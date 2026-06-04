@@ -4,53 +4,14 @@
   </a>
 </p>
 
-# study-factory-step-management
 
-`jagong-api` 구조를 기준으로 재구성한 `NestJS + Prisma` 백엔드 프로젝트입니다.
-
-이 프로젝트는 사진 기획서의 `자격증공장 사원업무현황` 앱을 위한 API 서버를 목표로 합니다.
-
-Nest 기본 스타터 흐름 위에, 직원 업무 등록/진행/피드백/사진 첨부 도메인을 얹은 형태입니다.
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) 기반 TypeScript 서버 프로젝트이며, 현재 도메인은 사원 업무 현황 관리입니다.
-
-## 현재 반영된 구조
-
-- `src/main.ts`: Nest 앱 진입점
-- `src/app.module.ts`: 전역 모듈 조합
-- `src/database`: Prisma 연결
-- `src/components/user`: 직위 선택 로그인, 직원 조회, 직원 생성
-- `src/components/task`: 업무 등록, 상태 변경, 피드백, 사진/파일 첨부
-- `src/libs/dto`: 요청 DTO
-- `prisma/schema.prisma`: 역할, 업무, 피드백, 첨부 구조
-
-## 사진 기획서 기준 반영 내용
+## 기획서 기준 반영 내용
 
 - 직위 기반 로그인
 - 대표 / 운영관리자 / 개발팀장 / 디자이너 / 마케팅 / 개발자 / 콘텐츠 담당 / 사원 역할
 - 업무 등록 -> 진행중 -> 검토요청 -> 완료 상태 흐름
 - 피드백과 메모 기록
 - 사진 업로드를 위한 첨부 데이터 구조
-
-## 주요 API
-
-### 사용자
-
-- `POST /api/users/login`
-- `POST /api/users`
-- `GET /api/users`
-- `GET /api/users/:id`
-
-### 업무
-
-- `POST /api/tasks`
-- `GET /api/tasks`
-- `GET /api/tasks/:id`
-- `PATCH /api/tasks/:id/status`
-- `POST /api/tasks/:id/feedback`
-- `POST /api/tasks/:id/attachments`
 
 ## Project setup
 
