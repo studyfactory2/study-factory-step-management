@@ -2,25 +2,24 @@
 
 기획서 기준으로, 이 앱은 대표/관리자가 직원에게 업무를 지시하고 직원이 진행상황, 결과물, 사진, 피드백을 남기는 모바일 최적화 업무관리 앱입니다.
 
-구현 방향은 Next.js + Supabase 기반으로 확정합니다. Next.js App Router에서 화면과 서버 액션을 구성하고, Supabase Auth/Postgres/Storage/Realtime을 사용해 인증, 데이터, 파일 업로드, 실시간 반영을 처리합니다.
+구현 방향은 프론트엔드와 백엔드를 분리한 구조로 가져갑니다. 프론트엔드는 Next.js App Router + React로 구성하고, 백엔드는 PostgreSQL을 사용하는 별도 API 서버로 구현합니다.
 
 ## 1. 프로젝트 초기 세팅
 
-- [ ] Next.js App Router + TypeScript 프로젝트 구조로 전환
+- [ ] `frontend`와 `backend` 디렉터리 분리
+- [ ] `frontend`를 Next.js App Router + TypeScript 구조로 구성
+- [ ] 로그인 화면을 React 컴포넌트로 분리
+- [ ] `backend`를 NestJS + PostgreSQL API 서버 구조로 구성
 - [ ] Tailwind CSS 설정
 - [ ] shadcn/ui 초기 설정
 - [ ] lucide-react 아이콘 설정
-- [ ] Supabase 클라이언트/서버 유틸 설정
-- [ ] Supabase Auth, Postgres, Storage, Realtime 사용 전제 환경 구성
 - [ ] 모바일 우선 PWA 형태로 구성
-- [ ] Vercel 배포와 Supabase 환경변수 구조 정리
+- [ ] 프론트엔드/백엔드 환경변수 구조 정리
 - [ ] 디자인 톤 적용: 파스텔 핑크, 크림, 라벤더, 세이지, 둥근 카드, 자체 제작 캐릭터
 
 ## 2. 기본 데이터 모델 설계
 
-- [ ] Supabase SQL 마이그레이션 작성
-- [ ] Supabase RLS 정책 작성
-- [ ] Supabase Storage 버킷 생성
+- [ ] PostgreSQL 마이그레이션 작성
 - [ ] `member_role`: `CEO`, `OPERATIONS_MANAGER`, `DEVELOPMENT_LEAD`, `DESIGNER`, `MARKETER`, `DEVELOPER`, `CONTENT_MANAGER`, `STAFF`
 - [ ] `member`: 직원/관리자 프로필, 로그인 아이디, 이름, 아바타, 직위 enum
 - [ ] `tasks`: 업무 제목, 설명, 담당자, 생성자, 상태, 마감일, 완료일
@@ -33,13 +32,13 @@
 ## 3. 로그인과 권한
 
 - [ ] 직위 선택 트리 화면 구현
-- [ ] Supabase Auth 기반 이름 또는 아이디 + 비밀번호 로그인 구현
+- [ ] 백엔드 로그인 API 기반 이름 또는 아이디 + 비밀번호 로그인 구현
 - [ ] 비밀번호 보기/숨김, 아이디 기억하기, 비밀번호 찾기 UI 구현
 - [ ] 대표/관리자/직원 권한 분리
 - [ ] 관리자는 하위 직원 업무 조회, 지시, 피드백, 상태 변경 가능
 - [ ] 직원은 본인 업무와 도움 요청으로 허용된 업무만 접근 가능
 - [ ] 로그인 후 권한에 따라 관리자 화면 또는 직원 화면으로 라우팅
-- [ ] 서버 컴포넌트/서버 액션에서 세션 검증 처리
+- [ ] 프론트엔드 라우팅에서 인증 상태 검증 처리
 
 ## 4. 공통 UI 컴포넌트
 
@@ -101,7 +100,7 @@
 
 ## 8. 사진과 파일 업로드
 
-- [ ] Supabase Storage 업로드 유틸 구현
+- [ ] 백엔드 업로드 API 구현
 - [ ] 허용 파일 형식 결정: jpg, png, webp, heic 등
 - [ ] 모바일 카메라 촬영 지원
 - [ ] 원본 이미지와 썸네일 분리 저장
@@ -114,7 +113,7 @@
 
 ## 9. 알림과 이벤트
 
-- [ ] Supabase Realtime 구독 구조 구현
+- [ ] 알림 이벤트 저장/조회 API 구현
 - [ ] 업무 등록 알림
 - [ ] 직원이 진행중으로 변경했을 때 알림
 - [ ] 검토요청 알림
@@ -127,10 +126,10 @@
 
 ## 10. 1차 MVP 범위
 
-- [ ] Next.js 프로젝트 전환
-- [ ] Supabase 기본 연결
-- [ ] Supabase SQL 스키마
-- [ ] Supabase Auth 로그인
+- [ ] `frontend`/`backend` 구조 분리
+- [ ] Next.js 프론트엔드 구성
+- [ ] PostgreSQL 스키마
+- [ ] 로그인 API
 - [ ] 직위/직원 seed 데이터
 - [ ] 관리자 업무 등록
 - [ ] 직원 내 업무 목록
@@ -147,7 +146,7 @@
 - [ ] 직원 추가
 - [ ] 관리자 피드백 흐름 고도화
 - [ ] 도움 요청
-- [ ] 실시간 반영
+- [ ] 실시간 반영 또는 폴링 전략
 - [ ] PWA 홈 화면 설치
 
 ## 12. 테스트 체크리스트
@@ -175,20 +174,22 @@
 - [ ] 알림 생성과 읽음 처리 확인
 - [ ] 모바일 화면에서 버튼이 겹치지 않는지 확인
 - [ ] 하단 네비게이션이 안전 영역에 맞는지 확인
-- [ ] Vercel Preview와 Production 환경변수 구분 확인
-- [ ] Supabase RLS 적용 확인
+- [ ] 프론트엔드/백엔드 환경변수 구분 확인
+- [ ] PostgreSQL 마이그레이션 적용 확인
 
 ## 권장 구현 순서
 
-1. Next.js App Router + TypeScript 프로젝트 구조로 전환
-2. Tailwind CSS, shadcn/ui, lucide-react 설정
-3. Supabase 환경변수와 클라이언트/서버 유틸 작성
-4. Supabase SQL 스키마, RLS, Storage 버킷 작성
-5. seed 데이터로 직위/직원/업무 목록 조회 구현
-6. Supabase Auth 로그인과 권한 분리 구현
-7. 관리자 대시보드와 업무 등록 구현
-8. 직원 내 업무와 업무 상세 구현
-9. Supabase Storage 기반 사진 업로드와 썸네일 구현
-10. 피드백, 활동 내역, 알림 구현
-11. 도움 요청 구현
-12. 모바일 QA와 Vercel 배포
+1. 프론트엔드와 백엔드 디렉터리 분리
+2. Next.js App Router + React 로그인 화면 컴포넌트 정리
+3. Tailwind CSS, shadcn/ui, lucide-react 설정
+4. NestJS 백엔드 앱 구성과 PostgreSQL DB 접근 방식 확정
+5. PostgreSQL 스키마와 마이그레이션 작성
+6. seed 데이터로 직위/직원/업무 목록 조회 구현
+7. 로그인 API와 권한 분리 구현
+8. 프론트엔드 로그인 화면을 API에 연결
+9. 관리자 대시보드와 업무 등록 구현
+10. 직원 내 업무와 업무 상세 구현
+11. 사진 업로드와 썸네일 구현
+12. 피드백, 활동 내역, 알림 구현
+13. 도움 요청 구현
+14. 모바일 QA와 배포

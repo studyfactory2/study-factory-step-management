@@ -51,7 +51,7 @@ const statusCards: StatusCardItem[] = [
   }
 ];
 
-export default function Home() {
+export function LoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col px-5 py-6">
       <section className="flex flex-1 flex-col justify-between gap-6 rounded-[28px] border border-border bg-white/82 p-5 shadow-soft backdrop-blur">
