@@ -20,8 +20,9 @@
 ## 2. 기본 데이터 모델 설계
 
 - [ ] PostgreSQL 마이그레이션 작성
-- [x] `member_role`: `CEO`, `OPERATIONS_MANAGER`, `DEVELOPMENT_LEAD`, `DESIGNER`, `MARKETER`, `DEVELOPER`, `CONTENT_MANAGER`, `STAFF`
-- [x] `member`: 직원/관리자 프로필, 로그인 아이디, 이름, 아바타, 직위 enum
+- [x] `member_role`: `CEO`, `ADMIN`, `OPERATIONS_MANAGER`, `DEVELOPMENT_LEAD`, `DESIGNER`, `MARKETER`, `DEVELOPER`, `CONTENT_MANAGER`, `STAFF`
+- [x] `member`: 직원/관리자 프로필, 이름, 아바타, 직위 enum
+- [x] `member_pre_registration`: CEO/관리자가 사전등록한 이름, 직위, 가입 완료 여부
 - [ ] `tasks`: 업무 제목, 설명, 담당자, 생성자, 상태, 마감일, 완료일
 - [ ] `task_comments`: 진행상황, 결과물, 관리자 피드백, 도움 답변
 - [ ] `task_attachments`: 사진, 파일, 썸네일, 업로드 경로
@@ -32,7 +33,9 @@
 ## 3. 로그인과 권한
 
 - [x] 직위 선택 트리 화면 구현
-- [ ] 백엔드 로그인 API 기반 이름 또는 아이디 + 비밀번호 로그인 구현
+- [x] CEO/관리자 사전등록 API 구현
+- [x] 사전등록된 이름 + 직위 기반 직원 회원가입 API 구현
+- [x] 백엔드 로그인 API 기반 이름 + 직위 + 비밀번호 로그인 구현
 - [ ] 비밀번호 보기/숨김, 아이디 기억하기, 비밀번호 찾기 UI 구현
 - [ ] 대표/관리자/직원 권한 분리
 - [ ] 관리자는 하위 직원 업무 조회, 지시, 피드백, 상태 변경 가능
