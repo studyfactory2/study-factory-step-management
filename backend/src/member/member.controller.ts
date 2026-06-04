@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
 import { AdminOrCeoGuard } from "../auth/guard/admin-or-ceo.guard";
-import { JWYAuthGuard } from "../auth/guard/jwy-auth.guard";
+import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";
 import { MemberService } from "./member.service";
@@ -20,7 +20,7 @@ export class MemberController {
   }
 
   @Post("pre-registrations")
-  @UseGuards(JWYAuthGuard, AdminOrCeoGuard)
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
   async preRegister(@Body() request: MemberPreRegisterRequest) {
     return this.memberService.preRegister(request);
   }
