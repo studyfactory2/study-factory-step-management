@@ -1,132 +1,75 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank">
-    <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
-  </a>
-</p>
+# 자격증공장 사원업무현황
 
-# study-factory-step-management
+대표/관리자가 직원에게 업무를 지시하고, 직원이 진행상황/결과물/사진/피드백을 남기는 모바일 최적화 업무관리 앱입니다.
 
-`jagong-api` 구조를 기준으로 재구성한 `NestJS + Prisma` 백엔드 프로젝트입니다.
+이 저장소는 프론트엔드와 백엔드를 분리한 워크스페이스 구조로 관리합니다.
 
-이 프로젝트는 사진 기획서의 `자격증공장 사원업무현황` 앱을 위한 API 서버를 목표로 합니다.
+## 구조
 
-Nest 기본 스타터 흐름 위에, 직원 업무 등록/진행/피드백/사진 첨부 도메인을 얹은 형태입니다.
+- `frontend`: Next.js App Router + React + TypeScript + Tailwind CSS
+- `backend`: NestJS + PostgreSQL API 서버
+- `docs`: 기획서 기반 구현 체크리스트와 개발 문서
 
-## Description
+## 프론트엔드
 
-[Nest](https://github.com/nestjs/nest) 기반 TypeScript 서버 프로젝트이며, 현재 도메인은 사원 업무 현황 관리입니다.
+현재 로그인 첫 화면 UI는 React 컴포넌트로 분리되어 있습니다.
 
-## 현재 반영된 구조
+- `frontend/src/app/page.tsx`: Next.js 페이지 엔트리
+- `frontend/src/features/auth/login-page.tsx`: 로그인 화면 React 컴포넌트
+- `frontend/src/components`: 공통 UI 컴포넌트
+- `frontend/src/types/domain.ts`: 프론트엔드 도메인 타입 초안
 
-- `src/main.ts`: Nest 앱 진입점
-- `src/app.module.ts`: 전역 모듈 조합
-- `src/database`: Prisma 연결
-- `src/components/user`: 직위 선택 로그인, 직원 조회, 직원 생성
-- `src/components/task`: 업무 등록, 상태 변경, 피드백, 사진/파일 첨부
-- `src/libs/dto`: 요청 DTO
-- `prisma/schema.prisma`: 역할, 업무, 피드백, 첨부 구조
+## 백엔드
 
-## 사진 기획서 기준 반영 내용
+백엔드는 NestJS와 PostgreSQL 사용을 전제로 분리합니다. ORM은 다음 단계에서 Prisma 또는 TypeORM 중 하나로 확정합니다.
 
-- 직위 기반 로그인
-- 대표 / 운영관리자 / 개발팀장 / 디자이너 / 마케팅 / 개발자 / 콘텐츠 담당 / 사원 역할
-- 업무 등록 -> 진행중 -> 검토요청 -> 완료 상태 흐름
-- 피드백과 메모 기록
-- 사진 업로드를 위한 첨부 데이터 구조
+예정 역할:
 
-## 주요 API
-
-### 사용자
-
-- `POST /api/users/login`
-- `POST /api/users`
-- `GET /api/users`
-- `GET /api/users/:id`
-
-### 업무
-
-- `POST /api/tasks`
-- `GET /api/tasks`
-- `GET /api/tasks/:id`
-- `PATCH /api/tasks/:id/status`
-- `POST /api/tasks/:id/feedback`
-- `POST /api/tasks/:id/attachments`
-
-## Project setup
-
-```bash
-npm install
-npm run prisma:generate
-```
-
-## Compile and run the project
-
-```bash
-# development
-npm run start
-
-# watch mode
-npm run start:dev
-
-# production mode
-npm run start:prod
-```
-
-## Build
-
-```bash
-npm run build
-```
-
-## Run tests
-
-```bash
-# unit tests
-npm run test
-
-# e2e tests
-npm run test:e2e
-
-# test coverage
-npm run test:cov
-```
-
-## Lint and format
-
-```bash
-npm run lint
-npm run format
-```
+- 로그인/인증 API
+- `member`, `tasks`, `task_comments`, `task_attachments` 등 업무 도메인 API
+- PostgreSQL 마이그레이션
+- 파일 업로드 저장소 연동
 
 ## 환경 변수
 
-`.env`에 아래 값을 설정해 주세요.
+루트 예시:
 
 ```bash
-DATABASE_URL=
-PORT=3000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/study_factory
+PORT=4000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
 ```
 
-## Deployment
+프론트엔드 예시:
 
-배포 전에는 아래 항목을 먼저 준비하는 걸 권장합니다.
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+```
 
-- `DATABASE_URL`이 연결된 운영 PostgreSQL 준비
-- `prisma migrate deploy` 또는 운영 반영 방식 정리
-- 사진 첨부 저장소를 Supabase Storage 또는 S3로 확정
-- 역할별 권한 가드와 인증 방식 정리
+백엔드 예시:
 
-Nest 배포 자체는 일반적인 `build -> start:prod` 흐름으로 가져가면 됩니다.
+```bash
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/study_factory
+PORT=4000
+```
 
-## Resources
+## 실행
 
-- [NestJS Documentation](https://docs.nestjs.com)
-- [NestJS Deployment Docs](https://docs.nestjs.com/deployment)
-- [Prisma Documentation](https://www.prisma.io/docs)
+```bash
+npm install
+npm run dev
+```
 
-## 다음으로 추천하는 작업
+현재 `npm run dev`는 `frontend` 앱을 실행합니다. 브라우저에서 `http://localhost:3000`을 열면 됩니다.
 
-1. Prisma migration 생성
-2. 역할별 권한 가드 추가
-3. Supabase Storage 또는 S3 기반 실제 사진 업로드 연동
-4. 프론트 로그인/업무 화면과 API 연결
+## 주요 구현 순서
+
+1. NestJS 백엔드 앱 구성
+2. PostgreSQL 스키마와 마이그레이션 작성
+3. 로그인 API 구현
+4. 프론트엔드 로그인 화면을 API에 연결
+5. 관리자 대시보드와 업무 등록 구현
+6. 직원 내 업무와 업무 상세 구현
+7. 사진 업로드 구현
+8. 피드백, 활동 내역, 알림 구현
+9. 도움 요청 구현
