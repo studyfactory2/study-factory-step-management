@@ -23,10 +23,10 @@ function isCurrentMember(obj: unknown): obj is CurrentMemberType {
     typeof obj === "object" &&
     obj !== null &&
     "memberId" in obj &&
+    "name" in obj &&
     "role" in obj &&
-    "loginId" in obj &&
     typeof (obj as CurrentMemberType).memberId === "number" &&
-    typeof (obj as CurrentMemberType).role === "string" &&
-    typeof (obj as CurrentMemberType).loginId === "string"
+    typeof (obj as CurrentMemberType).name === "string" &&
+    typeof (obj as CurrentMemberType).role === "string"
   );
 }

@@ -3,7 +3,7 @@ import { AuthTokenType } from "../enum/auth-token-type.enum";
 
 export type JwtPayload = {
   userId: number;
-  loginId: string;
+  name: string;
   roleType: MemberRole;
   tokenType: AuthTokenType;
 };

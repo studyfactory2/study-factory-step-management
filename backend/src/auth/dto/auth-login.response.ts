@@ -1,10 +1,9 @@
 import { MemberRole } from "../../member/enum/member-role.enum";
 
-export class LoginResponse {
+export class AuthLoginResponse {
   accessToken: string;
   member: {
     id: number;
-    loginId: string;
     name: string;
     roleType: MemberRole;
   };

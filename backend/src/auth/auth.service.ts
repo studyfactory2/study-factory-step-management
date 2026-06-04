@@ -1,8 +1,9 @@
 import * as jwt from "jsonwebtoken";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { LoginRequest } from "./dto/login.request";
-import { LoginResponse } from "./dto/login.response";
+import { createHash } from "crypto";
+import { AuthLoginRequest } from "./dto/auth-login.request";
+import { AuthLoginResponse } from "./dto/auth-login.response";
 import { AuthTokenType } from "./enum/auth-token-type.enum";
 import { InvalidCredentialsException } from "./exception/invalid-credentials.exception";
 import { InvalidTokenException } from "./exception/invalid-token.exception";
@@ -22,22 +23,28 @@ export class AuthService {
     this.jwtSecretKey = this.configService.getOrThrow<string>("jwt.secretKey");
   }
 
-  login(loginRequest: LoginRequest): LoginResponse {
-    const member = this.memberRepository.findByLoginId(loginRequest.loginId);
+  async login(loginRequest: AuthLoginRequest): Promise<AuthLoginResponse> {
+    const member = await this.memberRepository.findByNameAndRoleType(
+      loginRequest.name,
+      loginRequest.memberRole
+    );
 
     if (!member) {
+      throw new InvalidCredentialsException();
+    }
+
+    if (member.passwordHash !== this.createPasswordHash(loginRequest.password)) {
       throw new InvalidCredentialsException();
     }
 
     return {
       accessToken: this.generateAccessToken({
         userId: member.id,
-        loginId: member.loginId,
+        name: member.name,
         roleType: member.roleType
       }),
       member: {
         id: member.id,
-        loginId: member.loginId,
         name: member.name,
         roleType: member.roleType
       }
@@ -70,5 +77,9 @@ export class AuthService {
       ...payload,
       tokenType: AuthTokenType.REFRESH
     });
+  }
+
+  private createPasswordHash(password: string): string {
+    return createHash("sha256").update(password).digest("hex");
   }
 }

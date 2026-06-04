@@ -1,4 +1,8 @@
-import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
+import { AdminOrCeoGuard } from "../auth/guard/admin-or-ceo.guard";
+import { JWYAuthGuard } from "../auth/guard/jwy-auth.guard";
+import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
+import { MemberRegisterRequest } from "./dto/member-register.request";
 import { MemberService } from "./member.service";
 
 @Controller("members")
@@ -6,12 +10,23 @@ export class MemberController {
   constructor(private readonly memberService: MemberService) {}
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.memberService.findAll();
   }
 
   @Get(":id")
-  findById(@Param("id", ParseIntPipe) id: number) {
+  async findById(@Param("id", ParseIntPipe) id: number) {
     return this.memberService.findById(id);
+  }
+
+  @Post("pre-registrations")
+  @UseGuards(JWYAuthGuard, AdminOrCeoGuard)
+  async preRegister(@Body() request: MemberPreRegisterRequest) {
+    return this.memberService.preRegister(request);
+  }
+
+  @Post("register")
+  async register(@Body() request: MemberRegisterRequest) {
+    return this.memberService.register(request);
   }
 }

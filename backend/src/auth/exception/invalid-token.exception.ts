@@ -2,6 +2,6 @@ import { UnauthorizedException } from "@nestjs/common";
 
 export class InvalidTokenException extends UnauthorizedException {
   constructor() {
-    super("Invalid or expired token.");
+    super("유효하지 않거나 만료된 토큰입니다.");
   }
 }

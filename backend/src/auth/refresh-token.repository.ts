@@ -1,17 +1,26 @@
 import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 import { RefreshToken } from "./entity/refresh-token.entity";
 
 @Injectable()
 export class RefreshTokenRepository {
-  findByToken(_token: string): RefreshToken | null {
-    return null;
+  constructor(
+    @InjectRepository(RefreshToken)
+    private readonly refreshTokenRepository: Repository<RefreshToken>
+  ) {}
+
+  async findByToken(token: string): Promise<RefreshToken | null> {
+    return this.refreshTokenRepository.findOne({
+      where: { token }
+    });
   }
 
-  save(_refreshToken: RefreshToken): RefreshToken {
-    return _refreshToken;
+  async save(refreshToken: RefreshToken): Promise<RefreshToken> {
+    return this.refreshTokenRepository.save(refreshToken);
   }
 
-  deleteByToken(_token: string): void {
-    return;
+  async deleteByToken(token: string): Promise<void> {
+    await this.refreshTokenRepository.delete({ token });
   }
 }
