@@ -10,4 +10,8 @@ export class MemberRepository {
   findById(_id: number): Member | null {
     return null;
   }
+
+  findByLoginId(_loginId: string): Member | null {
+    return null;
+  }
 }
