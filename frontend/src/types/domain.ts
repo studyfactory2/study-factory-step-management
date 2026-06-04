@@ -2,6 +2,7 @@ export type TaskStatus = "REGISTERED" | "IN_PROGRESS" | "REVIEW_REQUESTED" | "CO
 
 export type MemberRole =
   | "CEO"
+  | "ADMIN"
   | "OPERATIONS_MANAGER"
   | "DEVELOPMENT_LEAD"
   | "DESIGNER"
@@ -12,7 +13,6 @@ export type MemberRole =
 
 export type Member = {
   id: number;
-  loginId: string;
   name: string;
   avatarUrl: string | null;
   roleType: MemberRole;

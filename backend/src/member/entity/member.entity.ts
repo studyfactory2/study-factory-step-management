@@ -4,16 +4,13 @@ import { MemberRole } from "../enum/member-role.enum";
 
 @Entity({ name: "member" })
 export class Member extends BaseEntity {
-  @Column({ name: "login_id", unique: true })
-  loginId: string;
-
   @Column()
   name: string;
 
   @Column({ name: "password_hash" })
   passwordHash: string;
 
-  @Column({ name: "avatar_url", nullable: true })
+  @Column({ name: "avatar_url", type: "varchar", nullable: true })
   avatarUrl: string | null;
 
   @Column({

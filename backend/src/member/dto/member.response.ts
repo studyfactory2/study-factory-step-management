@@ -2,7 +2,6 @@ import { MemberRole } from "../enum/member-role.enum";
 
 export class MemberResponse {
   id: number;
-  loginId: string;
   name: string;
   avatarUrl: string | null;
   roleType: MemberRole;

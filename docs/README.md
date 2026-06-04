@@ -6,22 +6,23 @@
 
 ## 1. 프로젝트 초기 세팅
 
-- [ ] `frontend`와 `backend` 디렉터리 분리
-- [ ] `frontend`를 Next.js App Router + TypeScript 구조로 구성
-- [ ] 로그인 화면을 React 컴포넌트로 분리
-- [ ] `backend`를 NestJS + PostgreSQL API 서버 구조로 구성
-- [ ] Tailwind CSS 설정
+- [x] `frontend`와 `backend` 디렉터리 분리
+- [x] `frontend`를 Next.js App Router + TypeScript 구조로 구성
+- [x] 로그인 화면을 React 컴포넌트로 분리
+- [x] `backend`를 NestJS + PostgreSQL API 서버 구조로 구성
+- [x] Tailwind CSS 설정
 - [ ] shadcn/ui 초기 설정
-- [ ] lucide-react 아이콘 설정
+- [x] lucide-react 아이콘 설정
 - [ ] 모바일 우선 PWA 형태로 구성
-- [ ] 프론트엔드/백엔드 환경변수 구조 정리
-- [ ] 디자인 톤 적용: 파스텔 핑크, 크림, 라벤더, 세이지, 둥근 카드, 자체 제작 캐릭터
+- [x] 프론트엔드/백엔드 환경변수 구조 정리
+- [x] 디자인 톤 적용: 파스텔 핑크, 크림, 라벤더, 세이지, 둥근 카드, 자체 제작 캐릭터
 
 ## 2. 기본 데이터 모델 설계
 
-- [ ] PostgreSQL 마이그레이션 작성
-- [ ] `member_role`: `CEO`, `OPERATIONS_MANAGER`, `DEVELOPMENT_LEAD`, `DESIGNER`, `MARKETER`, `DEVELOPER`, `CONTENT_MANAGER`, `STAFF`
-- [ ] `member`: 직원/관리자 프로필, 로그인 아이디, 이름, 아바타, 직위 enum
+- [x] PostgreSQL 마이그레이션 작성
+- [x] `member_role`: `CEO`, `ADMIN`, `OPERATIONS_MANAGER`, `DEVELOPMENT_LEAD`, `DESIGNER`, `MARKETER`, `DEVELOPER`, `CONTENT_MANAGER`, `STAFF`
+- [x] `member`: 직원/관리자 프로필, 이름, 아바타, 직위 enum
+- [x] `member_pre_registration`: CEO/관리자가 사전등록한 이름, 직위, 가입 완료 여부
 - [ ] `tasks`: 업무 제목, 설명, 담당자, 생성자, 상태, 마감일, 완료일
 - [ ] `task_comments`: 진행상황, 결과물, 관리자 피드백, 도움 답변
 - [ ] `task_attachments`: 사진, 파일, 썸네일, 업로드 경로
@@ -31,8 +32,10 @@
 
 ## 3. 로그인과 권한
 
-- [ ] 직위 선택 트리 화면 구현
-- [ ] 백엔드 로그인 API 기반 이름 또는 아이디 + 비밀번호 로그인 구현
+- [x] 직위 선택 트리 화면 구현
+- [x] CEO/관리자 사전등록 API 구현
+- [x] 사전등록된 이름 + 직위 기반 직원 회원가입 API 구현
+- [x] 백엔드 로그인 API 기반 이름 + 직위 + 비밀번호 로그인 구현
 - [ ] 비밀번호 보기/숨김, 아이디 기억하기, 비밀번호 찾기 UI 구현
 - [ ] 대표/관리자/직원 권한 분리
 - [ ] 관리자는 하위 직원 업무 조회, 지시, 피드백, 상태 변경 가능
@@ -42,7 +45,7 @@
 
 ## 4. 공통 UI 컴포넌트
 
-- [ ] `RoleTree`: 첫 화면 직위 선택 트리
+- [x] `RoleTree`: 첫 화면 직위 선택 트리
 - [ ] `StatusBadge`: 업무 상태 배지
 - [ ] `EmployeeCard`: 직원 목록 카드
 - [ ] `TaskCard`: 업무 목록 카드
@@ -126,8 +129,8 @@
 
 ## 10. 1차 MVP 범위
 
-- [ ] `frontend`/`backend` 구조 분리
-- [ ] Next.js 프론트엔드 구성
+- [x] `frontend`/`backend` 구조 분리
+- [x] Next.js 프론트엔드 구성
 - [ ] PostgreSQL 스키마
 - [ ] 로그인 API
 - [ ] 직위/직원 seed 데이터
