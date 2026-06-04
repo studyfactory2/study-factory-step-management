@@ -4,5 +4,8 @@ dist
 coverage
 *.log
 .env
+.env.local
+backend/.env
+frontend/.env
 .DS_Store
 tsconfig.tsbuildinfo
