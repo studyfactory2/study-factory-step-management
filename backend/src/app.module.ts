@@ -22,7 +22,7 @@ import { MemberModule } from "./member/member.module";
         type: "postgres",
         url: configService.getOrThrow<string>("database.url"),
         entities: [Member, MemberPreRegistration, RefreshToken],
-        synchronize: true
+        synchronize: false
       })
     }),
     AuthModule,

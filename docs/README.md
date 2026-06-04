@@ -19,7 +19,7 @@
 
 ## 2. 기본 데이터 모델 설계
 
-- [ ] PostgreSQL 마이그레이션 작성
+- [x] PostgreSQL 마이그레이션 작성
 - [x] `member_role`: `CEO`, `ADMIN`, `OPERATIONS_MANAGER`, `DEVELOPMENT_LEAD`, `DESIGNER`, `MARKETER`, `DEVELOPER`, `CONTENT_MANAGER`, `STAFF`
 - [x] `member`: 직원/관리자 프로필, 이름, 아바타, 직위 enum
 - [x] `member_pre_registration`: CEO/관리자가 사전등록한 이름, 직위, 가입 완료 여부

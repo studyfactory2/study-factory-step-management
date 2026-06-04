@@ -4,6 +4,7 @@ import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";
 import { Member } from "./entity/member.entity";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
+import { MemberDuplicateCredentialException } from "./exception/member-duplicate-credential.exception";
 import { MemberPreRegistrationNotFoundException } from "./exception/member-pre-registration-not-found.exception";
 import { MemberNotFoundException } from "./exception/member-not-found.exception";
 import { MemberRepository } from "./member.repository";
@@ -46,6 +47,16 @@ export class MemberService {
     }
 
     const passwordHash = this.createPasswordHash(request.password);
+    const duplicateMember = await this.memberRepository.findByNameAndRoleTypeAndPasswordHash(
+      request.name,
+      request.memberRole,
+      passwordHash
+    );
+
+    if (duplicateMember) {
+      throw new MemberDuplicateCredentialException(request.name, request.memberRole);
+    }
+
     const member = request.toEntity(passwordHash);
 
     preRegistration.isRegistered = true;

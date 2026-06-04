@@ -33,6 +33,20 @@ export class MemberRepository {
     });
   }
 
+  async findByNameAndRoleTypeAndPasswordHash(
+    name: string,
+    roleType: MemberRole,
+    passwordHash: string
+  ): Promise<Member | null> {
+    return this.memberRepository.findOne({
+      where: {
+        name,
+        roleType,
+        passwordHash
+      }
+    });
+  }
+
   async save(member: Member): Promise<Member> {
     return this.memberRepository.save(member);
   }

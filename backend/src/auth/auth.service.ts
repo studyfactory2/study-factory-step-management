@@ -24,16 +24,14 @@ export class AuthService {
   }
 
   async login(loginRequest: AuthLoginRequest): Promise<AuthLoginResponse> {
-    const member = await this.memberRepository.findByNameAndRoleType(
+    const passwordHash = this.createPasswordHash(loginRequest.password);
+    const member = await this.memberRepository.findByNameAndRoleTypeAndPasswordHash(
       loginRequest.name,
-      loginRequest.memberRole
+      loginRequest.memberRole,
+      passwordHash
     );
 
     if (!member) {
-      throw new InvalidCredentialsException();
-    }
-
-    if (member.passwordHash !== this.createPasswordHash(loginRequest.password)) {
       throw new InvalidCredentialsException();
     }
 
