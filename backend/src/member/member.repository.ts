@@ -1,9 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Member } from "./entity/member.entity";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
 import { MemberRole } from "./enum/member-role.enum";
+
+export type BranchMemberCountRow = {
+  branch: string | null;
+  memberCount: string;
+};
 
 @Injectable()
 export class MemberRepository {
@@ -21,6 +26,15 @@ export class MemberRepository {
   async findById(id: number): Promise<Member | null> {
     return this.memberRepository.findOne({
       where: { id }
+    });
+  }
+
+  async findActiveByRoleTypes(roleTypes: MemberRole[]): Promise<Member[]> {
+    return this.memberRepository.find({
+      where: {
+        isActive: true,
+        roleType: In(roleTypes)
+      }
     });
   }
 
@@ -68,5 +82,17 @@ export class MemberRepository {
 
   async savePreRegistration(preRegistration: MemberPreRegistration): Promise<MemberPreRegistration> {
     return this.memberPreRegistrationRepository.save(preRegistration);
+  }
+
+  async countActiveMembersByBranchAndRoleTypes(roleTypes: MemberRole[]): Promise<BranchMemberCountRow[]> {
+    return this.memberRepository
+      .createQueryBuilder("member")
+      .select("member.branch", "branch")
+      .addSelect("COUNT(member.id)", "memberCount")
+      .where("member.isActive = true")
+      .andWhere("member.roleType IN (:...roleTypes)", { roleTypes })
+      .groupBy("member.branch")
+      .orderBy("member.branch", "ASC")
+      .getRawMany<BranchMemberCountRow>();
   }
 }

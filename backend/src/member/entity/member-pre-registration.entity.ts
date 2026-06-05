@@ -15,8 +15,8 @@ export class MemberPreRegistration extends BaseEntity {
   })
   roleType: MemberRole;
 
-  @Column()
-  branch: string;
+  @Column({ type: "varchar", nullable: true })
+  branch: string | null;
 
   @Column({ name: "is_registered", default: false })
   isRegistered: boolean;

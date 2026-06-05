@@ -1,6 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { In, Repository } from "typeorm";
 import {
   AdminBranchStaffCountResponse,
   AdminDashboardBranchGroupResponse,
@@ -12,19 +10,9 @@ import {
 import { Member } from "../member/entity/member.entity";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { MemberNotFoundException } from "../member/exception/member-not-found.exception";
-import { Task } from "../task/entity/task.entity";
+import { MemberRepository } from "../member/member.repository";
 import { TaskStatus } from "../task/enum/task-status.enum";
-
-type TaskCountRow = {
-  assigneeId: number;
-  status: TaskStatus;
-  count: string;
-};
-
-type BranchGroupRow = {
-  branch: string | null;
-  memberCount: string;
-};
+import { TaskRepository, TaskCountRow } from "../task/task.repository";
 
 @Injectable()
 export class AdminService {
@@ -43,10 +31,8 @@ export class AdminService {
   private readonly branchStaffRoles = [MemberRole.EMPLOYEE, MemberRole.STAFF];
 
   constructor(
-    @InjectRepository(Member)
-    private readonly memberRepository: Repository<Member>,
-    @InjectRepository(Task)
-    private readonly taskRepository: Repository<Task>
+    private readonly memberRepository: MemberRepository,
+    private readonly taskRepository: TaskRepository
   ) {}
 
   async getDashboard(currentMemberId: number): Promise<AdminDashboardResponse> {
@@ -90,9 +76,7 @@ export class AdminService {
   }
 
   private async findCurrentMember(currentMemberId: number): Promise<Member> {
-    const currentMember = await this.memberRepository.findOne({
-      where: { id: currentMemberId }
-    });
+    const currentMember = await this.memberRepository.findById(currentMemberId);
 
     if (!currentMember) {
       throw new MemberNotFoundException(currentMemberId);
@@ -102,12 +86,7 @@ export class AdminService {
   }
 
   private async findDashboardEmployees(): Promise<Member[]> {
-    const employees = await this.memberRepository.find({
-      where: {
-        isActive: true,
-        roleType: In(this.dashboardEmployeeRoles)
-      }
-    });
+    const employees = await this.memberRepository.findActiveByRoleTypes(this.dashboardEmployeeRoles);
 
     return employees.sort((a, b) => {
       const roleOrderDifference = this.getRoleOrder(a.roleType) - this.getRoleOrder(b.roleType);
@@ -121,18 +100,11 @@ export class AdminService {
   }
 
   private async findTaskCountRows(): Promise<TaskCountRow[]> {
-    return this.taskRepository
-      .createQueryBuilder("task")
-      .select("task.assigneeId", "assigneeId")
-      .addSelect("task.status", "status")
-      .addSelect("COUNT(task.id)", "count")
-      .where("task.isDraft = false")
-      .andWhere("task.status IN (:...statuses)", {
-        statuses: [TaskStatus.REGISTERED, TaskStatus.IN_PROGRESS, TaskStatus.REVIEW_REQUESTED]
-      })
-      .groupBy("task.assigneeId")
-      .addGroupBy("task.status")
-      .getRawMany<TaskCountRow>();
+    return this.taskRepository.findActiveCountRowsByAssigneeAndStatus([
+      TaskStatus.REGISTERED,
+      TaskStatus.IN_PROGRESS,
+      TaskStatus.REVIEW_REQUESTED
+    ]);
   }
 
   private async findBranchGroups(): Promise<AdminDashboardBranchGroupResponse[]> {
@@ -140,17 +112,9 @@ export class AdminService {
   }
 
   private async findBranchStaffCounts(): Promise<AdminBranchStaffCountResponse[]> {
-    const rows = await this.memberRepository
-      .createQueryBuilder("member")
-      .select("member.branch", "branch")
-      .addSelect("COUNT(member.id)", "memberCount")
-      .where("member.isActive = true")
-      .andWhere("member.roleType IN (:...roles)", {
-        roles: this.branchStaffRoles
-      })
-      .groupBy("member.branch")
-      .orderBy("member.branch", "ASC")
-      .getRawMany<BranchGroupRow>();
+    const rows = await this.memberRepository.countActiveMembersByBranchAndRoleTypes(
+      this.branchStaffRoles
+    );
 
     return rows.map((row) => ({
       branch: row.branch ?? "미지정",
@@ -159,20 +123,7 @@ export class AdminService {
   }
 
   private async findRecentOutputs(): Promise<AdminDashboardRecentOutputResponse[]> {
-    const tasks = await this.taskRepository.find({
-      where: {
-        status: TaskStatus.REVIEW_REQUESTED,
-        isDraft: false
-      },
-      relations: {
-        assignee: true,
-        attachments: true
-      },
-      order: {
-        updatedAt: "DESC"
-      },
-      take: 10
-    });
+    const tasks = await this.taskRepository.findRecentReviewRequested(10);
 
     return tasks.map((task) => ({
       taskId: task.id,

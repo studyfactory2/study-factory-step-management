@@ -33,7 +33,7 @@ CREATE TABLE member_pre_registration (
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   name VARCHAR NOT NULL,
   role_type member_role_type_enum NOT NULL,
-  branch VARCHAR NOT NULL,
+  branch VARCHAR,
   is_registered BOOLEAN NOT NULL DEFAULT false
 );
 

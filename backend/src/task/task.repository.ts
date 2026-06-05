@@ -4,6 +4,12 @@ import { Between, Repository } from "typeorm";
 import { Task } from "./entity/task.entity";
 import { TaskStatus } from "./enum/task-status.enum";
 
+export type TaskCountRow = {
+  assigneeId: number;
+  status: TaskStatus;
+  count: string;
+};
+
 @Injectable()
 export class TaskRepository {
   constructor(
@@ -27,6 +33,36 @@ export class TaskRepository {
         completedAt: Between(startAt, endAt),
         isDraft: false
       }
+    });
+  }
+
+  async findActiveCountRowsByAssigneeAndStatus(statuses: TaskStatus[]): Promise<TaskCountRow[]> {
+    return this.taskRepository
+      .createQueryBuilder("task")
+      .select("task.assigneeId", "assigneeId")
+      .addSelect("task.status", "status")
+      .addSelect("COUNT(task.id)", "count")
+      .where("task.isDraft = false")
+      .andWhere("task.status IN (:...statuses)", { statuses })
+      .groupBy("task.assigneeId")
+      .addGroupBy("task.status")
+      .getRawMany<TaskCountRow>();
+  }
+
+  async findRecentReviewRequested(limit: number): Promise<Task[]> {
+    return this.taskRepository.find({
+      where: {
+        status: TaskStatus.REVIEW_REQUESTED,
+        isDraft: false
+      },
+      relations: {
+        assignee: true,
+        attachments: true
+      },
+      order: {
+        updatedAt: "DESC"
+      },
+      take: limit
     });
   }
 }
