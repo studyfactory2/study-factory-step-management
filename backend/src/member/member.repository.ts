@@ -3,6 +3,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { In, Not, Repository } from "typeorm";
 import { Member } from "./entity/member.entity";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
+import { MemberAffiliation } from "./enum/member-affiliation.enum";
+import { MemberDuty } from "./enum/member-duty.enum";
+import { MemberPosition } from "./enum/member-position.enum";
 import { MemberRole } from "./enum/member-role.enum";
 
 export type BranchMemberCountRow = {
@@ -80,14 +83,18 @@ export class MemberRepository {
 
   async findPreRegistrationByNameAndRoleType(
     name: string,
-    roleType: MemberRole,
-    branch: string
+    branch: string,
+    affiliation: MemberAffiliation,
+    position: MemberPosition,
+    duty: MemberDuty
   ): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
       where: {
         name,
-        roleType,
         branch,
+        affiliation,
+        position,
+        duty,
         isRegistered: false
       }
     });

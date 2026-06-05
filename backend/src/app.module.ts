@@ -26,7 +26,7 @@ import { TaskModule } from "./task/task.module";
         type: "postgres",
         url: configService.getOrThrow<string>("database.url"),
         entities: [Member, MemberPreRegistration, RefreshToken, Task, TaskAttachment],
-        synchronize: true
+        synchronize: false
       })
     }),
     AdminModule,

@@ -8,6 +8,7 @@ import { MemberDuplicateCredentialException } from "./exception/member-duplicate
 import { MemberPreRegistrationNotFoundException } from "./exception/member-pre-registration-not-found.exception";
 import { MemberNotFoundException } from "./exception/member-not-found.exception";
 import { MemberRepository } from "./member.repository";
+import { MemberRole } from "./enum/member-role.enum";
 
 @Injectable()
 export class MemberService {
@@ -28,10 +29,14 @@ export class MemberService {
   }
 
   async preRegister(request: MemberPreRegisterRequest): Promise<MemberPreRegistration> {
+    const roleType = request.position as unknown as MemberRole;
     const preRegistration = new MemberPreRegistration();
     preRegistration.name = request.name;
-    preRegistration.roleType = request.memberRole;
     preRegistration.branch = request.branch;
+    preRegistration.affiliation = request.affiliation;
+    preRegistration.position = request.position;
+    preRegistration.roleType = roleType;
+    preRegistration.duty = request.duty;
     preRegistration.isRegistered = false;
 
     return this.memberRepository.savePreRegistration(preRegistration);
@@ -40,27 +45,32 @@ export class MemberService {
   async register(request: MemberRegisterRequest): Promise<Member> {
     const preRegistration = await this.memberRepository.findPreRegistrationByNameAndRoleType(
       request.name,
-      request.memberRole,
-      request.branch
+      request.branch,
+      request.affiliation,
+      request.position,
+      request.duty
     );
 
     if (!preRegistration) {
       throw new MemberPreRegistrationNotFoundException(
         request.name,
-        request.memberRole,
-        request.branch
+        request.branch,
+        request.affiliation,
+        request.position,
+        request.duty
       );
     }
 
     const passwordHash = this.createPasswordHash(request.password);
+    const roleType = request.position as unknown as MemberRole;
     const duplicateMember = await this.memberRepository.findByNameAndRoleTypeAndPasswordHash(
       request.name,
-      request.memberRole,
+      roleType,
       passwordHash
     );
 
     if (duplicateMember) {
-      throw new MemberDuplicateCredentialException(request.name, request.memberRole);
+      throw new MemberDuplicateCredentialException(request.name, request.position);
     }
 
     const member = request.toEntity(passwordHash);

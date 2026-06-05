@@ -1,0 +1,7 @@
+export enum MemberDuty {
+  DEVELOPMENT = "DEVELOPMENT",
+  BEVERAGE = "BEVERAGE",
+  FOOD = "FOOD",
+  CLEANING = "CLEANING",
+  GENERAL = "GENERAL"
+}

@@ -12,6 +12,70 @@ CREATE TYPE member_role_type_enum AS ENUM (
   'STAFF'
 );
 
+CREATE TYPE member_affiliation_enum AS ENUM (
+  'DEVELOPMENT_TEAM',
+  'STAFF',
+  'ADMIN',
+  'CEO'
+);
+
+CREATE TYPE member_duty_enum AS ENUM (
+  'DEVELOPMENT',
+  'BEVERAGE',
+  'FOOD',
+  'CLEANING',
+  'GENERAL'
+);
+
+CREATE TYPE member_position_enum AS ENUM (
+  'DEVELOPMENT_LEAD',
+  'DEVELOPER',
+  'STAFF',
+  'EMPLOYEE',
+  'CEO',
+  'ADMIN',
+  'FACTORY_MANAGER'
+);
+
+CREATE TYPE member_pre_registration_role_type_enum AS ENUM (
+  'CEO',
+  'ADMIN',
+  'OPERATIONS_MANAGER',
+  'FACTORY_MANAGER',
+  'DEVELOPMENT_LEAD',
+  'DESIGNER',
+  'MARKETER',
+  'DEVELOPER',
+  'CONTENT_MANAGER',
+  'EMPLOYEE',
+  'STAFF'
+);
+
+CREATE TYPE member_pre_registration_affiliation_enum AS ENUM (
+  'DEVELOPMENT_TEAM',
+  'STAFF',
+  'ADMIN',
+  'CEO'
+);
+
+CREATE TYPE member_pre_registration_duty_enum AS ENUM (
+  'DEVELOPMENT',
+  'BEVERAGE',
+  'FOOD',
+  'CLEANING',
+  'GENERAL'
+);
+
+CREATE TYPE member_pre_registration_position_enum AS ENUM (
+  'DEVELOPMENT_LEAD',
+  'DEVELOPER',
+  'STAFF',
+  'EMPLOYEE',
+  'CEO',
+  'ADMIN',
+  'FACTORY_MANAGER'
+);
+
 CREATE TABLE member (
   id SERIAL PRIMARY KEY,
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
@@ -20,7 +84,10 @@ CREATE TABLE member (
   password_hash VARCHAR NOT NULL,
   avatar_url VARCHAR,
   branch VARCHAR,
+  affiliation member_affiliation_enum,
+  position member_position_enum,
   role_type member_role_type_enum NOT NULL,
+  duty member_duty_enum,
   is_active BOOLEAN NOT NULL DEFAULT true
 );
 
@@ -32,13 +99,16 @@ CREATE TABLE member_pre_registration (
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   name VARCHAR NOT NULL,
-  role_type member_role_type_enum NOT NULL,
+  affiliation member_pre_registration_affiliation_enum,
+  position member_pre_registration_position_enum,
+  role_type member_pre_registration_role_type_enum NOT NULL,
+  duty member_pre_registration_duty_enum,
   branch VARCHAR,
   is_registered BOOLEAN NOT NULL DEFAULT false
 );
 
-CREATE UNIQUE INDEX idx_member_pre_registration_name_role_type_branch
-  ON member_pre_registration (name, role_type, branch);
+CREATE UNIQUE INDEX idx_member_pre_registration_name_branch_affiliation_position_duty
+  ON member_pre_registration (name, branch, affiliation, position, duty);
 
 CREATE TABLE refresh_token (
   id SERIAL PRIMARY KEY,

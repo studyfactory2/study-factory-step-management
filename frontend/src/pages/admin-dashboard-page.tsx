@@ -2,15 +2,22 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { getAdminDashboard, type AdminDashboard, type AdminDashboardSortOrder } from "@/api/admin";
-import { getMembers } from "@/api/member";
+import { getMembers, preRegisterMember } from "@/api/member";
 import { createTask } from "@/api/task";
-import type { Member, TaskStatus } from "@/types/domain";
+import type {
+  Member,
+  MemberAffiliation,
+  MemberDuty,
+  MemberPosition,
+  TaskStatus
+} from "@/types/domain";
 import { BranchStaffSection } from "@/components/adminDashboard/branch-staff-section";
 import { DashboardHeader } from "@/components/adminDashboard/dashboard-header";
 import { DashboardLogout } from "@/components/adminDashboard/dashboard-logout";
 import { EmployeeListSection } from "@/components/adminDashboard/employee-list-section";
 import { GreetingCard } from "@/components/adminDashboard/greeting-card";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
+import { MemberPreRegisterPanel } from "@/components/adminDashboard/member-pre-register-panel";
 import { RecentOutputsSection } from "@/components/adminDashboard/recent-outputs-section";
 import { TaskCreateForm } from "@/components/adminDashboard/task-create-form";
 import { ALL_ASSIGNEES_VALUE } from "@/components/adminDashboard/constants";
@@ -41,10 +48,12 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   const [selectedAssigneeId, setSelectedAssigneeId] = useState("");
   const [recentTaskStatus, setRecentTaskStatus] = useState<TaskStatus>("REVIEW_REQUESTED");
   const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder | "">("");
+  const [isPreRegisterOpen, setIsPreRegisterOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isPreRegisterSubmitting, setIsPreRegisterSubmitting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -143,15 +152,46 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     setSelectedAssigneeId("");
   }
 
+  async function handlePreRegister(request: {
+    affiliation: MemberAffiliation;
+    branch: string;
+    duty: MemberDuty;
+    name: string;
+    position: MemberPosition;
+  }) {
+    setMessage("");
+    setIsPreRegisterSubmitting(true);
+
+    try {
+      await preRegisterMember(accessToken, request);
+      setMessage("직원 사전등록이 완료되었습니다.");
+      setIsPreRegisterOpen(false);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "직원 사전등록에 실패했습니다.");
+    } finally {
+      setIsPreRegisterSubmitting(false);
+    }
+  }
+
   return (
     <main className="min-h-dvh overflow-hidden bg-background px-4 py-7 text-foreground sm:px-8">
       <div className="pointer-events-none fixed -left-32 -top-28 h-[28rem] w-[28rem] rounded-full bg-[#FDE5EB]" />
       <div className="pointer-events-none fixed -right-28 bottom-36 h-[26rem] w-[26rem] rounded-full bg-[#EFE8FF]" />
 
       <div className="relative mx-auto w-full max-w-[1180px] space-y-10">
-        <DashboardHeader roleType={dashboard.currentMember.roleType} />
+        <DashboardHeader
+          onAddMember={() => setIsPreRegisterOpen((isOpen) => !isOpen)}
+          roleType={dashboard.currentMember.roleType}
+        />
         <GreetingCard memberName={dashboard.currentMember.name} />
         <MessageBanner message={message} />
+        {isPreRegisterOpen && (
+          <MemberPreRegisterPanel
+            isSubmitting={isPreRegisterSubmitting}
+            onClose={() => setIsPreRegisterOpen(false)}
+            onSubmit={handlePreRegister}
+          />
+        )}
         <EmployeeListSection employees={dashboard.employees} />
         <BranchStaffSection branchGroups={dashboard.branchGroups} />
         <TaskCreateForm
