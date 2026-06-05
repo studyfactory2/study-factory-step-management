@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Between, Repository } from "typeorm";
+import { TaskAttachment } from "./entity/task-attachment.entity";
 import { Task } from "./entity/task.entity";
 import { TaskStatus } from "./enum/task-status.enum";
 
@@ -14,7 +15,9 @@ export type TaskCountRow = {
 export class TaskRepository {
   constructor(
     @InjectRepository(Task)
-    private readonly taskRepository: Repository<Task>
+    private readonly taskRepository: Repository<Task>,
+    @InjectRepository(TaskAttachment)
+    private readonly taskAttachmentRepository: Repository<TaskAttachment>
   ) {}
 
   async countByStatus(status: TaskStatus): Promise<number> {
@@ -64,5 +67,13 @@ export class TaskRepository {
       },
       take: limit
     });
+  }
+
+  async saveAll(tasks: Task[]): Promise<Task[]> {
+    return this.taskRepository.save(tasks);
+  }
+
+  async saveAttachments(attachments: TaskAttachment[]): Promise<TaskAttachment[]> {
+    return this.taskAttachmentRepository.save(attachments);
   }
 }

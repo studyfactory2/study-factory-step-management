@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { In, Repository } from "typeorm";
+import { In, Not, Repository } from "typeorm";
 import { Member } from "./entity/member.entity";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
 import { MemberRole } from "./enum/member-role.enum";
@@ -34,6 +34,19 @@ export class MemberRepository {
       where: {
         isActive: true,
         roleType: In(roleTypes)
+      }
+    });
+  }
+
+  async findActiveAssignableMembers(): Promise<Member[]> {
+    return this.memberRepository.find({
+      where: {
+        isActive: true,
+        roleType: Not(In([MemberRole.CEO, MemberRole.ADMIN]))
+      },
+      order: {
+        roleType: "ASC",
+        name: "ASC"
       }
     });
   }
