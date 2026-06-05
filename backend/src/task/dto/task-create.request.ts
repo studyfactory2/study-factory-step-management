@@ -1,11 +1,12 @@
 import { Type } from "class-transformer";
 import {
   IsArray,
-  IsDateString,
+  IsDefined,
   IsEnum,
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
   ValidateNested
 } from "class-validator";
 import { Task } from "../entity/task.entity";
@@ -23,13 +24,10 @@ export class TaskCreateRequest {
   @IsEnum(TaskAssigneeScope, { message: "유효하지 않은 담당자 지정 방식입니다." })
   assigneeScope: TaskAssigneeScope;
 
-  @IsOptional()
+  @ValidateIf((request: TaskCreateRequest) => request.assigneeScope === TaskAssigneeScope.SINGLE)
+  @IsDefined({ message: "단일 담당자 업무 등록에는 담당자 ID가 필요합니다." })
   @IsNumber({}, { message: "담당자 ID는 숫자여야 합니다." })
   assigneeId?: number;
-
-  @IsOptional()
-  @IsDateString({}, { message: "마감일은 날짜 형식이어야 합니다." })
-  dueAt?: string;
 
   @IsOptional()
   @IsArray({ message: "첨부 사진 목록은 배열이어야 합니다." })
@@ -44,7 +42,6 @@ export class TaskCreateRequest {
     task.status = TaskStatus.REGISTERED;
     task.assigneeId = assigneeId;
     task.createdBy = createdBy;
-    task.dueAt = this.dueAt ? new Date(this.dueAt) : null;
     task.completedAt = null;
     task.isDraft = false;
 

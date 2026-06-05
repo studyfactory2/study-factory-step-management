@@ -67,7 +67,6 @@ CREATE TABLE tasks (
   status task_status_enum NOT NULL,
   assignee_id INTEGER NOT NULL,
   created_by INTEGER NOT NULL,
-  due_at TIMESTAMP,
   completed_at TIMESTAMP,
   is_draft BOOLEAN NOT NULL DEFAULT false,
   CONSTRAINT fk_tasks_assignee_id
