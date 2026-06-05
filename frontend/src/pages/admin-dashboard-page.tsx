@@ -338,11 +338,15 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
               </p>
             </div>
             <div className="relative">
-              <select className="h-10 appearance-none rounded-full border-2 border-primary bg-white pl-8 pr-12 text-sm font-semibold text-primary outline-none">
-                <option>최근 수정순</option>
-                <option>최근 검토요청 순</option>
+              <select
+                className="h-11 w-44 appearance-none rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] pl-4 pr-10 text-sm font-medium text-[#B79A94] outline-none"
+                defaultValue=""
+              >
+                <option value="">정렬 순</option>
+                <option value="UPDATED_DESC">최근 수정순</option>
+                <option value="REVIEW_REQUESTED_DESC">최근 검토요청 순</option>
               </select>
-              <span className="pointer-events-none absolute right-7 top-1/2 -translate-y-1/2 text-sm font-bold text-primary">
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#9B7A75]">
                 ∨
               </span>
             </div>
