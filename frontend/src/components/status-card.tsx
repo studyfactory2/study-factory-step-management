@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/util/utils";
 
 const toneClassNames = {
   pink: "bg-[#FFF0F2] text-primary",

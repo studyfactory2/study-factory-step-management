@@ -1,0 +1,41 @@
+import type { MemberRole } from "@/types/domain";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+
+export type LoginRequest = {
+  name: string;
+  memberRole: MemberRole;
+  password: string;
+};
+
+export type LoginResponse = {
+  accessToken: string;
+  member: {
+    id: number;
+    name: string;
+    roleType: MemberRole;
+  };
+};
+
+type ApiErrorResponse = {
+  message?: string | string[];
+};
+
+export async function login(request: LoginRequest): Promise<LoginResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "로그인에 실패했습니다.");
+  }
+
+  return response.json() as Promise<LoginResponse>;
+}

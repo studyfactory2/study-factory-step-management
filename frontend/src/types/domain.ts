@@ -4,6 +4,7 @@ export type MemberRole =
   | "CEO"
   | "ADMIN"
   | "OPERATIONS_MANAGER"
+  | "FACTORY_MANAGER"
   | "DEVELOPMENT_LEAD"
   | "DESIGNER"
   | "MARKETER"
@@ -31,6 +32,15 @@ export type Task = {
   dueAt: string | null;
   completedAt: string | null;
   isDraft: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TaskAttachment = {
+  id: number;
+  taskId: number;
+  imageUrl: string;
+  originalName: string | null;
   createdAt: string;
   updatedAt: string;
 };
