@@ -98,6 +98,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       });
 
       localStorage.setItem("accessToken", response.accessToken);
+      localStorage.setItem("refreshToken", response.refreshToken);
       localStorage.setItem("currentMember", JSON.stringify(response.member));
       setMessage(`${response.member.name}님, 로그인되었습니다.`);
       onLogin?.(response);

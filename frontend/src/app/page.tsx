@@ -45,6 +45,7 @@ export default function Home() {
 
   function handleLogout() {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("currentMember");
     setAccessToken("");
     setCurrentMember(null);

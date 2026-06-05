@@ -2,6 +2,7 @@ import { MemberRole } from "../../member/enum/member-role.enum";
 
 export class AuthLoginResponse {
   accessToken: string;
+  refreshToken: string;
   member: {
     id: number;
     name: string;
