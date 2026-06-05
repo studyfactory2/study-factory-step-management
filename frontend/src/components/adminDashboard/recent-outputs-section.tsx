@@ -11,23 +11,28 @@ export function RecentOutputsSection({ recentOutputs }: RecentOutputsSectionProp
     <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
       <div className="flex items-center justify-between gap-5">
         <div className="flex items-baseline gap-4">
-          <h2 className="text-2xl font-semibold text-[#5A3E3B]">최근 결과물</h2>
+          <h2 className="text-2xl font-semibold text-[#5A3E3B]">최근 제출물</h2>
           <p className="text-sm font-medium text-[#9B7A75]">
-            직원들이 제출한 결과물을 확인하고 피드백을 남겨주세요
+            직원들이 검토 요청한 업무들을 확인하고 피드백 해주세요
           </p>
         </div>
-        <div className="relative">
-          <select
-            className="h-11 w-44 appearance-none rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] pl-4 pr-10 text-sm font-medium text-[#B79A94] outline-none"
-            defaultValue=""
-          >
-            <option value="">정렬 순</option>
-            <option value="UPDATED_DESC">최근 수정순</option>
-            <option value="REVIEW_REQUESTED_DESC">최근 검토요청 순</option>
-          </select>
-          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#9B7A75]">
-            ∨
-          </span>
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <div className="relative">
+            <select
+              className="h-11 w-44 appearance-none rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] pl-4 pr-10 text-sm font-medium text-[#B79A94] outline-none"
+              defaultValue=""
+            >
+              <option value="">정렬 순</option>
+              <option value="UPDATED_DESC">최근 수정순</option>
+              <option value="REVIEW_REQUESTED_DESC">최근 검토요청 순</option>
+            </select>
+            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[#9B7A75]">
+              ∨
+            </span>
+          </div>
+          <button className="h-11 rounded-full border-2 border-primary bg-white px-8 text-sm font-semibold text-primary">
+            전체 업무보기
+          </button>
         </div>
       </div>
       <div className="mt-8 rounded-[18px] border border-[#F2C9C2] bg-white p-7">
