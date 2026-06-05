@@ -18,6 +18,7 @@ CREATE TABLE member (
   name VARCHAR NOT NULL,
   password_hash VARCHAR NOT NULL,
   avatar_url VARCHAR,
+  branch VARCHAR,
   role_type member_role_type_enum NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT true
 );
@@ -31,11 +32,12 @@ CREATE TABLE member_pre_registration (
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   name VARCHAR NOT NULL,
   role_type member_role_type_enum NOT NULL,
+  branch VARCHAR NOT NULL,
   is_registered BOOLEAN NOT NULL DEFAULT false
 );
 
-CREATE UNIQUE INDEX idx_member_pre_registration_name_role_type
-  ON member_pre_registration (name, role_type);
+CREATE UNIQUE INDEX idx_member_pre_registration_name_role_type_branch
+  ON member_pre_registration (name, role_type, branch);
 
 CREATE TABLE refresh_token (
   id SERIAL PRIMARY KEY,

@@ -13,6 +13,7 @@ export type LoginResponse = {
   member: {
     id: number;
     name: string;
+    branch: string | null;
     roleType: MemberRole;
   };
 };

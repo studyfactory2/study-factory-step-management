@@ -4,6 +4,7 @@ export class MemberResponse {
   id: number;
   name: string;
   avatarUrl: string | null;
+  branch: string | null;
   roleType: MemberRole;
   isActive: boolean;
   createdAt: Date;

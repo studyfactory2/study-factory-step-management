@@ -31,6 +31,7 @@ export class MemberService {
     const preRegistration = new MemberPreRegistration();
     preRegistration.name = request.name;
     preRegistration.roleType = request.memberRole;
+    preRegistration.branch = request.branch;
     preRegistration.isRegistered = false;
 
     return this.memberRepository.savePreRegistration(preRegistration);
@@ -39,11 +40,16 @@ export class MemberService {
   async register(request: MemberRegisterRequest): Promise<Member> {
     const preRegistration = await this.memberRepository.findPreRegistrationByNameAndRoleType(
       request.name,
-      request.memberRole
+      request.memberRole,
+      request.branch
     );
 
     if (!preRegistration) {
-      throw new MemberPreRegistrationNotFoundException(request.name, request.memberRole);
+      throw new MemberPreRegistrationNotFoundException(
+        request.name,
+        request.memberRole,
+        request.branch
+      );
     }
 
     const passwordHash = this.createPasswordHash(request.password);

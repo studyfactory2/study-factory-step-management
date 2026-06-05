@@ -13,6 +13,9 @@ export class Member extends BaseEntity {
   @Column({ name: "avatar_url", type: "varchar", nullable: true })
   avatarUrl: string | null;
 
+  @Column({ type: "varchar", nullable: true })
+  branch: string | null;
+
   @Column({
     name: "role_type",
     type: "enum",

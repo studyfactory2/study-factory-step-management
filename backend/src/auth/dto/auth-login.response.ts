@@ -5,6 +5,7 @@ export class AuthLoginResponse {
   member: {
     id: number;
     name: string;
+    branch: string | null;
     roleType: MemberRole;
   };
 }

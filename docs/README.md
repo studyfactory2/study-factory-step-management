@@ -20,12 +20,12 @@
 ## 2. 기본 데이터 모델 설계
 
 - [x] PostgreSQL 마이그레이션 작성
-- [x] `member_role`: `CEO`, `ADMIN`, `OPERATIONS_MANAGER`, `DEVELOPMENT_LEAD`, `DESIGNER`, `MARKETER`, `DEVELOPER`, `CONTENT_MANAGER`, `STAFF`
-- [x] `member`: 직원/관리자 프로필, 이름, 아바타, 직위 enum
-- [x] `member_pre_registration`: CEO/관리자가 사전등록한 이름, 직위, 가입 완료 여부
-- [ ] `tasks`: 업무 제목, 설명, 담당자, 생성자, 상태, 마감일, 완료일
+- [x] `member_role`: `CEO`, `ADMIN`, `OPERATIONS_MANAGER`, `FACTORY_MANAGER`, `DEVELOPMENT_LEAD`, `DESIGNER`, `MARKETER`, `DEVELOPER`, `CONTENT_MANAGER`, `STAFF`
+- [x] `member`: 직원/관리자 프로필, 이름, 아바타, 지점, 직위 enum
+- [x] `member_pre_registration`: CEO/관리자가 사전등록한 이름, 지점, 직위, 가입 완료 여부
+- [x] `tasks`: 업무 제목, 설명, 담당자, 생성자, 상태, 마감일, 완료일
 - [ ] `task_comments`: 진행상황, 결과물, 관리자 피드백, 도움 답변
-- [ ] `task_attachments`: 사진, 파일, 썸네일, 업로드 경로
+- [x] `task_attachments`: 사진, 파일, 썸네일, 업로드 경로
 - [ ] `task_activity_logs`: 상태 변경, 피드백, 업로드 기록
 - [ ] `help_requests`: 직원 간 도움 요청
 - [ ] `notifications`: 업무 배정, 검토요청, 피드백, 도움요청 알림
@@ -131,15 +131,16 @@
 
 - [x] `frontend`/`backend` 구조 분리
 - [x] Next.js 프론트엔드 구성
-- [ ] PostgreSQL 스키마
-- [ ] 로그인 API
+- [x] PostgreSQL 스키마
+- [x] 로그인 API
 - [ ] 직위/직원 seed 데이터
 - [ ] 관리자 업무 등록
 - [ ] 직원 내 업무 목록
 - [ ] 업무 상세 화면
 - [ ] 업무 상태 변경
 - [ ] 피드백/결과물 등록
-- [ ] 사진 업로드
+- [x] 사진 업로드 도메인 모델
+- [ ] 사진 업로드 API
 - [ ] 활동 내역
 
 ## 11. 1.5차와 2차 이후 범위

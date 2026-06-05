@@ -44,6 +44,7 @@ export class AuthService {
       member: {
         id: member.id,
         name: member.name,
+        branch: member.branch,
         roleType: member.roleType
       }
     };

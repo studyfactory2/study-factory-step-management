@@ -7,4 +7,7 @@ export class MemberPreRegisterRequest {
 
   @IsEnum(MemberRole, { message: "유효하지 않은 직위입니다." })
   memberRole: MemberRole;
+
+  @IsString({ message: "지점은 문자열이어야 합니다." })
+  branch: string;
 }

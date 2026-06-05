@@ -53,12 +53,14 @@ export class MemberRepository {
 
   async findPreRegistrationByNameAndRoleType(
     name: string,
-    roleType: MemberRole
+    roleType: MemberRole,
+    branch: string
   ): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
       where: {
         name,
         roleType,
+        branch,
         isRegistered: false
       }
     });
