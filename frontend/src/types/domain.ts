@@ -31,7 +31,6 @@ export type Task = {
   status: TaskStatus;
   assigneeId: number;
   createdBy: number;
-  dueAt: string | null;
   completedAt: string | null;
   isDraft: boolean;
   createdAt: string;
