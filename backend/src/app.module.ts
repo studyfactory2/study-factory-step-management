@@ -9,6 +9,9 @@ import { jwtConfig } from "./config/jwt.config";
 import { Member } from "./member/entity/member.entity";
 import { MemberPreRegistration } from "./member/entity/member-pre-registration.entity";
 import { MemberModule } from "./member/member.module";
+import { TaskAttachment } from "./task/entity/task-attachment.entity";
+import { Task } from "./task/entity/task.entity";
+import { TaskModule } from "./task/task.module";
 
 @Module({
   imports: [
@@ -21,12 +24,13 @@ import { MemberModule } from "./member/member.module";
       useFactory: (configService: ConfigService) => ({
         type: "postgres",
         url: configService.getOrThrow<string>("database.url"),
-        entities: [Member, MemberPreRegistration, RefreshToken],
+        entities: [Member, MemberPreRegistration, RefreshToken, Task, TaskAttachment],
         synchronize: false
       })
     }),
     AuthModule,
-    MemberModule
+    MemberModule,
+    TaskModule
   ]
 })
 export class AppModule {}
