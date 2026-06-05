@@ -68,8 +68,15 @@ const roles = [
     className: "border-[#C8D3A7] bg-[#F7FAEC]"
   },
   {
+    id: "EMPLOYEE",
+    name: "직원",
+    badge: "직원",
+    icon: UserRound,
+    className: "border-[#F0D8A8] bg-[#FFF8E9]"
+  },
+  {
     id: "STAFF",
-    name: "사원",
+    name: "스텝",
     badge: "직원",
     icon: UserRound,
     className: "border-[#F5C5CF] bg-[#FFF6F8]"

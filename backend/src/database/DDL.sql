@@ -8,6 +8,7 @@ CREATE TYPE member_role_type_enum AS ENUM (
   'MARKETER',
   'DEVELOPER',
   'CONTENT_MANAGER',
+  'EMPLOYEE',
   'STAFF'
 );
 

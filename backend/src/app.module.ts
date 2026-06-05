@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { AdminModule } from "./admin/admin.module";
 import { AuthModule } from "./auth/auth.module";
 import { RefreshToken } from "./auth/entity/refresh-token.entity";
 import { appConfig } from "./config/app.config";
@@ -28,6 +29,7 @@ import { TaskModule } from "./task/task.module";
         synchronize: false
       })
     }),
+    AdminModule,
     AuthModule,
     MemberModule,
     TaskModule

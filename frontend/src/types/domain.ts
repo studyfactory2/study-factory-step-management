@@ -10,6 +10,7 @@ export type MemberRole =
   | "MARKETER"
   | "DEVELOPER"
   | "CONTENT_MANAGER"
+  | "EMPLOYEE"
   | "STAFF";
 
 export type Member = {
