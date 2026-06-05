@@ -1,10 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { getAdminDashboard, type AdminDashboard } from "@/api/admin";
+import { getAdminDashboard, type AdminDashboard, type AdminDashboardSortOrder } from "@/api/admin";
 import { getMembers } from "@/api/member";
 import { createTask } from "@/api/task";
-import type { Member } from "@/types/domain";
+import type { Member, TaskStatus } from "@/types/domain";
 import { BranchStaffSection } from "@/components/adminDashboard/branch-staff-section";
 import { DashboardHeader } from "@/components/adminDashboard/dashboard-header";
 import { DashboardLogout } from "@/components/adminDashboard/dashboard-logout";
@@ -39,6 +39,8 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedAssigneeId, setSelectedAssigneeId] = useState("");
+  const [recentTaskStatus, setRecentTaskStatus] = useState<TaskStatus>("REVIEW_REQUESTED");
+  const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder | "">("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
@@ -49,7 +51,10 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     async function loadDashboard() {
       try {
         const [dashboardResponse, memberResponse] = await Promise.all([
-          getAdminDashboard(accessToken),
+          getAdminDashboard(accessToken, {
+            sortOrder: recentTaskSortOrder === "" ? undefined : recentTaskSortOrder,
+            status: recentTaskStatus
+          }),
           getMembers()
         ]);
 
@@ -63,7 +68,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     }
 
     void loadDashboard();
-  }, [accessToken]);
+  }, [accessToken, recentTaskSortOrder, recentTaskStatus]);
 
   const branches = useMemo(() => {
     const values = members.map((member) => member.branch).filter((branch): branch is string => !!branch);
@@ -89,7 +94,10 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   }, [members, selectedBranch, selectedRole]);
 
   async function refreshDashboard() {
-    const dashboardResponse = await getAdminDashboard(accessToken);
+    const dashboardResponse = await getAdminDashboard(accessToken, {
+      sortOrder: recentTaskSortOrder === "" ? undefined : recentTaskSortOrder,
+      status: recentTaskStatus
+    });
     setDashboard(dashboardResponse);
   }
 
@@ -164,7 +172,13 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
           selectedRole={selectedRole}
           title={title}
         />
-        <RecentOutputsSection recentOutputs={dashboard.recentOutputs} />
+        <RecentOutputsSection
+          onSortOrderChange={setRecentTaskSortOrder}
+          onStatusChange={setRecentTaskStatus}
+          recentOutputs={dashboard.recentOutputs}
+          selectedSortOrder={recentTaskSortOrder}
+          selectedStatus={recentTaskStatus}
+        />
         <DashboardLogout onLogout={onLogout} />
       </div>
     </main>

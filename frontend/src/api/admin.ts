@@ -32,11 +32,12 @@ export type AdminDashboardBranchGroup = {
 export type AdminDashboardRecentOutput = {
   taskId: number;
   taskTitle: string;
+  taskStatus: TaskStatus;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;
   startedAt: string;
-  submittedAt: string;
+  submittedAt: string | null;
   attachmentPreviewUrls: string[];
 };
 
@@ -47,12 +48,33 @@ export type AdminDashboard = {
   recentOutputs: AdminDashboardRecentOutput[];
 };
 
+export type AdminDashboardSortOrder = "LATEST" | "OLDEST";
+
+export type AdminDashboardFilters = {
+  sortOrder?: AdminDashboardSortOrder;
+  status?: TaskStatus;
+};
+
 type ApiErrorResponse = {
   message?: string | string[];
 };
 
-export async function getAdminDashboard(accessToken: string): Promise<AdminDashboard> {
-  const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
+export async function getAdminDashboard(
+  accessToken: string,
+  filters: AdminDashboardFilters = {}
+): Promise<AdminDashboard> {
+  const params = new URLSearchParams();
+
+  if (filters.status) {
+    params.set("status", filters.status);
+  }
+
+  if (filters.sortOrder) {
+    params.set("sortOrder", filters.sortOrder);
+  }
+
+  const queryString = params.toString();
+  const response = await fetch(`${API_BASE_URL}/api/admin/dashboard${queryString ? `?${queryString}` : ""}`, {
     cache: "no-store",
     headers: {
       Authorization: `Bearer ${accessToken}`

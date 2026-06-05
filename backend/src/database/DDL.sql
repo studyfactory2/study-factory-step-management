@@ -68,6 +68,7 @@ CREATE TABLE tasks (
   assignee_id INTEGER NOT NULL,
   created_by INTEGER NOT NULL,
   completed_at TIMESTAMP,
+  review_requested_at TIMESTAMP,
   is_draft BOOLEAN NOT NULL DEFAULT false,
   CONSTRAINT fk_tasks_assignee_id
     FOREIGN KEY (assignee_id)
@@ -82,6 +83,9 @@ CREATE INDEX idx_tasks_status_is_draft
 
 CREATE INDEX idx_tasks_completed_at
   ON tasks (completed_at);
+
+CREATE INDEX idx_tasks_review_requested_at
+  ON tasks (review_requested_at);
 
 CREATE TABLE task_attachments (
   id SERIAL PRIMARY KEY,

@@ -36,11 +36,12 @@ export class AdminBranchStaffCountResponse {
 export class AdminDashboardRecentOutputResponse {
   taskId: number;
   taskTitle: string;
+  taskStatus: TaskStatus;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;
   startedAt: Date;
-  submittedAt: Date;
+  submittedAt: Date | null;
   attachmentPreviewUrls: string[];
 }
 

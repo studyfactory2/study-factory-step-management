@@ -13,6 +13,7 @@ import { MemberNotFoundException } from "../member/exception/member-not-found.ex
 import { MemberRepository } from "../member/member.repository";
 import { TaskStatus } from "../task/enum/task-status.enum";
 import { TaskRepository, TaskCountRow } from "../task/task.repository";
+import { AdminDashboardQueryRequest } from "./dto/admin-dashboard-query.request";
 
 @Injectable()
 export class AdminService {
@@ -35,14 +36,17 @@ export class AdminService {
     private readonly taskRepository: TaskRepository
   ) {}
 
-  async getDashboard(currentMemberId: number): Promise<AdminDashboardResponse> {
+  async getDashboard(
+    currentMemberId: number,
+    query: AdminDashboardQueryRequest = {}
+  ): Promise<AdminDashboardResponse> {
     const [currentMember, employees, taskCountRows, branchGroups, recentOutputs] =
       await Promise.all([
         this.findCurrentMember(currentMemberId),
         this.findDashboardEmployees(),
         this.findTaskCountRows(),
         this.findBranchGroups(),
-        this.findRecentOutputs()
+        this.findRecentOutputs(query)
       ]);
 
     return {
@@ -122,17 +126,25 @@ export class AdminService {
     }));
   }
 
-  private async findRecentOutputs(): Promise<AdminDashboardRecentOutputResponse[]> {
-    const tasks = await this.taskRepository.findRecentReviewRequested(10);
+  private async findRecentOutputs(
+    query: AdminDashboardQueryRequest
+  ): Promise<AdminDashboardRecentOutputResponse[]> {
+    const status = query.status ?? TaskStatus.REVIEW_REQUESTED;
+    const tasks = await this.taskRepository.findRecentWorkStatus({
+      limit: 10,
+      sortOrder: query.sortOrder,
+      status
+    });
 
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
+      taskStatus: task.status,
       memberId: task.assignee.id,
       memberName: task.assignee.name,
       memberRole: task.assignee.roleType,
       startedAt: task.createdAt,
-      submittedAt: task.updatedAt,
+      submittedAt: task.status === TaskStatus.REVIEW_REQUESTED ? task.reviewRequestedAt : null,
       attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl)
     }));
   }

@@ -3,12 +3,19 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Between, Repository } from "typeorm";
 import { TaskAttachment } from "./entity/task-attachment.entity";
 import { Task } from "./entity/task.entity";
+import { TaskSortOrder } from "./enum/task-sort-order.enum";
 import { TaskStatus } from "./enum/task-status.enum";
 
 export type TaskCountRow = {
   assigneeId: number;
   status: TaskStatus;
   count: string;
+};
+
+type FindRecentWorkStatusOptions = {
+  limit: number;
+  sortOrder?: TaskSortOrder;
+  status: TaskStatus;
 };
 
 @Injectable()
@@ -52,21 +59,27 @@ export class TaskRepository {
       .getRawMany<TaskCountRow>();
   }
 
-  async findRecentReviewRequested(limit: number): Promise<Task[]> {
-    return this.taskRepository.find({
-      where: {
-        status: TaskStatus.REVIEW_REQUESTED,
-        isDraft: false
-      },
-      relations: {
-        assignee: true,
-        attachments: true
-      },
-      order: {
-        updatedAt: "DESC"
-      },
-      take: limit
-    });
+  async findRecentWorkStatus(options: FindRecentWorkStatusOptions): Promise<Task[]> {
+    const queryBuilder = this.taskRepository
+      .createQueryBuilder("task")
+      .leftJoinAndSelect("task.assignee", "assignee")
+      .leftJoinAndSelect("task.attachments", "attachments")
+      .where("task.status = :status", { status: options.status })
+      .andWhere("task.isDraft = false");
+
+    if (options.sortOrder === TaskSortOrder.LATEST) {
+      queryBuilder.orderBy("task.updatedAt", "DESC");
+    } else if (options.sortOrder === TaskSortOrder.OLDEST) {
+      queryBuilder.orderBy("task.updatedAt", "ASC");
+    } else if (options.status === TaskStatus.REVIEW_REQUESTED) {
+      queryBuilder
+        .orderBy("task.reviewRequestedAt", "DESC", "NULLS LAST")
+        .addOrderBy("task.updatedAt", "DESC");
+    } else {
+      queryBuilder.orderBy("task.updatedAt", "DESC");
+    }
+
+    return queryBuilder.take(options.limit).getMany();
   }
 
   async saveAll(tasks: Task[]): Promise<Task[]> {

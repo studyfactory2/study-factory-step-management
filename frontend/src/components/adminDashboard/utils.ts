@@ -8,7 +8,7 @@ export function formatDate(value: string) {
   })
     .format(new Date(value))
     .replace(/\\. /g, ".")
-    .replace(".", ".");
+    .replace(/\.$/, "");
 }
 
 export function isAssignableMember(member: Member) {

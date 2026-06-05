@@ -36,6 +36,9 @@ export class Task extends BaseEntity {
   @Column({ name: "completed_at", type: "timestamp", nullable: true })
   completedAt: Date | null;
 
+  @Column({ name: "review_requested_at", type: "timestamp", nullable: true })
+  reviewRequestedAt: Date | null;
+
   @Column({ name: "is_draft", default: false })
   isDraft: boolean;
 
