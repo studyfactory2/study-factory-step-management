@@ -72,7 +72,9 @@ export class AdminService {
     };
   }
 
-  async getEmployees(): Promise<AdminDashboardEmployeeResponse[]> {
+  async getEmployees(currentMemberId: number): Promise<AdminDashboardEmployeeResponse[]> {
+    await this.findCurrentMember(currentMemberId);
+
     const [employees, taskCountRows] = await Promise.all([
       this.findDashboardEmployees(),
       this.findTaskCountRows()
@@ -81,7 +83,9 @@ export class AdminService {
     return this.toEmployeeResponses(employees, taskCountRows);
   }
 
-  async getBranchStaffCounts(): Promise<AdminBranchStaffCountResponse[]> {
+  async getBranchStaffCounts(currentMemberId: number): Promise<AdminBranchStaffCountResponse[]> {
+    await this.findCurrentMember(currentMemberId);
+
     return this.findBranchStaffCounts();
   }
 

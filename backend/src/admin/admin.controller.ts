@@ -16,12 +16,12 @@ export class AdminController {
   }
 
   @Get("employees")
-  async getEmployees() {
-    return this.adminService.getEmployees();
+  async getEmployees(@CurrentMember() currentMember: CurrentMemberType) {
+    return this.adminService.getEmployees(currentMember.memberId);
   }
 
   @Get("branches/staff-counts")
-  async getBranchStaffCounts() {
-    return this.adminService.getBranchStaffCounts();
+  async getBranchStaffCounts(@CurrentMember() currentMember: CurrentMemberType) {
+    return this.adminService.getBranchStaffCounts(currentMember.memberId);
   }
 }
