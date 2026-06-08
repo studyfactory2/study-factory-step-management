@@ -22,7 +22,10 @@ import type {
   MemberPosition,
   TaskStatus
 } from "@/types/domain";
-import { DashboardActionSection } from "@/components/adminDashboard/dashboard-action-section";
+import {
+  DashboardActionSection,
+  type MemberManagementView
+} from "@/components/adminDashboard/dashboard-action-section";
 import { DashboardHeader } from "@/components/adminDashboard/dashboard-header";
 import { DashboardLogout } from "@/components/adminDashboard/dashboard-logout";
 import { EmployeeListSection } from "@/components/adminDashboard/employee-list-section";
@@ -60,8 +63,8 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   const [selectedAssigneeId, setSelectedAssigneeId] = useState("");
   const [recentTaskStatus, setRecentTaskStatus] = useState<TaskStatus>("REVIEW_REQUESTED");
   const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder | "">("");
-  const [isPreRegisterOpen, setIsPreRegisterOpen] = useState(false);
   const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
+  const [memberManagementView, setMemberManagementView] = useState<MemberManagementView>("menu");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
@@ -221,7 +224,8 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     try {
       await preRegisterMember(accessToken, request);
       setMessage("직원 사전등록이 완료되었습니다.");
-      setIsPreRegisterOpen(false);
+      setIsMemberManagementOpen(false);
+      setMemberManagementView("menu");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "직원 사전등록에 실패했습니다.");
     } finally {
@@ -230,13 +234,23 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   }
 
   function handleSelectMemberPreRegister() {
-    setIsMemberManagementOpen(false);
-    setIsPreRegisterOpen(true);
+    setMemberManagementView("preRegister");
   }
 
   function handleSelectPositionTree() {
     setIsMemberManagementOpen(false);
+    setMemberManagementView("menu");
     setMessage("로그인 화면 트리 관리는 다음 단계에서 연결할 예정입니다.");
+  }
+
+  function handleOpenMemberManagement() {
+    setMemberManagementView("menu");
+    setIsMemberManagementOpen(true);
+  }
+
+  function handleCloseMemberManagement() {
+    setIsMemberManagementOpen(false);
+    setMemberManagementView("menu");
   }
 
   return (
@@ -252,13 +266,6 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
         <DashboardHeader roleType={dashboard.currentMember.roleType} />
         <GreetingCard memberName={dashboard.currentMember.name} />
         <MessageBanner message={message} />
-        {isPreRegisterOpen && (
-          <MemberPreRegisterPanel
-            isSubmitting={isPreRegisterSubmitting}
-            onClose={() => setIsPreRegisterOpen(false)}
-            onSubmit={handlePreRegister}
-          />
-        )}
         <EmployeeListSection
           candidates={favoriteCandidates}
           employees={dashboard.employees}
@@ -293,8 +300,18 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
         />
         <DashboardActionSection
           isMemberManagementOpen={isMemberManagementOpen}
-          onCloseMemberManagement={() => setIsMemberManagementOpen(false)}
-          onOpenMemberManagement={() => setIsMemberManagementOpen(true)}
+          memberManagementView={memberManagementView}
+          memberPreRegisterPanel={
+            <MemberPreRegisterPanel
+              isSubmitting={isPreRegisterSubmitting}
+              layout="modal"
+              onClose={() => setMemberManagementView("menu")}
+              onSubmit={handlePreRegister}
+            />
+          }
+          onBackToMemberManagementMenu={() => setMemberManagementView("menu")}
+          onCloseMemberManagement={handleCloseMemberManagement}
+          onOpenMemberManagement={handleOpenMemberManagement}
           onSelectMemberPreRegister={handleSelectMemberPreRegister}
           onSelectPositionTree={handleSelectPositionTree}
         />

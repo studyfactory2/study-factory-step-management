@@ -4,6 +4,7 @@ import { affiliationLabels, dutyLabels, positionLabels } from "./constants";
 
 type MemberPreRegisterPanelProps = {
   isSubmitting: boolean;
+  layout?: "page" | "modal";
   onClose: () => void;
   onSubmit: (request: {
     affiliation: MemberAffiliation;
@@ -35,6 +36,7 @@ const dutyOptionsByPosition: Record<MemberPosition, MemberDuty[]> = {
 
 export function MemberPreRegisterPanel({
   isSubmitting,
+  layout = "page",
   onClose,
   onSubmit
 }: MemberPreRegisterPanelProps) {
@@ -78,7 +80,13 @@ export function MemberPreRegisterPanel({
   }
 
   return (
-    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
+    <section
+      className={
+        layout === "modal"
+          ? "rounded-[22px] border border-[#F2C9C2] bg-[#FFF8F9] px-6 py-6"
+          : "rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]"
+      }
+    >
       <div className="flex items-center justify-between gap-5">
         <h2 className="text-2xl font-semibold text-[#5A3E3B]">사전 직원 등록</h2>
         <button
@@ -89,7 +97,14 @@ export function MemberPreRegisterPanel({
           닫기
         </button>
       </div>
-      <form className="mt-7 grid gap-5 lg:grid-cols-[1fr_1fr_180px_180px_180px_auto]" onSubmit={handleSubmit}>
+      <form
+        className={
+          layout === "modal"
+            ? "mt-7 grid gap-4 sm:grid-cols-2"
+            : "mt-7 grid gap-5 lg:grid-cols-[1fr_1fr_180px_180px_180px_auto]"
+        }
+        onSubmit={handleSubmit}
+      >
         <input
           className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium outline-none placeholder:text-[#B79A94]"
           onChange={(event) => setName(event.target.value)}
@@ -146,7 +161,7 @@ export function MemberPreRegisterPanel({
           ))}
         </select>
         <button
-          className="h-11 rounded-full bg-primary px-8 text-sm font-bold text-white disabled:opacity-60"
+          className="h-11 rounded-full bg-primary px-8 text-sm font-bold text-white disabled:opacity-60 sm:col-span-2 lg:col-span-1"
           disabled={isSubmitting}
           type="submit"
         >
