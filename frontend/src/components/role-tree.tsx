@@ -71,7 +71,7 @@ export function RoleTree({ selectedRole, onSelectRole }: RoleTreeProps) {
     <div className="space-y-3">
       <button
         className={cn(
-          "mx-auto flex w-36 flex-col items-center rounded-2xl border-2 px-4 py-3 text-center shadow-sm transition",
+          "mx-auto flex w-36 flex-col items-center rounded-2xl border-2 px-4 py-3 text-center shadow-sm transition lg:w-44",
           roles[0].className,
           selectedRole === roles[0].id && "ring-2 ring-primary ring-offset-2"
         )}
@@ -81,7 +81,7 @@ export function RoleTree({ selectedRole, onSelectRole }: RoleTreeProps) {
         <RoleContent role={roles[0]} />
       </button>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {roles.slice(1, 5).map((role) => (
           <button
             key={role.id}

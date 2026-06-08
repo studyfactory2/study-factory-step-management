@@ -6,6 +6,7 @@ import {
   Bell,
   BriefcaseBusiness,
   CheckCircle2,
+  Heart,
   ClipboardList,
   EyeOff,
   Lock,
@@ -15,7 +16,9 @@ import {
 } from "lucide-react";
 import { login, type LoginResponse } from "@/api/auth";
 import { getTaskStatusSummary, type TaskStatusSummary } from "@/api/task";
+import { RoleTree } from "@/components/role-tree";
 import { StatusCard } from "@/components/status-card";
+import type { MemberRole } from "@/types/domain";
 
 type StatusCardItem = {
   label: string;
@@ -72,6 +75,8 @@ type LoginPageProps = {
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberName, setRememberName] = useState(false);
+  const [selectedTreeRole, setSelectedTreeRole] = useState<MemberRole>("CEO");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [taskSummary, setTaskSummary] = useState<TaskStatusSummary>(defaultSummary);
@@ -106,78 +111,130 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col px-5 py-6">
-      <section className="flex flex-1 flex-col justify-between gap-6 rounded-[28px] border border-border bg-white/82 p-5 shadow-soft backdrop-blur">
-        <div className="space-y-6">
-          <header className="space-y-3 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-border bg-muted text-primary">
-              <Sparkles aria-hidden className="h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-primary">자격증공장</p>
-              <h1 className="text-4xl font-black leading-tight tracking-normal text-foreground">
-                사원업무현황
-              </h1>
-              <p className="mt-2 text-sm font-medium text-muted-foreground">
-                이름과 비밀번호로 로그인하세요
-              </p>
-            </div>
-          </header>
+    <main className="mx-auto flex min-h-dvh w-full max-w-[920px] flex-col px-5 py-6 text-[#4B332E] lg:px-8">
+      <div className="pointer-events-none fixed left-8 top-12 text-[#F0C957]">
+        <Sparkles aria-hidden className="h-7 w-7 fill-current" />
+      </div>
+      <div className="pointer-events-none fixed right-9 top-20 text-[#F1A9C0]">
+        <Sparkles aria-hidden className="h-6 w-6 fill-current" />
+      </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {createStatusCards(taskSummary).map((card) => (
-              <StatusCard key={card.label} {...card} />
-            ))}
+      <header className="mb-7 pt-3 text-center">
+        <h1 className="text-[34px] font-black leading-tight tracking-normal text-[#3F2C28]">
+          자격증공장 업무전달현황
+        </h1>
+        <p className="mt-2 text-[17px] font-bold text-[#9C7D79]">
+          이름과 비밀번호로 로그인하세요.
+        </p>
+      </header>
+
+      <section className="mb-5 rounded-[24px] border border-[#EBCDD1] bg-white/86 p-4 shadow-soft backdrop-blur">
+        <div className="mb-4 flex items-center gap-3 rounded-full bg-[#FFF1F6] px-4 py-2">
+          <h2 className="shrink-0 text-[20px] font-black tracking-normal text-[#3F2C28]">
+            직위트리
+          </h2>
+          <div className="min-w-0 flex-1 truncate rounded-full border border-[#EBCDD1] bg-white px-4 py-1.5 text-center text-sm font-bold text-[#9C7D79]">
+            관리자페이지에서 트리 모양과 텍스트를 수정할 수 있음
           </div>
         </div>
 
-        <form
-          className="space-y-3 rounded-[24px] border border-dashed border-border bg-[#FFF9F8] p-4"
-          onSubmit={handleSubmit}
-        >
-          <label className="flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3">
-            <UserRound aria-hidden className="h-5 w-5 text-primary" />
-            <input
-              className="min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none placeholder:text-[#C8AAA5]"
-              onChange={(event) => setName(event.target.value)}
-              placeholder="이름"
-              type="text"
-              value={name}
-            />
-          </label>
-          <label className="flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3">
-            <Lock aria-hidden className="h-5 w-5 text-primary" />
-            <input
-              className="min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none placeholder:text-[#C8AAA5]"
-              maxLength={4}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="비밀번호"
-              type="password"
-              value={password}
-            />
-            <EyeOff aria-label="비밀번호 숨김" className="h-5 w-5 text-muted-foreground" />
-          </label>
+        <RoleTree selectedRole={selectedTreeRole} onSelectRole={setSelectedTreeRole} />
+      </section>
+
+      <section className="mb-5 rounded-[24px] border border-[#EBCDD1] bg-white/86 p-4 shadow-soft backdrop-blur">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-[21px] font-black tracking-normal text-[#3F2C28]">전체업무현황</h2>
+          <div className="rounded-full bg-[#FFF1C9] px-4 py-2 text-sm font-bold text-[#B18735]">
+            우리 모두 잘하고 있어요!
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {createStatusCards(taskSummary).map((card) => (
+            <StatusCard key={card.label} {...card} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-5 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur lg:px-6 lg:py-4">
+        <div className="mb-0.5 flex justify-center text-[#F188A4]">
+          <Heart aria-hidden className="h-5 w-5 fill-current" />
+        </div>
+
+        <form className="space-y-3" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 lg:grid-cols-[100px_1fr]">
+            <span className="text-base font-black text-[#4B332E]">로그인</span>
+            <label className="flex min-h-[48px] items-center gap-3 rounded-[16px] border border-[#EBCDD1] bg-white px-4 shadow-sm">
+              <UserRound aria-hidden className="h-5 w-5 text-[#F188A4]" />
+              <input
+                className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:text-[#C9ABA6]"
+                onChange={(event) => setName(event.target.value)}
+                placeholder="이름을 입력하세요"
+                type="text"
+                value={name}
+              />
+            </label>
+          </div>
+
+          <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 lg:grid-cols-[100px_1fr]">
+            <span className="text-base font-black text-[#4B332E]">비밀번호</span>
+            <label className="flex min-h-[48px] items-center gap-3 rounded-[16px] border border-[#EBCDD1] bg-white px-4 shadow-sm">
+              <Lock aria-hidden className="h-5 w-5 text-[#F188A4]" />
+              <input
+                className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:text-[#C9ABA6]"
+                maxLength={4}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="4자리"
+                type="password"
+                value={password}
+              />
+              <EyeOff aria-label="비밀번호 숨김" className="h-5 w-5 text-[#BFA4A0]" />
+            </label>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 px-1 text-sm font-bold text-[#9C7D79]">
+            <label className="flex items-center gap-2">
+              <input
+                checked={rememberName}
+                className="h-5 w-5 rounded border-[#EBCDD1] accent-[#F188A4]"
+                onChange={(event) => setRememberName(event.target.checked)}
+                type="checkbox"
+              />
+              이름 기억하기
+            </label>
+            <button className="text-[#9C7D79] transition hover:text-[#F188A4]" type="button">
+              직원등록 &gt;
+            </button>
+          </div>
+
           {message && (
-            <p className="rounded-2xl bg-white px-4 py-3 text-center text-sm font-bold text-primary">
+            <p className="rounded-[16px] bg-[#FFF3F5] px-4 py-2.5 text-center text-sm font-black text-[#E97999]">
               {message}
             </p>
           )}
+
           <button
-            className="flex w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-black text-primary-foreground shadow-soft transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex min-h-[50px] w-full items-center justify-center rounded-[16px] bg-[#F188A4] px-4 py-2.5 text-lg font-black text-white shadow-soft transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isSubmitting}
             type="submit"
           >
             {isSubmitting ? "로그인 중" : "로그인"}
           </button>
+
           <button
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-white px-4 py-3 text-base font-black text-primary transition hover:bg-muted"
+            className="flex min-h-[40px] w-full items-center justify-center gap-2 rounded-[16px] border border-[#EBCDD1] bg-[#FFF7F8] px-4 py-2 text-sm font-black text-[#E97999] transition hover:bg-[#FFF0F2]"
             type="button"
           >
             <UserPlus aria-hidden className="h-5 w-5" />
-            직원 등록
+            홈화면에 추가하기
           </button>
         </form>
       </section>
+
+      <footer className="mt-6 flex items-center justify-center gap-3 rounded-full bg-[#FFF2F6] px-4 py-4 text-center text-[17px] font-black text-[#4B332E]">
+        <Sparkles aria-hidden className="h-5 w-5 text-[#F188A4]" />
+        당신은 우리 회사의 자랑스러운 인재!
+      </footer>
     </main>
   );
 }
