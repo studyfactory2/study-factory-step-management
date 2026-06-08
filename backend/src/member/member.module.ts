@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { AdminOrCeoGuard } from "../auth/guard/admin-or-ceo.guard";
+import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
 import { Member } from "./entity/member.entity";

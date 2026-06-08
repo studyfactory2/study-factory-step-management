@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
+import { CurrentMember } from "../../auth/type/current-member.type";
 import { MemberRole } from "../../member/enum/member-role.enum";
-import { CurrentMember } from "../type/current-member.type";
 
 @Injectable()
 export class AdminOrCeoGuard implements CanActivate {
@@ -11,6 +11,6 @@ export class AdminOrCeoGuard implements CanActivate {
       return true;
     }
 
-    throw new ForbiddenException("사전등록 권한이 없습니다.");
+    throw new ForbiddenException("관리자 권한이 없습니다.");
   }
 }

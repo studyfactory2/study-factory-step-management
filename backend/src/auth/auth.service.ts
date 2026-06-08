@@ -10,6 +10,7 @@ import { InvalidTokenException } from "./exception/invalid-token.exception";
 import { MemberRepository } from "../member/member.repository";
 import { RefreshTokenRepository } from "./refresh-token.repository";
 import { JwtPayload } from "./type/jwt-payload.type";
+import { RefreshToken } from "./entity/refresh-token.entity";
 
 @Injectable()
 export class AuthService {
@@ -35,15 +36,23 @@ export class AuthService {
       throw new InvalidCredentialsException();
     }
 
+    const tokenPayload = {
+      userId: member.id,
+      name: member.name,
+      roleType: member.roleType
+    };
+    const accessToken = this.generateAccessToken(tokenPayload);
+    const refreshToken = this.generateRefreshToken(tokenPayload);
+
+    await this.saveRefreshToken(member.id, refreshToken);
+
     return {
-      accessToken: this.generateAccessToken({
-        userId: member.id,
-        name: member.name,
-        roleType: member.roleType
-      }),
+      accessToken,
+      refreshToken,
       member: {
         id: member.id,
         name: member.name,
+        branch: member.branch,
         roleType: member.roleType
       }
     };
@@ -75,6 +84,16 @@ export class AuthService {
       ...payload,
       tokenType: AuthTokenType.REFRESH
     });
+  }
+
+  private async saveRefreshToken(memberId: number, token: string): Promise<void> {
+    await this.refreshTokenRepository.deleteByMemberId(memberId);
+
+    const refreshToken = new RefreshToken();
+    refreshToken.memberId = memberId;
+    refreshToken.token = token;
+
+    await this.refreshTokenRepository.save(refreshToken);
   }
 
   private createPasswordHash(password: string): string {

@@ -13,7 +13,7 @@ import {
   UserPlus,
   UserRound
 } from "lucide-react";
-import { login } from "@/api/auth";
+import { login, type LoginResponse } from "@/api/auth";
 import { getTaskStatusSummary, type TaskStatusSummary } from "@/api/task";
 import { RoleTree } from "@/components/role-tree";
 import { StatusCard } from "@/components/status-card";
@@ -67,7 +67,11 @@ function createStatusCards(summary: TaskStatusSummary): StatusCardItem[] {
   ];
 }
 
-export function LoginPage() {
+type LoginPageProps = {
+  onLogin?: (response: LoginResponse) => void;
+};
+
+export function LoginPage({ onLogin }: LoginPageProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState<MemberRole>("ADMIN");
@@ -94,8 +98,10 @@ export function LoginPage() {
       });
 
       localStorage.setItem("accessToken", response.accessToken);
+      localStorage.setItem("refreshToken", response.refreshToken);
       localStorage.setItem("currentMember", JSON.stringify(response.member));
       setMessage(`${response.member.name}님, 로그인되었습니다.`);
+      onLogin?.(response);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "로그인에 실패했습니다.");
     } finally {

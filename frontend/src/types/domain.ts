@@ -10,13 +10,31 @@ export type MemberRole =
   | "MARKETER"
   | "DEVELOPER"
   | "CONTENT_MANAGER"
+  | "EMPLOYEE"
   | "STAFF";
+
+export type MemberPosition =
+  | "DEVELOPMENT_LEAD"
+  | "DEVELOPER"
+  | "STAFF"
+  | "EMPLOYEE"
+  | "CEO"
+  | "ADMIN"
+  | "FACTORY_MANAGER";
+
+export type MemberAffiliation = "DEVELOPMENT_TEAM" | "STAFF" | "ADMIN" | "CEO";
+
+export type MemberDuty = "DEVELOPMENT" | "BEVERAGE" | "FOOD" | "CLEANING" | "GENERAL";
 
 export type Member = {
   id: number;
   name: string;
   avatarUrl: string | null;
+  branch: string | null;
+  affiliation: MemberAffiliation | null;
+  position: MemberPosition | null;
   roleType: MemberRole;
+  duty: MemberDuty | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -29,7 +47,6 @@ export type Task = {
   status: TaskStatus;
   assigneeId: number;
   createdBy: number;
-  dueAt: string | null;
   completedAt: string | null;
   isDraft: boolean;
   createdAt: string;

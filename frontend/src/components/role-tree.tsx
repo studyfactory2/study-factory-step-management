@@ -19,13 +19,6 @@ const roles = [
     className: "border-[#C8D3A7] bg-[#FAF9EA]"
   },
   {
-    id: "OPERATIONS_MANAGER",
-    name: "운영관리자",
-    badge: "관리자",
-    icon: ShieldCheck,
-    className: "border-[#C8D3A7] bg-[#FAF9EA]"
-  },
-  {
     id: "FACTORY_MANAGER",
     name: "공장장",
     badge: "관리자",
@@ -40,20 +33,6 @@ const roles = [
     className: "border-[#CDBDEB] bg-[#F6EFFF]"
   },
   {
-    id: "DESIGNER",
-    name: "디자이너",
-    badge: "직원",
-    icon: UserRound,
-    className: "border-[#F5C5CF] bg-[#FFF6F8]"
-  },
-  {
-    id: "MARKETER",
-    name: "마케팅",
-    badge: "직원",
-    icon: UserRound,
-    className: "border-[#F0D8A8] bg-[#FFF8E9]"
-  },
-  {
     id: "DEVELOPER",
     name: "개발자",
     badge: "직원",
@@ -61,15 +40,15 @@ const roles = [
     className: "border-[#CDBDEB] bg-[#F7F2FF]"
   },
   {
-    id: "CONTENT_MANAGER",
-    name: "콘텐츠 담당",
+    id: "EMPLOYEE",
+    name: "직원",
     badge: "직원",
     icon: UserRound,
-    className: "border-[#C8D3A7] bg-[#F7FAEC]"
+    className: "border-[#F0D8A8] bg-[#FFF8E9]"
   },
   {
     id: "STAFF",
-    name: "사원",
+    name: "스텝",
     badge: "직원",
     icon: UserRound,
     className: "border-[#F5C5CF] bg-[#FFF6F8]"

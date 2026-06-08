@@ -20,6 +20,10 @@ export class RefreshTokenRepository {
     return this.refreshTokenRepository.save(refreshToken);
   }
 
+  async deleteByMemberId(memberId: number): Promise<void> {
+    await this.refreshTokenRepository.delete({ memberId });
+  }
+
   async deleteByToken(token: string): Promise<void> {
     await this.refreshTokenRepository.delete({ token });
   }

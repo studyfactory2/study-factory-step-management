@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
-import { AdminOrCeoGuard } from "../auth/guard/admin-or-ceo.guard";
+import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";

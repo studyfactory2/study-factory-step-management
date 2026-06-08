@@ -33,11 +33,11 @@ export class Task extends BaseEntity {
   @JoinColumn({ name: "created_by" })
   creator: Member;
 
-  @Column({ name: "due_at", type: "timestamp", nullable: true })
-  dueAt: Date | null;
-
   @Column({ name: "completed_at", type: "timestamp", nullable: true })
   completedAt: Date | null;
+
+  @Column({ name: "review_requested_at", type: "timestamp", nullable: true })
+  reviewRequestedAt: Date | null;
 
   @Column({ name: "is_draft", default: false })
   isDraft: boolean;
