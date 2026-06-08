@@ -29,11 +29,10 @@ export function RoleTree({ positions, selectedPositionId, onSelectPosition }: Ro
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-auto pb-1">
       {visiblePositions.map((position, index) => (
         <PositionNode
           index={index}
-          isRoot
           key={position.id}
           onSelectPosition={onSelectPosition}
           position={position}
@@ -61,13 +60,11 @@ function filterVisiblePositions(positions: PositionTreeNode[]): PositionTreeNode
 
 function PositionNode({
   index,
-  isRoot = false,
   onSelectPosition,
   position,
   selectedPositionId
 }: {
   index: number;
-  isRoot?: boolean;
   onSelectPosition: (positionId: number) => void;
   position: PositionTreeNode;
   selectedPositionId: number | null;
@@ -77,7 +74,7 @@ function PositionNode({
   return (
     <div className="relative flex flex-col items-center">
       <PositionCard
-        className={cn(isRoot ? "w-40 lg:w-48" : "w-full")}
+        className="w-[132px] sm:w-36 lg:w-40"
         index={index}
         isSelected={selectedPositionId === position.id}
         onSelect={() => onSelectPosition(position.id)}
@@ -85,13 +82,24 @@ function PositionNode({
       />
 
       {children.length > 0 && (
-        <div className="relative mt-8 w-full">
+        <div className="relative mt-8 w-full min-w-max">
           <span className="absolute left-1/2 top-[-2rem] h-8 w-px -translate-x-1/2 bg-[#E5C5CB]" />
-          <span className="absolute left-[12%] right-[12%] top-0 h-px bg-[#E5C5CB]" />
+          <span
+            className={cn(
+              "absolute top-0 h-px bg-[#E5C5CB]",
+              children.length === 1 && "left-1/2 right-1/2",
+              children.length === 2 && "left-1/4 right-1/4",
+              children.length === 3 && "left-[16.666%] right-[16.666%]",
+              children.length >= 4 && "left-[12.5%] right-[12.5%]"
+            )}
+          />
           <div
             className={cn(
-              "grid gap-3 pt-5",
-              children.length <= 2 ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-4"
+              "grid justify-items-center gap-3 pt-5",
+              children.length === 1 && "grid-cols-1",
+              children.length === 2 && "grid-cols-2",
+              children.length === 3 && "grid-cols-3",
+              children.length >= 4 && "grid-cols-4"
             )}
           >
             {children.map((child, childIndex) => (
@@ -131,7 +139,7 @@ function PositionCard({
   return (
     <button
       className={cn(
-        "flex min-h-[84px] w-full flex-col items-center justify-center rounded-2xl border px-3 py-3 text-center shadow-sm transition",
+        "flex min-h-[78px] w-full flex-col items-center justify-center rounded-2xl border px-2.5 py-2.5 text-center shadow-sm transition",
         toneClassName,
         isSelected && "ring-2 ring-primary ring-offset-2",
         className
@@ -139,12 +147,12 @@ function PositionCard({
       onClick={onSelect}
       type="button"
     >
-      <span className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-primary shadow-sm">
-        <Icon aria-hidden className="h-5 w-5" />
+      <span className="mb-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+        <Icon aria-hidden className="h-4 w-4" />
       </span>
-      <span className="text-sm font-black">{position.name}</span>
+      <span className="text-[13px] font-black">{position.name}</span>
       {position.subtitle && (
-        <span className="mt-1 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
+        <span className="mt-1 max-w-full rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-bold leading-tight text-muted-foreground">
           {position.subtitle}
         </span>
       )}

@@ -25,6 +25,17 @@ DELETE FROM member_positions
 WHERE code = 'FACTORY_MANAGER';
 
 UPDATE member_positions
+SET
+  name = '공장장',
+  subtitle = '관리/검토',
+  is_login_visible = true
+WHERE code = 'OPERATIONS_MANAGER';
+
+UPDATE member_positions
+SET is_login_visible = false
+WHERE code IN ('CONTENT_MANAGER', 'MARKETER', 'DESIGNER');
+
+UPDATE member_positions
 SET display_order = CASE code
   WHEN 'CEO' THEN 1
   WHEN 'ADMIN' THEN 2

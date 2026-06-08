@@ -21,7 +21,7 @@ export const positionLabels: Record<MemberPosition, string> = {
   EMPLOYEE: "직원",
   CEO: "CEO",
   ADMIN: "admin",
-  OPERATIONS_MANAGER: "운영관리자"
+  OPERATIONS_MANAGER: "공장장"
 };
 
 export const affiliationLabels: Record<MemberAffiliation, string> = {
