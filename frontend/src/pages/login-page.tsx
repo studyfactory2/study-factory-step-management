@@ -15,10 +15,10 @@ import {
   UserRound
 } from "lucide-react";
 import { login, type LoginResponse } from "@/api/auth";
+import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import { getTaskStatusSummary, type TaskStatusSummary } from "@/api/task";
 import { RoleTree } from "@/components/role-tree";
 import { StatusCard } from "@/components/status-card";
-import type { MemberRole } from "@/types/domain";
 
 type StatusCardItem = {
   label: string;
@@ -76,7 +76,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [rememberName, setRememberName] = useState(false);
-  const [selectedTreeRole, setSelectedTreeRole] = useState<MemberRole>("CEO");
+  const [positions, setPositions] = useState<PositionTreeNode[]>([]);
+  const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
+  const [positionTreeMessage, setPositionTreeMessage] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [taskSummary, setTaskSummary] = useState<TaskStatusSummary>(defaultSummary);
@@ -85,6 +87,20 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     getTaskStatusSummary()
       .then(setTaskSummary)
       .catch(() => setTaskSummary(defaultSummary));
+  }, []);
+
+  useEffect(() => {
+    getPositionTree()
+      .then((positionTree) => {
+        setPositions(positionTree);
+        setSelectedPositionId(positionTree[0]?.id ?? null);
+        setPositionTreeMessage("");
+      })
+      .catch(() => {
+        setPositions([]);
+        setSelectedPositionId(null);
+        setPositionTreeMessage("직위트리를 불러오지 못했습니다.");
+      });
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -138,7 +154,17 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </div>
         </div>
 
-        <RoleTree selectedRole={selectedTreeRole} onSelectRole={setSelectedTreeRole} />
+        {positionTreeMessage ? (
+          <div className="rounded-[18px] border border-dashed border-[#EBCDD1] bg-[#FFF9FA] px-4 py-8 text-center text-sm font-bold text-[#9C7D79]">
+            {positionTreeMessage}
+          </div>
+        ) : (
+          <RoleTree
+            onSelectPosition={setSelectedPositionId}
+            positions={positions}
+            selectedPositionId={selectedPositionId}
+          />
+        )}
       </section>
 
       <section className="mb-5 rounded-[24px] border border-[#EBCDD1] bg-white/86 p-4 shadow-soft backdrop-blur">

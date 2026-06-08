@@ -1,141 +1,139 @@
 import type { LucideIcon } from "lucide-react";
 import { Crown, ShieldCheck, UserRound } from "lucide-react";
-import type { MemberRole } from "@/types/domain";
+import type { PositionTreeNode } from "@/api/position";
 import { cn } from "@/util/utils";
 
-const roles = [
-  {
-    id: "CEO",
-    name: "대표",
-    badge: "관리자",
-    icon: Crown,
-    className: "border-primary bg-[#FFF0F2]"
-  },
-  {
-    id: "ADMIN",
-    name: "관리자",
-    badge: "관리자",
-    icon: ShieldCheck,
-    className: "border-[#C8D3A7] bg-[#FAF9EA]"
-  },
-  {
-    id: "FACTORY_MANAGER",
-    name: "공장장",
-    badge: "관리자",
-    icon: ShieldCheck,
-    className: "border-[#F0D8A8] bg-[#FFF8E9]"
-  },
-  {
-    id: "DEVELOPMENT_LEAD",
-    name: "개발팀장",
-    badge: "관리자",
-    icon: ShieldCheck,
-    className: "border-[#CDBDEB] bg-[#F6EFFF]"
-  },
-  {
-    id: "DEVELOPER",
-    name: "개발자",
-    badge: "직원",
-    icon: UserRound,
-    className: "border-[#CDBDEB] bg-[#F7F2FF]"
-  },
-  {
-    id: "EMPLOYEE",
-    name: "직원",
-    badge: "직원",
-    icon: UserRound,
-    className: "border-[#F0D8A8] bg-[#FFF8E9]"
-  },
-  {
-    id: "STAFF",
-    name: "스텝",
-    badge: "직원",
-    icon: UserRound,
-    className: "border-[#F5C5CF] bg-[#FFF6F8]"
-  }
-] satisfies Array<{
-  id: MemberRole;
-  name: string;
-  badge: string;
-  icon: LucideIcon;
-  className: string;
-}>;
+const toneClassNames = [
+  "border-primary bg-[#FFF0F2]",
+  "border-[#C8D3A7] bg-[#FAF9EA]",
+  "border-[#F0D8A8] bg-[#FFF8E9]",
+  "border-[#CDBDEB] bg-[#F6EFFF]",
+  "border-[#F5C5CF] bg-[#FFF6F8]"
+];
 
 type RoleTreeProps = {
-  selectedRole: MemberRole;
-  onSelectRole: (role: MemberRole) => void;
+  positions: PositionTreeNode[];
+  selectedPositionId: number | null;
+  onSelectPosition: (positionId: number) => void;
 };
 
-export function RoleTree({ selectedRole, onSelectRole }: RoleTreeProps) {
+export function RoleTree({ positions, selectedPositionId, onSelectPosition }: RoleTreeProps) {
+  if (positions.length === 0) {
+    return (
+      <div className="rounded-[18px] border border-dashed border-[#EBCDD1] bg-[#FFF9FA] px-4 py-8 text-center text-sm font-bold text-[#9C7D79]">
+        등록된 직위트리가 없습니다.
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-3">
-      <button
-        className={cn(
-          "mx-auto flex w-36 flex-col items-center rounded-2xl border-2 px-4 py-3 text-center shadow-sm transition lg:w-44",
-          roles[0].className,
-          selectedRole === roles[0].id && "ring-2 ring-primary ring-offset-2"
-        )}
-        onClick={() => onSelectRole(roles[0].id)}
-        type="button"
-      >
-        <RoleContent role={roles[0]} />
-      </button>
-
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {roles.slice(1, 5).map((role) => (
-          <button
-            key={role.id}
-            className={cn(
-              "flex flex-col items-center rounded-2xl border-2 px-3 py-3 text-center shadow-sm transition",
-              role.className,
-              selectedRole === role.id && "ring-2 ring-primary ring-offset-2"
-            )}
-            onClick={() => onSelectRole(role.id)}
-            type="button"
-          >
-            <RoleContent role={role} />
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        {roles.slice(5).map((role) => (
-          <button
-            key={role.id}
-            className={cn(
-              "flex min-h-24 flex-col items-center justify-center rounded-2xl border px-2 py-2 text-center transition",
-              role.className,
-              selectedRole === role.id && "ring-2 ring-primary ring-offset-2"
-            )}
-            onClick={() => onSelectRole(role.id)}
-            type="button"
-          >
-            <RoleContent role={role} compact />
-          </button>
-        ))}
-      </div>
+    <div className="space-y-4">
+      {positions.map((position, index) => (
+        <PositionBranch
+          key={position.id}
+          depth={0}
+          index={index}
+          onSelectPosition={onSelectPosition}
+          position={position}
+          selectedPositionId={selectedPositionId}
+        />
+      ))}
     </div>
   );
 }
 
-function RoleContent({
-  role,
-  compact = false
+function PositionBranch({
+  depth,
+  index,
+  onSelectPosition,
+  position,
+  selectedPositionId
 }: {
-  role: (typeof roles)[number];
-  compact?: boolean;
+  depth: number;
+  index: number;
+  onSelectPosition: (positionId: number) => void;
+  position: PositionTreeNode;
+  selectedPositionId: number | null;
 }) {
-  const Icon = role.icon;
+  const children = position.children ?? [];
 
   return (
-    <>
+    <div className={cn("space-y-3", depth > 0 && "rounded-[18px] bg-white/40 p-3")}>
+      <PositionCard
+        index={index}
+        isSelected={selectedPositionId === position.id}
+        onSelect={() => onSelectPosition(position.id)}
+        position={position}
+      />
+
+      {children.length > 0 && (
+        <div
+          className={cn(
+            "grid gap-3",
+            depth === 0 ? "grid-cols-2 lg:grid-cols-3" : "grid-cols-2 lg:grid-cols-4"
+          )}
+        >
+          {children.map((child, childIndex) => (
+            <PositionBranch
+              key={child.id}
+              depth={depth + 1}
+              index={childIndex + index + 1}
+              onSelectPosition={onSelectPosition}
+              position={child}
+              selectedPositionId={selectedPositionId}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PositionCard({
+  index,
+  isSelected,
+  onSelect,
+  position
+}: {
+  index: number;
+  isSelected: boolean;
+  onSelect: () => void;
+  position: PositionTreeNode;
+}) {
+  const Icon = getPositionIcon(position);
+  const toneClassName = toneClassNames[index % toneClassNames.length];
+
+  return (
+    <button
+      className={cn(
+        "flex min-h-[84px] w-full flex-col items-center justify-center rounded-2xl border px-3 py-3 text-center shadow-sm transition",
+        toneClassName,
+        isSelected && "ring-2 ring-primary ring-offset-2"
+      )}
+      onClick={onSelect}
+      type="button"
+    >
       <span className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-primary shadow-sm">
         <Icon aria-hidden className="h-5 w-5" />
       </span>
-      <span className={cn("font-black", compact ? "text-xs" : "text-sm")}>{role.name}</span>
-      <span className="mt-1 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
-        {role.badge}
-      </span>
-    </>
+      <span className="text-sm font-black">{position.name}</span>
+      {position.subtitle && (
+        <span className="mt-1 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
+          {position.subtitle}
+        </span>
+      )}
+    </button>
   );
+}
+
+function getPositionIcon(position: PositionTreeNode): LucideIcon {
+  if (position.code === "CEO") {
+    return Crown;
+  }
+
+  if (position.isAdmin || position.subtitle?.includes("관리") || position.subtitle?.includes("총괄")) {
+    return ShieldCheck;
+  }
+
+  return UserRound;
 }
