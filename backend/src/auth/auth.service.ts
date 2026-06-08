@@ -26,9 +26,8 @@ export class AuthService {
 
   async login(loginRequest: AuthLoginRequest): Promise<AuthLoginResponse> {
     const passwordHash = this.createPasswordHash(loginRequest.password);
-    const member = await this.memberRepository.findByNameAndRoleTypeAndPasswordHash(
+    const member = await this.memberRepository.findByNameAndPasswordHash(
       loginRequest.name,
-      loginRequest.memberRole,
       passwordHash
     );
 

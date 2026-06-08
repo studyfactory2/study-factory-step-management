@@ -77,6 +77,15 @@ export class MemberRepository {
     });
   }
 
+  async findByNameAndPasswordHash(name: string, passwordHash: string): Promise<Member | null> {
+    return this.memberRepository.findOne({
+      where: {
+        name,
+        passwordHash
+      }
+    });
+  }
+
   async save(member: Member): Promise<Member> {
     return this.memberRepository.save(member);
   }

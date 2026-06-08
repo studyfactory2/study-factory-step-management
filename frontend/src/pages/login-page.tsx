@@ -15,9 +15,7 @@ import {
 } from "lucide-react";
 import { login, type LoginResponse } from "@/api/auth";
 import { getTaskStatusSummary, type TaskStatusSummary } from "@/api/task";
-import { RoleTree } from "@/components/role-tree";
 import { StatusCard } from "@/components/status-card";
-import type { MemberRole } from "@/types/domain";
 
 type StatusCardItem = {
   label: string;
@@ -74,7 +72,6 @@ type LoginPageProps = {
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<MemberRole>("ADMIN");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [taskSummary, setTaskSummary] = useState<TaskStatusSummary>(defaultSummary);
@@ -93,7 +90,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     try {
       const response = await login({
         name,
-        memberRole: selectedRole,
         password
       });
 
@@ -123,12 +119,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 사원업무현황
               </h1>
               <p className="mt-2 text-sm font-medium text-muted-foreground">
-                직위를 선택하고 로그인하세요
+                이름과 비밀번호로 로그인하세요
               </p>
             </div>
           </header>
-
-          <RoleTree selectedRole={selectedRole} onSelectRole={setSelectedRole} />
 
           <div className="grid grid-cols-2 gap-3">
             {createStatusCards(taskSummary).map((card) => (
