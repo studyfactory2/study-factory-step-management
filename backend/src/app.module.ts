@@ -11,6 +11,7 @@ import { Member } from "./member/entity/member.entity";
 import { MemberPreRegistration } from "./member/entity/member-pre-registration.entity";
 import { MemberModule } from "./member/member.module";
 import { Position } from "./position/entity/position.entity";
+import { PositionModule } from "./position/position.module";
 import { TaskAttachment } from "./task/entity/task-attachment.entity";
 import { Task } from "./task/entity/task.entity";
 import { TaskModule } from "./task/task.module";
@@ -33,6 +34,7 @@ import { TaskModule } from "./task/task.module";
     AdminModule,
     AuthModule,
     MemberModule,
+    PositionModule,
     TaskModule
   ]
 })
