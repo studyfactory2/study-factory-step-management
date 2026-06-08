@@ -83,7 +83,9 @@ export function RecentOutputsSection({
               key={output.taskId}
             >
               <div>
-                <p className="text-sm font-bold text-primary">{roleLabels[output.memberRole]}</p>
+                <p className="text-sm font-bold text-primary">
+                  {output.memberPositionName ?? roleLabels[output.memberRole]}
+                </p>
                 <p className="mt-2 text-sm font-medium text-[#9B7A75]">{output.memberName}</p>
               </div>
               <div>

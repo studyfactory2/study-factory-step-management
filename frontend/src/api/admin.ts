@@ -19,6 +19,8 @@ export type AdminDashboardEmployee = {
   id: number;
   name: string;
   roleType: MemberRole;
+  positionCode: string | null;
+  positionName: string | null;
   branch: string | null;
   highestTaskStatus: Exclude<TaskStatus, "COMPLETED"> | null;
   taskCounts: AdminDashboardTaskCounts;
@@ -36,6 +38,7 @@ export type AdminDashboardRecentOutput = {
   memberId: number;
   memberName: string;
   memberRole: MemberRole;
+  memberPositionName: string | null;
   startedAt: string;
   submittedAt: string | null;
   attachmentPreviewUrls: string[];

@@ -63,6 +63,7 @@ export class TaskRepository {
     const queryBuilder = this.taskRepository
       .createQueryBuilder("task")
       .leftJoinAndSelect("task.assignee", "assignee")
+      .leftJoinAndSelect("assignee.positionInfo", "assigneePosition")
       .leftJoinAndSelect("task.attachments", "attachments")
       .where("task.status = :status", { status: options.status })
       .andWhere("task.isDraft = false");

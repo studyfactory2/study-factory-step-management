@@ -67,7 +67,7 @@ export class MemberService {
     }
 
     const passwordHash = this.createPasswordHash(request.password);
-    const roleType = request.position as unknown as MemberRole;
+    const roleType = this.resolveRoleType(request.position);
     const duplicateMember = await this.memberRepository.findByNameAndRoleTypeAndPasswordHash(
       request.name,
       roleType,
@@ -83,7 +83,15 @@ export class MemberService {
       throw new MemberPositionNotFoundException(request.position);
     }
 
-    const member = request.toEntity(passwordHash, position.id);
+    const positionDuty = await this.positionRepository.findDutyByPositionIdAndDuty(
+      position.id,
+      request.duty
+    );
+    if (!positionDuty) {
+      throw new MemberPositionNotFoundException(request.position);
+    }
+
+    const member = request.toEntity(passwordHash, position.id, positionDuty.id, roleType);
 
     preRegistration.isRegistered = true;
     await this.memberRepository.savePreRegistration(preRegistration);
@@ -93,5 +101,17 @@ export class MemberService {
 
   private createPasswordHash(password: string): string {
     return createHash("sha256").update(password).digest("hex");
+  }
+
+  private resolveRoleType(position: string): MemberRole {
+    if (position === MemberRole.CEO) {
+      return MemberRole.CEO;
+    }
+
+    if (position === MemberRole.ADMIN) {
+      return MemberRole.ADMIN;
+    }
+
+    return MemberRole.EMPLOYEE;
   }
 }

@@ -1,15 +1,7 @@
 CREATE TYPE member_role_type_enum AS ENUM (
   'CEO',
   'ADMIN',
-  'OPERATIONS_MANAGER',
-  'FACTORY_MANAGER',
-  'DEVELOPMENT_LEAD',
-  'DESIGNER',
-  'MARKETER',
-  'DEVELOPER',
-  'CONTENT_MANAGER',
-  'EMPLOYEE',
-  'STAFF'
+  'EMPLOYEE'
 );
 
 CREATE TYPE member_affiliation_enum AS ENUM (
@@ -40,15 +32,7 @@ CREATE TYPE member_position_enum AS ENUM (
 CREATE TYPE member_pre_registration_role_type_enum AS ENUM (
   'CEO',
   'ADMIN',
-  'OPERATIONS_MANAGER',
-  'FACTORY_MANAGER',
-  'DEVELOPMENT_LEAD',
-  'DESIGNER',
-  'MARKETER',
-  'DEVELOPER',
-  'CONTENT_MANAGER',
-  'EMPLOYEE',
-  'STAFF'
+  'EMPLOYEE'
 );
 
 CREATE TYPE member_pre_registration_affiliation_enum AS ENUM (
@@ -123,18 +107,23 @@ CREATE TABLE member (
   password_hash VARCHAR NOT NULL,
   avatar_url VARCHAR,
   branch VARCHAR,
-  affiliation member_affiliation_enum,
   position_id INTEGER,
+  position_duty_id INTEGER,
   role_type member_role_type_enum NOT NULL,
-  duty member_duty_enum,
   is_active BOOLEAN NOT NULL DEFAULT true,
   CONSTRAINT fk_member_position_id
     FOREIGN KEY (position_id)
-    REFERENCES member_positions (id)
+    REFERENCES member_positions (id),
+  CONSTRAINT fk_member_position_duty_id
+    FOREIGN KEY (position_duty_id)
+    REFERENCES position_duties (id)
 );
 
 CREATE INDEX idx_member_position_id
   ON member (position_id);
+
+CREATE INDEX idx_member_position_duty_id
+  ON member (position_duty_id);
 
 CREATE UNIQUE INDEX idx_member_name_role_type_password_hash
   ON member (name, role_type, password_hash);

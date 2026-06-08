@@ -1,5 +1,5 @@
 import type { AdminDashboardEmployee } from "@/api/admin";
-import { roleLabels, statusLabels } from "./constants";
+import { statusLabels } from "./constants";
 
 type EmployeeListSectionProps = {
   employees: AdminDashboardEmployee[];
@@ -18,12 +18,12 @@ export function EmployeeListSection({ employees }: EmployeeListSectionProps) {
             >
               <span
                 className={`mx-auto block h-7 rounded-full border border-[#F2C9C2] px-4 text-sm font-semibold leading-7 ${
-                  employee.roleType === "FACTORY_MANAGER"
+                  employee.positionCode === "FACTORY_MANAGER"
                     ? "bg-[#E8F3DF] text-[#6D956A]"
                     : "bg-[#FBE6EA] text-primary"
                 }`}
               >
-                {roleLabels[employee.roleType]}
+                {employee.positionName ?? "직원"}
               </span>
               <p className="mt-8 text-2xl font-semibold text-[#5A3E3B]">{employee.name}</p>
               <p className="mt-2 text-base font-semibold text-primary">
