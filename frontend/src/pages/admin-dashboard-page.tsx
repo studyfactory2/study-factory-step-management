@@ -61,6 +61,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   const [recentTaskStatus, setRecentTaskStatus] = useState<TaskStatus>("REVIEW_REQUESTED");
   const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder | "">("");
   const [isPreRegisterOpen, setIsPreRegisterOpen] = useState(false);
+  const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
@@ -228,6 +229,16 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     }
   }
 
+  function handleSelectMemberPreRegister() {
+    setIsMemberManagementOpen(false);
+    setIsPreRegisterOpen(true);
+  }
+
+  function handleSelectPositionTree() {
+    setIsMemberManagementOpen(false);
+    setMessage("로그인 화면 트리 관리는 다음 단계에서 연결할 예정입니다.");
+  }
+
   return (
     <main className="min-h-dvh overflow-hidden bg-background px-4 py-8 text-foreground sm:px-8">
       <div className="pointer-events-none fixed left-10 top-20 text-[#F0C957]">
@@ -238,10 +249,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
       </div>
 
       <div className="relative mx-auto w-full max-w-[1180px] space-y-7">
-        <DashboardHeader
-          onAddMember={() => setIsPreRegisterOpen((isOpen) => !isOpen)}
-          roleType={dashboard.currentMember.roleType}
-        />
+        <DashboardHeader roleType={dashboard.currentMember.roleType} />
         <GreetingCard memberName={dashboard.currentMember.name} />
         <MessageBanner message={message} />
         {isPreRegisterOpen && (
@@ -283,7 +291,13 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
           selectedSortOrder={recentTaskSortOrder}
           selectedStatus={recentTaskStatus}
         />
-        <DashboardActionSection />
+        <DashboardActionSection
+          isMemberManagementOpen={isMemberManagementOpen}
+          onCloseMemberManagement={() => setIsMemberManagementOpen(false)}
+          onOpenMemberManagement={() => setIsMemberManagementOpen(true)}
+          onSelectMemberPreRegister={handleSelectMemberPreRegister}
+          onSelectPositionTree={handleSelectPositionTree}
+        />
         <DashboardLogout onLogout={onLogout} />
       </div>
     </main>
