@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "../../common/entity/base.entity";
+import { PositionDuty } from "./position-duty.entity";
 
 @Entity({ name: "member_positions" })
 export class Position extends BaseEntity {
@@ -21,6 +22,9 @@ export class Position extends BaseEntity {
 
   @OneToMany(() => Position, (position) => position.parent)
   children: Position[];
+
+  @OneToMany(() => PositionDuty, (positionDuty) => positionDuty.position)
+  dutyLinks: PositionDuty[];
 
   @Column({ name: "display_order", default: 0 })
   displayOrder: number;

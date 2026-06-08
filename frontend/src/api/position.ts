@@ -5,6 +5,7 @@ export type PositionTreeNode = {
   code: string;
   name: string;
   subtitle: string | null;
+  duties: string[];
   parentId: number | null;
   displayOrder: number;
   isLoginVisible: boolean;

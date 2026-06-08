@@ -12,6 +12,9 @@ export class PositionRepository {
 
   async findActivePositions(): Promise<Position[]> {
     return this.positionRepository.find({
+      relations: {
+        dutyLinks: true
+      },
       where: {
         isActive: true
       },

@@ -32,7 +32,7 @@ export type Member = {
   avatarUrl: string | null;
   branch: string | null;
   affiliation: MemberAffiliation | null;
-  position: MemberPosition | null;
+  positionId: number | null;
   roleType: MemberRole;
   duty: MemberDuty | null;
   isActive: boolean;

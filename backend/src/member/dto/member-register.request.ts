@@ -28,7 +28,6 @@ export class MemberRegisterRequest {
     const member = new Member();
     member.name = this.name;
     member.roleType = this.position as unknown as MemberRole;
-    member.position = this.position;
     member.positionId = positionId;
     member.affiliation = this.affiliation;
     member.passwordHash = passwordHash;

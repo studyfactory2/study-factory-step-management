@@ -24,7 +24,7 @@ CREATE INDEX idx_member_positions_display_order
 INSERT INTO member_positions (code, name, subtitle, parent_id, display_order, is_login_visible, is_admin, is_active)
 VALUES
   ('CEO', '대표', '최종 승인자', NULL, 1, true, true, true),
-  ('ADMIN', '관리자', '관리자', NULL, 2, true, true, true),
+  ('ADMIN', '관리자', '관리자', NULL, 2, false, true, true),
   ('OPERATIONS_MANAGER', '운영관리자', '관리/검토', NULL, 3, false, false, true),
   ('DEVELOPMENT_LEAD', '개발팀장', '개발관리', NULL, 4, false, false, true),
   ('DEVELOPER', '개발자', '직원', NULL, 5, false, false, true),

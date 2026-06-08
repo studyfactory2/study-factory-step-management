@@ -3,7 +3,6 @@ import { BaseEntity } from "../../common/entity/base.entity";
 import { Position } from "../../position/entity/position.entity";
 import { MemberAffiliation } from "../enum/member-affiliation.enum";
 import { MemberDuty } from "../enum/member-duty.enum";
-import { MemberPosition } from "../enum/member-position.enum";
 import { MemberRole } from "../enum/member-role.enum";
 
 @Entity({ name: "member" })
@@ -27,14 +26,6 @@ export class Member extends BaseEntity {
     nullable: true
   })
   affiliation: MemberAffiliation | null;
-
-  @Column({
-    type: "enum",
-    enumName: "member_position_enum",
-    enum: MemberPosition,
-    nullable: true
-  })
-  position: MemberPosition | null;
 
   @Column({ name: "position_id", type: "int", nullable: true })
   positionId: number | null;

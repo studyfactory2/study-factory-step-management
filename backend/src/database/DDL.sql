@@ -83,6 +83,7 @@ CREATE TABLE member_positions (
   code VARCHAR NOT NULL UNIQUE,
   name VARCHAR NOT NULL,
   subtitle VARCHAR,
+  duty member_duty_enum,
   parent_id INTEGER,
   display_order INTEGER NOT NULL DEFAULT 0,
   is_login_visible BOOLEAN NOT NULL DEFAULT true,
@@ -99,6 +100,21 @@ CREATE INDEX idx_member_positions_parent_id
 CREATE INDEX idx_member_positions_display_order
   ON member_positions (display_order);
 
+CREATE TABLE position_duties (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  position_id INTEGER NOT NULL,
+  duty member_duty_enum NOT NULL,
+  CONSTRAINT fk_position_duties_position_id
+    FOREIGN KEY (position_id)
+    REFERENCES member_positions (id)
+    ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX idx_position_duties_position_id_duty
+  ON position_duties (position_id, duty);
+
 CREATE TABLE member (
   id SERIAL PRIMARY KEY,
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
@@ -108,7 +124,6 @@ CREATE TABLE member (
   avatar_url VARCHAR,
   branch VARCHAR,
   affiliation member_affiliation_enum,
-  position member_position_enum,
   position_id INTEGER,
   role_type member_role_type_enum NOT NULL,
   duty member_duty_enum,

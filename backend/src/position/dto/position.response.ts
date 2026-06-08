@@ -1,10 +1,12 @@
 import { Position } from "../entity/position.entity";
+import { MemberDuty } from "../../member/enum/member-duty.enum";
 
 export class PositionResponse {
   id: number;
   code: string;
   name: string;
   subtitle: string | null;
+  duties: MemberDuty[];
   parentId: number | null;
   displayOrder: number;
   isLoginVisible: boolean;
@@ -17,6 +19,7 @@ export class PositionResponse {
       code: position.code,
       name: position.name,
       subtitle: position.subtitle,
+      duties: position.dutyLinks?.map((dutyLink) => dutyLink.duty) ?? [],
       parentId: position.parentId,
       displayOrder: position.displayOrder,
       isLoginVisible: position.isLoginVisible,
