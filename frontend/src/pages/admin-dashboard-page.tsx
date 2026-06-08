@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import {
   getAdminDashboard,
@@ -39,13 +39,13 @@ import { GreetingCard } from "@/components/adminDashboard/greeting-card";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import { MemberPreRegisterPanel } from "@/components/adminDashboard/member-pre-register-panel";
 import { RecentOutputsSection } from "@/components/adminDashboard/recent-outputs-section";
-import { TaskCreateForm } from "@/components/adminDashboard/task-create-form";
-import { ALL_ASSIGNEES_VALUE } from "@/components/adminDashboard/constants";
+import { TaskCreateForm, type TaskCreateDraftSubmit } from "@/components/adminDashboard/task-create-form";
 import { isAssignableMember } from "@/components/adminDashboard/utils";
 
 type AdminDashboardPageProps = {
   accessToken: string;
   onLogout: () => void;
+  onTaskDetailOpen: (taskId: number) => void;
 };
 
 const emptyDashboard: AdminDashboard = {
@@ -67,20 +67,15 @@ type ConfirmDialogState = {
   title: string;
 } | null;
 
-export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPageProps) {
+export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: AdminDashboardPageProps) {
   const [dashboard, setDashboard] = useState<AdminDashboard>(emptyDashboard);
   const [favoriteCandidates, setFavoriteCandidates] = useState<AdminDashboardEmployee[]>([]);
   const [memberPreRegistrations, setMemberPreRegistrations] = useState<MemberPreRegistration[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState("");
-  const [selectedAssigneeId, setSelectedAssigneeId] = useState("");
-  const [selectedAssigneePositionId, setSelectedAssigneePositionId] = useState("");
   const [recentTaskStatuses, setRecentTaskStatuses] = useState<TaskStatus[]>(["REVIEW_REQUESTED"]);
   const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder>("LATEST");
   const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
   const [memberManagementView, setMemberManagementView] = useState<MemberManagementView>("menu");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,18 +108,6 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
 
     void loadDashboard();
   }, [accessToken, recentTaskSortOrder, recentTaskStatuses]);
-
-  const branches = useMemo(() => {
-    const values = members.map((member) => member.branch).filter((branch): branch is string => !!branch);
-    return Array.from(new Set(values));
-  }, [members]);
-
-  const assignees = useMemo(() => {
-    return members.filter((member) => {
-      const isSameBranch = !selectedBranch || member.branch === selectedBranch;
-      return isSameBranch;
-    });
-  }, [members, selectedBranch]);
 
   async function refreshDashboard() {
     const dashboardResponse = await getAdminDashboard(accessToken, {
@@ -210,32 +193,17 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     });
   }
 
-  async function handleCreateTask(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleCreateTask(request: TaskCreateDraftSubmit) {
     setMessage("");
-
-    if (!selectedAssigneeId) {
-      setMessage("직원을 선택해주세요.");
-      return;
-    }
 
     setIsSubmitting(true);
     try {
       await createTask(accessToken, {
-        title,
-        description,
-        assigneeScope: selectedAssigneeId === ALL_ASSIGNEES_VALUE ? "ALL" : "SINGLE",
-        ...(selectedAssigneeId === ALL_ASSIGNEES_VALUE
-          ? {
-              ...(selectedBranch ? { branch: selectedBranch } : {}),
-              ...(selectedAssigneePositionId ? { positionId: Number(selectedAssigneePositionId) } : {})
-            }
-          : { assigneeId: Number(selectedAssigneeId) })
+        title: request.title,
+        description: request.description,
+        assigneeScope: "SINGLE",
+        assigneeId: request.assigneeId
       });
-      setTitle("");
-      setDescription("");
-      setSelectedAssigneeId("");
-      setSelectedAssigneePositionId("");
       setMessage("업무가 등록되었습니다.");
       await refreshDashboard();
     } catch (error) {
@@ -243,12 +211,6 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  function handleBranchChange(value: string) {
-    setSelectedBranch(value);
-    setSelectedAssigneeId("");
-    setSelectedAssigneePositionId("");
   }
 
   async function handlePreRegister(request: {
@@ -348,23 +310,15 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
           onDeleteFavoriteMember={handleDeleteFavoriteMember}
         />
         <TaskCreateForm
-          assignees={assignees}
-          branches={branches}
-          description={description}
+          accessToken={accessToken}
+          assignees={members}
           isLoading={isLoading}
           isSubmitting={isSubmitting}
-          onAssigneeChange={setSelectedAssigneeId}
-          onBranchChange={handleBranchChange}
-          onDescriptionChange={setDescription}
-          onPositionChange={setSelectedAssigneePositionId}
+          onPublished={refreshDashboard}
           onSubmit={handleCreateTask}
-          onTitleChange={setTitle}
-          selectedAssigneePositionId={selectedAssigneePositionId}
-          selectedAssigneeId={selectedAssigneeId}
-          selectedBranch={selectedBranch}
-          title={title}
         />
         <RecentOutputsSection
+          onDetailOpen={onTaskDetailOpen}
           onSortOrderToggle={handleRecentTaskSortToggle}
           onStatusToggle={handleRecentTaskStatusToggle}
           recentOutputs={dashboard.recentOutputs}

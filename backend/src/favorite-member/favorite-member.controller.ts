@@ -11,7 +11,7 @@ export class FavoriteMemberController {
   constructor(private readonly favoriteMemberService: FavoriteMemberService) {}
 
   @Post()
-  async addFavoriteMember(
+  async createFavoriteMember(
     @CurrentMember() currentMember: CurrentMemberType,
     @Body() request: FavoriteMemberCreateRequest
   ) {

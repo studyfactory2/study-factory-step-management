@@ -79,6 +79,46 @@ export class TaskRepository {
     return queryBuilder.take(options.limit).getMany();
   }
 
+  async findDetailById(id: number): Promise<Task | null> {
+    return this.taskRepository
+      .createQueryBuilder("task")
+      .leftJoinAndSelect("task.assignee", "assignee")
+      .leftJoinAndSelect("assignee.positionInfo", "assigneePosition")
+      .leftJoinAndSelect("task.creator", "creator")
+      .leftJoinAndSelect("creator.positionInfo", "creatorPosition")
+      .leftJoinAndSelect("task.attachments", "attachments")
+      .where("task.id = :id", { id })
+      .andWhere("task.isDraft = false")
+      .orderBy("attachments.createdAt", "ASC")
+      .getOne();
+  }
+
+  async findDraftsByCreator(createdBy: number): Promise<Task[]> {
+    return this.taskRepository.find({
+      where: {
+        createdBy,
+        isDraft: true
+      },
+      order: {
+        createdAt: "ASC"
+      }
+    });
+  }
+
+  async findDraftByIdAndCreator(id: number, createdBy: number): Promise<Task | null> {
+    return this.taskRepository.findOne({
+      where: {
+        id,
+        createdBy,
+        isDraft: true
+      }
+    });
+  }
+
+  async save(task: Task): Promise<Task> {
+    return this.taskRepository.save(task);
+  }
+
   async saveAll(tasks: Task[]): Promise<Task[]> {
     return this.taskRepository.save(tasks);
   }

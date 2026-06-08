@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { LoginResponse } from "@/api/auth";
 import { AdminDashboardPage } from "@/pages/admin-dashboard-page";
 import { LoginPage } from "@/pages/login-page";
+import { TaskDetailPage } from "@/pages/task-detail-page";
 import type { MemberRole } from "@/types/domain";
 
 type StoredMember = {
@@ -32,6 +33,7 @@ function isAdminRole(roleType: MemberRole) {
 export default function Home() {
   const [accessToken, setAccessToken] = useState("");
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 
   useEffect(() => {
     setAccessToken(localStorage.getItem("accessToken") ?? "");
@@ -49,10 +51,27 @@ export default function Home() {
     localStorage.removeItem("currentMember");
     setAccessToken("");
     setCurrentMember(null);
+    setSelectedTaskId(null);
   }
 
   if (accessToken && currentMember && isAdminRole(currentMember.roleType)) {
-    return <AdminDashboardPage accessToken={accessToken} onLogout={handleLogout} />;
+    if (selectedTaskId) {
+      return (
+        <TaskDetailPage
+          accessToken={accessToken}
+          onBack={() => setSelectedTaskId(null)}
+          taskId={selectedTaskId}
+        />
+      );
+    }
+
+    return (
+      <AdminDashboardPage
+        accessToken={accessToken}
+        onLogout={handleLogout}
+        onTaskDetailOpen={setSelectedTaskId}
+      />
+    );
   }
 
   if (accessToken && currentMember) {

@@ -117,8 +117,11 @@ function EmployeeCard({
         onClick={handleStatusClick}
         type="button"
       >
-        {getShortStatusLabel(visibleStatus)} {visibleStatusCount}건
+        {getShortStatusLabel(visibleStatus)}
       </button>
+      <p className={`mt-2 text-sm font-black ${getStatusTextClassName(visibleStatus)}`}>
+        {visibleStatusCount}건
+      </p>
       <button className="mt-5 h-9 w-full rounded-full border border-[#F0B9C8] bg-white text-sm font-black text-primary">
         상세정보
       </button>
@@ -283,14 +286,14 @@ function FavoriteMemberAddModal({
 
 function getShortStatusLabel(status: VisibleTaskStatus) {
   if (status === "REGISTERED") {
-    return "등록";
+    return "등록 업무";
   }
 
   if (status === "IN_PROGRESS") {
     return "진행";
   }
 
-  return "검토";
+  return "검토 요청";
 }
 
 function getStatusClassName(status: VisibleTaskStatus) {
@@ -303,6 +306,18 @@ function getStatusClassName(status: VisibleTaskStatus) {
   }
 
   return "bg-[#FFF1D7] text-[#C88449]";
+}
+
+function getStatusTextClassName(status: VisibleTaskStatus) {
+  if (status === "REGISTERED") {
+    return "text-primary";
+  }
+
+  if (status === "IN_PROGRESS") {
+    return "text-[#8B72C8]";
+  }
+
+  return "text-[#C88449]";
 }
 
 function getVisibleStatusCount(employee: AdminDashboardEmployee, status: VisibleTaskStatus) {

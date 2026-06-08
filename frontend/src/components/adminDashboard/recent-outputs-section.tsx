@@ -4,6 +4,7 @@ import { roleLabels } from "./constants";
 import { formatDateTime } from "./utils";
 
 type RecentOutputsSectionProps = {
+  onDetailOpen: (taskId: number) => void;
   onSortOrderToggle: () => void;
   onStatusToggle: (value: TaskStatus) => void;
   recentOutputs: AdminDashboardRecentOutput[];
@@ -19,6 +20,7 @@ const taskStatusOptions: Array<{ label: string; value: TaskStatus }> = [
 ];
 
 export function RecentOutputsSection({
+  onDetailOpen,
   onSortOrderToggle,
   onStatusToggle,
   recentOutputs,
@@ -58,9 +60,12 @@ export function RecentOutputsSection({
             >
               {selectedSortOrder === "LATEST" ? "최신순" : "과거순"}
             </button>
-          <button className="h-11 rounded-full border-2 border-primary bg-white px-8 text-sm font-semibold text-primary">
-            전체 업무보기
-          </button>
+            <button
+              className="h-11 rounded-full border-2 border-primary bg-white px-8 text-sm font-semibold text-primary"
+              type="button"
+            >
+              전체 업무보기
+            </button>
           </div>
         </div>
       </div>
@@ -99,7 +104,11 @@ export function RecentOutputsSection({
               >
                 {getStatusLabel(output.taskStatus)}
               </span>
-              <button className="h-10 rounded-full border-2 border-primary bg-white text-sm font-semibold text-primary">
+              <button
+                className="h-10 rounded-full border-2 border-primary bg-white text-sm font-semibold text-primary"
+                onClick={() => onDetailOpen(output.taskId)}
+                type="button"
+              >
                 상세보기
               </button>
             </article>
