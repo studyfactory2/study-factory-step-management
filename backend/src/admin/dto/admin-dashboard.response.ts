@@ -38,6 +38,7 @@ export class AdminBranchStaffCountResponse {
 export class AdminDashboardRecentOutputResponse {
   taskId: number;
   taskTitle: string;
+  oneLineComment: string | null;
   taskStatus: TaskStatus;
   memberId: number;
   memberName: string;

@@ -1,0 +1,2 @@
+ALTER TABLE tasks
+  ADD COLUMN IF NOT EXISTS one_line_comment VARCHAR;

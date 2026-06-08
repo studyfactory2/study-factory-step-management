@@ -15,7 +15,7 @@ export type TaskCountRow = {
 type FindRecentWorkStatusOptions = {
   limit: number;
   sortOrder?: TaskSortOrder;
-  status: TaskStatus;
+  statuses: TaskStatus[];
 };
 
 @Injectable()
@@ -65,17 +65,13 @@ export class TaskRepository {
       .leftJoinAndSelect("task.assignee", "assignee")
       .leftJoinAndSelect("assignee.positionInfo", "assigneePosition")
       .leftJoinAndSelect("task.attachments", "attachments")
-      .where("task.status = :status", { status: options.status })
+      .where("task.status IN (:...statuses)", { statuses: options.statuses })
       .andWhere("task.isDraft = false");
 
     if (options.sortOrder === TaskSortOrder.LATEST) {
       queryBuilder.orderBy("task.updatedAt", "DESC");
     } else if (options.sortOrder === TaskSortOrder.OLDEST) {
       queryBuilder.orderBy("task.updatedAt", "ASC");
-    } else if (options.status === TaskStatus.REVIEW_REQUESTED) {
-      queryBuilder
-        .orderBy("task.reviewRequestedAt", "DESC", "NULLS LAST")
-        .addOrderBy("task.updatedAt", "DESC");
     } else {
       queryBuilder.orderBy("task.updatedAt", "DESC");
     }

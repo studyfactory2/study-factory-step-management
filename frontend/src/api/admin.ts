@@ -34,6 +34,7 @@ export type AdminDashboardBranchGroup = {
 export type AdminDashboardRecentOutput = {
   taskId: number;
   taskTitle: string;
+  oneLineComment: string | null;
   taskStatus: TaskStatus;
   memberId: number;
   memberName: string;
@@ -55,7 +56,7 @@ export type AdminDashboardSortOrder = "LATEST" | "OLDEST";
 
 export type AdminDashboardFilters = {
   sortOrder?: AdminDashboardSortOrder;
-  status?: TaskStatus;
+  statuses?: TaskStatus[];
 };
 
 type ApiErrorResponse = {
@@ -68,9 +69,9 @@ export async function getAdminDashboard(
 ): Promise<AdminDashboard> {
   const params = new URLSearchParams();
 
-  if (filters.status) {
-    params.set("status", filters.status);
-  }
+  filters.statuses?.forEach((status) => {
+    params.append("status", status);
+  });
 
   if (filters.sortOrder) {
     params.set("sortOrder", filters.sortOrder);

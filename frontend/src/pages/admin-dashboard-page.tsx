@@ -75,8 +75,8 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedAssigneeId, setSelectedAssigneeId] = useState("");
   const [selectedAssigneePositionId, setSelectedAssigneePositionId] = useState("");
-  const [recentTaskStatus, setRecentTaskStatus] = useState<TaskStatus>("REVIEW_REQUESTED");
-  const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder | "">("");
+  const [recentTaskStatuses, setRecentTaskStatuses] = useState<TaskStatus[]>(["REVIEW_REQUESTED"]);
+  const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder>("LATEST");
   const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
   const [memberManagementView, setMemberManagementView] = useState<MemberManagementView>("menu");
   const [title, setTitle] = useState("");
@@ -94,8 +94,8 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
       try {
         const [dashboardResponse, favoriteCandidateResponse, memberResponse] = await Promise.all([
           getAdminDashboard(accessToken, {
-            sortOrder: recentTaskSortOrder === "" ? undefined : recentTaskSortOrder,
-            status: recentTaskStatus
+            sortOrder: recentTaskSortOrder,
+            statuses: recentTaskStatuses
           }),
           getFavoriteMemberCandidates(accessToken),
           getMembers()
@@ -112,7 +112,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     }
 
     void loadDashboard();
-  }, [accessToken, recentTaskSortOrder, recentTaskStatus]);
+  }, [accessToken, recentTaskSortOrder, recentTaskStatuses]);
 
   const branches = useMemo(() => {
     const values = members.map((member) => member.branch).filter((branch): branch is string => !!branch);
@@ -128,10 +128,28 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
 
   async function refreshDashboard() {
     const dashboardResponse = await getAdminDashboard(accessToken, {
-      sortOrder: recentTaskSortOrder === "" ? undefined : recentTaskSortOrder,
-      status: recentTaskStatus
+      sortOrder: recentTaskSortOrder,
+      statuses: recentTaskStatuses
     });
     setDashboard(dashboardResponse);
+  }
+
+  function handleRecentTaskStatusToggle(status: TaskStatus) {
+    setRecentTaskStatuses((currentStatuses) => {
+      if (currentStatuses.includes(status)) {
+        if (currentStatuses.length === 1) {
+          return currentStatuses;
+        }
+
+        return currentStatuses.filter((currentStatus) => currentStatus !== status);
+      }
+
+      return [...currentStatuses, status];
+    });
+  }
+
+  function handleRecentTaskSortToggle() {
+    setRecentTaskSortOrder((currentSortOrder) => (currentSortOrder === "LATEST" ? "OLDEST" : "LATEST"));
   }
 
   async function refreshMemberPreRegistrations() {
@@ -347,11 +365,11 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
           title={title}
         />
         <RecentOutputsSection
-          onSortOrderChange={setRecentTaskSortOrder}
-          onStatusChange={setRecentTaskStatus}
+          onSortOrderToggle={handleRecentTaskSortToggle}
+          onStatusToggle={handleRecentTaskStatusToggle}
           recentOutputs={dashboard.recentOutputs}
           selectedSortOrder={recentTaskSortOrder}
-          selectedStatus={recentTaskStatus}
+          selectedStatuses={recentTaskStatuses}
         />
         <DashboardActionSection
           isMemberManagementOpen={isMemberManagementOpen}

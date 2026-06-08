@@ -193,6 +193,7 @@ CREATE TABLE tasks (
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   title VARCHAR NOT NULL,
   description TEXT NOT NULL,
+  one_line_comment VARCHAR,
   status task_status_enum NOT NULL,
   assignee_id INTEGER NOT NULL,
   created_by INTEGER NOT NULL,
