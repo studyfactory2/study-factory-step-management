@@ -23,13 +23,41 @@ export class MemberRepository {
   ) {}
 
   async findAll(): Promise<Member[]> {
-    return this.memberRepository.find();
+    return this.memberRepository.find({
+      relations: {
+        positionInfo: true,
+        positionDuty: true
+      }
+    });
   }
 
   async findById(id: number): Promise<Member | null> {
     return this.memberRepository.findOne({
+      relations: {
+        positionInfo: true,
+        positionDuty: true
+      },
       where: { id }
     });
+  }
+
+  async findPreRegistrations(): Promise<MemberPreRegistration[]> {
+    return this.memberPreRegistrationRepository.find({
+      order: {
+        isRegistered: "ASC",
+        createdAt: "DESC"
+      }
+    });
+  }
+
+  async findPreRegistrationById(id: number): Promise<MemberPreRegistration | null> {
+    return this.memberPreRegistrationRepository.findOne({
+      where: { id }
+    });
+  }
+
+  async deletePreRegistration(preRegistration: MemberPreRegistration): Promise<void> {
+    await this.memberPreRegistrationRepository.remove(preRegistration);
   }
 
   async findActiveByRoleTypes(roleTypes: MemberRole[]): Promise<Member[]> {
@@ -43,15 +71,70 @@ export class MemberRepository {
 
   async findActiveAssignableMembers(): Promise<Member[]> {
     return this.memberRepository.find({
+      relations: {
+        positionInfo: true,
+        positionDuty: true
+      },
       where: {
         isActive: true,
         roleType: Not(In([MemberRole.CEO, MemberRole.ADMIN]))
       },
       order: {
-        roleType: "ASC",
+        positionInfo: {
+          displayOrder: "ASC"
+        },
         name: "ASC"
       }
     });
+  }
+
+  async findActiveAssignableMembersByFilter(branch?: string, positionId?: number): Promise<Member[]> {
+    const queryBuilder = this.memberRepository
+      .createQueryBuilder("member")
+      .leftJoinAndSelect("member.positionInfo", "position")
+      .leftJoinAndSelect("member.positionDuty", "positionDuty")
+      .where("member.isActive = true")
+      .andWhere("member.roleType NOT IN (:...roleTypes)", {
+        roleTypes: [MemberRole.CEO, MemberRole.ADMIN]
+      });
+
+    if (branch) {
+      queryBuilder.andWhere("member.branch = :branch", { branch });
+    }
+
+    if (positionId) {
+      queryBuilder.andWhere("member.positionId = :positionId", { positionId });
+    }
+
+    return queryBuilder
+      .orderBy("position.displayOrder", "ASC")
+      .addOrderBy("member.name", "ASC")
+      .getMany();
+  }
+
+  async findActiveByPositionCodes(positionCodes: string[]): Promise<Member[]> {
+    return this.memberRepository
+      .createQueryBuilder("member")
+      .leftJoinAndSelect("member.positionInfo", "position")
+      .leftJoinAndSelect("member.positionDuty", "positionDuty")
+      .where("member.isActive = true")
+      .andWhere("position.code IN (:...positionCodes)", { positionCodes })
+      .orderBy("position.displayOrder", "ASC")
+      .addOrderBy("member.name", "ASC")
+      .getMany();
+  }
+
+  async countActiveMembersByBranchAndPositionCodes(positionCodes: string[]): Promise<BranchMemberCountRow[]> {
+    return this.memberRepository
+      .createQueryBuilder("member")
+      .leftJoin("member.positionInfo", "position")
+      .select("member.branch", "branch")
+      .addSelect("COUNT(member.id)", "memberCount")
+      .where("member.isActive = true")
+      .andWhere("position.code IN (:...positionCodes)", { positionCodes })
+      .groupBy("member.branch")
+      .orderBy("member.branch", "ASC")
+      .getRawMany<BranchMemberCountRow>();
   }
 
   async findByNameAndRoleType(name: string, roleType: MemberRole): Promise<Member | null> {
@@ -72,6 +155,15 @@ export class MemberRepository {
       where: {
         name,
         roleType,
+        passwordHash
+      }
+    });
+  }
+
+  async findByNameAndPasswordHash(name: string, passwordHash: string): Promise<Member | null> {
+    return this.memberRepository.findOne({
+      where: {
+        name,
         passwordHash
       }
     });

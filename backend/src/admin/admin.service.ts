@@ -7,6 +7,7 @@ import {
   AdminDashboardResponse,
   AdminDashboardTaskCountsResponse
 } from "./dto/admin-dashboard.response";
+import { FavoriteMemberService } from "../favorite-member/favorite-member.service";
 import { Member } from "../member/entity/member.entity";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { MemberNotFoundException } from "../member/exception/member-not-found.exception";
@@ -17,21 +18,12 @@ import { AdminDashboardQueryRequest } from "./dto/admin-dashboard-query.request"
 
 @Injectable()
 export class AdminService {
-  private readonly employeeRoleOrder = [
-    MemberRole.DEVELOPMENT_LEAD,
-    MemberRole.DEVELOPER,
-    MemberRole.FACTORY_MANAGER
-  ];
-
-  private readonly dashboardEmployeeRoles = [
-    MemberRole.DEVELOPMENT_LEAD,
-    MemberRole.DEVELOPER,
-    MemberRole.FACTORY_MANAGER
-  ];
-
-  private readonly branchStaffRoles = [MemberRole.EMPLOYEE, MemberRole.STAFF];
+  private readonly employeePositionOrder = ["DEVELOPMENT_LEAD", "DEVELOPER", "OPERATIONS_MANAGER"];
+  private readonly dashboardEmployeePositionCodes = ["DEVELOPMENT_LEAD", "DEVELOPER", "OPERATIONS_MANAGER"];
+  private readonly branchStaffPositionCodes = ["EMPLOYEE", "STAFF"];
 
   constructor(
+    private readonly favoriteMemberService: FavoriteMemberService,
     private readonly memberRepository: MemberRepository,
     private readonly taskRepository: TaskRepository
   ) {}
@@ -43,7 +35,7 @@ export class AdminService {
     const [currentMember, employees, taskCountRows, branchGroups, recentOutputs] =
       await Promise.all([
         this.findCurrentMember(currentMemberId),
-        this.findDashboardEmployees(),
+        this.favoriteMemberService.getFavoriteMemberEntities(currentMemberId),
         this.findTaskCountRows(),
         this.findBranchGroups(),
         this.findRecentOutputs(query)
@@ -90,10 +82,18 @@ export class AdminService {
   }
 
   private async findDashboardEmployees(): Promise<Member[]> {
-    const employees = await this.memberRepository.findActiveByRoleTypes(this.dashboardEmployeeRoles);
+    const employees = await this.memberRepository.findActiveByPositionCodes(
+      this.dashboardEmployeePositionCodes
+    );
 
+    return this.sortMembersByPosition(employees);
+  }
+
+  private sortMembersByPosition(employees: Member[]): Member[] {
     return employees.sort((a, b) => {
-      const roleOrderDifference = this.getRoleOrder(a.roleType) - this.getRoleOrder(b.roleType);
+      const roleOrderDifference =
+        this.getPositionOrder(a.positionInfo?.code ?? "") -
+        this.getPositionOrder(b.positionInfo?.code ?? "");
 
       if (roleOrderDifference !== 0) {
         return roleOrderDifference;
@@ -117,10 +117,13 @@ export class AdminService {
 
   private async findBranchStaffCounts(): Promise<AdminBranchStaffCountResponse[]> {
     const rows = await this.memberRepository.countActiveMembersByBranchAndRoleTypes(
-      this.branchStaffRoles
+      [MemberRole.EMPLOYEE]
+    );
+    const positionRows = await this.memberRepository.countActiveMembersByBranchAndPositionCodes(
+      this.branchStaffPositionCodes
     );
 
-    return rows.map((row) => ({
+    return positionRows.map((row) => ({
       branch: row.branch ?? "미지정",
       memberCount: Number(row.memberCount)
     }));
@@ -129,20 +132,22 @@ export class AdminService {
   private async findRecentOutputs(
     query: AdminDashboardQueryRequest
   ): Promise<AdminDashboardRecentOutputResponse[]> {
-    const status = query.status ?? TaskStatus.REVIEW_REQUESTED;
+    const statuses = query.status?.length ? query.status : [TaskStatus.REVIEW_REQUESTED];
     const tasks = await this.taskRepository.findRecentWorkStatus({
       limit: 10,
       sortOrder: query.sortOrder,
-      status
+      statuses
     });
 
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
+      oneLineComment: task.oneLineComment,
       taskStatus: task.status,
       memberId: task.assignee.id,
       memberName: task.assignee.name,
       memberRole: task.assignee.roleType,
+      memberPositionName: task.assignee.positionInfo?.name ?? null,
       startedAt: task.createdAt,
       submittedAt: task.status === TaskStatus.REVIEW_REQUESTED ? task.reviewRequestedAt : null,
       attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl)
@@ -162,6 +167,8 @@ export class AdminService {
         id: member.id,
         name: member.name,
         roleType: member.roleType,
+        positionCode: member.positionInfo?.code ?? null,
+        positionName: member.positionInfo?.name ?? null,
         branch: member.branch,
         highestTaskStatus: this.getHighestTaskStatus(taskCounts),
         taskCounts
@@ -220,9 +227,9 @@ export class AdminService {
     return null;
   }
 
-  private getRoleOrder(roleType: MemberRole): number {
-    const order = this.employeeRoleOrder.indexOf(roleType);
+  private getPositionOrder(positionCode: string): number {
+    const order = this.employeePositionOrder.indexOf(positionCode);
 
-    return order === -1 ? this.employeeRoleOrder.length : order;
+    return order === -1 ? this.employeePositionOrder.length : order;
   }
 }

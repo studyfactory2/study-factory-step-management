@@ -5,7 +5,7 @@ type DashboardLogoutProps = {
 export function DashboardLogout({ onLogout }: DashboardLogoutProps) {
   return (
     <button
-      className="mx-auto block rounded-full border border-[#F2C9C2] bg-white px-6 py-2 text-sm font-semibold text-[#9B7A75]"
+      className="mx-auto block rounded-full border border-[#F1CFD5] bg-white px-6 py-2 text-sm font-black text-[#9B7A75] shadow-sm"
       onClick={onLogout}
       type="button"
     >

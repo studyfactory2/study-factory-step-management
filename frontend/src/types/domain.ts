@@ -3,15 +3,7 @@ export type TaskStatus = "REGISTERED" | "IN_PROGRESS" | "REVIEW_REQUESTED" | "CO
 export type MemberRole =
   | "CEO"
   | "ADMIN"
-  | "OPERATIONS_MANAGER"
-  | "FACTORY_MANAGER"
-  | "DEVELOPMENT_LEAD"
-  | "DESIGNER"
-  | "MARKETER"
-  | "DEVELOPER"
-  | "CONTENT_MANAGER"
-  | "EMPLOYEE"
-  | "STAFF";
+  | "EMPLOYEE";
 
 export type MemberPosition =
   | "DEVELOPMENT_LEAD"
@@ -20,7 +12,7 @@ export type MemberPosition =
   | "EMPLOYEE"
   | "CEO"
   | "ADMIN"
-  | "FACTORY_MANAGER";
+  | "OPERATIONS_MANAGER";
 
 export type MemberAffiliation = "DEVELOPMENT_TEAM" | "STAFF" | "ADMIN" | "CEO";
 
@@ -31,10 +23,14 @@ export type Member = {
   name: string;
   avatarUrl: string | null;
   branch: string | null;
-  affiliation: MemberAffiliation | null;
-  position: MemberPosition | null;
+  positionId: number | null;
+  positionInfo?: {
+    id: number;
+    code: string;
+    name: string;
+  } | null;
+  positionDutyId: number | null;
   roleType: MemberRole;
-  duty: MemberDuty | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

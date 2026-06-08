@@ -19,6 +19,8 @@ export type AdminDashboardEmployee = {
   id: number;
   name: string;
   roleType: MemberRole;
+  positionCode: string | null;
+  positionName: string | null;
   branch: string | null;
   highestTaskStatus: Exclude<TaskStatus, "COMPLETED"> | null;
   taskCounts: AdminDashboardTaskCounts;
@@ -32,10 +34,12 @@ export type AdminDashboardBranchGroup = {
 export type AdminDashboardRecentOutput = {
   taskId: number;
   taskTitle: string;
+  oneLineComment: string | null;
   taskStatus: TaskStatus;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;
+  memberPositionName: string | null;
   startedAt: string;
   submittedAt: string | null;
   attachmentPreviewUrls: string[];
@@ -52,7 +56,7 @@ export type AdminDashboardSortOrder = "LATEST" | "OLDEST";
 
 export type AdminDashboardFilters = {
   sortOrder?: AdminDashboardSortOrder;
-  status?: TaskStatus;
+  statuses?: TaskStatus[];
 };
 
 type ApiErrorResponse = {
@@ -65,9 +69,9 @@ export async function getAdminDashboard(
 ): Promise<AdminDashboard> {
   const params = new URLSearchParams();
 
-  if (filters.status) {
-    params.set("status", filters.status);
-  }
+  filters.statuses?.forEach((status) => {
+    params.append("status", status);
+  });
 
   if (filters.sortOrder) {
     params.set("sortOrder", filters.sortOrder);

@@ -1,15 +1,7 @@
 CREATE TYPE member_role_type_enum AS ENUM (
   'CEO',
   'ADMIN',
-  'OPERATIONS_MANAGER',
-  'FACTORY_MANAGER',
-  'DEVELOPMENT_LEAD',
-  'DESIGNER',
-  'MARKETER',
-  'DEVELOPER',
-  'CONTENT_MANAGER',
-  'EMPLOYEE',
-  'STAFF'
+  'EMPLOYEE'
 );
 
 CREATE TYPE member_affiliation_enum AS ENUM (
@@ -34,21 +26,13 @@ CREATE TYPE member_position_enum AS ENUM (
   'EMPLOYEE',
   'CEO',
   'ADMIN',
-  'FACTORY_MANAGER'
+  'OPERATIONS_MANAGER'
 );
 
 CREATE TYPE member_pre_registration_role_type_enum AS ENUM (
   'CEO',
   'ADMIN',
-  'OPERATIONS_MANAGER',
-  'FACTORY_MANAGER',
-  'DEVELOPMENT_LEAD',
-  'DESIGNER',
-  'MARKETER',
-  'DEVELOPER',
-  'CONTENT_MANAGER',
-  'EMPLOYEE',
-  'STAFF'
+  'EMPLOYEE'
 );
 
 CREATE TYPE member_pre_registration_affiliation_enum AS ENUM (
@@ -73,8 +57,47 @@ CREATE TYPE member_pre_registration_position_enum AS ENUM (
   'EMPLOYEE',
   'CEO',
   'ADMIN',
-  'FACTORY_MANAGER'
+  'OPERATIONS_MANAGER'
 );
+
+CREATE TABLE member_positions (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  code VARCHAR NOT NULL UNIQUE,
+  name VARCHAR NOT NULL,
+  subtitle VARCHAR,
+  duty member_duty_enum,
+  parent_id INTEGER,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  is_login_visible BOOLEAN NOT NULL DEFAULT true,
+  is_admin BOOLEAN NOT NULL DEFAULT false,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  CONSTRAINT fk_member_positions_parent_id
+    FOREIGN KEY (parent_id)
+    REFERENCES member_positions (id)
+);
+
+CREATE INDEX idx_member_positions_parent_id
+  ON member_positions (parent_id);
+
+CREATE INDEX idx_member_positions_display_order
+  ON member_positions (display_order);
+
+CREATE TABLE position_duties (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  position_id INTEGER NOT NULL,
+  duty member_duty_enum NOT NULL,
+  CONSTRAINT fk_position_duties_position_id
+    FOREIGN KEY (position_id)
+    REFERENCES member_positions (id)
+    ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX idx_position_duties_position_id_duty
+  ON position_duties (position_id, duty);
 
 CREATE TABLE member (
   id SERIAL PRIMARY KEY,
@@ -84,12 +107,23 @@ CREATE TABLE member (
   password_hash VARCHAR NOT NULL,
   avatar_url VARCHAR,
   branch VARCHAR,
-  affiliation member_affiliation_enum,
-  position member_position_enum,
+  position_id INTEGER,
+  position_duty_id INTEGER,
   role_type member_role_type_enum NOT NULL,
-  duty member_duty_enum,
-  is_active BOOLEAN NOT NULL DEFAULT true
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  CONSTRAINT fk_member_position_id
+    FOREIGN KEY (position_id)
+    REFERENCES member_positions (id),
+  CONSTRAINT fk_member_position_duty_id
+    FOREIGN KEY (position_duty_id)
+    REFERENCES position_duties (id)
 );
+
+CREATE INDEX idx_member_position_id
+  ON member (position_id);
+
+CREATE INDEX idx_member_position_duty_id
+  ON member (position_duty_id);
 
 CREATE UNIQUE INDEX idx_member_name_role_type_password_hash
   ON member (name, role_type, password_hash);
@@ -121,6 +155,31 @@ CREATE TABLE refresh_token (
     REFERENCES member (id)
 );
 
+CREATE TABLE favorite_members (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  owner_member_id INTEGER NOT NULL,
+  member_id INTEGER NOT NULL,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  CONSTRAINT fk_favorite_members_owner_member_id
+    FOREIGN KEY (owner_member_id)
+    REFERENCES member (id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_favorite_members_member_id
+    FOREIGN KEY (member_id)
+    REFERENCES member (id)
+    ON DELETE CASCADE,
+  CONSTRAINT uq_favorite_member_owner_member
+    UNIQUE (owner_member_id, member_id)
+);
+
+CREATE INDEX idx_favorite_members_owner_member_id
+  ON favorite_members (owner_member_id);
+
+CREATE INDEX idx_favorite_members_display_order
+  ON favorite_members (display_order);
+
 CREATE TYPE task_status_enum AS ENUM (
   'REGISTERED',
   'IN_PROGRESS',
@@ -134,6 +193,7 @@ CREATE TABLE tasks (
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   title VARCHAR NOT NULL,
   description TEXT NOT NULL,
+  one_line_comment VARCHAR,
   status task_status_enum NOT NULL,
   assignee_id INTEGER NOT NULL,
   created_by INTEGER NOT NULL,

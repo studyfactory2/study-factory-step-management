@@ -21,6 +21,10 @@ export class TaskCreateRequest {
   @IsString({ message: "업무 설명은 문자열이어야 합니다." })
   description: string;
 
+  @IsOptional()
+  @IsString({ message: "한줄멘트는 문자열이어야 합니다." })
+  oneLineComment?: string;
+
   @IsEnum(TaskAssigneeScope, { message: "유효하지 않은 담당자 지정 방식입니다." })
   assigneeScope: TaskAssigneeScope;
 
@@ -28,6 +32,14 @@ export class TaskCreateRequest {
   @IsDefined({ message: "단일 담당자 업무 등록에는 담당자 ID가 필요합니다." })
   @IsNumber({}, { message: "담당자 ID는 숫자여야 합니다." })
   assigneeId?: number;
+
+  @IsOptional()
+  @IsString({ message: "지점은 문자열이어야 합니다." })
+  branch?: string;
+
+  @IsOptional()
+  @IsNumber({}, { message: "직위 ID는 숫자여야 합니다." })
+  positionId?: number;
 
   @IsOptional()
   @IsArray({ message: "첨부 사진 목록은 배열이어야 합니다." })
@@ -39,6 +51,7 @@ export class TaskCreateRequest {
     const task = new Task();
     task.title = this.title;
     task.description = this.description;
+    task.oneLineComment = this.oneLineComment ?? null;
     task.status = TaskStatus.REGISTERED;
     task.assigneeId = assigneeId;
     task.createdBy = createdBy;

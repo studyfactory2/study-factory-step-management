@@ -2,7 +2,7 @@ CREATE TYPE member_role_type_enum AS ENUM (
   'CEO',
   'ADMIN',
   'OPERATIONS_MANAGER',
-  'FACTORY_MANAGER',
+  'OPERATIONS_MANAGER',
   'DEVELOPMENT_LEAD',
   'DESIGNER',
   'MARKETER',
@@ -34,14 +34,14 @@ CREATE TYPE member_position_enum AS ENUM (
   'EMPLOYEE',
   'CEO',
   'ADMIN',
-  'FACTORY_MANAGER'
+  'OPERATIONS_MANAGER'
 );
 
 CREATE TYPE member_pre_registration_role_type_enum AS ENUM (
   'CEO',
   'ADMIN',
   'OPERATIONS_MANAGER',
-  'FACTORY_MANAGER',
+  'OPERATIONS_MANAGER',
   'DEVELOPMENT_LEAD',
   'DESIGNER',
   'MARKETER',
@@ -73,7 +73,7 @@ CREATE TYPE member_pre_registration_position_enum AS ENUM (
   'EMPLOYEE',
   'CEO',
   'ADMIN',
-  'FACTORY_MANAGER'
+  'OPERATIONS_MANAGER'
 );
 
 CREATE TABLE member (
@@ -121,6 +121,31 @@ CREATE TABLE refresh_token (
     REFERENCES member (id)
 );
 
+CREATE TABLE favorite_members (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  owner_member_id INTEGER NOT NULL,
+  member_id INTEGER NOT NULL,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  CONSTRAINT fk_favorite_members_owner_member_id
+    FOREIGN KEY (owner_member_id)
+    REFERENCES member (id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_favorite_members_member_id
+    FOREIGN KEY (member_id)
+    REFERENCES member (id)
+    ON DELETE CASCADE,
+  CONSTRAINT uq_favorite_member_owner_member
+    UNIQUE (owner_member_id, member_id)
+);
+
+CREATE INDEX idx_favorite_members_owner_member_id
+  ON favorite_members (owner_member_id);
+
+CREATE INDEX idx_favorite_members_display_order
+  ON favorite_members (display_order);
+
 CREATE TYPE task_status_enum AS ENUM (
   'REGISTERED',
   'IN_PROGRESS',
@@ -134,6 +159,7 @@ CREATE TABLE tasks (
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   title VARCHAR NOT NULL,
   description TEXT NOT NULL,
+  one_line_comment VARCHAR,
   status task_status_enum NOT NULL,
   assignee_id INTEGER NOT NULL,
   created_by INTEGER NOT NULL,

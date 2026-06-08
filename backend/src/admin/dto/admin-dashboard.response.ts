@@ -18,6 +18,8 @@ export class AdminDashboardEmployeeResponse {
   id: number;
   name: string;
   roleType: MemberRole;
+  positionCode: string | null;
+  positionName: string | null;
   branch: string | null;
   highestTaskStatus: Exclude<TaskStatus, TaskStatus.COMPLETED> | null;
   taskCounts: AdminDashboardTaskCountsResponse;
@@ -36,10 +38,12 @@ export class AdminBranchStaffCountResponse {
 export class AdminDashboardRecentOutputResponse {
   taskId: number;
   taskTitle: string;
+  oneLineComment: string | null;
   taskStatus: TaskStatus;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;
+  memberPositionName: string | null;
   startedAt: Date;
   submittedAt: Date | null;
   attachmentPreviewUrls: string[];

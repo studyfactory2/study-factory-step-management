@@ -12,6 +12,9 @@ export class Task extends BaseEntity {
   @Column({ type: "text" })
   description: string;
 
+  @Column({ name: "one_line_comment", type: "varchar", nullable: true })
+  oneLineComment: string | null;
+
   @Column({
     type: "enum",
     enumName: "task_status_enum",
