@@ -7,6 +7,7 @@ import {
   AdminDashboardResponse,
   AdminDashboardTaskCountsResponse
 } from "./dto/admin-dashboard.response";
+import { FavoriteMemberService } from "../favorite-member/favorite-member.service";
 import { Member } from "../member/entity/member.entity";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { MemberNotFoundException } from "../member/exception/member-not-found.exception";
@@ -22,6 +23,7 @@ export class AdminService {
   private readonly branchStaffPositionCodes = ["EMPLOYEE", "STAFF"];
 
   constructor(
+    private readonly favoriteMemberService: FavoriteMemberService,
     private readonly memberRepository: MemberRepository,
     private readonly taskRepository: TaskRepository
   ) {}
@@ -33,7 +35,7 @@ export class AdminService {
     const [currentMember, employees, taskCountRows, branchGroups, recentOutputs] =
       await Promise.all([
         this.findCurrentMember(currentMemberId),
-        this.findDashboardEmployees(),
+        this.favoriteMemberService.getFavoriteMemberEntities(currentMemberId),
         this.findTaskCountRows(),
         this.findBranchGroups(),
         this.findRecentOutputs(query)
@@ -84,6 +86,10 @@ export class AdminService {
       this.dashboardEmployeePositionCodes
     );
 
+    return this.sortMembersByPosition(employees);
+  }
+
+  private sortMembersByPosition(employees: Member[]): Member[] {
     return employees.sort((a, b) => {
       const roleOrderDifference =
         this.getPositionOrder(a.positionInfo?.code ?? "") -

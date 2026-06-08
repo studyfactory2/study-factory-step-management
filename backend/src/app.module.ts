@@ -6,6 +6,8 @@ import { AuthModule } from "./auth/auth.module";
 import { RefreshToken } from "./auth/entity/refresh-token.entity";
 import { appConfig } from "./config/app.config";
 import { databaseConfig } from "./config/database.config";
+import { FavoriteMember } from "./favorite-member/entity/favorite-member.entity";
+import { FavoriteMemberModule } from "./favorite-member/favorite-member.module";
 import { jwtConfig } from "./config/jwt.config";
 import { Member } from "./member/entity/member.entity";
 import { MemberPreRegistration } from "./member/entity/member-pre-registration.entity";
@@ -28,12 +30,22 @@ import { TaskModule } from "./task/task.module";
       useFactory: (configService: ConfigService) => ({
         type: "postgres",
         url: configService.getOrThrow<string>("database.url"),
-        entities: [Member, MemberPreRegistration, RefreshToken, Position, PositionDuty, Task, TaskAttachment],
+        entities: [
+          FavoriteMember,
+          Member,
+          MemberPreRegistration,
+          RefreshToken,
+          Position,
+          PositionDuty,
+          Task,
+          TaskAttachment
+        ],
         synchronize: false
       })
     }),
     AdminModule,
     AuthModule,
+    FavoriteMemberModule,
     MemberModule,
     PositionModule,
     TaskModule

@@ -8,7 +8,7 @@ export function MessageBanner({ message }: MessageBannerProps) {
   }
 
   return (
-    <div className="rounded-[18px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-4 text-sm font-semibold text-primary">
+    <div className="rounded-[20px] border border-[#F1CFD5] bg-[#FFFEFC]/95 px-5 py-4 text-sm font-black text-primary shadow-sm">
       {message}
     </div>
   );

@@ -1,7 +1,18 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { getAdminDashboard, type AdminDashboard, type AdminDashboardSortOrder } from "@/api/admin";
+import { Sparkles } from "lucide-react";
+import {
+  getAdminDashboard,
+  type AdminDashboard,
+  type AdminDashboardEmployee,
+  type AdminDashboardSortOrder
+} from "@/api/admin";
+import {
+  addFavoriteMember,
+  deleteFavoriteMember,
+  getFavoriteMemberCandidates
+} from "@/api/favorite-member";
 import { getMembers, preRegisterMember } from "@/api/member";
 import { createTask } from "@/api/task";
 import type {
@@ -11,7 +22,7 @@ import type {
   MemberPosition,
   TaskStatus
 } from "@/types/domain";
-import { BranchStaffSection } from "@/components/adminDashboard/branch-staff-section";
+import { DashboardActionSection } from "@/components/adminDashboard/dashboard-action-section";
 import { DashboardHeader } from "@/components/adminDashboard/dashboard-header";
 import { DashboardLogout } from "@/components/adminDashboard/dashboard-logout";
 import { EmployeeListSection } from "@/components/adminDashboard/employee-list-section";
@@ -42,6 +53,7 @@ const emptyDashboard: AdminDashboard = {
 
 export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPageProps) {
   const [dashboard, setDashboard] = useState<AdminDashboard>(emptyDashboard);
+  const [favoriteCandidates, setFavoriteCandidates] = useState<AdminDashboardEmployee[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
@@ -54,20 +66,23 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isPreRegisterSubmitting, setIsPreRegisterSubmitting] = useState(false);
+  const [isFavoriteUpdating, setIsFavoriteUpdating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadDashboard() {
       try {
-        const [dashboardResponse, memberResponse] = await Promise.all([
+        const [dashboardResponse, favoriteCandidateResponse, memberResponse] = await Promise.all([
           getAdminDashboard(accessToken, {
             sortOrder: recentTaskSortOrder === "" ? undefined : recentTaskSortOrder,
             status: recentTaskStatus
           }),
+          getFavoriteMemberCandidates(accessToken),
           getMembers()
         ]);
 
         setDashboard(dashboardResponse);
+        setFavoriteCandidates(favoriteCandidateResponse);
         setMembers(memberResponse.filter(isAssignableMember));
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "대시보드를 불러오지 못했습니다.");
@@ -108,6 +123,46 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
       status: recentTaskStatus
     });
     setDashboard(dashboardResponse);
+  }
+
+  async function handleAddFavoriteMember(memberId: number) {
+    setMessage("");
+    setIsFavoriteUpdating(true);
+
+    try {
+      const employees = await addFavoriteMember(accessToken, memberId);
+      setDashboard((currentDashboard) => ({
+        ...currentDashboard,
+        employees
+      }));
+      setMessage("함께 프로젝트 중 직원이 추가되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "함께 프로젝트 중 직원을 추가하지 못했습니다.");
+    } finally {
+      setIsFavoriteUpdating(false);
+    }
+  }
+
+  async function handleDeleteFavoriteMember(memberId: number, memberName: string) {
+    if (!window.confirm(`${memberName} 님을 함께 프로젝트 중에서 정말로 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    setMessage("");
+    setIsFavoriteUpdating(true);
+
+    try {
+      const employees = await deleteFavoriteMember(accessToken, memberId);
+      setDashboard((currentDashboard) => ({
+        ...currentDashboard,
+        employees
+      }));
+      setMessage("함께 프로젝트 중 직원이 삭제되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "함께 프로젝트 중 직원을 삭제하지 못했습니다.");
+    } finally {
+      setIsFavoriteUpdating(false);
+    }
   }
 
   async function handleCreateTask(event: FormEvent<HTMLFormElement>) {
@@ -174,11 +229,15 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   }
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-background px-4 py-7 text-foreground sm:px-8">
-      <div className="pointer-events-none fixed -left-32 -top-28 h-[28rem] w-[28rem] rounded-full bg-[#FDE5EB]" />
-      <div className="pointer-events-none fixed -right-28 bottom-36 h-[26rem] w-[26rem] rounded-full bg-[#EFE8FF]" />
+    <main className="min-h-dvh overflow-hidden bg-background px-4 py-8 text-foreground sm:px-8">
+      <div className="pointer-events-none fixed left-10 top-20 text-[#F0C957]">
+        <Sparkles aria-hidden className="h-9 w-9 fill-current" />
+      </div>
+      <div className="pointer-events-none fixed right-12 top-28 text-[#F1A9C0]">
+        <Sparkles aria-hidden className="h-8 w-8 fill-current" />
+      </div>
 
-      <div className="relative mx-auto w-full max-w-[1180px] space-y-10">
+      <div className="relative mx-auto w-full max-w-[1180px] space-y-7">
         <DashboardHeader
           onAddMember={() => setIsPreRegisterOpen((isOpen) => !isOpen)}
           roleType={dashboard.currentMember.roleType}
@@ -192,8 +251,13 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
             onSubmit={handlePreRegister}
           />
         )}
-        <EmployeeListSection employees={dashboard.employees} />
-        <BranchStaffSection branchGroups={dashboard.branchGroups} />
+        <EmployeeListSection
+          candidates={favoriteCandidates}
+          employees={dashboard.employees}
+          isUpdating={isFavoriteUpdating}
+          onAddFavoriteMember={handleAddFavoriteMember}
+          onDeleteFavoriteMember={handleDeleteFavoriteMember}
+        />
         <TaskCreateForm
           assignees={assignees}
           branches={branches}
@@ -219,6 +283,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
           selectedSortOrder={recentTaskSortOrder}
           selectedStatus={recentTaskStatus}
         />
+        <DashboardActionSection />
         <DashboardLogout onLogout={onLogout} />
       </div>
     </main>

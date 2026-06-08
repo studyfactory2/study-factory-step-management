@@ -52,12 +52,18 @@ export class MemberRepository {
 
   async findActiveAssignableMembers(): Promise<Member[]> {
     return this.memberRepository.find({
+      relations: {
+        positionInfo: true,
+        positionDuty: true
+      },
       where: {
         isActive: true,
         roleType: Not(In([MemberRole.CEO, MemberRole.ADMIN]))
       },
       order: {
-        roleType: "ASC",
+        positionInfo: {
+          displayOrder: "ASC"
+        },
         name: "ASC"
       }
     });
