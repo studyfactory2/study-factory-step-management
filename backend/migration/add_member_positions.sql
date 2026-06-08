@@ -25,15 +25,15 @@ INSERT INTO member_positions (code, name, subtitle, parent_id, display_order, is
 VALUES
   ('CEO', '대표', '최종 승인자', NULL, 1, true, true, true),
   ('ADMIN', '관리자', '관리자', NULL, 2, false, true, true),
-  ('OPERATIONS_MANAGER', '운영관리자', '관리/검토', NULL, 3, false, false, true),
-  ('DEVELOPMENT_LEAD', '개발팀장', '개발관리', NULL, 4, false, false, true),
-  ('DEVELOPER', '개발자', '직원', NULL, 5, false, false, true),
-  ('FACTORY_MANAGER', '공장장', '총괄', NULL, 6, false, false, true),
-  ('DESIGNER', '디자이너', '직원', NULL, 7, false, false, true),
-  ('MARKETER', '마케터', '직원', NULL, 8, false, false, true),
-  ('CONTENT_MANAGER', '콘텐츠담당', '직원', NULL, 9, false, false, true),
-  ('STAFF', '스텝', '직원', NULL, 10, false, false, true),
-  ('EMPLOYEE', '직원', '직원', NULL, 11, false, false, true)
+  ('OPERATIONS_MANAGER', '운영관리자', '관리/검토', NULL, 3, true, false, true),
+  ('DEVELOPMENT_LEAD', '개발팀장', '개발관리', NULL, 4, true, false, true),
+  ('DEVELOPER', '개발자', '직원', NULL, 5, true, false, true),
+  ('FACTORY_MANAGER', '공장장', '총괄', NULL, 6, true, false, true),
+  ('DESIGNER', '디자이너', '직원', NULL, 7, true, false, true),
+  ('MARKETER', '마케터', '직원', NULL, 8, true, false, true),
+  ('CONTENT_MANAGER', '콘텐츠담당', '직원', NULL, 9, true, false, true),
+  ('STAFF', '스텝', '직원', NULL, 10, true, false, true),
+  ('EMPLOYEE', '직원', '직원', NULL, 11, true, false, true)
 ON CONFLICT (code) DO UPDATE SET
   name = EXCLUDED.name,
   subtitle = EXCLUDED.subtitle,
