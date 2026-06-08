@@ -13,7 +13,13 @@ import {
   deleteFavoriteMember,
   getFavoriteMemberCandidates
 } from "@/api/favorite-member";
-import { getMembers, preRegisterMember } from "@/api/member";
+import {
+  deleteMemberPreRegistration,
+  getMemberPreRegistrations,
+  getMembers,
+  preRegisterMember,
+  type MemberPreRegistration
+} from "@/api/member";
 import { createTask } from "@/api/task";
 import type {
   Member,
@@ -54,9 +60,17 @@ const emptyDashboard: AdminDashboard = {
   recentOutputs: []
 };
 
+type ConfirmDialogState = {
+  confirmLabel?: string;
+  description: string;
+  onConfirm: () => Promise<void>;
+  title: string;
+} | null;
+
 export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPageProps) {
   const [dashboard, setDashboard] = useState<AdminDashboard>(emptyDashboard);
   const [favoriteCandidates, setFavoriteCandidates] = useState<AdminDashboardEmployee[]>([]);
+  const [memberPreRegistrations, setMemberPreRegistrations] = useState<MemberPreRegistration[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
@@ -68,7 +82,9 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPreRegistrationLoading, setIsPreRegistrationLoading] = useState(false);
   const [isPreRegisterSubmitting, setIsPreRegisterSubmitting] = useState(false);
   const [isFavoriteUpdating, setIsFavoriteUpdating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,6 +145,19 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     setDashboard(dashboardResponse);
   }
 
+  async function refreshMemberPreRegistrations() {
+    setIsPreRegistrationLoading(true);
+
+    try {
+      const preRegistrations = await getMemberPreRegistrations(accessToken);
+      setMemberPreRegistrations(preRegistrations.filter((preRegistration) => !preRegistration.isRegistered));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "직원 사전등록 목록을 불러오지 못했습니다.");
+    } finally {
+      setIsPreRegistrationLoading(false);
+    }
+  }
+
   async function handleAddFavoriteMember(memberId: number) {
     setMessage("");
     setIsFavoriteUpdating(true);
@@ -147,11 +176,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     }
   }
 
-  async function handleDeleteFavoriteMember(memberId: number, memberName: string) {
-    if (!window.confirm(`${memberName} 님을 함께 프로젝트 중에서 정말로 삭제하시겠습니까?`)) {
-      return;
-    }
-
+  async function deleteFavoriteMemberAfterConfirm(memberId: number) {
     setMessage("");
     setIsFavoriteUpdating(true);
 
@@ -167,6 +192,15 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     } finally {
       setIsFavoriteUpdating(false);
     }
+  }
+
+  function handleDeleteFavoriteMember(memberId: number, memberName: string) {
+    setConfirmDialog({
+      confirmLabel: "삭제",
+      description: `${memberName} 님을 함께 프로젝트 중에서 삭제할까요?`,
+      onConfirm: () => deleteFavoriteMemberAfterConfirm(memberId),
+      title: "함께 프로젝트 중 직원 삭제"
+    });
   }
 
   async function handleCreateTask(event: FormEvent<HTMLFormElement>) {
@@ -224,8 +258,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     try {
       await preRegisterMember(accessToken, request);
       setMessage("직원 사전등록이 완료되었습니다.");
-      setIsMemberManagementOpen(false);
-      setMemberManagementView("menu");
+      await refreshMemberPreRegistrations();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "직원 사전등록에 실패했습니다.");
     } finally {
@@ -235,6 +268,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
 
   function handleSelectMemberPreRegister() {
     setMemberManagementView("preRegister");
+    void refreshMemberPreRegistrations();
   }
 
   function handleSelectPositionTree() {
@@ -251,6 +285,40 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   function handleCloseMemberManagement() {
     setIsMemberManagementOpen(false);
     setMemberManagementView("menu");
+  }
+
+  async function deletePreRegistrationAfterConfirm(id: number) {
+    setMessage("");
+    setIsPreRegistrationLoading(true);
+
+    try {
+      await deleteMemberPreRegistration(accessToken, id);
+      setMessage("직원 사전등록 정보가 삭제되었습니다.");
+      await refreshMemberPreRegistrations();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "직원 사전등록 정보를 삭제하지 못했습니다.");
+    } finally {
+      setIsPreRegistrationLoading(false);
+    }
+  }
+
+  function handleDeletePreRegistration(id: number, name: string) {
+    setConfirmDialog({
+      confirmLabel: "삭제",
+      description: `${name} 님의 사전등록 정보를 삭제할까요?`,
+      onConfirm: () => deletePreRegistrationAfterConfirm(id),
+      title: "사전등록 정보 삭제"
+    });
+  }
+
+  async function handleConfirmDialog() {
+    if (!confirmDialog) {
+      return;
+    }
+
+    const confirmAction = confirmDialog.onConfirm;
+    setConfirmDialog(null);
+    await confirmAction();
   }
 
   return (
@@ -303,13 +371,15 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
           memberManagementView={memberManagementView}
           memberPreRegisterPanel={
             <MemberPreRegisterPanel
+              isLoading={isPreRegistrationLoading}
+              preRegistrations={memberPreRegistrations}
               isSubmitting={isPreRegisterSubmitting}
               layout="modal"
               onClose={() => setMemberManagementView("menu")}
+              onDelete={handleDeletePreRegistration}
               onSubmit={handlePreRegister}
             />
           }
-          onBackToMemberManagementMenu={() => setMemberManagementView("menu")}
           onCloseMemberManagement={handleCloseMemberManagement}
           onOpenMemberManagement={handleOpenMemberManagement}
           onSelectMemberPreRegister={handleSelectMemberPreRegister}
@@ -317,7 +387,55 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
         />
         <DashboardLogout onLogout={onLogout} />
       </div>
+      {confirmDialog && (
+        <ConfirmDialog
+          confirmLabel={confirmDialog.confirmLabel ?? "확인"}
+          description={confirmDialog.description}
+          onCancel={() => setConfirmDialog(null)}
+          onConfirm={handleConfirmDialog}
+          title={confirmDialog.title}
+        />
+      )}
     </main>
+  );
+}
+
+function ConfirmDialog({
+  confirmLabel,
+  description,
+  onCancel,
+  onConfirm,
+  title
+}: {
+  confirmLabel: string;
+  description: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+  title: string;
+}) {
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#3F2C28]/35 px-4">
+      <div className="w-full max-w-[420px] rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] p-7 text-center shadow-[0_18px_44px_rgba(90,62,59,0.2)]">
+        <p className="text-2xl font-black text-[#3F2C28]">{title}</p>
+        <p className="mt-3 text-sm font-bold leading-6 text-[#8F7470]">{description}</p>
+        <div className="mt-7 grid grid-cols-2 gap-3">
+          <button
+            className="h-11 rounded-full border border-[#F0B9C8] bg-white text-sm font-black text-primary"
+            onClick={onCancel}
+            type="button"
+          >
+            취소
+          </button>
+          <button
+            className="h-11 rounded-full bg-primary text-sm font-black text-white shadow-sm"
+            onClick={onConfirm}
+            type="button"
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -10,6 +10,18 @@ export type MemberPreRegisterRequest = {
   position: MemberPosition;
 };
 
+export type MemberPreRegistration = {
+  id: number;
+  affiliation: MemberAffiliation;
+  branch: string;
+  createdAt: string;
+  duty: MemberDuty;
+  isRegistered: boolean;
+  name: string;
+  position: MemberPosition;
+  updatedAt: string;
+};
+
 export async function getMembers(): Promise<Member[]> {
   const response = await fetch(`${API_BASE_URL}/api/members`, {
     cache: "no-store"
@@ -40,5 +52,39 @@ export async function preRegisterMember(
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
     throw new Error(message ?? "직원 사전등록에 실패했습니다.");
+  }
+}
+
+export async function getMemberPreRegistrations(accessToken: string): Promise<MemberPreRegistration[]> {
+  const response = await fetch(`${API_BASE_URL}/api/members/pre-registrations`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "직원 사전등록 목록을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<MemberPreRegistration[]>;
+}
+
+export async function deleteMemberPreRegistration(accessToken: string, id: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/members/pre-registrations/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "직원 사전등록 정보를 삭제하지 못했습니다.");
   }
 }

@@ -41,6 +41,25 @@ export class MemberRepository {
     });
   }
 
+  async findPreRegistrations(): Promise<MemberPreRegistration[]> {
+    return this.memberPreRegistrationRepository.find({
+      order: {
+        isRegistered: "ASC",
+        createdAt: "DESC"
+      }
+    });
+  }
+
+  async findPreRegistrationById(id: number): Promise<MemberPreRegistration | null> {
+    return this.memberPreRegistrationRepository.findOne({
+      where: { id }
+    });
+  }
+
+  async deletePreRegistration(preRegistration: MemberPreRegistration): Promise<void> {
+    await this.memberPreRegistrationRepository.remove(preRegistration);
+  }
+
   async findActiveByRoleTypes(roleTypes: MemberRole[]): Promise<Member[]> {
     return this.memberRepository.find({
       where: {

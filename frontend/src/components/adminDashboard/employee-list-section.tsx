@@ -21,7 +21,6 @@ export function EmployeeListSection({
 }: EmployeeListSectionProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const favoriteMemberIds = employees.map((employee) => employee.id);
-  const selectedCount = favoriteMemberIds.length;
   const addableCandidates = candidates.filter((candidate) => !favoriteMemberIds.includes(candidate.id));
   const visibleEmployees = employees;
   const favoriteSlots: Array<AdminDashboardEmployee | null> = Array.from({ length: 10 }, (_, index) =>
@@ -32,9 +31,6 @@ export function EmployeeListSection({
     <section className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-black text-[#3F2C28]">함께 프로젝트 중</h2>
-        <span className="rounded-full bg-[#FFF1D7] px-3 py-1 text-sm font-bold text-[#C88449]">
-          {selectedCount}/10명
-        </span>
       </div>
       <div className="rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 p-7 shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -47,7 +43,7 @@ export function EmployeeListSection({
               />
             ) : (
               <EmptySlot
-                disabled={isUpdating || selectedCount >= 10}
+                disabled={isUpdating || employees.length >= 10}
                 key={`empty-${index}`}
                 onSelect={() => setIsAddModalOpen(true)}
                 slotNumber={index + 1}

@@ -7,7 +7,6 @@ type DashboardActionSectionProps = {
   isMemberManagementOpen: boolean;
   memberManagementView: MemberManagementView;
   memberPreRegisterPanel: ReactNode;
-  onBackToMemberManagementMenu: () => void;
   onCloseMemberManagement: () => void;
   onOpenMemberManagement: () => void;
   onSelectMemberPreRegister: () => void;
@@ -18,7 +17,6 @@ export function DashboardActionSection({
   isMemberManagementOpen,
   memberManagementView,
   memberPreRegisterPanel,
-  onBackToMemberManagementMenu,
   onCloseMemberManagement,
   onOpenMemberManagement,
   onSelectMemberPreRegister,
@@ -99,13 +97,6 @@ export function DashboardActionSection({
               </div>
             ) : (
               <div className="mt-7">
-                <button
-                  className="mb-4 h-9 rounded-full border border-[#F0B9C8] bg-white px-5 text-sm font-black text-primary"
-                  onClick={onBackToMemberManagementMenu}
-                  type="button"
-                >
-                  선택지로 돌아가기
-                </button>
                 {memberPreRegisterPanel}
               </div>
             )}

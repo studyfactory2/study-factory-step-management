@@ -1,11 +1,15 @@
 import { FormEvent, useState } from "react";
+import type { MemberPreRegistration } from "@/api/member";
 import type { MemberAffiliation, MemberDuty, MemberPosition } from "@/types/domain";
 import { affiliationLabels, dutyLabels, positionLabels } from "./constants";
 
 type MemberPreRegisterPanelProps = {
+  isLoading?: boolean;
   isSubmitting: boolean;
   layout?: "page" | "modal";
+  preRegistrations?: MemberPreRegistration[];
   onClose: () => void;
+  onDelete?: (id: number, name: string) => void;
   onSubmit: (request: {
     affiliation: MemberAffiliation;
     branch: string;
@@ -35,9 +39,12 @@ const dutyOptionsByPosition: Record<MemberPosition, MemberDuty[]> = {
 };
 
 export function MemberPreRegisterPanel({
+  isLoading = false,
   isSubmitting,
   layout = "page",
+  preRegistrations = [],
   onClose,
+  onDelete,
   onSubmit
 }: MemberPreRegisterPanelProps) {
   const [name, setName] = useState("");
@@ -168,6 +175,56 @@ export function MemberPreRegisterPanel({
           {isSubmitting ? "등록 중" : "등록"}
         </button>
       </form>
+      <div className="mt-7 border-t border-[#F2C9C2] pt-6">
+        <div className="flex items-center justify-between gap-4">
+          <h3 className="text-lg font-black text-[#5A3E3B]">사전등록 목록</h3>
+          <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#9B7A75]">
+            {preRegistrations.length}건
+          </span>
+        </div>
+        <div className="mt-4 max-h-[260px] space-y-3 overflow-y-auto pr-1">
+          {isLoading ? (
+            <p className="rounded-[16px] bg-white px-4 py-4 text-sm font-bold text-[#9B7A75]">
+              사전등록 목록을 불러오는 중입니다.
+            </p>
+          ) : preRegistrations.length === 0 ? (
+            <p className="rounded-[16px] bg-white px-4 py-4 text-sm font-bold text-[#9B7A75]">
+              등록된 사전등록 정보가 없습니다.
+            </p>
+          ) : (
+            preRegistrations.map((preRegistration) => (
+              <article
+                className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#F2C9C2] bg-white px-4 py-3"
+                key={preRegistration.id}
+              >
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-base font-black text-[#3F2C28]">{preRegistration.name}</p>
+                    <span className="text-sm font-bold text-primary">
+                      {positionLabels[preRegistration.position]}
+                    </span>
+                    <span className="rounded-full bg-[#FBE6EA] px-2 py-1 text-xs font-bold text-primary">
+                      가입 대기
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs font-bold text-[#9B7A75]">
+                    {preRegistration.branch} · {affiliationLabels[preRegistration.affiliation]} ·{" "}
+                    {dutyLabels[preRegistration.duty]}
+                  </p>
+                </div>
+                <button
+                  className="h-9 rounded-full border border-[#F0B9C8] bg-white px-4 text-xs font-black text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={!onDelete}
+                  onClick={() => onDelete?.(preRegistration.id, preRegistration.name)}
+                  type="button"
+                >
+                  삭제
+                </button>
+              </article>
+            ))
+          )}
+        </div>
+      </div>
     </section>
   );
 }

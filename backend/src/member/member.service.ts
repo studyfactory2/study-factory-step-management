@@ -5,6 +5,7 @@ import { MemberRegisterRequest } from "./dto/member-register.request";
 import { Member } from "./entity/member.entity";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
 import { MemberDuplicateCredentialException } from "./exception/member-duplicate-credential.exception";
+import { MemberPreRegistrationDeleteException } from "./exception/member-pre-registration-delete.exception";
 import { MemberPreRegistrationNotFoundException } from "./exception/member-pre-registration-not-found.exception";
 import { MemberNotFoundException } from "./exception/member-not-found.exception";
 import { MemberPositionNotFoundException } from "./exception/member-position-not-found.exception";
@@ -45,6 +46,24 @@ export class MemberService {
     preRegistration.isRegistered = false;
 
     return this.memberRepository.savePreRegistration(preRegistration);
+  }
+
+  async findPreRegistrations(): Promise<MemberPreRegistration[]> {
+    return this.memberRepository.findPreRegistrations();
+  }
+
+  async deletePreRegistration(id: number): Promise<void> {
+    const preRegistration = await this.memberRepository.findPreRegistrationById(id);
+
+    if (!preRegistration) {
+      throw new MemberNotFoundException(id);
+    }
+
+    if (preRegistration.isRegistered) {
+      throw new MemberPreRegistrationDeleteException(id);
+    }
+
+    await this.memberRepository.deletePreRegistration(preRegistration);
   }
 
   async register(request: MemberRegisterRequest): Promise<Member> {
