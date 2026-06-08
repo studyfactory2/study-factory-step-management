@@ -24,11 +24,12 @@ export class MemberRegisterRequest {
   @IsEnum(MemberDuty, { message: "유효하지 않은 역할입니다." })
   duty: MemberDuty;
 
-  toEntity(passwordHash: string): Member {
+  toEntity(passwordHash: string, positionId: number): Member {
     const member = new Member();
     member.name = this.name;
     member.roleType = this.position as unknown as MemberRole;
     member.position = this.position;
+    member.positionId = positionId;
     member.affiliation = this.affiliation;
     member.passwordHash = passwordHash;
     member.avatarUrl = null;

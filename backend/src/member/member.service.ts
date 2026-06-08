@@ -7,12 +7,17 @@ import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
 import { MemberDuplicateCredentialException } from "./exception/member-duplicate-credential.exception";
 import { MemberPreRegistrationNotFoundException } from "./exception/member-pre-registration-not-found.exception";
 import { MemberNotFoundException } from "./exception/member-not-found.exception";
+import { MemberPositionNotFoundException } from "./exception/member-position-not-found.exception";
 import { MemberRepository } from "./member.repository";
 import { MemberRole } from "./enum/member-role.enum";
+import { PositionRepository } from "../position/position.repository";
 
 @Injectable()
 export class MemberService {
-  constructor(private readonly memberRepository: MemberRepository) {}
+  constructor(
+    private readonly memberRepository: MemberRepository,
+    private readonly positionRepository: PositionRepository
+  ) {}
 
   async findAll(): Promise<Member[]> {
     return this.memberRepository.findAll();
@@ -73,7 +78,12 @@ export class MemberService {
       throw new MemberDuplicateCredentialException(request.name, request.position);
     }
 
-    const member = request.toEntity(passwordHash);
+    const position = await this.positionRepository.findActiveByCode(request.position);
+    if (!position) {
+      throw new MemberPositionNotFoundException(request.position);
+    }
+
+    const member = request.toEntity(passwordHash, position.id);
 
     preRegistration.isRegistered = true;
     await this.memberRepository.savePreRegistration(preRegistration);

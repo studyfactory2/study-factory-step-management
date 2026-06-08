@@ -21,4 +21,13 @@ export class PositionRepository {
       }
     });
   }
+
+  async findActiveByCode(code: string): Promise<Position | null> {
+    return this.positionRepository.findOne({
+      where: {
+        code,
+        isActive: true
+      }
+    });
+  }
 }

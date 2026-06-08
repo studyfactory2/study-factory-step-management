@@ -1,5 +1,6 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { BaseEntity } from "../../common/entity/base.entity";
+import { Position } from "../../position/entity/position.entity";
 import { MemberAffiliation } from "../enum/member-affiliation.enum";
 import { MemberDuty } from "../enum/member-duty.enum";
 import { MemberPosition } from "../enum/member-position.enum";
@@ -34,6 +35,13 @@ export class Member extends BaseEntity {
     nullable: true
   })
   position: MemberPosition | null;
+
+  @Column({ name: "position_id", type: "int", nullable: true })
+  positionId: number | null;
+
+  @ManyToOne(() => Position, { nullable: true })
+  @JoinColumn({ name: "position_id" })
+  positionInfo: Position | null;
 
   @Column({
     name: "role_type",

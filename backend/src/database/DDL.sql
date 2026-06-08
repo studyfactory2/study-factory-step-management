@@ -109,10 +109,17 @@ CREATE TABLE member (
   branch VARCHAR,
   affiliation member_affiliation_enum,
   position member_position_enum,
+  position_id INTEGER,
   role_type member_role_type_enum NOT NULL,
   duty member_duty_enum,
-  is_active BOOLEAN NOT NULL DEFAULT true
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  CONSTRAINT fk_member_position_id
+    FOREIGN KEY (position_id)
+    REFERENCES member_positions (id)
 );
+
+CREATE INDEX idx_member_position_id
+  ON member (position_id);
 
 CREATE UNIQUE INDEX idx_member_name_role_type_password_hash
   ON member (name, role_type, password_hash);
