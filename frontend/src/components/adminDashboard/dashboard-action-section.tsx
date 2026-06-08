@@ -44,8 +44,8 @@ export function DashboardActionSection({
         type="button"
       >
         <div>
-          <p className="text-2xl font-semibold text-[#5A3E3B]">알림피드백</p>
-          <p className="mt-2 text-sm font-medium text-[#9B7A75]">알림과 피드백 내역을 확인합니다.</p>
+          <p className="text-2xl font-semibold text-[#5A3E3B]">알림코멘트</p>
+          <p className="mt-2 text-sm font-medium text-[#9B7A75]">알림과 코멘트 내역을 확인합니다.</p>
         </div>
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#EEE8FF] text-[#8B72C8]">
           <Bell aria-hidden className="h-7 w-7" />

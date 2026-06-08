@@ -87,10 +87,23 @@ export class TaskRepository {
       .leftJoinAndSelect("task.creator", "creator")
       .leftJoinAndSelect("creator.positionInfo", "creatorPosition")
       .leftJoinAndSelect("task.attachments", "attachments")
+      .leftJoinAndSelect("task.comments", "comments")
+      .leftJoinAndSelect("comments.attachments", "commentAttachments")
       .where("task.id = :id", { id })
       .andWhere("task.isDraft = false")
       .orderBy("attachments.createdAt", "ASC")
+      .addOrderBy("comments.createdAt", "ASC")
+      .addOrderBy("commentAttachments.createdAt", "ASC")
       .getOne();
+  }
+
+  async findPublishedById(id: number): Promise<Task | null> {
+    return this.taskRepository.findOne({
+      where: {
+        id,
+        isDraft: false
+      }
+    });
   }
 
   async findDraftsByCreator(createdBy: number): Promise<Task[]> {

@@ -55,15 +55,42 @@ export type TaskDetailAttachment = {
   createdAt: string;
 };
 
+export type TaskCommentAttachment = {
+  id: number;
+  imageUrl: string;
+  originalName: string | null;
+  createdAt: string;
+};
+
+export type TaskComment = {
+  id: number;
+  taskId: number;
+  content: string;
+  oneLineComment: string | null;
+  attachments: TaskCommentAttachment[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TaskCommentCreateRequest = {
+  content: string;
+  oneLineComment?: string;
+  status?: TaskStatus;
+};
+
 export type TaskDetail = {
   id: number;
   title: string;
   description: string;
+  descriptionHighlightStart: number | null;
+  descriptionHighlightEnd: number | null;
+  descriptionHighlightExpiresAt: string | null;
   oneLineComment: string | null;
   status: TaskStatus;
   assignee: TaskDetailMember;
   creator: TaskDetailMember;
   attachments: TaskDetailAttachment[];
+  comments: TaskComment[];
   completedAt: string | null;
   reviewRequestedAt: string | null;
   createdAt: string;
@@ -122,6 +149,30 @@ export async function getTaskDetail(accessToken: string, taskId: number): Promis
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
     throw new Error(message ?? "업무 상세 정보를 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskDetail>;
+}
+
+export async function updateTaskDescription(
+  accessToken: string,
+  taskId: number,
+  description: string
+): Promise<TaskDetail> {
+  const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/description`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ description })
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "프로젝트 내용을 수정하지 못했습니다.");
   }
 
   return response.json() as Promise<TaskDetail>;
@@ -211,4 +262,28 @@ export async function publishTaskDraft(
   }
 
   return response.json() as Promise<TaskCreateResponse>;
+}
+
+export async function createTaskComment(
+  accessToken: string,
+  taskId: number,
+  request: TaskCommentCreateRequest
+): Promise<TaskComment> {
+  const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/comments`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "코멘트를 등록하지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskComment>;
 }

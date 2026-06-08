@@ -159,6 +159,9 @@ CREATE TABLE tasks (
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   title VARCHAR NOT NULL,
   description TEXT NOT NULL,
+  description_highlight_start INTEGER,
+  description_highlight_end INTEGER,
+  description_highlight_expires_at TIMESTAMP,
   one_line_comment VARCHAR,
   status task_status_enum NOT NULL,
   assignee_id INTEGER NOT NULL,
@@ -198,3 +201,39 @@ CREATE TABLE task_attachments (
 
 CREATE INDEX idx_task_attachments_task_id
   ON task_attachments (task_id);
+
+CREATE TABLE task_comments (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  task_id INTEGER NOT NULL,
+  created_by INTEGER NOT NULL,
+  content TEXT NOT NULL,
+  one_line_comment VARCHAR,
+  CONSTRAINT fk_task_comments_task_id
+    FOREIGN KEY (task_id)
+    REFERENCES tasks (id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_task_comments_created_by
+    FOREIGN KEY (created_by)
+    REFERENCES member (id)
+);
+
+CREATE TABLE task_comment_attachments (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  task_comment_id INTEGER NOT NULL,
+  image_url VARCHAR NOT NULL,
+  original_name VARCHAR,
+  CONSTRAINT fk_task_comment_attachments_task_comment_id
+    FOREIGN KEY (task_comment_id)
+    REFERENCES task_comments (id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX idx_task_comments_task_id
+  ON task_comments (task_id);
+
+CREATE INDEX idx_task_comment_attachments_task_comment_id
+  ON task_comment_attachments (task_comment_id);

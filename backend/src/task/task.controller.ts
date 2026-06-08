@@ -4,6 +4,7 @@ import { CurrentMember } from "../auth/decorator/current-member.decorator";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { CurrentMember as CurrentMemberType } from "../auth/type/current-member.type";
 import { TaskCreateRequest } from "./dto/task-create.request";
+import { TaskDescriptionUpdateRequest } from "./dto/task-description-update.request";
 import { TaskDraftSaveRequest } from "./dto/task-draft-save.request";
 import { TaskService } from "./task.service";
 
@@ -54,6 +55,15 @@ export class TaskController {
   @Get(":id")
   async findDetail(@Param("id", ParseIntPipe) id: number) {
     return this.taskService.findDetail(id);
+  }
+
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
+  @Patch(":id/description")
+  async updateDescription(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() request: TaskDescriptionUpdateRequest
+  ) {
+    return this.taskService.updateDescription(id, request);
   }
 
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)

@@ -1,13 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
 import { MemberRepository } from "../member/member.repository";
+import { TaskCommentResponse } from "../task-comment/dto/task-comment.response";
 import { TaskCreateRequest } from "./dto/task-create.request";
 import { TaskCreateResponse } from "./dto/task-create.response";
+import { TaskDescriptionUpdateRequest } from "./dto/task-description-update.request";
 import { TaskDetailMemberResponse, TaskDetailResponse } from "./dto/task-detail.response";
 import { TaskDraftResponse } from "./dto/task-draft.response";
 import { TaskDraftSaveRequest } from "./dto/task-draft-save.request";
 import { TaskStatusSummaryResponse } from "./dto/task-status-summary.response";
 import { TaskAttachment } from "./entity/task-attachment.entity";
+import { TaskComment } from "../task-comment/entity/task-comment.entity";
 import { Task } from "./entity/task.entity";
 import { TaskAssigneeScope } from "./enum/task-assignee-scope.enum";
 import { TaskStatus } from "./enum/task-status.enum";
@@ -69,6 +72,15 @@ export class TaskService {
       id: task.id,
       title: task.title,
       description: task.description,
+      descriptionHighlightStart: this.isDescriptionHighlightActive(task)
+        ? task.descriptionHighlightStart
+        : null,
+      descriptionHighlightEnd: this.isDescriptionHighlightActive(task)
+        ? task.descriptionHighlightEnd
+        : null,
+      descriptionHighlightExpiresAt: this.isDescriptionHighlightActive(task)
+        ? task.descriptionHighlightExpiresAt
+        : null,
       oneLineComment: task.oneLineComment,
       status: task.status,
       assignee: this.toTaskMemberResponse(task.assignee),
@@ -79,11 +91,34 @@ export class TaskService {
         originalName: attachment.originalName,
         createdAt: attachment.createdAt
       })),
+      comments: task.comments.map((comment) => this.toTaskCommentResponse(comment)),
       completedAt: task.completedAt,
       reviewRequestedAt: task.reviewRequestedAt,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt
     };
+  }
+
+  async updateDescription(
+    id: number,
+    request: TaskDescriptionUpdateRequest
+  ): Promise<TaskDetailResponse> {
+    const task = await this.taskRepository.findPublishedById(id);
+
+    if (!task) {
+      throw new TaskNotFoundException(id);
+    }
+
+    const highlightRange = this.findAddedDescriptionRange(task.description, request.description);
+    task.description = request.description;
+    task.descriptionHighlightStart = highlightRange?.start ?? null;
+    task.descriptionHighlightEnd = highlightRange?.end ?? null;
+    task.descriptionHighlightExpiresAt = highlightRange
+      ? new Date(Date.now() + 24 * 60 * 60 * 1000)
+      : null;
+
+    await this.taskRepository.save(task);
+    return this.findDetail(id);
   }
 
   async createDraft(
@@ -177,5 +212,65 @@ export class TaskService {
       createdAt: task.createdAt,
       updatedAt: task.updatedAt
     };
+  }
+
+  private toTaskCommentResponse(comment: TaskComment): TaskCommentResponse {
+    return {
+      id: comment.id,
+      taskId: comment.taskId,
+      content: comment.content,
+      oneLineComment: comment.oneLineComment,
+      attachments: comment.attachments.map((attachment) => ({
+        id: attachment.id,
+        imageUrl: attachment.imageUrl,
+        originalName: attachment.originalName,
+        createdAt: attachment.createdAt
+      })),
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt
+    };
+  }
+
+  private findAddedDescriptionRange(
+    previousDescription: string,
+    nextDescription: string
+  ): { end: number; start: number } | null {
+    if (previousDescription === nextDescription || nextDescription.length <= previousDescription.length) {
+      return null;
+    }
+
+    let start = 0;
+    while (
+      start < previousDescription.length &&
+      start < nextDescription.length &&
+      previousDescription[start] === nextDescription[start]
+    ) {
+      start += 1;
+    }
+
+    let previousEnd = previousDescription.length - 1;
+    let nextEnd = nextDescription.length - 1;
+    while (
+      previousEnd >= start &&
+      nextEnd >= start &&
+      previousDescription[previousEnd] === nextDescription[nextEnd]
+    ) {
+      previousEnd -= 1;
+      nextEnd -= 1;
+    }
+
+    return {
+      end: nextEnd + 1,
+      start
+    };
+  }
+
+  private isDescriptionHighlightActive(task: Task): boolean {
+    return Boolean(
+      task.descriptionHighlightStart !== null &&
+        task.descriptionHighlightEnd !== null &&
+        task.descriptionHighlightExpiresAt &&
+        task.descriptionHighlightExpiresAt.getTime() > Date.now()
+    );
   }
 }
