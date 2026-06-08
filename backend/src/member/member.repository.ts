@@ -88,6 +88,30 @@ export class MemberRepository {
     });
   }
 
+  async findActiveAssignableMembersByFilter(branch?: string, positionId?: number): Promise<Member[]> {
+    const queryBuilder = this.memberRepository
+      .createQueryBuilder("member")
+      .leftJoinAndSelect("member.positionInfo", "position")
+      .leftJoinAndSelect("member.positionDuty", "positionDuty")
+      .where("member.isActive = true")
+      .andWhere("member.roleType NOT IN (:...roleTypes)", {
+        roleTypes: [MemberRole.CEO, MemberRole.ADMIN]
+      });
+
+    if (branch) {
+      queryBuilder.andWhere("member.branch = :branch", { branch });
+    }
+
+    if (positionId) {
+      queryBuilder.andWhere("member.positionId = :positionId", { positionId });
+    }
+
+    return queryBuilder
+      .orderBy("position.displayOrder", "ASC")
+      .addOrderBy("member.name", "ASC")
+      .getMany();
+  }
+
   async findActiveByPositionCodes(positionCodes: string[]): Promise<Member[]> {
     return this.memberRepository
       .createQueryBuilder("member")

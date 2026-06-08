@@ -24,6 +24,11 @@ export type Member = {
   avatarUrl: string | null;
   branch: string | null;
   positionId: number | null;
+  positionInfo?: {
+    id: number;
+    code: string;
+    name: string;
+  } | null;
   positionDutyId: number | null;
   roleType: MemberRole;
   isActive: boolean;

@@ -30,6 +30,14 @@ export class TaskCreateRequest {
   assigneeId?: number;
 
   @IsOptional()
+  @IsString({ message: "지점은 문자열이어야 합니다." })
+  branch?: string;
+
+  @IsOptional()
+  @IsNumber({}, { message: "직위 ID는 숫자여야 합니다." })
+  positionId?: number;
+
+  @IsOptional()
   @IsArray({ message: "첨부 사진 목록은 배열이어야 합니다." })
   @ValidateNested({ each: true })
   @Type(() => TaskAttachmentCreateRequest)

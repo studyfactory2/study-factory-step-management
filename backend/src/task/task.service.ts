@@ -62,7 +62,10 @@ export class TaskService {
       return [request.assigneeId];
     }
 
-    const members = await this.memberRepository.findActiveAssignableMembers();
+    const members = await this.memberRepository.findActiveAssignableMembersByFilter(
+      request.branch,
+      request.positionId
+    );
     return members.map((member) => member.id);
   }
 

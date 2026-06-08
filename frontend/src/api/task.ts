@@ -14,6 +14,8 @@ export type TaskCreateRequest = {
   description: string;
   assigneeScope: TaskAssigneeScope;
   assigneeId?: number;
+  branch?: string;
+  positionId?: number;
 };
 
 export type TaskCreateResponse = {

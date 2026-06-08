@@ -73,8 +73,8 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
   const [memberPreRegistrations, setMemberPreRegistrations] = useState<MemberPreRegistration[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedBranch, setSelectedBranch] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
   const [selectedAssigneeId, setSelectedAssigneeId] = useState("");
+  const [selectedAssigneePositionId, setSelectedAssigneePositionId] = useState("");
   const [recentTaskStatus, setRecentTaskStatus] = useState<TaskStatus>("REVIEW_REQUESTED");
   const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder | "">("");
   const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
@@ -119,23 +119,12 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     return Array.from(new Set(values));
   }, [members]);
 
-  const roles = useMemo(() => {
-    return Array.from(
-      new Set(
-        members
-          .filter((member) => !selectedBranch || member.branch === selectedBranch)
-          .map((member) => member.roleType)
-      )
-    );
-  }, [members, selectedBranch]);
-
   const assignees = useMemo(() => {
     return members.filter((member) => {
       const isSameBranch = !selectedBranch || member.branch === selectedBranch;
-      const isSameRole = !selectedRole || member.roleType === selectedRole;
-      return isSameBranch && isSameRole;
+      return isSameBranch;
     });
-  }, [members, selectedBranch, selectedRole]);
+  }, [members, selectedBranch]);
 
   async function refreshDashboard() {
     const dashboardResponse = await getAdminDashboard(accessToken, {
@@ -208,7 +197,7 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
     setMessage("");
 
     if (!selectedAssigneeId) {
-      setMessage("담당자를 선택해주세요.");
+      setMessage("직원을 선택해주세요.");
       return;
     }
 
@@ -219,12 +208,16 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
         description,
         assigneeScope: selectedAssigneeId === ALL_ASSIGNEES_VALUE ? "ALL" : "SINGLE",
         ...(selectedAssigneeId === ALL_ASSIGNEES_VALUE
-          ? {}
+          ? {
+              ...(selectedBranch ? { branch: selectedBranch } : {}),
+              ...(selectedAssigneePositionId ? { positionId: Number(selectedAssigneePositionId) } : {})
+            }
           : { assigneeId: Number(selectedAssigneeId) })
       });
       setTitle("");
       setDescription("");
       setSelectedAssigneeId("");
+      setSelectedAssigneePositionId("");
       setMessage("업무가 등록되었습니다.");
       await refreshDashboard();
     } catch (error) {
@@ -236,13 +229,8 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
 
   function handleBranchChange(value: string) {
     setSelectedBranch(value);
-    setSelectedRole("");
     setSelectedAssigneeId("");
-  }
-
-  function handleRoleChange(value: string) {
-    setSelectedRole(value);
-    setSelectedAssigneeId("");
+    setSelectedAssigneePositionId("");
   }
 
   async function handlePreRegister(request: {
@@ -350,13 +338,12 @@ export function AdminDashboardPage({ accessToken, onLogout }: AdminDashboardPage
           onAssigneeChange={setSelectedAssigneeId}
           onBranchChange={handleBranchChange}
           onDescriptionChange={setDescription}
-          onRoleChange={handleRoleChange}
+          onPositionChange={setSelectedAssigneePositionId}
           onSubmit={handleCreateTask}
           onTitleChange={setTitle}
-          roles={roles}
+          selectedAssigneePositionId={selectedAssigneePositionId}
           selectedAssigneeId={selectedAssigneeId}
           selectedBranch={selectedBranch}
-          selectedRole={selectedRole}
           title={title}
         />
         <RecentOutputsSection
