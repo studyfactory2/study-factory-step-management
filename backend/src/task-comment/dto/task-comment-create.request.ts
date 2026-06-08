@@ -22,12 +22,13 @@ export class TaskCommentCreateRequest {
   @Type(() => TaskCommentAttachmentCreateRequest)
   attachments?: TaskCommentAttachmentCreateRequest[];
 
-  toEntity(taskId: number, createdBy: number): TaskComment {
+  toEntity(taskId: number, createdBy: number, status: TaskStatus): TaskComment {
     const comment = new TaskComment();
     comment.taskId = taskId;
     comment.createdBy = createdBy;
     comment.content = this.content;
     comment.oneLineComment = this.oneLineComment ?? null;
+    comment.status = status;
 
     return comment;
   }

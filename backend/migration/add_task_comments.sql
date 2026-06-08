@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS task_comments (
   created_by INTEGER NOT NULL,
   content TEXT NOT NULL,
   one_line_comment VARCHAR,
+  status task_status_enum NOT NULL DEFAULT 'REGISTERED',
   CONSTRAINT fk_task_comments_task_id
     FOREIGN KEY (task_id)
     REFERENCES tasks (id)

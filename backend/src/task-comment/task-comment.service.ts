@@ -3,6 +3,7 @@ import { CurrentMember } from "../auth/type/current-member.type";
 import { Task } from "../task/entity/task.entity";
 import { TaskStatus } from "../task/enum/task-status.enum";
 import { TaskNotFoundException } from "../task/exception/task-not-found.exception";
+import { TaskCommentActivityResponse } from "./dto/task-comment-activity.response";
 import { TaskCommentCreateRequest } from "./dto/task-comment-create.request";
 import { TaskCommentResponse } from "./dto/task-comment.response";
 import { TaskCommentAttachment } from "./entity/task-comment-attachment.entity";
@@ -20,11 +21,10 @@ export class TaskCommentService {
   ): Promise<TaskCommentResponse> {
     const task = await this.findPublishedTaskEntity(taskId);
 
-    if (request.status) {
-      await this.updateTaskStatus(task, request.status);
-    }
+    const commentStatus = request.status ?? task.status;
+    await this.updateTaskStatus(task, commentStatus);
 
-    const comment = request.toEntity(taskId, currentMember.memberId);
+    const comment = request.toEntity(taskId, currentMember.memberId, commentStatus);
     const savedComment = await this.taskCommentRepository.saveComment(comment);
     const attachments = this.createAttachments(savedComment.id, request);
 
@@ -42,6 +42,11 @@ export class TaskCommentService {
 
     const comments = await this.taskCommentRepository.findByTaskId(taskId);
     return comments.map((comment) => this.toResponse(comment));
+  }
+
+  async findRecent(limit = 100): Promise<TaskCommentActivityResponse[]> {
+    const comments = await this.taskCommentRepository.findRecent(limit);
+    return comments.map((comment) => this.toActivityResponse(comment));
   }
 
   private async findPublishedTaskEntity(taskId: number) {
@@ -85,12 +90,28 @@ export class TaskCommentService {
       taskId: comment.taskId,
       content: comment.content,
       oneLineComment: comment.oneLineComment,
+      status: comment.status,
       attachments: comment.attachments.map((attachment) => ({
         id: attachment.id,
         imageUrl: attachment.imageUrl,
         originalName: attachment.originalName,
         createdAt: attachment.createdAt
       })),
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt
+    };
+  }
+
+  private toActivityResponse(comment: TaskComment): TaskCommentActivityResponse {
+    return {
+      id: comment.id,
+      taskId: comment.taskId,
+      taskTitle: comment.task.title,
+      assigneeName: comment.task.assignee.name,
+      assigneeRoleType: comment.task.assignee.roleType,
+      assigneePositionName: comment.task.assignee.positionInfo?.name ?? null,
+      oneLineComment: comment.oneLineComment,
+      status: comment.status,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt
     };

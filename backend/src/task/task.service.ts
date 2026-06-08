@@ -220,6 +220,7 @@ export class TaskService {
       taskId: comment.taskId,
       content: comment.content,
       oneLineComment: comment.oneLineComment,
+      status: comment.status,
       attachments: comment.attachments.map((attachment) => ({
         id: attachment.id,
         imageUrl: attachment.imageUrl,

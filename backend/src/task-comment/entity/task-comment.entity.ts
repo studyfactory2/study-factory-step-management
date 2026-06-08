@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "../../common/entity/base.entity";
 import { Member } from "../../member/entity/member.entity";
 import { Task } from "../../task/entity/task.entity";
+import { TaskStatus } from "../../task/enum/task-status.enum";
 import { TaskCommentAttachment } from "./task-comment-attachment.entity";
 
 @Entity({ name: "task_comments" })
@@ -25,6 +26,13 @@ export class TaskComment extends BaseEntity {
 
   @Column({ name: "one_line_comment", type: "varchar", nullable: true })
   oneLineComment: string | null;
+
+  @Column({
+    type: "enum",
+    enumName: "task_status_enum",
+    enum: TaskStatus
+  })
+  status: TaskStatus;
 
   @OneToMany(() => TaskCommentAttachment, (attachment) => attachment.comment)
   attachments: TaskCommentAttachment[];

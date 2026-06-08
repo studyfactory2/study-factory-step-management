@@ -67,7 +67,21 @@ export type TaskComment = {
   taskId: number;
   content: string;
   oneLineComment: string | null;
+  status: TaskStatus;
   attachments: TaskCommentAttachment[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TaskCommentActivity = {
+  id: number;
+  taskId: number;
+  taskTitle: string;
+  assigneeName: string;
+  assigneeRoleType: MemberRole;
+  assigneePositionName: string | null;
+  oneLineComment: string | null;
+  status: TaskStatus;
   createdAt: string;
   updatedAt: string;
 };
@@ -286,4 +300,25 @@ export async function createTaskComment(
   }
 
   return response.json() as Promise<TaskComment>;
+}
+
+export async function getTaskCommentActivities(
+  accessToken: string,
+  limit = 100
+): Promise<TaskCommentActivity[]> {
+  const response = await fetch(`${API_BASE_URL}/api/task-comments?limit=${limit}`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "활동내역을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskCommentActivity[]>;
 }

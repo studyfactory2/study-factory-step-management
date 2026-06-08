@@ -46,4 +46,16 @@ export class TaskCommentRepository {
       .addOrderBy("attachments.createdAt", "ASC")
       .getMany();
   }
+
+  async findRecent(limit: number): Promise<TaskComment[]> {
+    return this.taskCommentRepository
+      .createQueryBuilder("comment")
+      .leftJoinAndSelect("comment.task", "task")
+      .leftJoinAndSelect("task.assignee", "assignee")
+      .leftJoinAndSelect("assignee.positionInfo", "position")
+      .where("task.isDraft = false")
+      .orderBy("comment.updatedAt", "DESC")
+      .limit(limit)
+      .getMany();
+  }
 }
