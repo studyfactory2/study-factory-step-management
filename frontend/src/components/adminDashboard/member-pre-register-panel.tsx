@@ -20,7 +20,7 @@ const positionOptionsByAffiliation: Record<MemberAffiliation, MemberPosition[]> 
   ADMIN: [],
   CEO: [],
   DEVELOPMENT_TEAM: ["DEVELOPMENT_LEAD", "DEVELOPER"],
-  STAFF: ["STAFF", "EMPLOYEE", "FACTORY_MANAGER"]
+  STAFF: ["STAFF", "EMPLOYEE", "OPERATIONS_MANAGER"]
 };
 
 const dutyOptionsByPosition: Record<MemberPosition, MemberDuty[]> = {
@@ -29,7 +29,7 @@ const dutyOptionsByPosition: Record<MemberPosition, MemberDuty[]> = {
   DEVELOPER: ["DEVELOPMENT"],
   DEVELOPMENT_LEAD: ["DEVELOPMENT"],
   EMPLOYEE: ["CLEANING", "FOOD", "BEVERAGE"],
-  FACTORY_MANAGER: ["GENERAL"],
+  OPERATIONS_MANAGER: ["GENERAL"],
   STAFF: ["CLEANING", "FOOD", "BEVERAGE"]
 };
 

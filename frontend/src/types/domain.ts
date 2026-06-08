@@ -12,7 +12,7 @@ export type MemberPosition =
   | "EMPLOYEE"
   | "CEO"
   | "ADMIN"
-  | "FACTORY_MANAGER";
+  | "OPERATIONS_MANAGER";
 
 export type MemberAffiliation = "DEVELOPMENT_TEAM" | "STAFF" | "ADMIN" | "CEO";
 

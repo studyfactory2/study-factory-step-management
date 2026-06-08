@@ -26,7 +26,7 @@ CREATE TYPE member_position_enum AS ENUM (
   'EMPLOYEE',
   'CEO',
   'ADMIN',
-  'FACTORY_MANAGER'
+  'OPERATIONS_MANAGER'
 );
 
 CREATE TYPE member_pre_registration_role_type_enum AS ENUM (
@@ -57,7 +57,7 @@ CREATE TYPE member_pre_registration_position_enum AS ENUM (
   'EMPLOYEE',
   'CEO',
   'ADMIN',
-  'FACTORY_MANAGER'
+  'OPERATIONS_MANAGER'
 );
 
 CREATE TABLE member_positions (

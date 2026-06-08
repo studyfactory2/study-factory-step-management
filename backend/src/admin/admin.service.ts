@@ -17,8 +17,8 @@ import { AdminDashboardQueryRequest } from "./dto/admin-dashboard-query.request"
 
 @Injectable()
 export class AdminService {
-  private readonly employeePositionOrder = ["DEVELOPMENT_LEAD", "DEVELOPER", "FACTORY_MANAGER"];
-  private readonly dashboardEmployeePositionCodes = ["DEVELOPMENT_LEAD", "DEVELOPER", "FACTORY_MANAGER"];
+  private readonly employeePositionOrder = ["DEVELOPMENT_LEAD", "DEVELOPER", "OPERATIONS_MANAGER"];
+  private readonly dashboardEmployeePositionCodes = ["DEVELOPMENT_LEAD", "DEVELOPER", "OPERATIONS_MANAGER"];
   private readonly branchStaffPositionCodes = ["EMPLOYEE", "STAFF"];
 
   constructor(

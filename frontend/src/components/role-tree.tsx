@@ -19,7 +19,6 @@ type RoleTreeProps = {
 
 export function RoleTree({ positions, selectedPositionId, onSelectPosition }: RoleTreeProps) {
   const visiblePositions = filterVisiblePositions(positions);
-  const levels = createPositionLevels(visiblePositions);
 
   if (visiblePositions.length === 0) {
     return (
@@ -30,57 +29,87 @@ export function RoleTree({ positions, selectedPositionId, onSelectPosition }: Ro
   }
 
   return (
-    <div className="space-y-4">
-      {levels.map((level, depth) => (
-        <div
-          className={cn(
-            "gap-3",
-            level.length === 1
-              ? "flex justify-center"
-              : "grid grid-cols-2 lg:grid-cols-4"
-          )}
-          key={depth}
-        >
-          {level.map((position, index) => (
-            <PositionCard
-              className={level.length === 1 ? "w-40 lg:w-48" : undefined}
-              index={index + depth}
-              isSelected={selectedPositionId === position.id}
-              key={position.id}
-              onSelect={() => onSelectPosition(position.id)}
-              position={position}
-            />
-          ))}
-        </div>
+    <div className="space-y-6">
+      {visiblePositions.map((position, index) => (
+        <PositionNode
+          index={index}
+          isRoot
+          key={position.id}
+          onSelectPosition={onSelectPosition}
+          position={position}
+          selectedPositionId={selectedPositionId}
+        />
       ))}
     </div>
   );
 }
 
 function filterVisiblePositions(positions: PositionTreeNode[]): PositionTreeNode[] {
-  return positions
-    .filter((position) => position.isLoginVisible)
-    .map((position) => ({
-      ...position,
-      children: filterVisiblePositions(position.children ?? [])
-    }));
-}
+  return positions.flatMap((position) => {
+    const children = filterVisiblePositions(position.children ?? []);
 
-function createPositionLevels(positions: PositionTreeNode[]): PositionTreeNode[][] {
-  const levels: PositionTreeNode[][] = [];
-
-  function collect(nodes: PositionTreeNode[], depth: number) {
-    if (nodes.length === 0) {
-      return;
+    if (!position.isLoginVisible) {
+      return children;
     }
 
-    levels[depth] = [...(levels[depth] ?? []), ...nodes];
-    nodes.forEach((node) => collect(node.children ?? [], depth + 1));
-  }
+    return {
+      ...position,
+      children
+    };
+  });
+}
 
-  collect(positions, 0);
+function PositionNode({
+  index,
+  isRoot = false,
+  onSelectPosition,
+  position,
+  selectedPositionId
+}: {
+  index: number;
+  isRoot?: boolean;
+  onSelectPosition: (positionId: number) => void;
+  position: PositionTreeNode;
+  selectedPositionId: number | null;
+}) {
+  const children = position.children ?? [];
 
-  return levels;
+  return (
+    <div className="relative flex flex-col items-center">
+      <PositionCard
+        className={cn(isRoot ? "w-40 lg:w-48" : "w-full")}
+        index={index}
+        isSelected={selectedPositionId === position.id}
+        onSelect={() => onSelectPosition(position.id)}
+        position={position}
+      />
+
+      {children.length > 0 && (
+        <div className="relative mt-8 w-full">
+          <span className="absolute left-1/2 top-[-2rem] h-8 w-px -translate-x-1/2 bg-[#E5C5CB]" />
+          <span className="absolute left-[12%] right-[12%] top-0 h-px bg-[#E5C5CB]" />
+          <div
+            className={cn(
+              "grid gap-3 pt-5",
+              children.length <= 2 ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-4"
+            )}
+          >
+            {children.map((child, childIndex) => (
+              <div className="relative" key={child.id}>
+                <span className="absolute left-1/2 top-[-1.25rem] h-5 w-px -translate-x-1/2 bg-[#E5C5CB]" />
+                <PositionNode
+                  index={childIndex + index + 1}
+                  onSelectPosition={onSelectPosition}
+                  position={child}
+                  selectedPositionId={selectedPositionId}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function PositionCard({

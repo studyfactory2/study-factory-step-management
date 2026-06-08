@@ -18,7 +18,7 @@ export function EmployeeListSection({ employees }: EmployeeListSectionProps) {
             >
               <span
                 className={`mx-auto block h-7 rounded-full border border-[#F2C9C2] px-4 text-sm font-semibold leading-7 ${
-                  employee.positionCode === "FACTORY_MANAGER"
+                  employee.positionCode === "OPERATIONS_MANAGER"
                     ? "bg-[#E8F3DF] text-[#6D956A]"
                     : "bg-[#FBE6EA] text-primary"
                 }`}
