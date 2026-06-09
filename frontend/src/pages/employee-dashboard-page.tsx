@@ -33,6 +33,7 @@ import type { Member, TaskStatus } from "@/types/domain";
 type EmployeeDashboardPageProps = {
   accessToken: string;
   currentMember: StoredMember;
+  onAllTasksOpen: () => void;
   onLogout: () => void;
   onTaskDetailOpen: (taskId: number) => void;
 };
@@ -45,6 +46,7 @@ type ConfirmDialogState = {
 export function EmployeeDashboardPage({
   accessToken,
   currentMember,
+  onAllTasksOpen,
   onLogout,
   onTaskDetailOpen
 }: Partial<EmployeeDashboardPageProps>) {
@@ -205,7 +207,7 @@ export function EmployeeDashboardPage({
     }
   }
 
-  if (!accessToken || !currentMember || !onLogout || !onTaskDetailOpen) {
+  if (!accessToken || !currentMember || !onAllTasksOpen || !onLogout || !onTaskDetailOpen) {
     return null;
   }
 
@@ -250,6 +252,7 @@ export function EmployeeDashboardPage({
           onSubmit={handleCreateTask}
         />
         <RecentOutputsSection
+          onAllTasksOpen={onAllTasksOpen}
           onDetailOpen={onTaskDetailOpen}
           onSortOrderToggle={handleRecentTaskSortToggle}
           onStatusToggle={handleRecentTaskStatusToggle}

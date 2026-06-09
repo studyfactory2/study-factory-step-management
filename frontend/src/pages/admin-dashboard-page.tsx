@@ -40,6 +40,7 @@ import { isAssignableMember } from "@/components/adminDashboard/utils";
 
 type AdminDashboardPageProps = {
   accessToken: string;
+  onAllTasksOpen: () => void;
   onLogout: () => void;
   onTaskDetailOpen: (taskId: number) => void;
 };
@@ -63,7 +64,12 @@ type ConfirmDialogState = {
   title: string;
 } | null;
 
-export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: AdminDashboardPageProps) {
+export function AdminDashboardPage({
+  accessToken,
+  onAllTasksOpen,
+  onLogout,
+  onTaskDetailOpen
+}: AdminDashboardPageProps) {
   const [dashboard, setDashboard] = useState<AdminDashboard>(emptyDashboard);
   const [favoriteCandidates, setFavoriteCandidates] = useState<AdminDashboardEmployee[]>([]);
   const [memberPreRegistrations, setMemberPreRegistrations] = useState<MemberPreRegistration[]>([]);
@@ -331,6 +337,7 @@ export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: 
           onSubmit={handleCreateTask}
         />
         <RecentOutputsSection
+          onAllTasksOpen={onAllTasksOpen}
           onDetailOpen={onTaskDetailOpen}
           onSortOrderToggle={handleRecentTaskSortToggle}
           onStatusToggle={handleRecentTaskStatusToggle}

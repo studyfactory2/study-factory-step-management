@@ -453,3 +453,39 @@ export async function getTaskRecentWorkStatus(
 
   return response.json() as Promise<TaskRecentWorkStatus[]>;
 }
+
+export async function getTaskAllWorkStatus(
+  accessToken: string,
+  filters: {
+    sortOrder?: "LATEST" | "OLDEST";
+    statuses?: TaskStatus[];
+  } = {}
+): Promise<TaskRecentWorkStatus[]> {
+  const params = new URLSearchParams();
+
+  filters.statuses?.forEach((status) => {
+    params.append("status", status);
+  });
+
+  if (filters.sortOrder) {
+    params.set("sortOrder", filters.sortOrder);
+  }
+
+  const queryString = params.toString();
+  const response = await fetch(`${API_BASE_URL}/api/tasks/all-work-status${queryString ? `?${queryString}` : ""}`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "전체 업무를 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskRecentWorkStatus[]>;
+}
