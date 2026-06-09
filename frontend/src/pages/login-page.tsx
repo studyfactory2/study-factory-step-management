@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Heart,
   ClipboardList,
+  Eye,
   EyeOff,
   Lock,
   Sparkles,
@@ -78,6 +79,7 @@ type LoginPageProps = {
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [rememberName, setRememberName] = useState(false);
   const [positions, setPositions] = useState<PositionTreeNode[]>([]);
   const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
@@ -213,10 +215,21 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 maxLength={4}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="4자리"
-                type="password"
+                type={isPasswordVisible ? "text" : "password"}
                 value={password}
               />
-              <EyeOff aria-label="비밀번호 숨김" className="h-5 w-5 text-[#BFA4A0]" />
+              <button
+                aria-label={isPasswordVisible ? "비밀번호 숨기기" : "비밀번호 보기"}
+                className="text-[#BFA4A0] transition hover:text-[#F188A4]"
+                onClick={() => setIsPasswordVisible((current) => !current)}
+                type="button"
+              >
+                {isPasswordVisible ? (
+                  <Eye aria-hidden className="h-5 w-5" />
+                ) : (
+                  <EyeOff aria-hidden className="h-5 w-5" />
+                )}
+              </button>
             </label>
           </div>
 
