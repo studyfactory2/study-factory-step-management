@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { Task } from "../task/entity/task.entity";
@@ -21,6 +21,7 @@ export class TaskCommentService {
     currentMember: CurrentMember
   ): Promise<TaskCommentResponse> {
     const task = await this.findPublishedTaskEntity(taskId);
+    this.validateTaskCommentAccess(task, currentMember);
 
     const commentStatus = request.status ?? task.status;
     await this.updateTaskStatus(task, commentStatus);
@@ -35,11 +36,17 @@ export class TaskCommentService {
       savedComment.attachments = [];
     }
 
+    await this.taskCommentRepository.markTaskViewed(taskId, currentMember.memberId);
+
     return this.toResponse(savedComment);
   }
 
-  async findByTaskId(taskId: number): Promise<TaskCommentResponse[]> {
-    await this.findPublishedTaskEntity(taskId);
+  async findByTaskId(
+    taskId: number,
+    currentMember: CurrentMember
+  ): Promise<TaskCommentResponse[]> {
+    const task = await this.findPublishedTaskEntity(taskId);
+    this.validateTaskCommentAccess(task, currentMember);
 
     const comments = await this.taskCommentRepository.findByTaskId(taskId);
     return comments.map((comment) => this.toResponse(comment));
@@ -64,6 +71,19 @@ export class TaskCommentService {
     }
 
     return task;
+  }
+
+  private validateTaskCommentAccess(task: Task, currentMember: CurrentMember): void {
+    if (this.isAdminRole(currentMember.role)) {
+      return;
+    }
+
+    const isAssignee = task.assigneeId === currentMember.memberId;
+    const isCreator = task.createdBy === currentMember.memberId;
+
+    if (!isAssignee && !isCreator) {
+      throw new ForbiddenException("업무 코멘트 권한이 없습니다.");
+    }
   }
 
   private async updateTaskStatus(task: Task, status: TaskStatus): Promise<void> {
