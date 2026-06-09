@@ -1,7 +1,6 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { MemberPreRegistration } from "@/api/member";
-import type { MemberAffiliation, MemberDuty, MemberPosition } from "@/types/domain";
-import { affiliationLabels, dutyLabels, positionLabels } from "./constants";
+import { getPositionTree, type PositionTreeNode } from "@/api/position";
 
 type MemberPreRegisterPanelProps = {
   isLoading?: boolean;
@@ -11,31 +10,11 @@ type MemberPreRegisterPanelProps = {
   onClose: () => void;
   onDelete?: (id: number, name: string) => void;
   onSubmit: (request: {
-    affiliation: MemberAffiliation;
     branch: string;
-    duty: MemberDuty;
     name: string;
-    position: MemberPosition;
+    positionDutyId: number;
+    positionId: number;
   }) => Promise<void>;
-};
-
-const affiliationOptions: MemberAffiliation[] = ["DEVELOPMENT_TEAM", "STAFF"];
-
-const positionOptionsByAffiliation: Record<MemberAffiliation, MemberPosition[]> = {
-  ADMIN: [],
-  CEO: [],
-  DEVELOPMENT_TEAM: ["DEVELOPMENT_LEAD", "DEVELOPER"],
-  STAFF: ["STAFF", "EMPLOYEE", "OPERATIONS_MANAGER"]
-};
-
-const dutyOptionsByPosition: Record<MemberPosition, MemberDuty[]> = {
-  ADMIN: [],
-  CEO: [],
-  DEVELOPER: ["DEVELOPMENT"],
-  DEVELOPMENT_LEAD: ["DEVELOPMENT"],
-  EMPLOYEE: ["CLEANING", "FOOD", "BEVERAGE"],
-  OPERATIONS_MANAGER: ["GENERAL"],
-  STAFF: ["CLEANING", "FOOD", "BEVERAGE"]
 };
 
 export function MemberPreRegisterPanel({
@@ -49,41 +28,40 @@ export function MemberPreRegisterPanel({
 }: MemberPreRegisterPanelProps) {
   const [name, setName] = useState("");
   const [branch, setBranch] = useState("");
-  const [affiliation, setAffiliation] = useState<MemberAffiliation | "">("");
-  const [position, setPosition] = useState<MemberPosition | "">("");
-  const [duty, setDuty] = useState<MemberDuty | "">("");
-  const positionOptions = affiliation ? positionOptionsByAffiliation[affiliation] : [];
-  const dutyOptions = position ? dutyOptionsByPosition[position] : [];
+  const [positions, setPositions] = useState<PositionTreeNode[]>([]);
+  const [positionId, setPositionId] = useState<number | "">("");
+  const [positionDutyId, setPositionDutyId] = useState<number | "">("");
+  const flatPositions = useMemo(() => flattenPositions(positions), [positions]);
+  const selectedPosition = flatPositions.find((position) => position.id === positionId);
+  const dutyOptions = selectedPosition?.dutyOptions ?? [];
+
+  useEffect(() => {
+    getPositionTree()
+      .then(setPositions)
+      .catch(() => setPositions([]));
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!affiliation || !position || !duty) {
+    if (!positionId || !positionDutyId) {
       return;
     }
 
     await onSubmit({
-      affiliation,
       branch,
-      duty,
       name,
-      position
+      positionDutyId,
+      positionId
     });
     setName("");
     setBranch("");
-    setAffiliation("");
-    setPosition("");
-    setDuty("");
-  }
-
-  function handleAffiliationChange(value: string) {
-    setAffiliation(value as MemberAffiliation | "");
-    setPosition("");
-    setDuty("");
+    setPositionId("");
+    setPositionDutyId("");
   }
 
   function handlePositionChange(value: string) {
-    setPosition(value as MemberPosition | "");
-    setDuty("");
+    setPositionId(value ? Number(value) : "");
+    setPositionDutyId("");
   }
 
   return (
@@ -108,7 +86,7 @@ export function MemberPreRegisterPanel({
         className={
           layout === "modal"
             ? "mt-7 grid gap-4 sm:grid-cols-2"
-            : "mt-7 grid gap-5 lg:grid-cols-[1fr_1fr_180px_180px_180px_auto]"
+            : "mt-7 grid gap-5 lg:grid-cols-[1fr_1fr_180px_180px_auto]"
         }
         onSubmit={handleSubmit}
       >
@@ -128,42 +106,31 @@ export function MemberPreRegisterPanel({
         />
         <select
           className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium text-[#B79A94] outline-none"
-          onChange={(event) => handleAffiliationChange(event.target.value)}
-          required
-          value={affiliation}
-        >
-          <option value="">소속</option>
-          {affiliationOptions.map((option) => (
-            <option key={option} value={option}>
-              {affiliationLabels[option]}
-            </option>
-          ))}
-        </select>
-        <select
-          className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium text-[#B79A94] outline-none"
-          disabled={!affiliation}
           onChange={(event) => handlePositionChange(event.target.value)}
           required
-          value={position}
+          value={positionId}
         >
           <option value="">직급</option>
-          {positionOptions.map((option) => (
-            <option key={option} value={option}>
-              {positionLabels[option]}
+          {flatPositions
+            .filter((position) => !position.isAdmin)
+            .map((position) => (
+            <option key={position.id} value={position.id}>
+              {"　".repeat(position.depth)}
+              {position.name}
             </option>
           ))}
         </select>
         <select
           className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium text-[#B79A94] outline-none"
-          disabled={!position}
-          onChange={(event) => setDuty(event.target.value as MemberDuty)}
+          disabled={!positionId || dutyOptions.length === 0}
+          onChange={(event) => setPositionDutyId(event.target.value ? Number(event.target.value) : "")}
           required
-          value={duty}
+          value={positionDutyId}
         >
           <option value="">역할</option>
           {dutyOptions.map((option) => (
-            <option key={option} value={option}>
-              {dutyLabels[option]}
+            <option key={option.id} value={option.id}>
+              {option.name}
             </option>
           ))}
         </select>
@@ -201,15 +168,14 @@ export function MemberPreRegisterPanel({
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-base font-black text-[#3F2C28]">{preRegistration.name}</p>
                     <span className="text-sm font-bold text-primary">
-                      {positionLabels[preRegistration.position]}
+                      {preRegistration.positionInfo?.name ?? "직급 미지정"}
                     </span>
                     <span className="rounded-full bg-[#FBE6EA] px-2 py-1 text-xs font-bold text-primary">
                       가입 대기
                     </span>
                   </div>
                   <p className="mt-1 text-xs font-bold text-[#9B7A75]">
-                    {preRegistration.branch} · {affiliationLabels[preRegistration.affiliation]} ·{" "}
-                    {dutyLabels[preRegistration.duty]}
+                    {preRegistration.branch} · {preRegistration.positionDuty?.name ?? preRegistration.positionDuty?.duty ?? "역할 미지정"}
                   </p>
                 </div>
                 <button
@@ -227,4 +193,18 @@ export function MemberPreRegisterPanel({
       </div>
     </section>
   );
+}
+
+type FlatPosition = PositionTreeNode & {
+  depth: number;
+};
+
+function flattenPositions(positions: PositionTreeNode[], depth = 0): FlatPosition[] {
+  return positions.flatMap((position) => [
+    {
+      ...position,
+      depth
+    },
+    ...flattenPositions(position.children ?? [], depth + 1)
+  ]);
 }

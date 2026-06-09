@@ -94,3 +94,26 @@ export async function getFavoriteMembers(
 
   return response.json() as Promise<AdminDashboardEmployee[]>;
 }
+
+export async function reorderFavoriteMembers(
+  accessToken: string,
+  memberIds: number[]
+): Promise<AdminDashboardEmployee[]> {
+  const response = await fetch(`${API_BASE_URL}/api/favorite-members/order`, {
+    body: JSON.stringify({ memberIds }),
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    method: "PATCH"
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(getErrorMessage(error, "함께 프로젝트 중 직원 순서를 변경하지 못했습니다."));
+  }
+
+  return response.json() as Promise<AdminDashboardEmployee[]>;
+}

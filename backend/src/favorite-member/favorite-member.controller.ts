@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
 import { CurrentMember } from "../auth/decorator/current-member.decorator";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { CurrentMember as CurrentMemberType } from "../auth/type/current-member.type";
 import { FavoriteMemberCreateRequest } from "./dto/favorite-member-create.request";
+import { FavoriteMemberReorderRequest } from "./dto/favorite-member-reorder.request";
 import { FavoriteMemberService } from "./favorite-member.service";
 
 @Controller("favorite-members")
@@ -24,6 +25,14 @@ export class FavoriteMemberController {
     @Param("memberId", ParseIntPipe) memberId: number
   ) {
     return this.favoriteMemberService.deleteFavoriteMember(currentMember.memberId, memberId);
+  }
+
+  @Patch("order")
+  async reorderFavoriteMembers(
+    @CurrentMember() currentMember: CurrentMemberType,
+    @Body() request: FavoriteMemberReorderRequest
+  ) {
+    return this.favoriteMemberService.reorderFavoriteMembers(currentMember.memberId, request.memberIds);
   }
 
   @Get("candidates")

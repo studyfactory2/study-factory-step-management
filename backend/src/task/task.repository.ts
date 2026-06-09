@@ -41,6 +41,34 @@ export class TaskRepository {
     });
   }
 
+  async countByStatusAndCreatedAtBetween(
+    status: TaskStatus,
+    startAt: Date,
+    endAt: Date
+  ): Promise<number> {
+    return this.taskRepository.count({
+      where: {
+        status,
+        createdAt: Between(startAt, endAt),
+        isDraft: false
+      }
+    });
+  }
+
+  async countByStatusAndUpdatedAtBetween(
+    status: TaskStatus,
+    startAt: Date,
+    endAt: Date
+  ): Promise<number> {
+    return this.taskRepository.count({
+      where: {
+        status,
+        updatedAt: Between(startAt, endAt),
+        isDraft: false
+      }
+    });
+  }
+
   async countCompletedBetween(startAt: Date, endAt: Date): Promise<number> {
     return this.taskRepository.count({
       where: {

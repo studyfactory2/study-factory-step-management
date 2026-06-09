@@ -34,15 +34,34 @@ export class MemberService {
     return member;
   }
 
+  async findBranches(): Promise<string[]> {
+    return this.memberRepository.findBranches();
+  }
+
   async preRegister(request: MemberPreRegisterRequest): Promise<MemberPreRegistration> {
-    const roleType = request.position as unknown as MemberRole;
+    const positionInfo = await this.positionRepository.findActiveById(request.positionId);
+    if (!positionInfo) {
+      throw new MemberPositionNotFoundException(String(request.positionId));
+    }
+
+    const positionDuty = await this.positionRepository.findDutyByIdAndPositionId(
+      request.positionDutyId,
+      request.positionId
+    );
+    if (!positionDuty) {
+      throw new MemberPositionNotFoundException(String(request.positionId));
+    }
+
+    const roleType = this.resolveRoleType(positionInfo);
     const preRegistration = new MemberPreRegistration();
     preRegistration.name = request.name;
     preRegistration.branch = request.branch;
-    preRegistration.affiliation = request.affiliation;
-    preRegistration.position = request.position;
+    preRegistration.affiliation = null;
+    preRegistration.position = null;
     preRegistration.roleType = roleType;
-    preRegistration.duty = request.duty;
+    preRegistration.duty = null;
+    preRegistration.positionId = positionInfo.id;
+    preRegistration.positionDutyId = positionDuty.id;
     preRegistration.isRegistered = false;
 
     return this.memberRepository.savePreRegistration(preRegistration);
@@ -67,19 +86,21 @@ export class MemberService {
   }
 
   async register(request: MemberRegisterRequest): Promise<Member> {
-    const preRegistration = await this.memberRepository.findPendingPreRegistrationByName(request.name);
+    const preRegistration = await this.memberRepository.findPendingPreRegistrationByNameAndBranch(
+      request.name,
+      request.branch
+    );
 
     if (!preRegistration) {
-      throw new MemberPreRegistrationNotFoundException(request.name);
+      throw new MemberPreRegistrationNotFoundException(request.name, request.branch);
     }
 
-    const { branch, duty, position: positionCode } = preRegistration;
-    if (!branch || !duty || !positionCode) {
-      throw new MemberPreRegistrationNotFoundException(request.name);
+    const { branch, positionId, positionDutyId } = preRegistration;
+    if (!branch || !positionId || !positionDutyId) {
+      throw new MemberPreRegistrationNotFoundException(request.name, request.branch);
     }
 
     const passwordHash = this.createPasswordHash(request.password);
-    const roleType = this.resolveRoleType(positionCode);
     const duplicateMember = await this.memberRepository.findByNameAndPasswordHash(
       request.name,
       passwordHash
@@ -89,19 +110,20 @@ export class MemberService {
       throw new MemberDuplicateCredentialException(request.name);
     }
 
-    const position = await this.positionRepository.findActiveByCode(positionCode);
+    const position = await this.positionRepository.findActiveById(positionId);
     if (!position) {
-      throw new MemberPositionNotFoundException(positionCode);
+      throw new MemberPositionNotFoundException(String(positionId));
     }
 
-    const positionDuty = await this.positionRepository.findDutyByPositionIdAndDuty(
+    const positionDuty = await this.positionRepository.findDutyByIdAndPositionId(
+      positionDutyId,
       position.id,
-      duty
     );
     if (!positionDuty) {
-      throw new MemberPositionNotFoundException(positionCode);
+      throw new MemberPositionNotFoundException(String(positionId));
     }
 
+    const roleType = this.resolveRoleType(position);
     const displayName = await this.createDisplayName(request.name, branch);
     const member = request.toEntity(
       passwordHash,
@@ -132,12 +154,12 @@ export class MemberService {
     return `${name}${sameBranchMemberCount + 1}`;
   }
 
-  private resolveRoleType(position: string): MemberRole {
-    if (position === MemberRole.CEO) {
+  private resolveRoleType(position: { isAdmin: boolean; name: string }): MemberRole {
+    if (position.isAdmin && position.name === "대표") {
       return MemberRole.CEO;
     }
 
-    if (position === MemberRole.ADMIN) {
+    if (position.isAdmin) {
       return MemberRole.ADMIN;
     }
 

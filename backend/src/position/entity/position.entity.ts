@@ -4,9 +4,6 @@ import { PositionDuty } from "./position-duty.entity";
 
 @Entity({ name: "member_positions" })
 export class Position extends BaseEntity {
-  @Column({ unique: true })
-  code: string;
-
   @Column()
   name: string;
 

@@ -19,9 +19,9 @@ import { AdminDashboardQueryRequest } from "./dto/admin-dashboard-query.request"
 
 @Injectable()
 export class AdminService {
-  private readonly employeePositionOrder = ["DEVELOPMENT_LEAD", "DEVELOPER", "OPERATIONS_MANAGER"];
-  private readonly dashboardEmployeePositionCodes = ["DEVELOPMENT_LEAD", "DEVELOPER", "OPERATIONS_MANAGER"];
-  private readonly branchStaffPositionCodes = ["EMPLOYEE", "STAFF"];
+  private readonly employeePositionOrder = ["개발팀장", "개발자", "공장장"];
+  private readonly dashboardEmployeePositionNames = ["개발팀장", "개발자", "공장장"];
+  private readonly branchStaffPositionNames = ["직원", "스텝"];
 
   constructor(
     private readonly favoriteMemberService: FavoriteMemberService,
@@ -83,8 +83,8 @@ export class AdminService {
   }
 
   private async findDashboardEmployees(): Promise<Member[]> {
-    const employees = await this.memberRepository.findActiveByPositionCodes(
-      this.dashboardEmployeePositionCodes
+    const employees = await this.memberRepository.findActiveByPositionNames(
+      this.dashboardEmployeePositionNames
     );
 
     return this.sortMembersByPosition(employees);
@@ -93,8 +93,8 @@ export class AdminService {
   private sortMembersByPosition(employees: Member[]): Member[] {
     return employees.sort((a, b) => {
       const roleOrderDifference =
-        this.getPositionOrder(a.positionInfo?.code ?? "") -
-        this.getPositionOrder(b.positionInfo?.code ?? "");
+        this.getPositionOrder(a.positionInfo?.name ?? "") -
+        this.getPositionOrder(b.positionInfo?.name ?? "");
 
       if (roleOrderDifference !== 0) {
         return roleOrderDifference;
@@ -120,8 +120,8 @@ export class AdminService {
     const rows = await this.memberRepository.countActiveMembersByBranchAndRoleTypes(
       [MemberRole.EMPLOYEE]
     );
-    const positionRows = await this.memberRepository.countActiveMembersByBranchAndPositionCodes(
-      this.branchStaffPositionCodes
+    const positionRows = await this.memberRepository.countActiveMembersByBranchAndPositionNames(
+      this.branchStaffPositionNames
     );
 
     return positionRows.map((row) => ({
@@ -171,7 +171,6 @@ export class AdminService {
         id: member.id,
         name: this.getDisplayName(member),
         roleType: member.roleType,
-        positionCode: member.positionInfo?.code ?? null,
         positionName: member.positionInfo?.name ?? null,
         branch: member.branch,
         highestTaskStatus: this.getHighestTaskStatus(taskCounts),
@@ -235,8 +234,8 @@ export class AdminService {
     return null;
   }
 
-  private getPositionOrder(positionCode: string): number {
-    const order = this.employeePositionOrder.indexOf(positionCode);
+  private getPositionOrder(positionName: string): number {
+    const order = this.employeePositionOrder.indexOf(positionName);
 
     return order === -1 ? this.employeePositionOrder.length : order;
   }

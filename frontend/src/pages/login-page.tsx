@@ -6,6 +6,7 @@ import {
   Bell,
   BriefcaseBusiness,
   CheckCircle2,
+  ChevronDown,
   Heart,
   ClipboardList,
   Eye,
@@ -17,7 +18,7 @@ import {
   X
 } from "lucide-react";
 import { login, type LoginResponse } from "@/api/auth";
-import { registerMember } from "@/api/member";
+import { getMemberBranches, registerMember } from "@/api/member";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import { getTaskStatusSummary, type TaskStatusSummary } from "@/api/task";
 import { RoleTree } from "@/components/role-tree";
@@ -39,31 +40,46 @@ type StatusCardItem = {
 
 const defaultSummary: TaskStatusSummary = {
   registered: 0,
+  registeredToday: 0,
   inProgress: 0,
+  inProgressWeeklyChange: 0,
   reviewRequested: 0,
+  reviewRequestedWeeklyChange: 0,
   completedThisMonth: 0
 };
+
+function formatWeeklyChange(change: number): string {
+  if (change > 0) {
+    return `지난주 대비 ${change}건 증가`;
+  }
+
+  if (change < 0) {
+    return `지난주 대비 ${Math.abs(change)}건 감소`;
+  }
+
+  return "지난주와 동일";
+}
 
 function createStatusCards(summary: TaskStatusSummary): StatusCardItem[] {
   return [
     {
       label: "업무등록",
       value: String(summary.registered),
-      helper: "현재 등록중",
+      helper: `오늘 ${summary.registeredToday}건 등록`,
       icon: ClipboardList,
       tone: "pink"
     },
     {
       label: "진행 중",
       value: String(summary.inProgress),
-      helper: "현재 진행중",
+      helper: formatWeeklyChange(summary.inProgressWeeklyChange),
       icon: BriefcaseBusiness,
       tone: "lavender"
     },
     {
       label: "검토요청",
       value: String(summary.reviewRequested),
-      helper: "현재 검토요청중",
+      helper: formatWeeklyChange(summary.reviewRequestedWeeklyChange),
       icon: Bell,
       tone: "gold"
     },
@@ -119,7 +135,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       .catch(() => {
         setPositions([]);
         setSelectedPositionId(null);
-        setPositionTreeMessage("직위트리를 불러오지 못했습니다.");
+        setPositionTreeMessage("로그인 화면 조직도를 불러오지 못했습니다.");
       });
   }, []);
 
@@ -162,19 +178,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <h1 className="text-[34px] font-black leading-tight tracking-normal text-[#3F2C28]">
           자격증공장 업무전달현황
         </h1>
-        <p className="mt-2 text-[17px] font-bold text-[#9C7D79]">
-          이름과 비밀번호로 로그인하세요.
-        </p>
       </header>
 
       <section className="mb-5 rounded-[24px] border border-[#EBCDD1] bg-white/86 p-4 shadow-soft backdrop-blur">
-        <div className="mb-4 flex items-center gap-3 rounded-full bg-[#FFF1F6] px-4 py-2">
-          <h2 className="shrink-0 text-[20px] font-black tracking-normal text-[#3F2C28]">
+        <div className="mb-4 flex items-center justify-center rounded-full bg-[#FFF1F6] px-4 py-2">
+          <h2 className="text-center text-[20px] font-black tracking-normal text-[#3F2C28]">
             직위트리
           </h2>
-          <div className="min-w-0 flex-1 truncate rounded-full border border-[#EBCDD1] bg-white px-4 py-1.5 text-center text-sm font-bold text-[#9C7D79]">
-            관리자페이지에서 트리 모양과 텍스트를 수정할 수 있음
-          </div>
         </div>
 
         {positionTreeMessage ? (
@@ -212,7 +222,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 lg:grid-cols-[100px_1fr]">
-            <span className="text-base font-black text-[#4B332E]">로그인</span>
+            <span className="text-base font-black text-[#4B332E]">이름</span>
             <label className="flex min-h-[48px] items-center gap-3 rounded-[16px] border border-[#EBCDD1] bg-white px-4 shadow-sm">
               <UserRound aria-hidden className="h-5 w-5 text-[#F188A4]" />
               <input
@@ -316,9 +326,20 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
 function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
   const [registerName, setRegisterName] = useState("");
+  const [registerBranch, setRegisterBranch] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
+  const [branches, setBranches] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    getMemberBranches()
+      .then(setBranches)
+      .catch(() => {
+        setBranches([]);
+        setMessage("지점 목록을 불러오지 못했습니다.");
+      });
+  }, []);
 
   async function handleRegisterSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -327,11 +348,13 @@ function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
 
     try {
       await registerMember({
+        branch: registerBranch,
         name: registerName,
         password: registerPassword
       });
       setMessage("직원 등록이 완료되었습니다. 로그인해주세요.");
       setRegisterName("");
+      setRegisterBranch("");
       setRegisterPassword("");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "직원 등록에 실패했습니다.");
@@ -347,7 +370,7 @@ function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
           <div>
             <h2 className="text-[24px] font-black tracking-normal text-[#3F2C28]">직원 등록</h2>
             <p className="mt-1 text-sm font-bold text-[#9C7D79]">
-              사전등록된 이름과 사용할 비밀번호를 입력해주세요.
+              사전등록된 이름, 지점과 사용할 비밀번호를 입력해주세요.
             </p>
           </div>
           <button
@@ -361,6 +384,26 @@ function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
         </div>
 
         <form className="mt-5 space-y-3" onSubmit={handleRegisterSubmit}>
+          <div className="relative">
+            <select
+              className="h-12 w-full appearance-none rounded-[16px] border border-[#EBCDD1] bg-white px-4 pr-12 text-sm font-bold text-[#8D706B] outline-none disabled:bg-[#FFF7F8] disabled:text-[#C9ABA6]"
+              disabled={branches.length === 0}
+              onChange={(event) => setRegisterBranch(event.target.value)}
+              required
+              value={registerBranch}
+            >
+              <option value="">지점</option>
+              {branches.map((branch) => (
+                <option key={branch} value={branch}>
+                  {branch}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden
+              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#B88F89]"
+            />
+          </div>
           <input
             className="h-12 w-full rounded-[16px] border border-[#EBCDD1] bg-white px-4 text-sm font-bold text-[#4B332E] outline-none placeholder:text-[#C9ABA6]"
             onChange={(event) => setRegisterName(event.target.value)}

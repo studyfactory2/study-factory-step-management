@@ -34,22 +34,74 @@ export class TaskService {
 
   async getStatusSummary(): Promise<TaskStatusSummaryResponse> {
     const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const startOfThisWeek = this.getStartOfWeek(now);
+    const startOfLastWeek = new Date(startOfThisWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const [registered, inProgress, reviewRequested, completedThisMonth] = await Promise.all([
+    const [
+      registered,
+      registeredToday,
+      inProgress,
+      inProgressThisWeek,
+      inProgressLastWeek,
+      reviewRequested,
+      reviewRequestedThisWeek,
+      reviewRequestedLastWeek,
+      completedThisMonth
+    ] = await Promise.all([
       this.taskRepository.countByStatus(TaskStatus.REGISTERED),
+      this.taskRepository.countByStatusAndCreatedAtBetween(
+        TaskStatus.REGISTERED,
+        startOfToday,
+        startOfTomorrow
+      ),
       this.taskRepository.countByStatus(TaskStatus.IN_PROGRESS),
+      this.taskRepository.countByStatusAndUpdatedAtBetween(
+        TaskStatus.IN_PROGRESS,
+        startOfThisWeek,
+        now
+      ),
+      this.taskRepository.countByStatusAndUpdatedAtBetween(
+        TaskStatus.IN_PROGRESS,
+        startOfLastWeek,
+        startOfThisWeek
+      ),
       this.taskRepository.countByStatus(TaskStatus.REVIEW_REQUESTED),
+      this.taskRepository.countByStatusAndUpdatedAtBetween(
+        TaskStatus.REVIEW_REQUESTED,
+        startOfThisWeek,
+        now
+      ),
+      this.taskRepository.countByStatusAndUpdatedAtBetween(
+        TaskStatus.REVIEW_REQUESTED,
+        startOfLastWeek,
+        startOfThisWeek
+      ),
       this.taskRepository.countCompletedBetween(startOfMonth, endOfMonth)
     ]);
 
     return {
       registered,
+      registeredToday,
       inProgress,
+      inProgressWeeklyChange: inProgressThisWeek - inProgressLastWeek,
       reviewRequested,
+      reviewRequestedWeeklyChange: reviewRequestedThisWeek - reviewRequestedLastWeek,
       completedThisMonth
     };
+  }
+
+  private getStartOfWeek(date: Date): Date {
+    const startOfWeek = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const day = startOfWeek.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    startOfWeek.setDate(startOfWeek.getDate() + diff);
+
+    return startOfWeek;
   }
 
   async create(

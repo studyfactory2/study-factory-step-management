@@ -4,27 +4,38 @@ import { handleUnauthorizedResponse } from "@/api/client";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 export type MemberPreRegisterRequest = {
-  affiliation: MemberAffiliation;
   branch: string;
-  duty: MemberDuty;
   name: string;
-  position: MemberPosition;
+  positionDutyId: number;
+  positionId: number;
 };
 
 export type MemberRegisterRequest = {
+  branch: string;
   name: string;
   password: string;
 };
 
 export type MemberPreRegistration = {
   id: number;
-  affiliation: MemberAffiliation;
+  affiliation: MemberAffiliation | null;
   branch: string;
   createdAt: string;
-  duty: MemberDuty;
+  duty: MemberDuty | null;
   isRegistered: boolean;
   name: string;
-  position: MemberPosition;
+  position: MemberPosition | null;
+  positionDutyId: number | null;
+  positionDuty?: {
+    id: number;
+    name: string | null;
+    duty: MemberDuty | null;
+  } | null;
+  positionId: number | null;
+  positionInfo?: {
+    id: number;
+    name: string;
+  } | null;
   updatedAt: string;
 };
 
@@ -38,6 +49,18 @@ export async function getMembers(): Promise<Member[]> {
   }
 
   return response.json() as Promise<Member[]>;
+}
+
+export async function getMemberBranches(): Promise<string[]> {
+  const response = await fetch(`${API_BASE_URL}/api/members/branches`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("지점 목록을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<string[]>;
 }
 
 export async function preRegisterMember(

@@ -16,7 +16,11 @@ export class PositionDuty extends BaseEntity {
   @Column({
     type: "enum",
     enumName: "member_duty_enum",
-    enum: MemberDuty
+    enum: MemberDuty,
+    nullable: true
   })
-  duty: MemberDuty;
+  duty: MemberDuty | null;
+
+  @Column({ type: "varchar", nullable: true })
+  name: string | null;
 }

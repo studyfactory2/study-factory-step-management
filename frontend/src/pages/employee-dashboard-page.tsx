@@ -11,7 +11,8 @@ import {
   addFavoriteMember,
   deleteFavoriteMember,
   getFavoriteMemberCandidates,
-  getFavoriteMembers
+  getFavoriteMembers,
+  reorderFavoriteMembers
 } from "@/api/favorite-member";
 import { getMembers } from "@/api/member";
 import {
@@ -185,6 +186,25 @@ export function EmployeeDashboardPage({
     }
   }
 
+  async function handleReorderFavoriteMembers(memberIds: number[]) {
+    setIsFavoriteUpdating(true);
+    setMessage("");
+
+    try {
+      if (!accessToken) {
+        return;
+      }
+
+      const employees = await reorderFavoriteMembers(accessToken, memberIds);
+      setFavoriteMembers(employees);
+      setMessage("함께 프로젝트 중 직원 순서가 변경되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "함께 프로젝트 중 직원 순서를 변경하지 못했습니다.");
+    } finally {
+      setIsFavoriteUpdating(false);
+    }
+  }
+
   if (!accessToken || !currentMember || !onLogout || !onTaskDetailOpen) {
     return null;
   }
@@ -218,6 +238,7 @@ export function EmployeeDashboardPage({
             maxFavoriteCount={5}
             onAddFavoriteMember={handleAddFavoriteMember}
             onDeleteFavoriteMember={(memberId, memberName) => setConfirmDialog({ memberId, memberName })}
+            onReorderFavoriteMembers={handleReorderFavoriteMembers}
           />
         )}
         <TaskCreateForm

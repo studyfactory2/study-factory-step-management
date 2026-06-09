@@ -64,7 +64,6 @@ CREATE TABLE member_positions (
   id SERIAL PRIMARY KEY,
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
-  code VARCHAR NOT NULL UNIQUE,
   name VARCHAR NOT NULL,
   subtitle VARCHAR,
   duty member_duty_enum,

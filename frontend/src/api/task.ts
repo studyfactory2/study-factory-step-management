@@ -5,8 +5,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4
 
 export type TaskStatusSummary = {
   registered: number;
+  registeredToday: number;
   inProgress: number;
+  inProgressWeeklyChange: number;
   reviewRequested: number;
+  reviewRequestedWeeklyChange: number;
   completedThisMonth: number;
 };
 
