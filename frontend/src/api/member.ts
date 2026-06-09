@@ -11,6 +11,11 @@ export type MemberPreRegisterRequest = {
   position: MemberPosition;
 };
 
+export type MemberRegisterRequest = {
+  name: string;
+  password: string;
+};
+
 export type MemberPreRegistration = {
   id: number;
   affiliation: MemberAffiliation;
@@ -55,6 +60,25 @@ export async function preRegisterMember(
 
     throw new Error(message ?? "직원 사전등록에 실패했습니다.");
   }
+}
+
+export async function registerMember(request: MemberRegisterRequest): Promise<Member> {
+  const response = await fetch(`${API_BASE_URL}/api/members/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "직원 등록에 실패했습니다.");
+  }
+
+  return response.json() as Promise<Member>;
 }
 
 export async function getMemberPreRegistrations(accessToken: string): Promise<MemberPreRegistration[]> {
