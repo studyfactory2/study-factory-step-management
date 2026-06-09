@@ -40,31 +40,46 @@ type StatusCardItem = {
 
 const defaultSummary: TaskStatusSummary = {
   registered: 0,
+  registeredToday: 0,
   inProgress: 0,
+  inProgressWeeklyChange: 0,
   reviewRequested: 0,
+  reviewRequestedWeeklyChange: 0,
   completedThisMonth: 0
 };
+
+function formatWeeklyChange(change: number): string {
+  if (change > 0) {
+    return `지난주 대비 ${change}건 증가`;
+  }
+
+  if (change < 0) {
+    return `지난주 대비 ${Math.abs(change)}건 감소`;
+  }
+
+  return "지난주와 동일";
+}
 
 function createStatusCards(summary: TaskStatusSummary): StatusCardItem[] {
   return [
     {
       label: "업무등록",
       value: String(summary.registered),
-      helper: "현재 등록중",
+      helper: `오늘 ${summary.registeredToday}건 등록`,
       icon: ClipboardList,
       tone: "pink"
     },
     {
       label: "진행 중",
       value: String(summary.inProgress),
-      helper: "현재 진행중",
+      helper: formatWeeklyChange(summary.inProgressWeeklyChange),
       icon: BriefcaseBusiness,
       tone: "lavender"
     },
     {
       label: "검토요청",
       value: String(summary.reviewRequested),
-      helper: "현재 검토요청중",
+      helper: formatWeeklyChange(summary.reviewRequestedWeeklyChange),
       icon: Bell,
       tone: "gold"
     },
@@ -163,19 +178,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <h1 className="text-[34px] font-black leading-tight tracking-normal text-[#3F2C28]">
           자격증공장 업무전달현황
         </h1>
-        <p className="mt-2 text-[17px] font-bold text-[#9C7D79]">
-          이름과 비밀번호로 로그인하세요.
-        </p>
       </header>
 
       <section className="mb-5 rounded-[24px] border border-[#EBCDD1] bg-white/86 p-4 shadow-soft backdrop-blur">
-        <div className="mb-4 flex items-center gap-3 rounded-full bg-[#FFF1F6] px-4 py-2">
-          <h2 className="shrink-0 text-[20px] font-black tracking-normal text-[#3F2C28]">
-            조직도
+        <div className="mb-4 flex items-center justify-center rounded-full bg-[#FFF1F6] px-4 py-2">
+          <h2 className="text-center text-[20px] font-black tracking-normal text-[#3F2C28]">
+            직위트리
           </h2>
-          <div className="min-w-0 flex-1 truncate rounded-full border border-[#EBCDD1] bg-white px-4 py-1.5 text-center text-sm font-bold text-[#9C7D79]">
-            관리자페이지에서 트리 모양과 텍스트를 수정할 수 있음
-          </div>
         </div>
 
         {positionTreeMessage ? (
@@ -213,7 +222,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 lg:grid-cols-[100px_1fr]">
-            <span className="text-base font-black text-[#4B332E]">로그인</span>
+            <span className="text-base font-black text-[#4B332E]">이름</span>
             <label className="flex min-h-[48px] items-center gap-3 rounded-[16px] border border-[#EBCDD1] bg-white px-4 shadow-sm">
               <UserRound aria-hidden className="h-5 w-5 text-[#F188A4]" />
               <input
