@@ -70,6 +70,7 @@ export class TaskRepository {
       .leftJoinAndSelect("task.assignee", "assignee")
       .leftJoinAndSelect("assignee.positionInfo", "assigneePosition")
       .leftJoinAndSelect("task.attachments", "attachments")
+      .leftJoinAndSelect("task.comments", "comments")
       .where("task.status IN (:...statuses)", { statuses: options.statuses })
       .andWhere("task.isDraft = false");
 
@@ -95,6 +96,8 @@ export class TaskRepository {
     } else {
       queryBuilder.orderBy("task.updatedAt", "DESC");
     }
+
+    queryBuilder.addOrderBy("comments.updatedAt", "DESC");
 
     return queryBuilder.take(options.limit).getMany();
   }

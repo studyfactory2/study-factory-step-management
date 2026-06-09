@@ -196,7 +196,6 @@ CREATE TABLE tasks (
   description_highlight_start INTEGER,
   description_highlight_end INTEGER,
   description_highlight_expires_at TIMESTAMP,
-  one_line_comment VARCHAR,
   status task_status_enum NOT NULL,
   assignee_id INTEGER NOT NULL,
   created_by INTEGER NOT NULL,

@@ -188,9 +188,6 @@ function ProjectContentSection({
             <HighlightedDescription task={task} />
           </p>
         )}
-        {task.oneLineComment && (
-          <p className="mt-5 text-base font-black text-[#599BD7]">{task.oneLineComment}</p>
-        )}
       </div>
       {message && (
         <p className="mt-3 text-sm font-black text-primary">{message}</p>

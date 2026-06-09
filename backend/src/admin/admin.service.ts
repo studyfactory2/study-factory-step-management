@@ -145,7 +145,7 @@ export class AdminService {
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
-      oneLineComment: task.oneLineComment,
+      oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,
       memberName: task.assignee.name,
@@ -249,5 +249,17 @@ export class AdminService {
     }
 
     return readStatus.lastViewedAt.getTime() < task.updatedAt.getTime();
+  }
+
+  private findLatestCommentOneLineComment(task: Task): string | null {
+    const latestComment = task.comments?.reduce((latest, comment) => {
+      if (!latest) {
+        return comment;
+      }
+
+      return comment.updatedAt.getTime() > latest.updatedAt.getTime() ? comment : latest;
+    }, null as Task["comments"][number] | null);
+
+    return latestComment?.oneLineComment ?? null;
   }
 }

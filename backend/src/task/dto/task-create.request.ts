@@ -21,10 +21,6 @@ export class TaskCreateRequest {
   @IsString({ message: "업무 설명은 문자열이어야 합니다." })
   description: string;
 
-  @IsOptional()
-  @IsString({ message: "한줄멘트는 문자열이어야 합니다." })
-  oneLineComment?: string;
-
   @IsEnum(TaskAssigneeScope, { message: "유효하지 않은 담당자 지정 방식입니다." })
   assigneeScope: TaskAssigneeScope;
 
@@ -54,7 +50,6 @@ export class TaskCreateRequest {
     task.descriptionHighlightStart = null;
     task.descriptionHighlightEnd = null;
     task.descriptionHighlightExpiresAt = null;
-    task.oneLineComment = this.oneLineComment ?? null;
     task.status = TaskStatus.REGISTERED;
     task.assigneeId = assigneeId;
     task.createdBy = createdBy;

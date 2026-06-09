@@ -23,9 +23,6 @@ export class Task extends BaseEntity {
   @Column({ name: "description_highlight_expires_at", type: "timestamp", nullable: true })
   descriptionHighlightExpiresAt: Date | null;
 
-  @Column({ name: "one_line_comment", type: "varchar", nullable: true })
-  oneLineComment: string | null;
-
   @Column({
     type: "enum",
     enumName: "task_status_enum",

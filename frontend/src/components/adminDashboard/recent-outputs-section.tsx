@@ -101,7 +101,7 @@ export function RecentOutputsSection({
                   </p>
                 )}
                 <p className="mt-2 min-h-5 text-sm font-bold text-[#8F7470]">
-                  {output.oneLineComment ? `한줄멘트 : ${output.oneLineComment}` : "\u00A0"}
+                  {output.oneLineComment || "\u00A0"}
                 </p>
               </div>
               <span
