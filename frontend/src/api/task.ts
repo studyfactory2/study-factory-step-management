@@ -127,6 +127,7 @@ export type TaskRecentWorkStatus = {
   startedAt: string;
   submittedAt: string | null;
   attachmentPreviewUrls: string[];
+  isNew: boolean;
 };
 
 export async function getTaskStatusSummary(): Promise<TaskStatusSummary> {
