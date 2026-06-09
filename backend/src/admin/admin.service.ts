@@ -45,7 +45,7 @@ export class AdminService {
     return {
       currentMember: {
         id: currentMember.id,
-        name: currentMember.name,
+        name: this.getDisplayName(currentMember),
         roleType: currentMember.roleType,
         branch: currentMember.branch
       },
@@ -148,7 +148,7 @@ export class AdminService {
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,
-      memberName: task.assignee.name,
+      memberName: this.getDisplayName(task.assignee),
       memberRole: task.assignee.roleType,
       memberPositionName: task.assignee.positionInfo?.name ?? null,
       startedAt: task.createdAt,
@@ -169,7 +169,7 @@ export class AdminService {
 
       return {
         id: member.id,
-        name: member.name,
+        name: this.getDisplayName(member),
         roleType: member.roleType,
         positionCode: member.positionInfo?.code ?? null,
         positionName: member.positionInfo?.name ?? null,
@@ -211,6 +211,10 @@ export class AdminService {
       inProgress: 0,
       reviewRequested: 0
     };
+  }
+
+  private getDisplayName(member: Member): string {
+    return member.displayName ?? member.name;
   }
 
   private getHighestTaskStatus(

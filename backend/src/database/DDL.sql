@@ -104,6 +104,7 @@ CREATE TABLE member (
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   name VARCHAR NOT NULL,
+  display_name VARCHAR,
   password_hash VARCHAR NOT NULL,
   avatar_url VARCHAR,
   branch VARCHAR,

@@ -3,9 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { In, Not, Repository } from "typeorm";
 import { Member } from "./entity/member.entity";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
-import { MemberAffiliation } from "./enum/member-affiliation.enum";
-import { MemberDuty } from "./enum/member-duty.enum";
-import { MemberPosition } from "./enum/member-position.enum";
 import { MemberRole } from "./enum/member-role.enum";
 
 export type BranchMemberCountRow = {
@@ -169,24 +166,26 @@ export class MemberRepository {
     });
   }
 
+  async countByNameAndBranch(name: string, branch: string): Promise<number> {
+    return this.memberRepository.count({
+      where: {
+        name,
+        branch
+      }
+    });
+  }
+
   async save(member: Member): Promise<Member> {
     return this.memberRepository.save(member);
   }
 
-  async findPreRegistrationByNameAndRoleType(
-    name: string,
-    branch: string,
-    affiliation: MemberAffiliation,
-    position: MemberPosition,
-    duty: MemberDuty
-  ): Promise<MemberPreRegistration | null> {
+  async findPendingPreRegistrationByName(name: string): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
+      order: {
+        createdAt: "DESC"
+      },
       where: {
         name,
-        branch,
-        affiliation,
-        position,
-        duty,
         isRegistered: false
       }
     });

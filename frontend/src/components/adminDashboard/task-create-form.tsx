@@ -61,8 +61,8 @@ export function TaskCreateForm({
 
   const sortedAssignees = useMemo(() => {
     return [...assignees].sort((first, second) => {
-      const firstLabel = `${getMemberPositionName(first)}-${first.name}`;
-      const secondLabel = `${getMemberPositionName(second)}-${second.name}`;
+      const firstLabel = `${getMemberPositionName(first)}-${getMemberDisplayName(first)}`;
+      const secondLabel = `${getMemberPositionName(second)}-${getMemberDisplayName(second)}`;
       return firstLabel.localeCompare(secondLabel, "ko");
     });
   }, [assignees]);
@@ -298,7 +298,7 @@ function TaskDraftCard({
           <option value="">직원 선택</option>
           {assignees.map((member) => (
             <option key={member.id} value={member.id}>
-              {getMemberPositionName(member)}-{member.name}
+              {getMemberPositionName(member)}-{getMemberDisplayName(member)}
             </option>
           ))}
         </select>
@@ -380,4 +380,8 @@ function TaskDraftCard({
 
 function getMemberPositionName(member: Member): string {
   return member.positionInfo?.name ?? roleLabels[member.roleType];
+}
+
+function getMemberDisplayName(member: Member): string {
+  return member.displayName ?? member.name;
 }

@@ -67,50 +67,50 @@ export class MemberService {
   }
 
   async register(request: MemberRegisterRequest): Promise<Member> {
-    const preRegistration = await this.memberRepository.findPreRegistrationByNameAndRoleType(
-      request.name,
-      request.branch,
-      request.affiliation,
-      request.position,
-      request.duty
-    );
+    const preRegistration = await this.memberRepository.findPendingPreRegistrationByName(request.name);
 
     if (!preRegistration) {
-      throw new MemberPreRegistrationNotFoundException(
-        request.name,
-        request.branch,
-        request.affiliation,
-        request.position,
-        request.duty
-      );
+      throw new MemberPreRegistrationNotFoundException(request.name);
+    }
+
+    const { branch, duty, position: positionCode } = preRegistration;
+    if (!branch || !duty || !positionCode) {
+      throw new MemberPreRegistrationNotFoundException(request.name);
     }
 
     const passwordHash = this.createPasswordHash(request.password);
-    const roleType = this.resolveRoleType(request.position);
-    const duplicateMember = await this.memberRepository.findByNameAndRoleTypeAndPasswordHash(
+    const roleType = this.resolveRoleType(positionCode);
+    const duplicateMember = await this.memberRepository.findByNameAndPasswordHash(
       request.name,
-      roleType,
       passwordHash
     );
 
     if (duplicateMember) {
-      throw new MemberDuplicateCredentialException(request.name, request.position);
+      throw new MemberDuplicateCredentialException(request.name);
     }
 
-    const position = await this.positionRepository.findActiveByCode(request.position);
+    const position = await this.positionRepository.findActiveByCode(positionCode);
     if (!position) {
-      throw new MemberPositionNotFoundException(request.position);
+      throw new MemberPositionNotFoundException(positionCode);
     }
 
     const positionDuty = await this.positionRepository.findDutyByPositionIdAndDuty(
       position.id,
-      request.duty
+      duty
     );
     if (!positionDuty) {
-      throw new MemberPositionNotFoundException(request.position);
+      throw new MemberPositionNotFoundException(positionCode);
     }
 
-    const member = request.toEntity(passwordHash, position.id, positionDuty.id, roleType);
+    const displayName = await this.createDisplayName(request.name, branch);
+    const member = request.toEntity(
+      passwordHash,
+      branch,
+      displayName,
+      position.id,
+      positionDuty.id,
+      roleType
+    );
 
     preRegistration.isRegistered = true;
     await this.memberRepository.savePreRegistration(preRegistration);
@@ -120,6 +120,16 @@ export class MemberService {
 
   private createPasswordHash(password: string): string {
     return createHash("sha256").update(password).digest("hex");
+  }
+
+  private async createDisplayName(name: string, branch: string): Promise<string> {
+    const sameBranchMemberCount = await this.memberRepository.countByNameAndBranch(name, branch);
+
+    if (sameBranchMemberCount === 0) {
+      return name;
+    }
+
+    return `${name}${sameBranchMemberCount + 1}`;
   }
 
   private resolveRoleType(position: string): MemberRole {

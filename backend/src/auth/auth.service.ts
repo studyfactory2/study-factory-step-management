@@ -37,7 +37,7 @@ export class AuthService {
 
     const tokenPayload = {
       userId: member.id,
-      name: member.name,
+      name: member.displayName ?? member.name,
       roleType: member.roleType
     };
     const accessToken = this.generateAccessToken(tokenPayload);
@@ -50,7 +50,7 @@ export class AuthService {
       refreshToken,
       member: {
         id: member.id,
-        name: member.name,
+        name: member.displayName ?? member.name,
         branch: member.branch,
         roleType: member.roleType
       }

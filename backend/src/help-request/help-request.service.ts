@@ -80,6 +80,7 @@ export class HelpRequestService {
     const member = new Member();
     member.id = currentMember.memberId;
     member.name = currentMember.name;
+    member.displayName = currentMember.name;
     member.roleType = currentMember.role;
     member.positionInfo = null;
 
@@ -112,7 +113,7 @@ export class HelpRequestService {
     return {
       id: helpRequest.id,
       requesterId: helpRequest.requesterId,
-      requesterName: helpRequest.requester.name,
+      requesterName: this.getDisplayName(helpRequest.requester),
       requesterRoleType: helpRequest.requester.roleType,
       requesterPositionName: helpRequest.requester.positionInfo?.name ?? null,
       taskId: helpRequest.taskId,
@@ -127,5 +128,9 @@ export class HelpRequestService {
       })),
       requestedAt: helpRequest.createdAt
     };
+  }
+
+  private getDisplayName(member: Member): string {
+    return member.displayName ?? member.name;
   }
 }

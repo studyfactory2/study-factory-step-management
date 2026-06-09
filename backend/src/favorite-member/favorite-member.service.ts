@@ -145,7 +145,7 @@ export class FavoriteMemberService {
 
       return {
         id: member.id,
-        name: member.name,
+        name: this.getDisplayName(member),
         roleType: member.roleType,
         positionCode: member.positionInfo?.code ?? null,
         positionName: member.positionInfo?.name ?? null,
@@ -172,5 +172,9 @@ export class FavoriteMemberService {
     }
 
     return ownerMember;
+  }
+
+  private getDisplayName(member: Member): string {
+    return member.displayName ?? member.name;
   }
 }

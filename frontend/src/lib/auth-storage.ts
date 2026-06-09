@@ -13,6 +13,8 @@ export type StoredAuth = {
   currentMember: StoredMember | null;
 };
 
+const REMEMBERED_LOGIN_NAME_KEY = "rememberedLoginName";
+
 export function getStoredAuth(): StoredAuth {
   if (typeof window === "undefined") {
     return {
@@ -31,6 +33,22 @@ export function saveAuth(response: LoginResponse) {
   localStorage.setItem("accessToken", response.accessToken);
   localStorage.setItem("refreshToken", response.refreshToken);
   localStorage.setItem("currentMember", JSON.stringify(response.member));
+}
+
+export function getRememberedLoginName(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return localStorage.getItem(REMEMBERED_LOGIN_NAME_KEY) ?? "";
+}
+
+export function saveRememberedLoginName(name: string) {
+  localStorage.setItem(REMEMBERED_LOGIN_NAME_KEY, name);
+}
+
+export function clearRememberedLoginName() {
+  localStorage.removeItem(REMEMBERED_LOGIN_NAME_KEY);
 }
 
 export function clearAuth() {
