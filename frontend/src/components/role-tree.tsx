@@ -23,22 +23,24 @@ export function RoleTree({ positions, selectedPositionId, onSelectPosition }: Ro
   if (visiblePositions.length === 0) {
     return (
       <div className="rounded-[18px] border border-dashed border-[#EBCDD1] bg-[#FFF9FA] px-4 py-8 text-center text-sm font-bold text-[#9C7D79]">
-        등록된 직위트리가 없습니다.
+        등록된 조직도가 없습니다.
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 overflow-x-auto pb-1">
-      {visiblePositions.map((position, index) => (
-        <PositionNode
-          index={index}
-          key={position.id}
-          onSelectPosition={onSelectPosition}
-          position={position}
-          selectedPositionId={selectedPositionId}
-        />
-      ))}
+    <div className="overflow-x-auto pb-1">
+      <div className="flex min-w-max justify-center gap-5">
+        {visiblePositions.map((position, index) => (
+          <PositionNode
+            index={index}
+            key={position.id}
+            onSelectPosition={onSelectPosition}
+            position={position}
+            selectedPositionId={selectedPositionId}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -157,7 +159,7 @@ function PositionCard({
 }
 
 function getPositionIcon(position: PositionTreeNode): LucideIcon {
-  if (position.code === "CEO") {
+  if (position.name === "대표") {
     return Crown;
   }
 

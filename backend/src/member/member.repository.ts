@@ -40,6 +40,10 @@ export class MemberRepository {
 
   async findPreRegistrations(): Promise<MemberPreRegistration[]> {
     return this.memberPreRegistrationRepository.find({
+      relations: {
+        positionInfo: true,
+        positionDuty: true
+      },
       order: {
         isRegistered: "ASC",
         createdAt: "DESC"
@@ -47,8 +51,34 @@ export class MemberRepository {
     });
   }
 
+  async findBranches(): Promise<string[]> {
+    const memberBranches = await this.memberRepository
+      .createQueryBuilder("member")
+      .select("DISTINCT member.branch", "branch")
+      .where("member.branch IS NOT NULL")
+      .andWhere("member.branch != ''")
+      .getRawMany<{ branch: string }>();
+    const preRegistrationBranches = await this.memberPreRegistrationRepository
+      .createQueryBuilder("preRegistration")
+      .select("DISTINCT preRegistration.branch", "branch")
+      .where("preRegistration.branch IS NOT NULL")
+      .andWhere("preRegistration.branch != ''")
+      .getRawMany<{ branch: string }>();
+
+    return Array.from(
+      new Set([
+        ...memberBranches.map((row) => row.branch),
+        ...preRegistrationBranches.map((row) => row.branch)
+      ])
+    ).sort((first, second) => first.localeCompare(second, "ko"));
+  }
+
   async findPreRegistrationById(id: number): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
+      relations: {
+        positionInfo: true,
+        positionDuty: true
+      },
       where: { id }
     });
   }
@@ -109,26 +139,26 @@ export class MemberRepository {
       .getMany();
   }
 
-  async findActiveByPositionCodes(positionCodes: string[]): Promise<Member[]> {
+  async findActiveByPositionNames(positionNames: string[]): Promise<Member[]> {
     return this.memberRepository
       .createQueryBuilder("member")
       .leftJoinAndSelect("member.positionInfo", "position")
       .leftJoinAndSelect("member.positionDuty", "positionDuty")
       .where("member.isActive = true")
-      .andWhere("position.code IN (:...positionCodes)", { positionCodes })
+      .andWhere("position.name IN (:...positionNames)", { positionNames })
       .orderBy("position.displayOrder", "ASC")
       .addOrderBy("member.name", "ASC")
       .getMany();
   }
 
-  async countActiveMembersByBranchAndPositionCodes(positionCodes: string[]): Promise<BranchMemberCountRow[]> {
+  async countActiveMembersByBranchAndPositionNames(positionNames: string[]): Promise<BranchMemberCountRow[]> {
     return this.memberRepository
       .createQueryBuilder("member")
       .leftJoin("member.positionInfo", "position")
       .select("member.branch", "branch")
       .addSelect("COUNT(member.id)", "memberCount")
       .where("member.isActive = true")
-      .andWhere("position.code IN (:...positionCodes)", { positionCodes })
+      .andWhere("position.name IN (:...positionNames)", { positionNames })
       .groupBy("member.branch")
       .orderBy("member.branch", "ASC")
       .getRawMany<BranchMemberCountRow>();
@@ -179,12 +209,16 @@ export class MemberRepository {
     return this.memberRepository.save(member);
   }
 
-  async findPendingPreRegistrationByName(name: string): Promise<MemberPreRegistration | null> {
+  async findPendingPreRegistrationByNameAndBranch(
+    name: string,
+    branch: string
+  ): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
       order: {
         createdAt: "DESC"
       },
       where: {
+        branch,
         name,
         isRegistered: false
       }

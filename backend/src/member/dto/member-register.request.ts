@@ -9,6 +9,9 @@ export class MemberRegisterRequest {
   @Length(4, 4, { message: "비밀번호는 반드시 4자여야 합니다." })
   password: string;
 
+  @IsString({ message: "지점은 문자열이어야 합니다." })
+  branch: string;
+
   toEntity(
     passwordHash: string,
     branch: string,

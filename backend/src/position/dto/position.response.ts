@@ -1,12 +1,14 @@
 import { Position } from "../entity/position.entity";
-import { MemberDuty } from "../../member/enum/member-duty.enum";
 
 export class PositionResponse {
   id: number;
-  code: string;
   name: string;
   subtitle: string | null;
-  duties: MemberDuty[];
+  duties: string[];
+  dutyOptions: {
+    id: number;
+    name: string;
+  }[];
   parentId: number | null;
   displayOrder: number;
   isLoginVisible: boolean;
@@ -16,10 +18,13 @@ export class PositionResponse {
   static from(position: Position): PositionResponse {
     return {
       id: position.id,
-      code: position.code,
       name: position.name,
       subtitle: position.subtitle,
-      duties: position.dutyLinks?.map((dutyLink) => dutyLink.duty) ?? [],
+      duties: position.dutyLinks?.map((dutyLink) => dutyLink.name ?? dutyLink.duty ?? "").filter(Boolean) ?? [],
+      dutyOptions: position.dutyLinks?.map((dutyLink) => ({
+        id: dutyLink.id,
+        name: dutyLink.name ?? dutyLink.duty ?? "역할 미지정"
+      })) ?? [],
       parentId: position.parentId,
       displayOrder: position.displayOrder,
       isLoginVisible: position.isLoginVisible,

@@ -1,8 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
+import { flushSync } from "react-dom";
 import type { AdminDashboardEmployee } from "@/api/admin";
 import { statusLabels } from "./constants";
 
 type VisibleTaskStatus = "REGISTERED" | "IN_PROGRESS" | "REVIEW_REQUESTED";
+type DropIndicator = {
+  memberId: number;
+  side: "left" | "right";
+} | null;
 
 type EmployeeListSectionProps = {
   candidates: AdminDashboardEmployee[];
@@ -11,6 +16,7 @@ type EmployeeListSectionProps = {
   maxFavoriteCount?: number;
   onAddFavoriteMember: (memberId: number) => void;
   onDeleteFavoriteMember: (memberId: number, memberName: string) => void;
+  onReorderFavoriteMembers: (memberIds: number[]) => Promise<void>;
 };
 
 export function EmployeeListSection({
@@ -19,15 +25,187 @@ export function EmployeeListSection({
   isUpdating,
   maxFavoriteCount = 10,
   onAddFavoriteMember,
-  onDeleteFavoriteMember
+  onDeleteFavoriteMember,
+  onReorderFavoriteMembers
 }: EmployeeListSectionProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const favoriteMemberIds = employees.map((employee) => employee.id);
+  const [draggingMemberId, setDraggingMemberId] = useState<number | null>(null);
+  const [dropIndicator, setDropIndicator] = useState<DropIndicator>(null);
+  const [orderedEmployees, setOrderedEmployees] = useState(employees);
+  const hoverTargetIndexRef = useRef<string | null>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingOrderKeyRef = useRef<string | null>(null);
+  const cardElementMapRef = useRef(new Map<number, HTMLElement>());
+  const favoriteMemberIds = orderedEmployees.map((employee) => employee.id);
   const addableCandidates = candidates.filter((candidate) => !favoriteMemberIds.includes(candidate.id));
-  const visibleEmployees = employees;
+  const visibleEmployees = orderedEmployees;
   const favoriteSlots: Array<AdminDashboardEmployee | null> = Array.from({ length: maxFavoriteCount }, (_, index) =>
     visibleEmployees[index] ?? null
   );
+
+  useEffect(() => {
+    if (draggingMemberId) {
+      return;
+    }
+
+    const employeeOrderKey = createOrderKey(employees);
+
+    if (pendingOrderKeyRef.current && pendingOrderKeyRef.current !== employeeOrderKey) {
+      return;
+    }
+
+    pendingOrderKeyRef.current = null;
+    setOrderedEmployees(employees);
+  }, [draggingMemberId, employees]);
+
+  useEffect(() => {
+    return clearHoverTimer;
+  }, []);
+
+  function clearHoverTimer() {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+
+    hoverTimerRef.current = null;
+    hoverTargetIndexRef.current = null;
+  }
+
+  function reorderEmployees(
+    currentEmployees: AdminDashboardEmployee[],
+    draggingId: number,
+    insertionIndex: number
+  ) {
+    const sourceIndex = currentEmployees.findIndex((employee) => employee.id === draggingId);
+
+    if (sourceIndex < 0) {
+      return currentEmployees;
+    }
+
+    const nextEmployees = [...currentEmployees];
+    const [draggedEmployee] = nextEmployees.splice(sourceIndex, 1);
+    const targetIndex = insertionIndex > sourceIndex ? insertionIndex - 1 : insertionIndex;
+    nextEmployees.splice(Math.max(0, Math.min(targetIndex, nextEmployees.length)), 0, draggedEmployee);
+
+    return nextEmployees;
+  }
+
+  function setCardElement(memberId: number, element: HTMLElement | null) {
+    if (element) {
+      cardElementMapRef.current.set(memberId, element);
+      return;
+    }
+
+    cardElementMapRef.current.delete(memberId);
+  }
+
+  function getCardRects() {
+    const cardRects = new Map<number, DOMRect>();
+
+    cardElementMapRef.current.forEach((element, memberId) => {
+      cardRects.set(memberId, element.getBoundingClientRect());
+    });
+
+    return cardRects;
+  }
+
+  function animateReorder(nextEmployees: AdminDashboardEmployee[]) {
+    const previousRects = getCardRects();
+
+    flushSync(() => {
+      setOrderedEmployees(nextEmployees);
+    });
+
+    requestAnimationFrame(() => {
+      cardElementMapRef.current.forEach((element, memberId) => {
+        const previousRect = previousRects.get(memberId);
+
+        if (!previousRect) {
+          return;
+        }
+
+        const nextRect = element.getBoundingClientRect();
+        const translateX = previousRect.left - nextRect.left;
+        const translateY = previousRect.top - nextRect.top;
+
+        if (translateX === 0 && translateY === 0) {
+          return;
+        }
+
+        element.animate(
+          [
+            { transform: `translate(${translateX}px, ${translateY}px)` },
+            { transform: "translate(0, 0)" }
+          ],
+          {
+            duration: 360,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)"
+          }
+        );
+      });
+    });
+  }
+
+  function handleDragOver(targetIndex: number, event: DragEvent<HTMLElement>, targetMemberId: number) {
+    if (!draggingMemberId || isUpdating) {
+      return;
+    }
+
+    const sourceIndex = orderedEmployees.findIndex((employee) => employee.id === draggingMemberId);
+    const targetRect = event.currentTarget.getBoundingClientRect();
+    const side = event.clientX < targetRect.left + targetRect.width / 2 ? "left" : "right";
+    const insertionIndex = side === "left" ? targetIndex : targetIndex + 1;
+    const hoverKey = `${targetMemberId}-${side}-${insertionIndex}`;
+
+    if (sourceIndex < 0 || hoverTargetIndexRef.current === hoverKey) {
+      return;
+    }
+
+    clearHoverTimer();
+    setDropIndicator(
+      draggingMemberId === targetMemberId
+        ? null
+        : {
+            memberId: targetMemberId,
+            side
+          }
+    );
+    hoverTargetIndexRef.current = hoverKey;
+    hoverTimerRef.current = setTimeout(() => {
+      const nextEmployees = reorderEmployees(orderedEmployees, draggingMemberId, insertionIndex);
+      animateReorder(nextEmployees);
+      setDropIndicator(null);
+      clearHoverTimer();
+    }, 500);
+  }
+
+  function handleDragEnd() {
+    clearHoverTimer();
+    setDropIndicator(null);
+    setDraggingMemberId(null);
+
+    if (!pendingOrderKeyRef.current) {
+      setOrderedEmployees(employees);
+    }
+  }
+
+  async function handleDrop(targetIndex: number, event: DragEvent<HTMLElement>) {
+    if (!draggingMemberId || isUpdating) {
+      return;
+    }
+
+    clearHoverTimer();
+    const targetRect = event.currentTarget.getBoundingClientRect();
+    const side = event.clientX < targetRect.left + targetRect.width / 2 ? "left" : "right";
+    const insertionIndex = side === "left" ? targetIndex : targetIndex + 1;
+    const reorderedEmployees = reorderEmployees(orderedEmployees, draggingMemberId, insertionIndex);
+    pendingOrderKeyRef.current = createOrderKey(reorderedEmployees);
+    animateReorder(reorderedEmployees);
+    setDropIndicator(null);
+    setDraggingMemberId(null);
+
+    await onReorderFavoriteMembers(reorderedEmployees.map((employee) => employee.id));
+  }
 
   return (
     <section className="space-y-5">
@@ -39,8 +217,24 @@ export function EmployeeListSection({
           {favoriteSlots.map((employee, index) => (
             employee ? (
               <EmployeeCard
+                draggable={!isUpdating}
+                dropIndicatorSide={dropIndicator?.memberId === employee.id ? dropIndicator.side : null}
                 employee={employee}
+                isDragging={draggingMemberId === employee.id}
                 key={employee.id}
+                onCardRef={(element) => setCardElement(employee.id, element)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  handleDragOver(index, event, employee.id);
+                }}
+                onDragStart={(event) => {
+                  event.dataTransfer.effectAllowed = "move";
+                  event.dataTransfer.setData("text/plain", String(employee.id));
+                  setSoftDragImage(event);
+                  setDraggingMemberId(employee.id);
+                }}
+                onDrop={(event) => void handleDrop(index, event)}
                 onRemove={() => onDeleteFavoriteMember(employee.id, employee.name)}
               />
             ) : (
@@ -70,11 +264,52 @@ export function EmployeeListSection({
   );
 }
 
+function createOrderKey(employees: AdminDashboardEmployee[]): string {
+  return employees.map((employee) => employee.id).join(",");
+}
+
+function setSoftDragImage(event: DragEvent<HTMLElement>) {
+  const dragElement = event.currentTarget;
+  const dragImage = dragElement.cloneNode(true) as HTMLElement;
+  const rect = dragElement.getBoundingClientRect();
+
+  dragImage.style.width = `${rect.width}px`;
+  dragImage.style.height = `${rect.height}px`;
+  dragImage.style.opacity = "0.06";
+  dragImage.style.filter = "saturate(0.35) brightness(1.18)";
+  dragImage.style.pointerEvents = "none";
+  dragImage.style.position = "fixed";
+  dragImage.style.top = "-1000px";
+  dragImage.style.left = "-1000px";
+  dragImage.style.transform = "scale(0.96)";
+  dragImage.style.boxShadow = "none";
+  document.body.appendChild(dragImage);
+
+  event.dataTransfer.setDragImage(dragImage, rect.width / 2, rect.height / 2);
+  window.setTimeout(() => dragImage.remove(), 0);
+}
+
 function EmployeeCard({
+  draggable,
+  dropIndicatorSide,
   employee,
+  isDragging,
+  onDragEnd,
+  onDragOver,
+  onDragStart,
+  onDrop,
+  onCardRef,
   onRemove
 }: {
+  draggable: boolean;
+  dropIndicatorSide: "left" | "right" | null;
   employee: AdminDashboardEmployee;
+  isDragging: boolean;
+  onCardRef: (element: HTMLElement | null) => void;
+  onDragEnd: () => void;
+  onDragOver: (event: DragEvent<HTMLElement>) => void;
+  onDragStart: (event: DragEvent<HTMLElement>) => void;
+  onDrop: (event: DragEvent<HTMLElement>) => void;
   onRemove: () => void;
 }) {
   const [visibleStatus, setVisibleStatus] = useState<VisibleTaskStatus>(
@@ -97,7 +332,24 @@ function EmployeeCard({
   }
 
   return (
-    <article className="relative min-h-[252px] rounded-[24px] border border-[#F1CFD5] bg-white px-5 py-5 text-center shadow-[0_8px_0_#F3D1D8]">
+    <article
+      className={`relative min-h-[252px] cursor-grab rounded-[24px] border border-[#F1CFD5] bg-white px-5 py-5 text-center shadow-[0_8px_0_#F3D1D8] transition active:cursor-grabbing ${
+        isDragging ? "opacity-0" : ""
+      }`}
+      draggable={draggable}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDragStart={onDragStart}
+      onDrop={onDrop}
+      ref={onCardRef}
+    >
+      {dropIndicatorSide && !isDragging && (
+        <span
+          className={`pointer-events-none absolute bottom-4 top-4 z-10 w-2 rounded-full bg-primary/30 shadow-[0_0_18px_rgba(241,136,164,0.65)] ${
+            dropIndicatorSide === "left" ? "-left-3" : "-right-3"
+          }`}
+        />
+      )}
       <button
         aria-label={`${employee.name} 삭제`}
         className="absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border border-[#F1CFD5] bg-[#FFF8F9] text-xs font-black text-primary"
@@ -227,7 +479,7 @@ function FavoriteMemberAddModal({
             onChange={(event) => handleBranchChange(event.target.value)}
             value={selectedBranch}
           >
-            <option value="">브랜치</option>
+            <option value="">지점</option>
             {branches.map((branch) => (
               <option key={branch} value={branch}>
                 {branch}

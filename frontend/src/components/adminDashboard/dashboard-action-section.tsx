@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 import { Bell, GitBranch, UserPlus, UsersRound, X } from "lucide-react";
+import { cn } from "@/util/utils";
 
-export type MemberManagementView = "menu" | "preRegister";
+export type MemberManagementView = "menu" | "preRegister" | "positionTree";
 
 type DashboardActionSectionProps = {
   isMemberManagementOpen: boolean;
   memberManagementView: MemberManagementView;
   memberPreRegisterPanel: ReactNode;
+  positionTreeManagementPanel: ReactNode;
   onCloseMemberManagement: () => void;
   onOpenMemberManagement: () => void;
   onSelectMemberPreRegister: () => void;
@@ -17,6 +19,7 @@ export function DashboardActionSection({
   isMemberManagementOpen,
   memberManagementView,
   memberPreRegisterPanel,
+  positionTreeManagementPanel,
   onCloseMemberManagement,
   onOpenMemberManagement,
   onSelectMemberPreRegister,
@@ -32,7 +35,7 @@ export function DashboardActionSection({
         <div>
           <p className="text-2xl font-semibold text-[#5A3E3B]">직원관리</p>
           <p className="mt-2 text-sm font-medium text-[#9B7A75]">
-            사원 사전등록/삭제, 로그인 화면 트리생성 기능
+            사원 사전등록/삭제, 로그인 화면 조직도 생성 기능
           </p>
         </div>
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FBE6EA] text-primary">
@@ -52,15 +55,20 @@ export function DashboardActionSection({
         </span>
       </button>
       {isMemberManagementOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#3F2C28]/30 px-4">
-          <div className="w-full max-w-[760px] rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] p-7 shadow-[0_18px_44px_rgba(90,62,59,0.18)]">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#3F2C28]/30 px-4 py-6">
+          <div
+            className={cn(
+              "flex max-h-[calc(100dvh-48px)] w-full flex-col rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] p-6 shadow-[0_18px_44px_rgba(90,62,59,0.18)]",
+              memberManagementView === "positionTree" ? "max-w-[860px]" : "max-w-[760px]"
+            )}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-2xl font-black text-[#3F2C28]">직원관리</p>
                 <p className="mt-2 text-sm font-semibold text-[#9B7A75]">
-                  {memberManagementView === "menu"
-                    ? "관리할 항목을 선택해주세요."
-                    : "사원 사전등록 정보를 입력해주세요."}
+                  {memberManagementView === "menu" && "관리할 항목을 선택해주세요."}
+                  {memberManagementView === "preRegister" && "사원 사전등록 정보를 입력해주세요."}
+                  {memberManagementView === "positionTree" && "로그인 화면 조직도를 관리해주세요."}
                 </p>
               </div>
               <button
@@ -92,12 +100,16 @@ export function DashboardActionSection({
                   <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#8B72C8] shadow-sm">
                     <GitBranch aria-hidden className="h-6 w-6" />
                   </span>
-                  <span className="text-lg font-black text-[#3F2C28]">로그인 화면 트리 관리</span>
+                  <span className="text-lg font-black text-[#3F2C28]">로그인 화면 조직도 관리</span>
                 </button>
               </div>
-            ) : (
-              <div className="mt-7">
+            ) : memberManagementView === "preRegister" ? (
+              <div className="mt-7 overflow-y-auto pr-1">
                 {memberPreRegisterPanel}
+              </div>
+            ) : (
+              <div className="mt-6 min-h-0 overflow-y-auto pr-1">
+                {positionTreeManagementPanel}
               </div>
             )}
           </div>

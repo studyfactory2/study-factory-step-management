@@ -11,7 +11,8 @@ import {
 import {
   addFavoriteMember,
   deleteFavoriteMember,
-  getFavoriteMemberCandidates
+  getFavoriteMemberCandidates,
+  reorderFavoriteMembers
 } from "@/api/favorite-member";
 import {
   deleteMemberPreRegistration,
@@ -21,13 +22,7 @@ import {
   type MemberPreRegistration
 } from "@/api/member";
 import { createTask } from "@/api/task";
-import type {
-  Member,
-  MemberAffiliation,
-  MemberDuty,
-  MemberPosition,
-  TaskStatus
-} from "@/types/domain";
+import type { Member, TaskStatus } from "@/types/domain";
 import {
   DashboardActionSection,
   type MemberManagementView
@@ -38,6 +33,7 @@ import { EmployeeListSection } from "@/components/adminDashboard/employee-list-s
 import { GreetingCard } from "@/components/adminDashboard/greeting-card";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import { MemberPreRegisterPanel } from "@/components/adminDashboard/member-pre-register-panel";
+import { PositionTreeManagementPanel } from "@/components/adminDashboard/position-tree-management-panel";
 import { RecentOutputsSection } from "@/components/adminDashboard/recent-outputs-section";
 import { TaskCreateForm, type TaskCreateDraftSubmit } from "@/components/adminDashboard/task-create-form";
 import { isAssignableMember } from "@/components/adminDashboard/utils";
@@ -193,6 +189,24 @@ export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: 
     });
   }
 
+  async function handleReorderFavoriteMembers(memberIds: number[]) {
+    setMessage("");
+    setIsFavoriteUpdating(true);
+
+    try {
+      const employees = await reorderFavoriteMembers(accessToken, memberIds);
+      setDashboard((currentDashboard) => ({
+        ...currentDashboard,
+        employees
+      }));
+      setMessage("함께 프로젝트 중 직원 순서가 변경되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "함께 프로젝트 중 직원 순서를 변경하지 못했습니다.");
+    } finally {
+      setIsFavoriteUpdating(false);
+    }
+  }
+
   async function handleCreateTask(request: TaskCreateDraftSubmit) {
     setMessage("");
 
@@ -215,11 +229,10 @@ export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: 
   }
 
   async function handlePreRegister(request: {
-    affiliation: MemberAffiliation;
     branch: string;
-    duty: MemberDuty;
     name: string;
-    position: MemberPosition;
+    positionDutyId: number;
+    positionId: number;
   }) {
     setMessage("");
     setIsPreRegisterSubmitting(true);
@@ -241,9 +254,7 @@ export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: 
   }
 
   function handleSelectPositionTree() {
-    setIsMemberManagementOpen(false);
-    setMemberManagementView("menu");
-    setMessage("로그인 화면 트리 관리는 다음 단계에서 연결할 예정입니다.");
+    setMemberManagementView("positionTree");
   }
 
   function handleOpenMemberManagement() {
@@ -309,6 +320,7 @@ export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: 
           isUpdating={isFavoriteUpdating}
           onAddFavoriteMember={handleAddFavoriteMember}
           onDeleteFavoriteMember={handleDeleteFavoriteMember}
+          onReorderFavoriteMembers={handleReorderFavoriteMembers}
         />
         <TaskCreateForm
           accessToken={accessToken}
@@ -338,6 +350,13 @@ export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: 
               onClose={() => setMemberManagementView("menu")}
               onDelete={handleDeletePreRegistration}
               onSubmit={handlePreRegister}
+            />
+          }
+          positionTreeManagementPanel={
+            <PositionTreeManagementPanel
+              accessToken={accessToken}
+              onClose={() => setMemberManagementView("menu")}
+              onMessage={setMessage}
             />
           }
           onCloseMemberManagement={handleCloseMemberManagement}

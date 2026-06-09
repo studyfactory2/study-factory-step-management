@@ -1,5 +1,7 @@
-import { Column, Entity, Index } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne } from "typeorm";
 import { BaseEntity } from "../../common/entity/base.entity";
+import { PositionDuty } from "../../position/entity/position-duty.entity";
+import { Position } from "../../position/entity/position.entity";
 import { MemberAffiliation } from "../enum/member-affiliation.enum";
 import { MemberDuty } from "../enum/member-duty.enum";
 import { MemberPosition } from "../enum/member-position.enum";
@@ -41,6 +43,20 @@ export class MemberPreRegistration extends BaseEntity {
     nullable: true
   })
   duty: MemberDuty | null;
+
+  @Column({ name: "position_id", type: "int", nullable: true })
+  positionId: number | null;
+
+  @ManyToOne(() => Position, { nullable: true })
+  @JoinColumn({ name: "position_id" })
+  positionInfo: Position | null;
+
+  @Column({ name: "position_duty_id", type: "int", nullable: true })
+  positionDutyId: number | null;
+
+  @ManyToOne(() => PositionDuty, { nullable: true })
+  @JoinColumn({ name: "position_duty_id" })
+  positionDuty: PositionDuty | null;
 
   @Column({ type: "varchar", nullable: true })
   branch: string | null;

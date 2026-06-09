@@ -47,6 +47,22 @@ export class FavoriteMemberService {
     return this.getFavoriteMembers(ownerMemberId);
   }
 
+  async reorderFavoriteMembers(
+    ownerMemberId: number,
+    memberIds: number[]
+  ): Promise<AdminDashboardEmployeeResponse[]> {
+    await this.validateOwner(ownerMemberId);
+    const currentMemberIds = await this.favoriteMemberRepository.findIdsByOwnerMemberId(ownerMemberId);
+
+    if (!this.hasSameMemberIds(currentMemberIds, memberIds)) {
+      throw new BadRequestException("함께 프로젝트 중 직원 순서가 올바르지 않습니다.");
+    }
+
+    await this.favoriteMemberRepository.updateDisplayOrders(ownerMemberId, memberIds);
+
+    return this.getFavoriteMembers(ownerMemberId);
+  }
+
   async getCandidateMembers(ownerMemberId: number): Promise<AdminDashboardEmployeeResponse[]> {
     await this.validateOwner(ownerMemberId);
 
@@ -147,7 +163,6 @@ export class FavoriteMemberService {
         id: member.id,
         name: this.getDisplayName(member),
         roleType: member.roleType,
-        positionCode: member.positionInfo?.code ?? null,
         positionName: member.positionInfo?.name ?? null,
         branch: member.branch,
         highestTaskStatus: this.getHighestTaskStatus(taskCounts),
@@ -172,6 +187,15 @@ export class FavoriteMemberService {
     }
 
     return ownerMember;
+  }
+
+  private hasSameMemberIds(currentMemberIds: number[], requestedMemberIds: number[]): boolean {
+    if (currentMemberIds.length !== requestedMemberIds.length) {
+      return false;
+    }
+
+    const currentMemberIdSet = new Set(currentMemberIds);
+    return requestedMemberIds.every((memberId) => currentMemberIdSet.has(memberId));
   }
 
   private getDisplayName(member: Member): string {

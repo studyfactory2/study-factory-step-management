@@ -44,6 +44,23 @@ export class FavoriteMemberRepository {
       .getMany();
   }
 
+  async findIdsByOwnerMemberId(ownerMemberId: number): Promise<number[]> {
+    const favoriteMembers = await this.repository.find({
+      order: {
+        displayOrder: "ASC",
+        id: "ASC"
+      },
+      select: {
+        memberId: true
+      },
+      where: {
+        ownerMemberId
+      }
+    });
+
+    return favoriteMembers.map((favoriteMember) => favoriteMember.memberId);
+  }
+
   async save(ownerMemberId: number, memberId: number): Promise<void> {
     const displayOrder = await this.getNextDisplayOrder(ownerMemberId);
 
@@ -54,6 +71,25 @@ export class FavoriteMemberRepository {
         displayOrder
       })
     );
+  }
+
+  async updateDisplayOrders(ownerMemberId: number, memberIds: number[]): Promise<void> {
+    await this.repository.manager.transaction(async (entityManager) => {
+      await Promise.all(
+        memberIds.map((memberId, index) =>
+          entityManager.update(
+            FavoriteMember,
+            {
+              memberId,
+              ownerMemberId
+            },
+            {
+              displayOrder: index + 1
+            }
+          )
+        )
+      );
+    });
   }
 
   private async getNextDisplayOrder(ownerMemberId: number): Promise<number> {

@@ -27,7 +27,6 @@ export type Member = {
   positionId: number | null;
   positionInfo?: {
     id: number;
-    code: string;
     name: string;
   } | null;
   positionDutyId: number | null;
