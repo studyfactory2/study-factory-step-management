@@ -133,6 +133,7 @@ export function EmployeeDashboardPage({
       await createTask(accessToken, {
         assigneeId: request.assigneeId,
         assigneeScope: "SINGLE",
+        attachments: request.attachments,
         description: request.description,
         title: request.title
       });

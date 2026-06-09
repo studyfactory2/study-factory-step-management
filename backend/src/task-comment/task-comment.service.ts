@@ -4,6 +4,8 @@ import { MemberRole } from "../member/enum/member-role.enum";
 import { Task } from "../task/entity/task.entity";
 import { TaskStatus } from "../task/enum/task-status.enum";
 import { TaskNotFoundException } from "../task/exception/task-not-found.exception";
+import { UploadFile } from "../upload/type/upload-file.type";
+import { UploadService } from "../upload/upload.service";
 import { TaskCommentActivityResponse } from "./dto/task-comment-activity.response";
 import { TaskCommentCreateRequest } from "./dto/task-comment-create.request";
 import { TaskCommentResponse } from "./dto/task-comment.response";
@@ -13,12 +15,16 @@ import { TaskCommentRepository } from "./task-comment.repository";
 
 @Injectable()
 export class TaskCommentService {
-  constructor(private readonly taskCommentRepository: TaskCommentRepository) {}
+  constructor(
+    private readonly taskCommentRepository: TaskCommentRepository,
+    private readonly uploadService: UploadService
+  ) {}
 
   async create(
     taskId: number,
     request: TaskCommentCreateRequest,
-    currentMember: CurrentMember
+    currentMember: CurrentMember,
+    files: UploadFile[] = []
   ): Promise<TaskCommentResponse> {
     const task = await this.findPublishedTaskEntity(taskId);
     this.validateTaskCommentAccess(task, currentMember);
@@ -28,7 +34,7 @@ export class TaskCommentService {
 
     const comment = request.toEntity(taskId, currentMember.memberId, commentStatus);
     const savedComment = await this.taskCommentRepository.saveComment(comment);
-    const attachments = this.createAttachments(savedComment.id, request);
+    const attachments = await this.createAttachments(savedComment.id, files);
 
     if (attachments.length > 0) {
       savedComment.attachments = await this.taskCommentRepository.saveAttachments(attachments);
@@ -104,11 +110,20 @@ export class TaskCommentService {
     await this.taskCommentRepository.saveTask(task);
   }
 
-  private createAttachments(
+  private async createAttachments(
     taskCommentId: number,
-    request: TaskCommentCreateRequest
-  ): TaskCommentAttachment[] {
-    return request.attachments?.map((attachmentRequest) => attachmentRequest.toEntity(taskCommentId)) ?? [];
+    files: UploadFile[]
+  ): Promise<TaskCommentAttachment[]> {
+    const uploadedFiles = await this.uploadService.saveImages(files);
+
+    return uploadedFiles.map((uploadedFile) => {
+      const attachment = new TaskCommentAttachment();
+      attachment.taskCommentId = taskCommentId;
+      attachment.imageUrl = uploadedFile.imageUrl;
+      attachment.originalName = uploadedFile.originalName;
+
+      return attachment;
+    });
   }
 
   private toResponse(comment: TaskComment): TaskCommentResponse {

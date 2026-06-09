@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import {
+  addTaskAttachments,
   createTaskComment,
   getTaskCommentActivities,
   getTaskDetail,
@@ -20,6 +21,7 @@ type TaskDetailPageProps = {
   accessToken: string;
   currentMemberRole: MemberRole;
   onBack: () => void;
+  onHelpRequestOpen: () => void;
   taskId: number;
 };
 
@@ -30,10 +32,17 @@ const statusOptions: Array<{ label: string; value: TaskStatus }> = [
   { label: "완료", value: "COMPLETED" }
 ];
 
-export function TaskDetailPage({ accessToken, currentMemberRole, onBack, taskId }: TaskDetailPageProps) {
+export function TaskDetailPage({
+  accessToken,
+  currentMemberRole,
+  onBack,
+  onHelpRequestOpen,
+  taskId
+}: TaskDetailPageProps) {
   const [task, setTask] = useState<TaskDetail | null>(null);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadTaskDetail() {
@@ -70,6 +79,13 @@ export function TaskDetailPage({ accessToken, currentMemberRole, onBack, taskId 
             ← 뒤로
           </button>
           <h1 className="text-[34px] font-black tracking-normal text-[#3F2C28]">업무상세</h1>
+          <button
+            className="absolute right-0 h-11 rounded-full bg-primary px-7 text-sm font-black text-white shadow-sm"
+            onClick={onHelpRequestOpen}
+            type="button"
+          >
+            도움요청
+          </button>
         </header>
 
         {isLoading && (
@@ -89,11 +105,12 @@ export function TaskDetailPage({ accessToken, currentMemberRole, onBack, taskId 
             <TaskSummarySection task={task} />
             <ProjectContentSection
               accessToken={accessToken}
+              onImagePreview={setPreviewImageUrl}
               onTaskUpdate={setTask}
               task={task}
             />
-            <InitialResultSection task={task} />
-            <CommentHistorySection comments={task.comments.slice(1)} />
+            <InitialResultSection onImagePreview={setPreviewImageUrl} task={task} />
+            <CommentHistorySection comments={task.comments.slice(1)} onImagePreview={setPreviewImageUrl} />
             <CommentSection
               accessToken={accessToken}
               onTaskUpdate={setTask}
@@ -103,6 +120,9 @@ export function TaskDetailPage({ accessToken, currentMemberRole, onBack, taskId 
           </>
         )}
       </div>
+      {previewImageUrl && (
+        <ImagePreviewDialog imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl(null)} />
+      )}
     </main>
   );
 }
@@ -136,9 +156,11 @@ function TaskSummarySection({ task }: { task: TaskDetail }) {
 function ProjectContentSection({
   accessToken,
   onTaskUpdate,
+  onImagePreview,
   task
 }: {
   accessToken: string;
+  onImagePreview: (imageUrl: string) => void;
   onTaskUpdate: (task: TaskDetail) => void;
   task: TaskDetail;
 }) {
@@ -146,6 +168,7 @@ function ProjectContentSection({
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setDescription(task.description);
@@ -173,6 +196,27 @@ function ProjectContentSection({
     }
   }
 
+  async function handleAttachmentChange(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    if (files.length === 0) {
+      return;
+    }
+
+    setMessage("");
+    setIsSaving(true);
+
+    try {
+      const updatedTask = await addTaskAttachments(accessToken, task.id, files);
+      onTaskUpdate(updatedTask);
+      setMessage("사진이 첨부되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "사진을 첨부하지 못했습니다.");
+    } finally {
+      setIsSaving(false);
+      event.target.value = "";
+    }
+  }
+
   return (
     <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-black text-[#3F2C28]">프로젝트내용</h2>
@@ -189,11 +233,30 @@ function ProjectContentSection({
           </p>
         )}
       </div>
+      {task.attachments.length > 0 && (
+        <>
+          <p className="mt-6 text-base font-black text-primary">첨부한 사진들</p>
+          <AttachmentImageGrid attachments={task.attachments} onImagePreview={onImagePreview} />
+        </>
+      )}
       {message && (
         <p className="mt-3 text-sm font-black text-primary">{message}</p>
       )}
       <div className="mt-5 flex justify-end gap-3">
-        <button className="h-11 rounded-full bg-[#FBE6EA] px-8 text-sm font-black text-primary" type="button">
+        <input
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          multiple
+          onChange={handleAttachmentChange}
+          ref={fileInputRef}
+          type="file"
+        />
+        <button
+          className="h-11 rounded-full bg-[#FBE6EA] px-8 text-sm font-black text-primary disabled:opacity-60"
+          disabled={isSaving}
+          onClick={() => fileInputRef.current?.click()}
+          type="button"
+        >
           + 사진첨부
         </button>
         <button
@@ -226,7 +289,13 @@ function HighlightedDescription({ task }: { task: TaskDetail }) {
   );
 }
 
-function InitialResultSection({ task }: { task: TaskDetail }) {
+function InitialResultSection({
+  onImagePreview,
+  task
+}: {
+  onImagePreview: (imageUrl: string) => void;
+  task: TaskDetail;
+}) {
   const firstComment = task.comments[0] ?? null;
 
   return (
@@ -245,29 +314,23 @@ function InitialResultSection({ task }: { task: TaskDetail }) {
       {(firstComment?.attachments.length ?? 0) > 0 && (
         <>
           <p className="mt-6 text-base font-black text-primary">첨부한 사진들</p>
-          <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {firstComment?.attachments.map((attachment, index) => (
-              <a
-                className="rounded-[18px] border border-[#F2C9C2] bg-[#FFF8F6] px-4 py-4 text-center text-sm font-bold text-[#9B7A75]"
-                href={attachment.imageUrl}
-                key={attachment.id}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <div className="flex aspect-[4/3] items-center justify-center rounded-[14px] bg-white text-3xl text-primary">
-                  +
-                </div>
-                <p className="mt-3">{attachment.originalName ?? `사진 ${index + 1}`}</p>
-              </a>
-            ))}
-          </div>
+          <AttachmentImageGrid
+            attachments={firstComment?.attachments ?? []}
+            onImagePreview={onImagePreview}
+          />
         </>
       )}
     </section>
   );
 }
 
-function CommentHistorySection({ comments }: { comments: TaskComment[] }) {
+function CommentHistorySection({
+  comments,
+  onImagePreview
+}: {
+  comments: TaskComment[];
+  onImagePreview: (imageUrl: string) => void;
+}) {
   if (comments.length === 0) {
     return null;
   }
@@ -275,13 +338,19 @@ function CommentHistorySection({ comments }: { comments: TaskComment[] }) {
   return (
     <>
       {comments.map((comment) => (
-        <CommentHistoryCard comment={comment} key={comment.id} />
+        <CommentHistoryCard comment={comment} key={comment.id} onImagePreview={onImagePreview} />
       ))}
     </>
   );
 }
 
-function CommentHistoryCard({ comment }: { comment: TaskComment }) {
+function CommentHistoryCard({
+  comment,
+  onImagePreview
+}: {
+  comment: TaskComment;
+  onImagePreview: (imageUrl: string) => void;
+}) {
   return (
     <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-black text-[#3F2C28]">코멘트</h2>
@@ -298,25 +367,74 @@ function CommentHistoryCard({ comment }: { comment: TaskComment }) {
       {comment.attachments.length > 0 && (
         <>
           <p className="mt-6 text-base font-black text-primary">첨부한 사진들</p>
-          <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {comment.attachments.map((attachment, attachmentIndex) => (
-              <a
-                className="rounded-[18px] border border-[#F2C9C2] bg-[#FFF8F6] px-4 py-4 text-center text-sm font-bold text-[#9B7A75]"
-                href={attachment.imageUrl}
-                key={attachment.id}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <div className="flex aspect-[4/3] items-center justify-center rounded-[14px] bg-white text-3xl text-primary">
-                  +
-                </div>
-                <p className="mt-3">{attachment.originalName ?? `사진 ${attachmentIndex + 1}`}</p>
-              </a>
-            ))}
-          </div>
+          <AttachmentImageGrid attachments={comment.attachments} onImagePreview={onImagePreview} />
         </>
       )}
     </section>
+  );
+}
+
+function AttachmentImageGrid({
+  attachments,
+  onImagePreview
+}: {
+  attachments: Array<{
+    id: number;
+    imageUrl: string;
+  }>;
+  onImagePreview: (imageUrl: string) => void;
+}) {
+  return (
+    <div className="mt-4 flex flex-wrap gap-3">
+      {attachments.map((attachment) => (
+        <button
+          className="w-28 overflow-hidden rounded-[18px] border border-[#F2C9C2] bg-[#FFF8F6] p-1.5 shadow-sm sm:w-32"
+          key={attachment.id}
+          onClick={() => onImagePreview(attachment.imageUrl)}
+          type="button"
+        >
+          <img
+            alt=""
+            className="aspect-square w-full rounded-[14px] object-cover"
+            src={attachment.imageUrl}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ImagePreviewDialog({
+  imageUrl,
+  onClose
+}: {
+  imageUrl: string;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/55 px-4 py-8"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="relative max-h-full w-full max-w-[980px] rounded-[24px] border border-[#F2C9C2] bg-white p-4 shadow-[0_8px_0_#EFC6BE]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          className="absolute right-5 top-5 z-10 h-10 rounded-full bg-primary px-5 text-sm font-black text-white"
+          onClick={onClose}
+          type="button"
+        >
+          닫기
+        </button>
+        <img
+          alt=""
+          className="max-h-[78vh] w-full rounded-[18px] object-contain"
+          src={imageUrl}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -334,6 +452,8 @@ function CommentSection({
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus>(task.status);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setSelectedStatus(task.status);
@@ -351,12 +471,14 @@ function CommentSection({
 
     try {
       await createTaskComment(accessToken, task.id, {
+        attachments,
         content,
         oneLineComment: oneLineComment.trim() || undefined,
         status: selectedStatus
       });
       const updatedTask = await getTaskDetail(accessToken, task.id);
       onTaskUpdate(updatedTask);
+      setAttachments([]);
       setContent("");
       setOneLineComment("");
       setMessage("코멘트가 등록되었습니다.");
@@ -371,7 +493,19 @@ function CommentSection({
     <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
       <div className="flex items-center justify-between gap-5">
         <h2 className="text-2xl font-black text-[#3F2C28]">코멘트 남기기</h2>
-        <button className="h-11 rounded-full bg-[#FBE6EA] px-8 text-sm font-black text-primary" type="button">
+        <input
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          multiple
+          onChange={(event) => setAttachments(Array.from(event.target.files ?? []))}
+          ref={fileInputRef}
+          type="file"
+        />
+        <button
+          className="h-11 rounded-full bg-[#FBE6EA] px-8 text-sm font-black text-primary"
+          onClick={() => fileInputRef.current?.click()}
+          type="button"
+        >
           사진첨부
         </button>
       </div>
@@ -387,6 +521,21 @@ function CommentSection({
         placeholder="간단 한 줄 말 쓰는 칸"
         value={oneLineComment}
       />
+      {attachments.length > 0 && (
+        <div className="mt-4 rounded-[18px] border border-[#F2C9C2] bg-white px-6 py-4">
+          <p className="text-sm font-black text-[#3F2C28]">선택한 사진 {attachments.length}장</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {attachments.map((attachment) => (
+              <span
+                className="rounded-full bg-[#FFF8F6] px-4 py-2 text-xs font-bold text-[#9B7A75]"
+                key={`${attachment.name}-${attachment.lastModified}`}
+              >
+                {attachment.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="mt-5 grid gap-3 lg:grid-cols-[90px_1fr]">
         <span className="flex h-11 items-center text-base font-black text-[#5A3E3B]">상태변경</span>
         <div className="grid gap-3 sm:grid-cols-4">

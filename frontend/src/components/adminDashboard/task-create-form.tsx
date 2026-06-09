@@ -10,6 +10,7 @@ import { roleLabels } from "./constants";
 
 export type TaskCreateDraftSubmit = {
   assigneeId: number;
+  attachments: File[];
   description: string;
   title: string;
 };
@@ -25,6 +26,7 @@ type TaskCreateFormProps = {
 
 type TaskDraftForm = {
   assigneeId: string;
+  attachments: File[];
   attachmentNames: string[];
   description: string;
   draftId: number | null;
@@ -35,6 +37,7 @@ type TaskDraftForm = {
 
 const createEmptyDraft = (id: number): TaskDraftForm => ({
   assigneeId: "",
+  attachments: [],
   attachmentNames: [],
   description: "",
   draftId: null,
@@ -70,6 +73,7 @@ export function TaskCreateForm({
         const savedDrafts = await getTaskDrafts(accessToken);
         const draftForms = savedDrafts.map((draft, index) => ({
           assigneeId: String(draft.assigneeId),
+          attachments: [],
           attachmentNames: [],
           description: draft.description,
           draftId: draft.id,
@@ -98,6 +102,7 @@ export function TaskCreateForm({
     const files = Array.from(event.target.files ?? []);
     updateDraft(id, (draft) => ({
       ...draft,
+      attachments: files,
       attachmentNames: files.map((file) => file.name)
     }));
   }
@@ -129,6 +134,7 @@ export function TaskCreateForm({
             ? {
                 ...draft,
                 assigneeId: String(savedDraft.assigneeId),
+                attachments: [],
                 description: savedDraft.description,
                 draftId: savedDraft.id,
                 isSaved: true,
@@ -179,6 +185,7 @@ export function TaskCreateForm({
     } else {
       await onSubmit({
         assigneeId: Number(draft.assigneeId),
+        attachments: draft.attachments,
         description: draft.description,
         title: draft.title
       });
@@ -332,6 +339,7 @@ function TaskDraftCard({
             : "사진 또는 수기메모를 첨부하려면 이 영역을 선택하세요"}
         </label>
         <input
+          accept="image/jpeg,image/png,image/webp"
           className="hidden"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           id={attachmentInputId}

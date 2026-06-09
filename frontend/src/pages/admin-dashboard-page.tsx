@@ -201,6 +201,7 @@ export function AdminDashboardPage({ accessToken, onLogout, onTaskDetailOpen }: 
       await createTask(accessToken, {
         title: request.title,
         description: request.description,
+        attachments: request.attachments,
         assigneeScope: "SINGLE",
         assigneeId: request.assigneeId
       });

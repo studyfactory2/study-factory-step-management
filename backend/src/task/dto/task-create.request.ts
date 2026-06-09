@@ -26,6 +26,7 @@ export class TaskCreateRequest {
 
   @ValidateIf((request: TaskCreateRequest) => request.assigneeScope === TaskAssigneeScope.SINGLE)
   @IsDefined({ message: "단일 담당자 업무 등록에는 담당자 ID가 필요합니다." })
+  @Type(() => Number)
   @IsNumber({}, { message: "담당자 ID는 숫자여야 합니다." })
   assigneeId?: number;
 
@@ -34,6 +35,7 @@ export class TaskCreateRequest {
   branch?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber({}, { message: "직위 ID는 숫자여야 합니다." })
   positionId?: number;
 
