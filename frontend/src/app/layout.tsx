@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "자격증공장 사원업무현황",
-  description: "업무 지시와 진행상황 피드백을 관리하는 모바일 업무 앱"
+  description: "업무 지시와 진행상황 코멘트을 관리하는 모바일 업무 앱"
 };
 
 export const viewport: Viewport = {

@@ -1,4 +1,5 @@
 import { MemberRole } from "../../member/enum/member-role.enum";
+import { TaskCommentResponse } from "../../task-comment/dto/task-comment.response";
 import { TaskStatus } from "../enum/task-status.enum";
 
 export class TaskDetailMemberResponse {
@@ -20,11 +21,15 @@ export class TaskDetailResponse {
   id: number;
   title: string;
   description: string;
+  descriptionHighlightStart: number | null;
+  descriptionHighlightEnd: number | null;
+  descriptionHighlightExpiresAt: Date | null;
   oneLineComment: string | null;
   status: TaskStatus;
   assignee: TaskDetailMemberResponse;
   creator: TaskDetailMemberResponse;
   attachments: TaskDetailAttachmentResponse[];
+  comments: TaskCommentResponse[];
   completedAt: Date | null;
   reviewRequestedAt: Date | null;
   createdAt: Date;

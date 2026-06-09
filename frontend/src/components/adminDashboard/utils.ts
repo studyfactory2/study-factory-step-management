@@ -32,5 +32,5 @@ export function formatDateTime(value: string) {
 }
 
 export function isAssignableMember(member: Member) {
-  return member.isActive && member.roleType !== "CEO" && member.roleType !== "ADMIN";
+  return member.isActive && member.roleType !== "ADMIN";
 }

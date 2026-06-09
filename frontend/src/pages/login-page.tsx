@@ -19,6 +19,7 @@ import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import { getTaskStatusSummary, type TaskStatusSummary } from "@/api/task";
 import { RoleTree } from "@/components/role-tree";
 import { StatusCard } from "@/components/status-card";
+import { saveAuth } from "@/lib/auth-storage";
 
 type StatusCardItem = {
   label: string;
@@ -114,9 +115,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         password
       });
 
-      localStorage.setItem("accessToken", response.accessToken);
-      localStorage.setItem("refreshToken", response.refreshToken);
-      localStorage.setItem("currentMember", JSON.stringify(response.member));
+      saveAuth(response);
       setMessage(`${response.member.name}님, 로그인되었습니다.`);
       onLogin?.(response);
     } catch (error) {

@@ -15,6 +15,9 @@ import { MemberModule } from "./member/member.module";
 import { PositionDuty } from "./position/entity/position-duty.entity";
 import { Position } from "./position/entity/position.entity";
 import { PositionModule } from "./position/position.module";
+import { TaskCommentAttachment } from "./task-comment/entity/task-comment-attachment.entity";
+import { TaskComment } from "./task-comment/entity/task-comment.entity";
+import { TaskCommentModule } from "./task-comment/task-comment.module";
 import { TaskAttachment } from "./task/entity/task-attachment.entity";
 import { Task } from "./task/entity/task.entity";
 import { TaskModule } from "./task/task.module";
@@ -38,7 +41,9 @@ import { TaskModule } from "./task/task.module";
           Position,
           PositionDuty,
           Task,
-          TaskAttachment
+          TaskAttachment,
+          TaskComment,
+          TaskCommentAttachment
         ],
         synchronize: false
       })
@@ -48,6 +53,7 @@ import { TaskModule } from "./task/task.module";
     FavoriteMemberModule,
     MemberModule,
     PositionModule,
+    TaskCommentModule,
     TaskModule
   ]
 })

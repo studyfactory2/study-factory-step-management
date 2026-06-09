@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { getTaskDetail, type TaskDetail } from "@/api/task";
+import {
+  createTaskComment,
+  getTaskCommentActivities,
+  getTaskDetail,
+  updateTaskDescription,
+  type TaskCommentActivity,
+  type TaskComment,
+  type TaskDetail
+} from "@/api/task";
 import type { TaskStatus } from "@/types/domain";
 import { roleLabels } from "@/components/adminDashboard/constants";
 import { formatDateTime } from "@/components/adminDashboard/utils";
@@ -77,10 +85,19 @@ export function TaskDetailPage({ accessToken, onBack, taskId }: TaskDetailPagePr
         {task && (
           <>
             <TaskSummarySection task={task} />
-            <ProjectContentSection task={task} />
+            <ProjectContentSection
+              accessToken={accessToken}
+              onTaskUpdate={setTask}
+              task={task}
+            />
             <InitialResultSection task={task} />
-            <FeedbackSection task={task} />
-            <ActivitySection task={task} />
+            <CommentHistorySection comments={task.comments.slice(1)} />
+            <CommentSection
+              accessToken={accessToken}
+              onTaskUpdate={setTask}
+              task={task}
+            />
+            <ActivitySection accessToken={accessToken} />
           </>
         )}
       </div>
@@ -114,82 +131,262 @@ function TaskSummarySection({ task }: { task: TaskDetail }) {
   );
 }
 
-function ProjectContentSection({ task }: { task: TaskDetail }) {
+function ProjectContentSection({
+  accessToken,
+  onTaskUpdate,
+  task
+}: {
+  accessToken: string;
+  onTaskUpdate: (task: TaskDetail) => void;
+  task: TaskDetail;
+}) {
+  const [description, setDescription] = useState(task.description);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    setDescription(task.description);
+    setIsEditing(false);
+  }, [task.id, task.description]);
+
+  async function handleDescriptionEdit() {
+    setMessage("");
+
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const updatedTask = await updateTaskDescription(accessToken, task.id, description);
+      onTaskUpdate(updatedTask);
+      setMessage("프로젝트 내용이 수정되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "프로젝트 내용을 수정하지 못했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-black text-[#3F2C28]">프로젝트내용</h2>
       <div className="mt-5 rounded-[20px] border border-[#F2C9C2] bg-white px-6 py-6">
-        <p className="whitespace-pre-wrap text-base font-bold leading-8 text-[#5A3E3B]">{task.description}</p>
+        {isEditing ? (
+          <textarea
+            className="min-h-[180px] w-full resize-none bg-transparent text-base font-bold leading-8 text-[#5A3E3B] outline-none"
+            onChange={(event) => setDescription(event.target.value)}
+            value={description}
+          />
+        ) : (
+          <p className="whitespace-pre-wrap text-base font-bold leading-8 text-[#5A3E3B]">
+            <HighlightedDescription task={task} />
+          </p>
+        )}
         {task.oneLineComment && (
           <p className="mt-5 text-base font-black text-[#599BD7]">{task.oneLineComment}</p>
         )}
       </div>
+      {message && (
+        <p className="mt-3 text-sm font-black text-primary">{message}</p>
+      )}
       <div className="mt-5 flex justify-end gap-3">
         <button className="h-11 rounded-full bg-[#FBE6EA] px-8 text-sm font-black text-primary" type="button">
           + 사진첨부
         </button>
-        <button className="h-11 rounded-full border border-[#F2C9C2] bg-white px-8 text-sm font-black text-[#9B7A75]" type="button">
-          글 수정
+        <button
+          className="h-11 rounded-full border border-[#F2C9C2] bg-white px-8 text-sm font-black text-[#9B7A75] disabled:opacity-60"
+          disabled={isSaving}
+          onClick={handleDescriptionEdit}
+          type="button"
+        >
+          {isSaving ? "수정 중" : "글 수정"}
         </button>
       </div>
     </section>
   );
 }
 
+function HighlightedDescription({ task }: { task: TaskDetail }) {
+  if (!isDescriptionHighlightVisible(task)) {
+    return <>{task.description}</>;
+  }
+
+  const start = task.descriptionHighlightStart ?? 0;
+  const end = task.descriptionHighlightEnd ?? 0;
+
+  return (
+    <>
+      {task.description.slice(0, start)}
+      <span className="text-[#599BD7]">{task.description.slice(start, end)}</span>
+      {task.description.slice(end)}
+    </>
+  );
+}
+
 function InitialResultSection({ task }: { task: TaskDetail }) {
+  const firstComment = task.comments[0] ?? null;
+
   return (
     <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-black text-[#3F2C28]">최초 결과물</h2>
       <div className="mt-5 rounded-[20px] border border-[#F2C9C2] bg-white px-6 py-6">
-        {task.oneLineComment ? (
-          <p className="text-base font-bold leading-8 text-[#5A3E3B]">{task.oneLineComment}</p>
-        ) : (
-          <p className="text-base font-bold leading-8 text-[#9B7A75]">등록된 한줄멘트가 없습니다.</p>
-        )}
+        <p className="whitespace-pre-wrap text-base font-bold leading-8 text-[#5A3E3B]">
+          {firstComment?.content || "업무 진행 사항 및 요청사항이 없습니다."}
+        </p>
       </div>
-      <p className="mt-6 text-base font-black text-primary">첨부한 사진들</p>
-      {task.attachments.length === 0 ? (
-        <div className="mt-4 rounded-[18px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] px-6 py-8 text-center text-sm font-bold text-[#9B7A75]">
-          첨부된 사진이 없습니다.
-        </div>
-      ) : (
-        <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {task.attachments.map((attachment, index) => (
-            <a
-              className="rounded-[18px] border border-[#F2C9C2] bg-[#FFF8F6] px-4 py-4 text-center text-sm font-bold text-[#9B7A75]"
-              href={attachment.imageUrl}
-              key={attachment.id}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <div className="flex aspect-[4/3] items-center justify-center rounded-[14px] bg-white text-3xl text-primary">
-                +
-              </div>
-              <p className="mt-3">{attachment.originalName ?? `사진 ${index + 1}`}</p>
-            </a>
-          ))}
-        </div>
+      <div className="mt-4 min-h-14 rounded-[18px] border border-[#F2C9C2] bg-white px-6 py-4">
+        <p className={`text-base font-bold leading-6 ${firstComment?.oneLineComment ? "text-[#5A3E3B]" : "text-[#BFA4A0]"}`}>
+          {firstComment?.oneLineComment || "등록된 한 줄 멘트가 없습니다."}
+        </p>
+      </div>
+      {(firstComment?.attachments.length ?? 0) > 0 && (
+        <>
+          <p className="mt-6 text-base font-black text-primary">첨부한 사진들</p>
+          <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {firstComment?.attachments.map((attachment, index) => (
+              <a
+                className="rounded-[18px] border border-[#F2C9C2] bg-[#FFF8F6] px-4 py-4 text-center text-sm font-bold text-[#9B7A75]"
+                href={attachment.imageUrl}
+                key={attachment.id}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <div className="flex aspect-[4/3] items-center justify-center rounded-[14px] bg-white text-3xl text-primary">
+                  +
+                </div>
+                <p className="mt-3">{attachment.originalName ?? `사진 ${index + 1}`}</p>
+              </a>
+            ))}
+          </div>
+        </>
       )}
     </section>
   );
 }
 
-function FeedbackSection({ task }: { task: TaskDetail }) {
+function CommentHistorySection({ comments }: { comments: TaskComment[] }) {
+  if (comments.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      {comments.map((comment) => (
+        <CommentHistoryCard comment={comment} key={comment.id} />
+      ))}
+    </>
+  );
+}
+
+function CommentHistoryCard({ comment }: { comment: TaskComment }) {
+  return (
+    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
+      <h2 className="text-2xl font-black text-[#3F2C28]">코멘트</h2>
+      <div className="mt-5 rounded-[20px] border border-[#F2C9C2] bg-white px-6 py-6">
+        <p className="whitespace-pre-wrap text-base font-bold leading-8 text-[#5A3E3B]">
+          {comment.content || "업무 진행 사항 및 요청사항이 없습니다."}
+        </p>
+      </div>
+      <div className="mt-4 min-h-14 rounded-[18px] border border-[#F2C9C2] bg-white px-6 py-4">
+        <p className={`text-base font-bold leading-6 ${comment.oneLineComment ? "text-[#5A3E3B]" : "text-[#BFA4A0]"}`}>
+          {comment.oneLineComment || "등록된 한 줄 멘트가 없습니다."}
+        </p>
+      </div>
+      {comment.attachments.length > 0 && (
+        <>
+          <p className="mt-6 text-base font-black text-primary">첨부한 사진들</p>
+          <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {comment.attachments.map((attachment, attachmentIndex) => (
+              <a
+                className="rounded-[18px] border border-[#F2C9C2] bg-[#FFF8F6] px-4 py-4 text-center text-sm font-bold text-[#9B7A75]"
+                href={attachment.imageUrl}
+                key={attachment.id}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <div className="flex aspect-[4/3] items-center justify-center rounded-[14px] bg-white text-3xl text-primary">
+                  +
+                </div>
+                <p className="mt-3">{attachment.originalName ?? `사진 ${attachmentIndex + 1}`}</p>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+function CommentSection({
+  accessToken,
+  onTaskUpdate,
+  task
+}: {
+  accessToken: string;
+  onTaskUpdate: (task: TaskDetail) => void;
+  task: TaskDetail;
+}) {
+  const [content, setContent] = useState("");
+  const [oneLineComment, setOneLineComment] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<TaskStatus>(task.status);
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setSelectedStatus(task.status);
+  }, [task.status]);
+
+  async function handleCommentSubmit() {
+    setMessage("");
+
+    if (!content.trim()) {
+      setMessage("코멘트 내용을 입력해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await createTaskComment(accessToken, task.id, {
+        content,
+        oneLineComment: oneLineComment.trim() || undefined,
+        status: selectedStatus
+      });
+      const updatedTask = await getTaskDetail(accessToken, task.id);
+      onTaskUpdate(updatedTask);
+      setContent("");
+      setOneLineComment("");
+      setMessage("코멘트가 등록되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "코멘트를 등록하지 못했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
       <div className="flex items-center justify-between gap-5">
-        <h2 className="text-2xl font-black text-[#3F2C28]">피드백 남기기</h2>
+        <h2 className="text-2xl font-black text-[#3F2C28]">코멘트 남기기</h2>
         <button className="h-11 rounded-full bg-[#FBE6EA] px-8 text-sm font-black text-primary" type="button">
           사진첨부
         </button>
       </div>
       <textarea
         className="mt-5 h-32 w-full resize-none rounded-[20px] border border-[#F2C9C2] bg-white px-6 py-5 text-base font-bold outline-none placeholder:text-[#BFA4A0]"
-        placeholder="피드백을 남겨주세요"
+        onChange={(event) => setContent(event.target.value)}
+        placeholder="코멘트를 남겨주세요"
+        value={content}
       />
       <input
         className="mt-4 h-14 w-full rounded-[18px] border border-[#F2C9C2] bg-white px-6 text-base font-bold outline-none placeholder:text-[#BFA4A0]"
+        onChange={(event) => setOneLineComment(event.target.value)}
         placeholder="간단 한 줄 말 쓰는 칸"
+        value={oneLineComment}
       />
       <div className="mt-5 grid gap-3 lg:grid-cols-[90px_1fr]">
         <span className="flex h-11 items-center text-base font-black text-[#5A3E3B]">상태변경</span>
@@ -197,11 +394,12 @@ function FeedbackSection({ task }: { task: TaskDetail }) {
           {statusOptions.map((option) => (
             <button
               className={`h-11 rounded-full border border-[#F2C9C2] text-sm font-black ${
-                task.status === option.value
+                selectedStatus === option.value
                   ? getStatusClassName(option.value)
                   : "bg-white text-[#BFA4A0]"
               }`}
               key={option.value}
+              onClick={() => setSelectedStatus(option.value)}
               type="button"
             >
               {option.label}
@@ -209,37 +407,87 @@ function FeedbackSection({ task }: { task: TaskDetail }) {
           ))}
         </div>
       </div>
+      {message && (
+        <p className="mt-4 text-sm font-black text-primary">{message}</p>
+      )}
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <button className="min-h-[52px] rounded-full bg-primary text-base font-black text-white" type="button">
-          피드백 등록
+        <button
+          className="min-h-[52px] rounded-full bg-primary text-base font-black text-white disabled:opacity-60"
+          disabled={isSubmitting}
+          onClick={handleCommentSubmit}
+          type="button"
+        >
+          {isSubmitting ? "등록 중" : "코멘트 등록"}
         </button>
         <button className="min-h-[52px] rounded-full border border-[#F2C9C2] bg-white text-base font-black text-[#9B7A75]" type="button">
           수정
         </button>
       </div>
-      <button className="mt-4 h-12 w-full rounded-full border border-[#F2C9C2] bg-[#FFF8F6] text-base font-black text-primary" type="button">
-        + 피드백 추가하기
-      </button>
     </section>
   );
 }
 
-function ActivitySection({ task }: { task: TaskDetail }) {
-  const assigneePositionName = task.assignee.positionName ?? roleLabels[task.assignee.roleType];
+function ActivitySection({ accessToken }: { accessToken: string }) {
+  const [activities, setActivities] = useState<TaskCommentActivity[]>([]);
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadActivities() {
+      try {
+        const commentActivities = await getTaskCommentActivities(accessToken);
+        setActivities(commentActivities);
+        setMessage("");
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "활동내역을 불러오지 못했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    void loadActivities();
+  }, [accessToken]);
 
   return (
     <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-black text-[#3F2C28]">활동내역</h2>
-      <p className="mt-2 text-sm font-bold text-[#9B7A75]">상태와 한줄말 · 최신순</p>
-      <div className="mt-5 space-y-4">
-        <article className="grid items-center gap-4 rounded-[18px] border border-[#F2C9C2] bg-white px-5 py-4 lg:grid-cols-[180px_140px_1fr_180px]">
-          <p className="font-black text-[#5A3E3B]">{assigneePositionName} {task.assignee.name}</p>
-          <span className={`flex h-9 items-center justify-center rounded-full border border-[#F2C9C2] text-sm font-black ${getStatusClassName(task.status)}`}>
-            {getStatusLabel(task.status)}
-          </span>
-          <p className="text-sm font-bold text-[#5A3E3B]">{task.oneLineComment ?? "업무 내용을 확인했습니다."}</p>
-          <p className="text-right text-sm font-bold text-[#BFA4A0]">{formatDateTime(task.updatedAt)}</p>
-        </article>
+      <p className="mt-2 text-sm font-bold text-[#9B7A75]">코멘트 한 줄 말 · 최신순</p>
+      <div className="mt-5 max-h-[360px] space-y-4 overflow-y-auto pr-3">
+        {isLoading && (
+          <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-5 py-8 text-center text-sm font-bold text-[#BFA4A0]">
+            활동내역을 불러오는 중입니다.
+          </div>
+        )}
+        {message && (
+          <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-5 py-8 text-center text-sm font-bold text-primary">
+            {message}
+          </div>
+        )}
+        {!isLoading && !message && activities.length === 0 && (
+          <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-5 py-8 text-center text-sm font-bold text-[#BFA4A0]">
+            등록된 코멘트 한 줄 말이 없습니다.
+          </div>
+        )}
+        {activities.map((comment) => (
+          <article
+            className="grid items-center gap-4 rounded-[18px] border border-[#F2C9C2] bg-white px-5 py-4 lg:grid-cols-[180px_120px_1fr_180px]"
+            key={comment.id}
+          >
+            <p className="font-black text-[#5A3E3B]">
+              {comment.creatorPositionName ?? roleLabels[comment.creatorRoleType]} {comment.creatorName}
+            </p>
+            <span className={`flex h-9 items-center justify-center rounded-full border border-[#F2C9C2] text-sm font-black ${getStatusClassName(comment.status)}`}>
+              {getStatusLabel(comment.status)}
+            </span>
+            <div>
+              <p className="text-sm font-black text-[#5A3E3B]">{comment.taskTitle}</p>
+              <p className={`mt-1 text-sm font-bold ${comment.oneLineComment ? "text-[#5A3E3B]" : "text-[#BFA4A0]"}`}>
+                {comment.oneLineComment || "등록된 한 줄 멘트가 없습니다."}
+              </p>
+            </div>
+            <p className="text-right text-sm font-bold text-[#BFA4A0]">{formatDateTime(comment.updatedAt)}</p>
+          </article>
+        ))}
       </div>
     </section>
   );
@@ -275,6 +523,18 @@ function getStatusClassName(status: TaskStatus) {
   }
 
   return "bg-[#E8F3DF] text-[#6D956A]";
+}
+
+function isDescriptionHighlightVisible(task: TaskDetail) {
+  if (
+    task.descriptionHighlightStart === null ||
+    task.descriptionHighlightEnd === null ||
+    !task.descriptionHighlightExpiresAt
+  ) {
+    return false;
+  }
+
+  return new Date(task.descriptionHighlightExpiresAt).getTime() > Date.now();
 }
 
 export default TaskDetailPage;

@@ -1,4 +1,5 @@
 import type { Member, MemberAffiliation, MemberDuty, MemberPosition } from "@/types/domain";
+import { handleUnauthorizedResponse } from "@/api/client";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -48,6 +49,7 @@ export async function preRegisterMember(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -64,6 +66,7 @@ export async function getMemberPreRegistrations(accessToken: string): Promise<Me
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -82,6 +85,7 @@ export async function deleteMemberPreRegistration(accessToken: string, id: numbe
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 

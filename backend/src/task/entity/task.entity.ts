@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "../../common/entity/base.entity";
 import { Member } from "../../member/entity/member.entity";
+import { TaskComment } from "../../task-comment/entity/task-comment.entity";
 import { TaskAttachment } from "./task-attachment.entity";
 import { TaskStatus } from "../enum/task-status.enum";
 
@@ -11,6 +12,15 @@ export class Task extends BaseEntity {
 
   @Column({ type: "text" })
   description: string;
+
+  @Column({ name: "description_highlight_start", type: "int", nullable: true })
+  descriptionHighlightStart: number | null;
+
+  @Column({ name: "description_highlight_end", type: "int", nullable: true })
+  descriptionHighlightEnd: number | null;
+
+  @Column({ name: "description_highlight_expires_at", type: "timestamp", nullable: true })
+  descriptionHighlightExpiresAt: Date | null;
 
   @Column({ name: "one_line_comment", type: "varchar", nullable: true })
   oneLineComment: string | null;
@@ -47,4 +57,7 @@ export class Task extends BaseEntity {
 
   @OneToMany(() => TaskAttachment, (attachment) => attachment.task)
   attachments: TaskAttachment[];
+
+  @OneToMany(() => TaskComment, (comment) => comment.task)
+  comments: TaskComment[];
 }

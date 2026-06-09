@@ -17,6 +17,9 @@ export class TaskDraftSaveRequest {
     const task = new Task();
     task.title = this.title;
     task.description = this.description ?? "";
+    task.descriptionHighlightStart = null;
+    task.descriptionHighlightEnd = null;
+    task.descriptionHighlightExpiresAt = null;
     task.oneLineComment = null;
     task.status = TaskStatus.REGISTERED;
     task.assigneeId = this.assigneeId;

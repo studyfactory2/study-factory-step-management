@@ -51,6 +51,9 @@ export class TaskCreateRequest {
     const task = new Task();
     task.title = this.title;
     task.description = this.description;
+    task.descriptionHighlightStart = null;
+    task.descriptionHighlightEnd = null;
+    task.descriptionHighlightExpiresAt = null;
     task.oneLineComment = this.oneLineComment ?? null;
     task.status = TaskStatus.REGISTERED;
     task.assigneeId = assigneeId;

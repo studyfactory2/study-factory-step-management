@@ -8,6 +8,7 @@ type EmployeeListSectionProps = {
   candidates: AdminDashboardEmployee[];
   employees: AdminDashboardEmployee[];
   isUpdating: boolean;
+  maxFavoriteCount?: number;
   onAddFavoriteMember: (memberId: number) => void;
   onDeleteFavoriteMember: (memberId: number, memberName: string) => void;
 };
@@ -16,6 +17,7 @@ export function EmployeeListSection({
   candidates,
   employees,
   isUpdating,
+  maxFavoriteCount = 10,
   onAddFavoriteMember,
   onDeleteFavoriteMember
 }: EmployeeListSectionProps) {
@@ -23,7 +25,7 @@ export function EmployeeListSection({
   const favoriteMemberIds = employees.map((employee) => employee.id);
   const addableCandidates = candidates.filter((candidate) => !favoriteMemberIds.includes(candidate.id));
   const visibleEmployees = employees;
-  const favoriteSlots: Array<AdminDashboardEmployee | null> = Array.from({ length: 10 }, (_, index) =>
+  const favoriteSlots: Array<AdminDashboardEmployee | null> = Array.from({ length: maxFavoriteCount }, (_, index) =>
     visibleEmployees[index] ?? null
   );
 
@@ -43,7 +45,7 @@ export function EmployeeListSection({
               />
             ) : (
               <EmptySlot
-                disabled={isUpdating || employees.length >= 10}
+                disabled={isUpdating || employees.length >= maxFavoriteCount}
                 key={`empty-${index}`}
                 onSelect={() => setIsAddModalOpen(true)}
                 slotNumber={index + 1}

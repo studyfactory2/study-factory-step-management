@@ -1,4 +1,5 @@
 import type { AdminDashboardEmployee } from "@/api/admin";
+import { handleUnauthorizedResponse } from "@/api/client";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -24,6 +25,7 @@ export async function addFavoriteMember(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
 
     throw new Error(getErrorMessage(error, "함께 프로젝트 중 직원을 추가하지 못했습니다."));
@@ -44,6 +46,7 @@ export async function deleteFavoriteMember(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
 
     throw new Error(getErrorMessage(error, "함께 프로젝트 중 직원을 삭제하지 못했습니다."));
@@ -63,9 +66,30 @@ export async function getFavoriteMemberCandidates(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
 
     throw new Error(getErrorMessage(error, "직원 후보 목록을 불러오지 못했습니다."));
+  }
+
+  return response.json() as Promise<AdminDashboardEmployee[]>;
+}
+
+export async function getFavoriteMembers(
+  accessToken: string
+): Promise<AdminDashboardEmployee[]> {
+  const response = await fetch(`${API_BASE_URL}/api/favorite-members/me`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(getErrorMessage(error, "함께 프로젝트 중 직원을 불러오지 못했습니다."));
   }
 
   return response.json() as Promise<AdminDashboardEmployee[]>;
