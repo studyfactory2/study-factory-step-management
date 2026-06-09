@@ -24,7 +24,6 @@ export class TaskDetailResponse {
   descriptionHighlightStart: number | null;
   descriptionHighlightEnd: number | null;
   descriptionHighlightExpiresAt: Date | null;
-  oneLineComment: string | null;
   status: TaskStatus;
   assignee: TaskDetailMemberResponse;
   creator: TaskDetailMemberResponse;

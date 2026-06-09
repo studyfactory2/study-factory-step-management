@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Between, Repository } from "typeorm";
 import { TaskAttachment } from "./entity/task-attachment.entity";
+import { TaskReadStatus } from "./entity/task-read-status.entity";
 import { Task } from "./entity/task.entity";
 import { TaskSortOrder } from "./enum/task-sort-order.enum";
 import { TaskStatus } from "./enum/task-status.enum";
@@ -17,6 +18,7 @@ type FindRecentWorkStatusOptions = {
   memberId?: number;
   sortOrder?: TaskSortOrder;
   statuses: TaskStatus[];
+  viewerId?: number;
 };
 
 @Injectable()
@@ -25,7 +27,9 @@ export class TaskRepository {
     @InjectRepository(Task)
     private readonly taskRepository: Repository<Task>,
     @InjectRepository(TaskAttachment)
-    private readonly taskAttachmentRepository: Repository<TaskAttachment>
+    private readonly taskAttachmentRepository: Repository<TaskAttachment>,
+    @InjectRepository(TaskReadStatus)
+    private readonly taskReadStatusRepository: Repository<TaskReadStatus>
   ) {}
 
   async countByStatus(status: TaskStatus): Promise<number> {
@@ -66,8 +70,18 @@ export class TaskRepository {
       .leftJoinAndSelect("task.assignee", "assignee")
       .leftJoinAndSelect("assignee.positionInfo", "assigneePosition")
       .leftJoinAndSelect("task.attachments", "attachments")
+      .leftJoinAndSelect("task.comments", "comments")
       .where("task.status IN (:...statuses)", { statuses: options.statuses })
       .andWhere("task.isDraft = false");
+
+    if (options.viewerId) {
+      queryBuilder.leftJoinAndSelect(
+        "task.readStatuses",
+        "readStatus",
+        "readStatus.memberId = :viewerId",
+        { viewerId: options.viewerId }
+      );
+    }
 
     if (options.memberId) {
       queryBuilder.andWhere("(task.assigneeId = :memberId OR task.createdBy = :memberId)", {
@@ -82,6 +96,8 @@ export class TaskRepository {
     } else {
       queryBuilder.orderBy("task.updatedAt", "DESC");
     }
+
+    queryBuilder.addOrderBy("comments.updatedAt", "DESC");
 
     return queryBuilder.take(options.limit).getMany();
   }
@@ -145,5 +161,31 @@ export class TaskRepository {
 
   async saveAttachments(attachments: TaskAttachment[]): Promise<TaskAttachment[]> {
     return this.taskAttachmentRepository.save(attachments);
+  }
+
+  async markTaskViewed(taskId: number, memberId: number, viewedAt = new Date()): Promise<void> {
+    await this.taskReadStatusRepository.upsert(
+      {
+        taskId,
+        memberId,
+        lastViewedAt: viewedAt
+      },
+      ["taskId", "memberId"]
+    );
+  }
+
+  async markTasksViewed(taskIds: number[], memberId: number, viewedAt = new Date()): Promise<void> {
+    if (taskIds.length === 0) {
+      return;
+    }
+
+    await this.taskReadStatusRepository.upsert(
+      taskIds.map((taskId) => ({
+        taskId,
+        memberId,
+        lastViewedAt: viewedAt
+      })),
+      ["taskId", "memberId"]
+    );
   }
 }

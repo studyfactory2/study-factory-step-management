@@ -13,4 +13,5 @@ export class TaskRecentWorkStatusResponse {
   startedAt: Date;
   submittedAt: Date | null;
   attachmentPreviewUrls: string[];
+  isNew: boolean;
 }

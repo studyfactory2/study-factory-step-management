@@ -78,9 +78,16 @@ export function RecentOutputsSection({
           )}
           {recentOutputs.map((output) => (
             <article
-              className="grid items-center gap-5 rounded-2xl border border-[#F2C9C2] bg-[#FFF8F6] px-6 py-5 shadow-[0_7px_0_#EFC6BE] lg:grid-cols-[1fr_140px_140px]"
+              className={`relative grid items-center gap-5 rounded-2xl border border-[#F2C9C2] bg-[#FFF8F6] px-6 pb-5 shadow-[0_7px_0_#EFC6BE] lg:grid-cols-[1fr_140px_140px] ${
+                output.isNew ? "pt-10" : "pt-5"
+              }`}
               key={output.taskId}
             >
+              {output.isNew && (
+                <span className="absolute left-4 top-3 rounded-full bg-primary px-3 py-1 text-[11px] font-black uppercase text-white shadow-sm">
+                  new
+                </span>
+              )}
               <div>
                 <p className="text-xl font-semibold text-[#5A3E3B]">
                   {output.memberPositionName ?? roleLabels[output.memberRole]} {output.memberName} - {output.taskTitle}
@@ -93,11 +100,9 @@ export function RecentOutputsSection({
                     제출일: {formatDateTime(output.submittedAt)}
                   </p>
                 )}
-                {output.oneLineComment && (
-                  <p className="mt-2 text-sm font-bold text-[#8F7470]">
-                    한줄멘트 : {output.oneLineComment}
-                  </p>
-                )}
+                <p className="mt-2 min-h-5 text-sm font-bold text-[#8F7470]">
+                  {output.oneLineComment || "\u00A0"}
+                </p>
               </div>
               <span
                 className={`flex h-10 items-center justify-center rounded-full border border-[#F1CFD5] text-sm font-black ${getStatusClassName(output.taskStatus)}`}

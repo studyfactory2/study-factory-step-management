@@ -19,6 +19,7 @@ import { TaskCommentAttachment } from "./task-comment/entity/task-comment-attach
 import { TaskComment } from "./task-comment/entity/task-comment.entity";
 import { TaskCommentModule } from "./task-comment/task-comment.module";
 import { TaskAttachment } from "./task/entity/task-attachment.entity";
+import { TaskReadStatus } from "./task/entity/task-read-status.entity";
 import { Task } from "./task/entity/task.entity";
 import { TaskModule } from "./task/task.module";
 
@@ -42,6 +43,7 @@ import { TaskModule } from "./task/task.module";
           PositionDuty,
           Task,
           TaskAttachment,
+          TaskReadStatus,
           TaskComment,
           TaskCommentAttachment
         ],

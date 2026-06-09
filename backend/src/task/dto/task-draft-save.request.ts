@@ -20,7 +20,6 @@ export class TaskDraftSaveRequest {
     task.descriptionHighlightStart = null;
     task.descriptionHighlightEnd = null;
     task.descriptionHighlightExpiresAt = null;
-    task.oneLineComment = null;
     task.status = TaskStatus.REGISTERED;
     task.assigneeId = this.assigneeId;
     task.createdBy = createdBy;

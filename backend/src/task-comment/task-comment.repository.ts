@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Task } from "../task/entity/task.entity";
+import { TaskReadStatus } from "../task/entity/task-read-status.entity";
 import { TaskCommentAttachment } from "./entity/task-comment-attachment.entity";
 import { TaskComment } from "./entity/task-comment.entity";
 
@@ -13,7 +14,9 @@ export class TaskCommentRepository {
     @InjectRepository(TaskComment)
     private readonly taskCommentRepository: Repository<TaskComment>,
     @InjectRepository(TaskCommentAttachment)
-    private readonly taskCommentAttachmentRepository: Repository<TaskCommentAttachment>
+    private readonly taskCommentAttachmentRepository: Repository<TaskCommentAttachment>,
+    @InjectRepository(TaskReadStatus)
+    private readonly taskReadStatusRepository: Repository<TaskReadStatus>
   ) {}
 
   async findPublishedTaskById(id: number): Promise<Task | null> {
@@ -66,5 +69,16 @@ export class TaskCommentRepository {
     }
 
     return queryBuilder.getMany();
+  }
+
+  async markTaskViewed(taskId: number, memberId: number, viewedAt = new Date()): Promise<void> {
+    await this.taskReadStatusRepository.upsert(
+      {
+        taskId,
+        memberId,
+        lastViewedAt: viewedAt
+      },
+      ["taskId", "memberId"]
+    );
   }
 }

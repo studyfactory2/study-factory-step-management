@@ -44,6 +44,7 @@ export type AdminDashboardRecentOutput = {
   startedAt: string;
   submittedAt: string | null;
   attachmentPreviewUrls: string[];
+  isNew: boolean;
 };
 
 export type AdminDashboard = {

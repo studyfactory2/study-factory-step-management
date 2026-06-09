@@ -52,6 +52,10 @@ export class TaskService {
     const assigneeIds = await this.findAssigneeIds(request);
     const tasks = assigneeIds.map((assigneeId) => request.toEntity(assigneeId, currentMember.memberId));
     const savedTasks = await this.taskRepository.saveAll(tasks);
+    await this.taskRepository.markTasksViewed(
+      savedTasks.map((task) => task.id),
+      currentMember.memberId
+    );
 
     const attachments = savedTasks.flatMap((task) => this.createAttachments(task.id, request));
     if (attachments.length > 0) {
@@ -76,13 +80,14 @@ export class TaskService {
       limit: 10,
       memberId,
       sortOrder: query.sortOrder,
-      statuses
+      statuses,
+      viewerId: currentMember?.memberId
     });
 
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
-      oneLineComment: task.oneLineComment,
+      oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,
       memberName: task.assignee.name,
@@ -90,15 +95,20 @@ export class TaskService {
       memberPositionName: task.assignee.positionInfo?.name ?? null,
       startedAt: task.createdAt,
       submittedAt: task.status === TaskStatus.REVIEW_REQUESTED ? task.reviewRequestedAt : null,
-      attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl)
+      attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl),
+      isNew: currentMember ? this.isNewTaskForMember(task, currentMember.memberId) : false
     }));
   }
 
-  async findDetail(id: number): Promise<TaskDetailResponse> {
+  async findDetail(id: number, currentMember?: CurrentMember): Promise<TaskDetailResponse> {
     const task = await this.taskRepository.findDetailById(id);
 
     if (!task) {
       throw new TaskNotFoundException(id);
+    }
+
+    if (currentMember) {
+      await this.taskRepository.markTaskViewed(id, currentMember.memberId);
     }
 
     return {
@@ -114,7 +124,6 @@ export class TaskService {
       descriptionHighlightExpiresAt: this.isDescriptionHighlightActive(task)
         ? task.descriptionHighlightExpiresAt
         : null,
-      oneLineComment: task.oneLineComment,
       status: task.status,
       assignee: this.toTaskMemberResponse(task.assignee),
       creator: this.toTaskMemberResponse(task.creator),
@@ -189,6 +198,7 @@ export class TaskService {
     draft.status = TaskStatus.REGISTERED;
 
     const savedTask = await this.taskRepository.save(draft);
+    await this.taskRepository.markTaskViewed(savedTask.id, currentMember.memberId);
 
     return {
       createdCount: 1,
@@ -310,5 +320,31 @@ export class TaskService {
 
   private isAdminRole(role: MemberRole): boolean {
     return role === MemberRole.ADMIN || role === MemberRole.CEO;
+  }
+
+  private isNewTaskForMember(task: Task, memberId: number): boolean {
+    if (task.createdBy !== memberId && task.assigneeId !== memberId) {
+      return false;
+    }
+
+    const readStatus = task.readStatuses?.[0];
+
+    if (!readStatus) {
+      return task.createdBy !== memberId;
+    }
+
+    return readStatus.lastViewedAt.getTime() < task.updatedAt.getTime();
+  }
+
+  private findLatestCommentOneLineComment(task: Task): string | null {
+    const latestComment = task.comments?.reduce((latest, comment) => {
+      if (!latest) {
+        return comment;
+      }
+
+      return comment.updatedAt.getTime() > latest.updatedAt.getTime() ? comment : latest;
+    }, null as Task["comments"][number] | null);
+
+    return latestComment?.oneLineComment ?? null;
   }
 }

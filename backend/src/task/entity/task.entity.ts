@@ -3,6 +3,7 @@ import { BaseEntity } from "../../common/entity/base.entity";
 import { Member } from "../../member/entity/member.entity";
 import { TaskComment } from "../../task-comment/entity/task-comment.entity";
 import { TaskAttachment } from "./task-attachment.entity";
+import { TaskReadStatus } from "./task-read-status.entity";
 import { TaskStatus } from "../enum/task-status.enum";
 
 @Entity({ name: "tasks" })
@@ -21,9 +22,6 @@ export class Task extends BaseEntity {
 
   @Column({ name: "description_highlight_expires_at", type: "timestamp", nullable: true })
   descriptionHighlightExpiresAt: Date | null;
-
-  @Column({ name: "one_line_comment", type: "varchar", nullable: true })
-  oneLineComment: string | null;
 
   @Column({
     type: "enum",
@@ -60,4 +58,7 @@ export class Task extends BaseEntity {
 
   @OneToMany(() => TaskComment, (comment) => comment.task)
   comments: TaskComment[];
+
+  @OneToMany(() => TaskReadStatus, (readStatus) => readStatus.task)
+  readStatuses: TaskReadStatus[];
 }

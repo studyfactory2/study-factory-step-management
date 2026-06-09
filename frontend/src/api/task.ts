@@ -103,7 +103,6 @@ export type TaskDetail = {
   descriptionHighlightStart: number | null;
   descriptionHighlightEnd: number | null;
   descriptionHighlightExpiresAt: string | null;
-  oneLineComment: string | null;
   status: TaskStatus;
   assignee: TaskDetailMember;
   creator: TaskDetailMember;
@@ -127,6 +126,7 @@ export type TaskRecentWorkStatus = {
   startedAt: string;
   submittedAt: string | null;
   attachmentPreviewUrls: string[];
+  isNew: boolean;
 };
 
 export async function getTaskStatusSummary(): Promise<TaskStatusSummary> {
