@@ -22,7 +22,12 @@ import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import { getTaskStatusSummary, type TaskStatusSummary } from "@/api/task";
 import { RoleTree } from "@/components/role-tree";
 import { StatusCard } from "@/components/status-card";
-import { saveAuth } from "@/lib/auth-storage";
+import {
+  clearRememberedLoginName,
+  getRememberedLoginName,
+  saveAuth,
+  saveRememberedLoginName
+} from "@/lib/auth-storage";
 
 type StatusCardItem = {
   label: string;
@@ -90,6 +95,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   useEffect(() => {
+    const rememberedName = getRememberedLoginName();
+
+    if (rememberedName) {
+      setName(rememberedName);
+      setRememberName(true);
+    }
+  }, []);
+
+  useEffect(() => {
     getTaskStatusSummary()
       .then(setTaskSummary)
       .catch(() => setTaskSummary(defaultSummary));
@@ -121,6 +135,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       });
 
       saveAuth(response);
+      if (rememberName) {
+        saveRememberedLoginName(name);
+      } else {
+        clearRememberedLoginName();
+      }
       setMessage(`${response.member.name}님, 로그인되었습니다.`);
       onLogin?.(response);
     } catch (error) {
@@ -238,7 +257,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               <input
                 checked={rememberName}
                 className="h-5 w-5 rounded border-[#EBCDD1] accent-[#F188A4]"
-                onChange={(event) => setRememberName(event.target.checked)}
+                onChange={(event) => {
+                  const isChecked = event.target.checked;
+                  setRememberName(isChecked);
+
+                  if (!isChecked) {
+                    clearRememberedLoginName();
+                  }
+                }}
                 type="checkbox"
               />
               이름 기억하기
