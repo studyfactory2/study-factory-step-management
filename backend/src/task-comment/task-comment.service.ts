@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
+import { MemberRole } from "../member/enum/member-role.enum";
 import { Task } from "../task/entity/task.entity";
 import { TaskStatus } from "../task/enum/task-status.enum";
 import { TaskNotFoundException } from "../task/exception/task-not-found.exception";
@@ -44,8 +45,14 @@ export class TaskCommentService {
     return comments.map((comment) => this.toResponse(comment));
   }
 
-  async findRecent(limit = 100): Promise<TaskCommentActivityResponse[]> {
-    const comments = await this.taskCommentRepository.findRecent(limit);
+  async findRecent(
+    limit = 100,
+    currentMember?: CurrentMember
+  ): Promise<TaskCommentActivityResponse[]> {
+    const memberId = currentMember && !this.isAdminRole(currentMember.role)
+      ? currentMember.memberId
+      : undefined;
+    const comments = await this.taskCommentRepository.findRecent(limit, memberId);
     return comments.map((comment) => this.toActivityResponse(comment));
   }
 
@@ -110,10 +117,17 @@ export class TaskCommentService {
       assigneeName: comment.task.assignee.name,
       assigneeRoleType: comment.task.assignee.roleType,
       assigneePositionName: comment.task.assignee.positionInfo?.name ?? null,
+      creatorName: comment.creator.name,
+      creatorRoleType: comment.creator.roleType,
+      creatorPositionName: comment.creator.positionInfo?.name ?? null,
       oneLineComment: comment.oneLineComment,
       status: comment.status,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt
     };
+  }
+
+  private isAdminRole(role: MemberRole): boolean {
+    return role === MemberRole.ADMIN || role === MemberRole.CEO;
   }
 }

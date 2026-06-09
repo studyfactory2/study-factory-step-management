@@ -14,6 +14,7 @@ export type TaskCountRow = {
 
 type FindRecentWorkStatusOptions = {
   limit: number;
+  memberId?: number;
   sortOrder?: TaskSortOrder;
   statuses: TaskStatus[];
 };
@@ -67,6 +68,12 @@ export class TaskRepository {
       .leftJoinAndSelect("task.attachments", "attachments")
       .where("task.status IN (:...statuses)", { statuses: options.statuses })
       .andWhere("task.isDraft = false");
+
+    if (options.memberId) {
+      queryBuilder.andWhere("(task.assigneeId = :memberId OR task.createdBy = :memberId)", {
+        memberId: options.memberId
+      });
+    }
 
     if (options.sortOrder === TaskSortOrder.LATEST) {
       queryBuilder.orderBy("task.updatedAt", "DESC");

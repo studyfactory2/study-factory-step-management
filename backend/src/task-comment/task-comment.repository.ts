@@ -47,15 +47,24 @@ export class TaskCommentRepository {
       .getMany();
   }
 
-  async findRecent(limit: number): Promise<TaskComment[]> {
-    return this.taskCommentRepository
+  async findRecent(limit: number, memberId?: number): Promise<TaskComment[]> {
+    const queryBuilder = this.taskCommentRepository
       .createQueryBuilder("comment")
       .leftJoinAndSelect("comment.task", "task")
       .leftJoinAndSelect("task.assignee", "assignee")
       .leftJoinAndSelect("assignee.positionInfo", "position")
+      .leftJoinAndSelect("comment.creator", "creator")
+      .leftJoinAndSelect("creator.positionInfo", "creatorPosition")
       .where("task.isDraft = false")
       .orderBy("comment.updatedAt", "DESC")
-      .limit(limit)
-      .getMany();
+      .limit(limit);
+
+    if (memberId) {
+      queryBuilder.andWhere("(task.assigneeId = :memberId OR task.createdBy = :memberId)", {
+        memberId
+      });
+    }
+
+    return queryBuilder.getMany();
   }
 }

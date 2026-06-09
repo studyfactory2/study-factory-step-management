@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
 import { MemberRepository } from "../member/member.repository";
+import { MemberRole } from "../member/enum/member-role.enum";
 import { TaskCommentResponse } from "../task-comment/dto/task-comment.response";
 import { TaskCreateRequest } from "./dto/task-create.request";
 import { TaskCreateResponse } from "./dto/task-create.response";
@@ -8,6 +9,8 @@ import { TaskDescriptionUpdateRequest } from "./dto/task-description-update.requ
 import { TaskDetailMemberResponse, TaskDetailResponse } from "./dto/task-detail.response";
 import { TaskDraftResponse } from "./dto/task-draft.response";
 import { TaskDraftSaveRequest } from "./dto/task-draft-save.request";
+import { TaskRecentWorkStatusQueryRequest } from "./dto/task-recent-work-status-query.request";
+import { TaskRecentWorkStatusResponse } from "./dto/task-recent-work-status.response";
 import { TaskStatusSummaryResponse } from "./dto/task-status-summary.response";
 import { TaskAttachment } from "./entity/task-attachment.entity";
 import { TaskComment } from "../task-comment/entity/task-comment.entity";
@@ -59,6 +62,36 @@ export class TaskService {
       createdCount: savedTasks.length,
       taskIds: savedTasks.map((task) => task.id)
     };
+  }
+
+  async findRecentWorkStatus(
+    query: TaskRecentWorkStatusQueryRequest = {},
+    currentMember?: CurrentMember
+  ): Promise<TaskRecentWorkStatusResponse[]> {
+    const statuses = query.status?.length ? query.status : [TaskStatus.REVIEW_REQUESTED];
+    const memberId = currentMember && !this.isAdminRole(currentMember.role)
+      ? currentMember.memberId
+      : undefined;
+    const tasks = await this.taskRepository.findRecentWorkStatus({
+      limit: 10,
+      memberId,
+      sortOrder: query.sortOrder,
+      statuses
+    });
+
+    return tasks.map((task) => ({
+      taskId: task.id,
+      taskTitle: task.title,
+      oneLineComment: task.oneLineComment,
+      taskStatus: task.status,
+      memberId: task.assignee.id,
+      memberName: task.assignee.name,
+      memberRole: task.assignee.roleType,
+      memberPositionName: task.assignee.positionInfo?.name ?? null,
+      startedAt: task.createdAt,
+      submittedAt: task.status === TaskStatus.REVIEW_REQUESTED ? task.reviewRequestedAt : null,
+      attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl)
+    }));
   }
 
   async findDetail(id: number): Promise<TaskDetailResponse> {
@@ -273,5 +306,9 @@ export class TaskService {
         task.descriptionHighlightExpiresAt &&
         task.descriptionHighlightExpiresAt.getTime() > Date.now()
     );
+  }
+
+  private isAdminRole(role: MemberRole): boolean {
+    return role === MemberRole.ADMIN || role === MemberRole.CEO;
   }
 }

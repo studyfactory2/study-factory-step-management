@@ -10,8 +10,6 @@ import { FavoriteMemberRepository } from "./favorite-member.repository";
 
 @Injectable()
 export class FavoriteMemberService {
-  private readonly maxFavoriteMemberCount = 10;
-
   constructor(
     private readonly favoriteMemberRepository: FavoriteMemberRepository,
     private readonly memberRepository: MemberRepository,
@@ -19,7 +17,7 @@ export class FavoriteMemberService {
   ) {}
 
   async addFavoriteMember(ownerMemberId: number, memberId: number): Promise<AdminDashboardEmployeeResponse[]> {
-    await this.validateOwner(ownerMemberId);
+    const ownerMember = await this.validateOwner(ownerMemberId);
 
     const member = await this.memberRepository.findById(memberId);
     if (!member || !member.isActive || member.roleType === MemberRole.CEO || member.roleType === MemberRole.ADMIN) {
@@ -30,8 +28,10 @@ export class FavoriteMemberService {
     if (!alreadyExists) {
       const favoriteMemberCount = await this.favoriteMemberRepository.countByOwnerMemberId(ownerMemberId);
 
-      if (favoriteMemberCount >= this.maxFavoriteMemberCount) {
-        throw new BadRequestException("함께 프로젝트 중 직원은 최대 10명까지 등록할 수 있습니다.");
+      const maxFavoriteMemberCount = this.getMaxFavoriteMemberCount(ownerMember.roleType);
+
+      if (favoriteMemberCount >= maxFavoriteMemberCount) {
+        throw new BadRequestException(`함께 프로젝트 중 직원은 최대 ${maxFavoriteMemberCount}명까지 등록할 수 있습니다.`);
       }
 
       await this.favoriteMemberRepository.save(ownerMemberId, memberId);
@@ -156,11 +156,21 @@ export class FavoriteMemberService {
     });
   }
 
-  private async validateOwner(ownerMemberId: number): Promise<void> {
+  private getMaxFavoriteMemberCount(roleType: MemberRole): number {
+    if (roleType === MemberRole.ADMIN || roleType === MemberRole.CEO) {
+      return 10;
+    }
+
+    return 5;
+  }
+
+  private async validateOwner(ownerMemberId: number): Promise<Member> {
     const ownerMember = await this.memberRepository.findById(ownerMemberId);
 
     if (!ownerMember) {
       throw new MemberNotFoundException(ownerMemberId);
     }
+
+    return ownerMember;
   }
 }

@@ -77,7 +77,7 @@ export class MemberRepository {
       },
       where: {
         isActive: true,
-        roleType: Not(In([MemberRole.CEO, MemberRole.ADMIN]))
+        roleType: Not(MemberRole.ADMIN)
       },
       order: {
         positionInfo: {
@@ -95,7 +95,7 @@ export class MemberRepository {
       .leftJoinAndSelect("member.positionDuty", "positionDuty")
       .where("member.isActive = true")
       .andWhere("member.roleType NOT IN (:...roleTypes)", {
-        roleTypes: [MemberRole.CEO, MemberRole.ADMIN]
+        roleTypes: [MemberRole.ADMIN]
       });
 
     if (branch) {

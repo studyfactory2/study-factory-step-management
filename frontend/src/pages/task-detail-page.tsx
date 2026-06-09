@@ -474,7 +474,7 @@ function ActivitySection({ accessToken }: { accessToken: string }) {
             key={comment.id}
           >
             <p className="font-black text-[#5A3E3B]">
-              {comment.assigneePositionName ?? roleLabels[comment.assigneeRoleType]} {comment.assigneeName}
+              {comment.creatorPositionName ?? roleLabels[comment.creatorRoleType]} {comment.creatorName}
             </p>
             <span className={`flex h-9 items-center justify-center rounded-full border border-[#F2C9C2] text-sm font-black ${getStatusClassName(comment.status)}`}>
               {getStatusLabel(comment.status)}

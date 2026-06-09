@@ -1,4 +1,5 @@
 import type { MemberRole, TaskStatus } from "@/types/domain";
+import { handleUnauthorizedResponse } from "@/api/client";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -80,6 +81,9 @@ export type TaskCommentActivity = {
   assigneeName: string;
   assigneeRoleType: MemberRole;
   assigneePositionName: string | null;
+  creatorName: string;
+  creatorRoleType: MemberRole;
+  creatorPositionName: string | null;
   oneLineComment: string | null;
   status: TaskStatus;
   createdAt: string;
@@ -109,6 +113,20 @@ export type TaskDetail = {
   reviewRequestedAt: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type TaskRecentWorkStatus = {
+  taskId: number;
+  taskTitle: string;
+  oneLineComment: string | null;
+  taskStatus: TaskStatus;
+  memberId: number;
+  memberName: string;
+  memberRole: MemberRole;
+  memberPositionName: string | null;
+  startedAt: string;
+  submittedAt: string | null;
+  attachmentPreviewUrls: string[];
 };
 
 export async function getTaskStatusSummary(): Promise<TaskStatusSummary> {
@@ -141,6 +159,7 @@ export async function createTask(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -159,6 +178,7 @@ export async function getTaskDetail(accessToken: string, taskId: number): Promis
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -183,6 +203,7 @@ export async function updateTaskDescription(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -201,6 +222,7 @@ export async function getTaskDrafts(accessToken: string): Promise<TaskDraft[]> {
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -224,6 +246,7 @@ export async function createTaskDraft(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -248,6 +271,7 @@ export async function updateTaskDraft(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -269,6 +293,7 @@ export async function publishTaskDraft(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -293,6 +318,7 @@ export async function createTaskComment(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -314,6 +340,7 @@ export async function getTaskCommentActivities(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
@@ -321,4 +348,40 @@ export async function getTaskCommentActivities(
   }
 
   return response.json() as Promise<TaskCommentActivity[]>;
+}
+
+export async function getTaskRecentWorkStatus(
+  accessToken: string,
+  filters: {
+    sortOrder?: "LATEST" | "OLDEST";
+    statuses?: TaskStatus[];
+  } = {}
+): Promise<TaskRecentWorkStatus[]> {
+  const params = new URLSearchParams();
+
+  filters.statuses?.forEach((status) => {
+    params.append("status", status);
+  });
+
+  if (filters.sortOrder) {
+    params.set("sortOrder", filters.sortOrder);
+  }
+
+  const queryString = params.toString();
+  const response = await fetch(`${API_BASE_URL}/api/tasks/recent-work-status${queryString ? `?${queryString}` : ""}`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "최근 작업 근황을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskRecentWorkStatus[]>;
 }

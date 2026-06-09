@@ -1,4 +1,5 @@
 import type { MemberRole, TaskStatus } from "@/types/domain";
+import { handleUnauthorizedResponse } from "@/api/client";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -86,6 +87,7 @@ export async function getAdminDashboard(
   });
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 

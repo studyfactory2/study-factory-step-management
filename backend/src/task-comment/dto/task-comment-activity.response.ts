@@ -8,6 +8,9 @@ export class TaskCommentActivityResponse {
   assigneeName: string;
   assigneeRoleType: MemberRole;
   assigneePositionName: string | null;
+  creatorName: string;
+  creatorRoleType: MemberRole;
+  creatorPositionName: string | null;
   oneLineComment: string | null;
   status: TaskStatus;
   createdAt: Date;
