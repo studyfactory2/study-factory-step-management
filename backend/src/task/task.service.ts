@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
+import { Member } from "../member/entity/member.entity";
 import { MemberRepository } from "../member/member.repository";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { TaskCommentResponse } from "../task-comment/dto/task-comment.response";
@@ -97,7 +98,7 @@ export class TaskService {
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,
-      memberName: task.assignee.name,
+      memberName: this.getDisplayName(task.assignee),
       memberRole: task.assignee.roleType,
       memberPositionName: task.assignee.positionInfo?.name ?? null,
       startedAt: task.createdAt,
@@ -282,7 +283,7 @@ export class TaskService {
   private toTaskMemberResponse(member: Task["assignee"]): TaskDetailMemberResponse {
     return {
       id: member.id,
-      name: member.name,
+      name: this.getDisplayName(member),
       branch: member.branch,
       roleType: member.roleType,
       positionName: member.positionInfo?.name ?? null
@@ -399,5 +400,9 @@ export class TaskService {
     }, null as Task["comments"][number] | null);
 
     return latestComment?.oneLineComment ?? null;
+  }
+
+  private getDisplayName(member: Member): string {
+    return member.displayName ?? member.name;
   }
 }

@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
+import { Member } from "../member/entity/member.entity";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { Task } from "../task/entity/task.entity";
 import { TaskStatus } from "../task/enum/task-status.enum";
@@ -149,10 +150,10 @@ export class TaskCommentService {
       id: comment.id,
       taskId: comment.taskId,
       taskTitle: comment.task.title,
-      assigneeName: comment.task.assignee.name,
+      assigneeName: this.getDisplayName(comment.task.assignee),
       assigneeRoleType: comment.task.assignee.roleType,
       assigneePositionName: comment.task.assignee.positionInfo?.name ?? null,
-      creatorName: comment.creator.name,
+      creatorName: this.getDisplayName(comment.creator),
       creatorRoleType: comment.creator.roleType,
       creatorPositionName: comment.creator.positionInfo?.name ?? null,
       oneLineComment: comment.oneLineComment,
@@ -164,5 +165,9 @@ export class TaskCommentService {
 
   private isAdminRole(role: MemberRole): boolean {
     return role === MemberRole.ADMIN || role === MemberRole.CEO;
+  }
+
+  private getDisplayName(member: Member): string {
+    return member.displayName ?? member.name;
   }
 }

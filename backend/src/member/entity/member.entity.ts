@@ -9,6 +9,9 @@ export class Member extends BaseEntity {
   @Column()
   name: string;
 
+  @Column({ name: "display_name", type: "varchar", nullable: true })
+  displayName: string | null;
+
   @Column({ name: "password_hash" })
   passwordHash: string;
 

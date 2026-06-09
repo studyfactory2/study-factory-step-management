@@ -1,8 +1,5 @@
-import { IsEnum, IsString, Length } from "class-validator";
+import { IsString, Length } from "class-validator";
 import { Member } from "../entity/member.entity";
-import { MemberAffiliation } from "../enum/member-affiliation.enum";
-import { MemberDuty } from "../enum/member-duty.enum";
-import { MemberPosition } from "../enum/member-position.enum";
 import { MemberRole } from "../enum/member-role.enum";
 
 export class MemberRegisterRequest {
@@ -12,27 +9,23 @@ export class MemberRegisterRequest {
   @Length(4, 4, { message: "비밀번호는 반드시 4자여야 합니다." })
   password: string;
 
-  @IsString({ message: "지점은 문자열이어야 합니다." })
-  branch: string;
-
-  @IsEnum(MemberAffiliation, { message: "유효하지 않은 소속입니다." })
-  affiliation: MemberAffiliation;
-
-  @IsEnum(MemberPosition, { message: "유효하지 않은 직급입니다." })
-  position: MemberPosition;
-
-  @IsEnum(MemberDuty, { message: "유효하지 않은 역할입니다." })
-  duty: MemberDuty;
-
-  toEntity(passwordHash: string, positionId: number, positionDutyId: number | null, roleType: MemberRole): Member {
+  toEntity(
+    passwordHash: string,
+    branch: string,
+    displayName: string,
+    positionId: number,
+    positionDutyId: number | null,
+    roleType: MemberRole
+  ): Member {
     const member = new Member();
     member.name = this.name;
+    member.displayName = displayName;
     member.roleType = roleType;
     member.positionId = positionId;
     member.positionDutyId = positionDutyId;
     member.passwordHash = passwordHash;
     member.avatarUrl = null;
-    member.branch = this.branch;
+    member.branch = branch;
     member.isActive = true;
 
     return member;

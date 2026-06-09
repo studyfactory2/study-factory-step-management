@@ -21,6 +21,7 @@ export type MemberDuty = "DEVELOPMENT" | "BEVERAGE" | "FOOD" | "CLEANING" | "GEN
 export type Member = {
   id: number;
   name: string;
+  displayName: string | null;
   avatarUrl: string | null;
   branch: string | null;
   positionId: number | null;
