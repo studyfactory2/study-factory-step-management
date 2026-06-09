@@ -49,6 +49,7 @@ export default function TaskDetailRoutePage({ params }: TaskDetailRoutePageProps
     <TaskDetailPage
       accessToken={accessToken}
       currentMemberRole={currentMember.roleType}
+      onHelpRequestOpen={() => router.push(`/tasks/${parsedTaskId}/help-request`)}
       onBack={() => router.push(isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard")}
       taskId={parsedTaskId}
     />

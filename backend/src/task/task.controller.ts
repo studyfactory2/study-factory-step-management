@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FilesInterceptor } from "@nestjs/platform-express";
 import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { CurrentMember } from "../auth/decorator/current-member.decorator";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { CurrentMember as CurrentMemberType } from "../auth/type/current-member.type";
+import { UploadFile } from "../upload/type/upload-file.type";
 import { TaskCreateRequest } from "./dto/task-create.request";
 import { TaskDescriptionUpdateRequest } from "./dto/task-description-update.request";
 import { TaskDraftSaveRequest } from "./dto/task-draft-save.request";
@@ -80,8 +82,24 @@ export class TaskController {
   }
 
   @UseGuards(JWTAuthGuard)
+  @UseInterceptors(FilesInterceptor("attachments", 10))
+  @Post(":id/attachments")
+  async addAttachments(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType,
+    @UploadedFiles() files: UploadFile[] = []
+  ) {
+    return this.taskService.addAttachments(id, currentMember, files);
+  }
+
+  @UseGuards(JWTAuthGuard)
+  @UseInterceptors(FilesInterceptor("attachments", 10))
   @Post()
-  async create(@Body() request: TaskCreateRequest, @CurrentMember() currentMember: CurrentMemberType) {
-    return this.taskService.create(request, currentMember);
+  async create(
+    @Body() request: TaskCreateRequest,
+    @CurrentMember() currentMember: CurrentMemberType,
+    @UploadedFiles() files: UploadFile[] = []
+  ) {
+    return this.taskService.create(request, currentMember, files);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
 import { MemberRepository } from "../member/member.repository";
 import { MemberRole } from "../member/enum/member-role.enum";
@@ -14,6 +14,8 @@ import { TaskRecentWorkStatusResponse } from "./dto/task-recent-work-status.resp
 import { TaskStatusSummaryResponse } from "./dto/task-status-summary.response";
 import { TaskAttachment } from "./entity/task-attachment.entity";
 import { TaskComment } from "../task-comment/entity/task-comment.entity";
+import { UploadFile } from "../upload/type/upload-file.type";
+import { UploadService } from "../upload/upload.service";
 import { Task } from "./entity/task.entity";
 import { TaskAssigneeScope } from "./enum/task-assignee-scope.enum";
 import { TaskStatus } from "./enum/task-status.enum";
@@ -25,7 +27,8 @@ import { TaskRepository } from "./task.repository";
 export class TaskService {
   constructor(
     private readonly taskRepository: TaskRepository,
-    private readonly memberRepository: MemberRepository
+    private readonly memberRepository: MemberRepository,
+    private readonly uploadService: UploadService
   ) {}
 
   async getStatusSummary(): Promise<TaskStatusSummaryResponse> {
@@ -48,7 +51,11 @@ export class TaskService {
     };
   }
 
-  async create(request: TaskCreateRequest, currentMember: CurrentMember): Promise<TaskCreateResponse> {
+  async create(
+    request: TaskCreateRequest,
+    currentMember: CurrentMember,
+    files: UploadFile[] = []
+  ): Promise<TaskCreateResponse> {
     const assigneeIds = await this.findAssigneeIds(request);
     const tasks = assigneeIds.map((assigneeId) => request.toEntity(assigneeId, currentMember.memberId));
     const savedTasks = await this.taskRepository.saveAll(tasks);
@@ -57,7 +64,7 @@ export class TaskService {
       currentMember.memberId
     );
 
-    const attachments = savedTasks.flatMap((task) => this.createAttachments(task.id, request));
+    const attachments = await this.createAttachments(savedTasks, files);
     if (attachments.length > 0) {
       await this.taskRepository.saveAttachments(attachments);
     }
@@ -163,6 +170,27 @@ export class TaskService {
     return this.findDetail(id);
   }
 
+  async addAttachments(
+    id: number,
+    currentMember: CurrentMember,
+    files: UploadFile[] = []
+  ): Promise<TaskDetailResponse> {
+    const task = await this.taskRepository.findPublishedById(id);
+
+    if (!task) {
+      throw new TaskNotFoundException(id);
+    }
+
+    this.validateTaskAccess(task, currentMember);
+
+    const attachments = await this.createAttachments([task], files);
+    if (attachments.length > 0) {
+      await this.taskRepository.saveAttachments(attachments);
+    }
+
+    return this.findDetail(id, currentMember);
+  }
+
   async createDraft(
     request: TaskDraftSaveRequest,
     currentMember: CurrentMember
@@ -232,8 +260,23 @@ export class TaskService {
     return members.map((member) => member.id);
   }
 
-  private createAttachments(taskId: number, request: TaskCreateRequest): TaskAttachment[] {
-    return request.attachments?.map((attachmentRequest) => attachmentRequest.toEntity(taskId)) ?? [];
+  private async createAttachments(tasks: Task[], files: UploadFile[]): Promise<TaskAttachment[]> {
+    const uploadedFiles = await this.uploadService.saveImages(files);
+
+    if (uploadedFiles.length === 0) {
+      return [];
+    }
+
+    return tasks.flatMap((task) =>
+      uploadedFiles.map((uploadedFile) => {
+        const attachment = new TaskAttachment();
+        attachment.taskId = task.id;
+        attachment.imageUrl = uploadedFile.imageUrl;
+        attachment.originalName = uploadedFile.originalName;
+
+        return attachment;
+      })
+    );
   }
 
   private toTaskMemberResponse(member: Task["assignee"]): TaskDetailMemberResponse {
@@ -320,6 +363,16 @@ export class TaskService {
 
   private isAdminRole(role: MemberRole): boolean {
     return role === MemberRole.ADMIN || role === MemberRole.CEO;
+  }
+
+  private validateTaskAccess(task: Task, currentMember: CurrentMember): void {
+    if (this.isAdminRole(currentMember.role)) {
+      return;
+    }
+
+    if (task.assigneeId !== currentMember.memberId && task.createdBy !== currentMember.memberId) {
+      throw new ForbiddenException("업무 접근 권한이 없습니다.");
+    }
   }
 
   private isNewTaskForMember(task: Task, memberId: number): boolean {

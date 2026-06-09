@@ -13,6 +13,7 @@ export type TaskStatusSummary = {
 export type TaskAssigneeScope = "SINGLE" | "ALL";
 
 export type TaskCreateRequest = {
+  attachments?: File[];
   title: string;
   description: string;
   assigneeScope: TaskAssigneeScope;
@@ -91,6 +92,7 @@ export type TaskCommentActivity = {
 };
 
 export type TaskCommentCreateRequest = {
+  attachments?: File[];
   content: string;
   oneLineComment?: string;
   status?: TaskStatus;
@@ -149,13 +151,33 @@ export async function createTask(
   accessToken: string,
   request: TaskCreateRequest
 ): Promise<TaskCreateResponse> {
+  const formData = new FormData();
+  formData.append("title", request.title);
+  formData.append("description", request.description);
+  formData.append("assigneeScope", request.assigneeScope);
+
+  if (request.assigneeId !== undefined) {
+    formData.append("assigneeId", String(request.assigneeId));
+  }
+
+  if (request.branch) {
+    formData.append("branch", request.branch);
+  }
+
+  if (request.positionId !== undefined) {
+    formData.append("positionId", String(request.positionId));
+  }
+
+  request.attachments?.forEach((attachment) => {
+    formData.append("attachments", attachment);
+  });
+
   const response = await fetch(`${API_BASE_URL}/api/tasks`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json"
+      Authorization: `Bearer ${accessToken}`
     },
-    body: JSON.stringify(request)
+    body: formData
   });
 
   if (!response.ok) {
@@ -208,6 +230,35 @@ export async function updateTaskDescription(
     const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
 
     throw new Error(message ?? "프로젝트 내용을 수정하지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskDetail>;
+}
+
+export async function addTaskAttachments(
+  accessToken: string,
+  taskId: number,
+  attachments: File[]
+): Promise<TaskDetail> {
+  const formData = new FormData();
+  attachments.forEach((attachment) => {
+    formData.append("attachments", attachment);
+  });
+
+  const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/attachments`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "업무 사진을 첨부하지 못했습니다.");
   }
 
   return response.json() as Promise<TaskDetail>;
@@ -308,13 +359,27 @@ export async function createTaskComment(
   taskId: number,
   request: TaskCommentCreateRequest
 ): Promise<TaskComment> {
+  const formData = new FormData();
+  formData.append("content", request.content);
+
+  if (request.oneLineComment) {
+    formData.append("oneLineComment", request.oneLineComment);
+  }
+
+  if (request.status) {
+    formData.append("status", request.status);
+  }
+
+  request.attachments?.forEach((attachment) => {
+    formData.append("attachments", attachment);
+  });
+
   const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/comments`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json"
+      Authorization: `Bearer ${accessToken}`
     },
-    body: JSON.stringify(request)
+    body: formData
   });
 
   if (!response.ok) {
