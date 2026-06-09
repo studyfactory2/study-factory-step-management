@@ -76,7 +76,6 @@ function PositionNode({
       <PositionCard
         className="w-[132px] sm:w-36 lg:w-40"
         index={index}
-        isSelected={selectedPositionId === position.id}
         onSelect={() => onSelectPosition(position.id)}
         position={position}
       />
@@ -123,13 +122,11 @@ function PositionNode({
 function PositionCard({
   className,
   index,
-  isSelected,
   onSelect,
   position
 }: {
   className?: string;
   index: number;
-  isSelected: boolean;
   onSelect: () => void;
   position: PositionTreeNode;
 }) {
@@ -141,7 +138,6 @@ function PositionCard({
       className={cn(
         "flex min-h-[78px] w-full flex-col items-center justify-center rounded-2xl border px-2.5 py-2.5 text-center shadow-sm transition",
         toneClassName,
-        isSelected && "ring-2 ring-primary ring-offset-2",
         className
       )}
       onClick={onSelect}
