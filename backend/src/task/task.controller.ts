@@ -63,8 +63,11 @@ export class TaskController {
 
   @UseGuards(JWTAuthGuard)
   @Get(":id")
-  async findDetail(@Param("id", ParseIntPipe) id: number) {
-    return this.taskService.findDetail(id);
+  async findDetail(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.taskService.findDetail(id, currentMember);
   }
 
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)

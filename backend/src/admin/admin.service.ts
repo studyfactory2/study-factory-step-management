@@ -12,6 +12,7 @@ import { Member } from "../member/entity/member.entity";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { MemberNotFoundException } from "../member/exception/member-not-found.exception";
 import { MemberRepository } from "../member/member.repository";
+import { Task } from "../task/entity/task.entity";
 import { TaskStatus } from "../task/enum/task-status.enum";
 import { TaskRepository, TaskCountRow } from "../task/task.repository";
 import { AdminDashboardQueryRequest } from "./dto/admin-dashboard-query.request";
@@ -38,7 +39,7 @@ export class AdminService {
         this.favoriteMemberService.getFavoriteMemberEntities(currentMemberId),
         this.findTaskCountRows(),
         this.findBranchGroups(),
-        this.findRecentOutputs(query)
+        this.findRecentOutputs(query, currentMemberId)
       ]);
 
     return {
@@ -130,13 +131,15 @@ export class AdminService {
   }
 
   private async findRecentOutputs(
-    query: AdminDashboardQueryRequest
+    query: AdminDashboardQueryRequest,
+    currentMemberId: number
   ): Promise<AdminDashboardRecentOutputResponse[]> {
     const statuses = query.status?.length ? query.status : [TaskStatus.REVIEW_REQUESTED];
     const tasks = await this.taskRepository.findRecentWorkStatus({
       limit: 10,
       sortOrder: query.sortOrder,
-      statuses
+      statuses,
+      viewerId: currentMemberId
     });
 
     return tasks.map((task) => ({
@@ -150,7 +153,8 @@ export class AdminService {
       memberPositionName: task.assignee.positionInfo?.name ?? null,
       startedAt: task.createdAt,
       submittedAt: task.status === TaskStatus.REVIEW_REQUESTED ? task.reviewRequestedAt : null,
-      attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl)
+      attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl),
+      isNew: this.isNewTaskForMember(task, currentMemberId)
     }));
   }
 
@@ -231,5 +235,19 @@ export class AdminService {
     const order = this.employeePositionOrder.indexOf(positionCode);
 
     return order === -1 ? this.employeePositionOrder.length : order;
+  }
+
+  private isNewTaskForMember(task: Task, memberId: number): boolean {
+    if (task.createdBy !== memberId && task.assigneeId !== memberId) {
+      return false;
+    }
+
+    const readStatus = task.readStatuses?.[0];
+
+    if (!readStatus) {
+      return task.createdBy !== memberId;
+    }
+
+    return readStatus.lastViewedAt.getTime() < task.updatedAt.getTime();
   }
 }

@@ -47,6 +47,7 @@ export class AdminDashboardRecentOutputResponse {
   startedAt: Date;
   submittedAt: Date | null;
   attachmentPreviewUrls: string[];
+  isNew: boolean;
 }
 
 export class AdminDashboardResponse {
