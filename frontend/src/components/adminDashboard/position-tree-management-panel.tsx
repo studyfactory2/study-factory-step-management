@@ -289,7 +289,7 @@ export function PositionTreeManagementPanel({
     <section className="relative rounded-[22px] border border-[#D9D1F3] bg-[#F8F5FF] px-5 py-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-[#5A3E3B]">로그인 화면 조직도 관리</h2>
+          <h2 className="text-xl font-semibold text-[#5A3E3B]">로그인 화면 직위트리 관리</h2>
           <p className="mt-1 text-sm font-bold text-[#9B7A75]">
             직위를 추가하고 드래그해서 로그인 화면의 직급 구조를 연결합니다.
           </p>
@@ -305,7 +305,7 @@ export function PositionTreeManagementPanel({
 
       <div className="mt-5 rounded-[18px] border border-[#D9D1F3] bg-white p-4">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-lg font-black text-[#3F2C28]">조직도 구성</p>
+          <p className="text-lg font-black text-[#3F2C28]">직위 트리 구성</p>
           <div className="flex items-center gap-2">
             {isSaving && <span className="text-xs font-black text-[#8B72C8]">저장 중</span>}
             <button
