@@ -91,7 +91,7 @@ export function AllTasksPage({
         <Sparkles aria-hidden className="h-8 w-8 fill-current" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[430px] space-y-5">
+      <div className="relative mx-auto w-full max-w-[360px] space-y-5">
         <AllTasksHeader isAdmin={isAdmin} onBack={onBack} taskCount={tasks.length} />
 
         <section className="rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-6 py-6 shadow-[0_8px_0_#EFC6BE]">

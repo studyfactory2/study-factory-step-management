@@ -47,9 +47,9 @@ export function LoginFormSection({
       </div>
 
       <form className="space-y-3" onSubmit={onSubmit}>
-        <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 ">
-          <span className="text-base font-black text-[#4B332E]">이름</span>
-          <label className="flex min-h-[48px] items-center gap-3 rounded-[16px] border border-[#EBCDD1] bg-white px-4 shadow-sm">
+        <div className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-2">
+          <span className="text-[15px] font-black text-[#4B332E]">이름</span>
+          <label className="flex min-h-[48px] w-full min-w-0 items-center gap-2.5 rounded-[16px] border border-[#EBCDD1] bg-white px-3 shadow-sm">
             <UserRound aria-hidden className="h-5 w-5 text-[#F188A4]" />
             <input
               className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:text-[#C9ABA6]"
@@ -61,9 +61,9 @@ export function LoginFormSection({
           </label>
         </div>
 
-        <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 ">
-          <span className="text-base font-black text-[#4B332E]">비밀번호</span>
-          <label className="flex min-h-[48px] items-center gap-3 rounded-[16px] border border-[#EBCDD1] bg-white px-4 shadow-sm">
+        <div className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-2">
+          <span className="text-[15px] font-black text-[#4B332E]">비밀번호</span>
+          <label className="flex min-h-[48px] w-full min-w-0 items-center gap-2 rounded-[16px] border border-[#EBCDD1] bg-white px-3 shadow-sm">
             <Lock aria-hidden className="h-5 w-5 text-[#F188A4]" />
             <input
               className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:text-[#C9ABA6]"
@@ -75,7 +75,7 @@ export function LoginFormSection({
             />
             <button
               aria-label={isPasswordVisible ? "비밀번호 숨기기" : "비밀번호 보기"}
-              className="text-[#BFA4A0] transition hover:text-[#F188A4]"
+              className="-mr-1 flex h-8 w-7 shrink-0 items-center justify-center text-[#BFA4A0] transition hover:text-[#F188A4]"
               onClick={onTogglePasswordVisible}
               type="button"
             >
@@ -129,8 +129,8 @@ export function LoginFormSection({
           홈화면에 추가하기
         </button>
       </form>
-      <footer className="mt-6 flex items-center justify-center gap-3 rounded-full bg-[#FFF2F6] px-4 py-4 text-center text-[17px] font-black text-[#4B332E]">
-        <Sparkles aria-hidden className="h-5 w-5 text-[#F188A4]" />
+      <footer className="mt-6 flex items-center justify-center gap-2 rounded-full bg-[#FFF2F6] px-3 py-4 text-center text-[13px] font-black text-[#4B332E]">
+        <Sparkles aria-hidden className="h-4 w-4 shrink-0 text-[#F188A4]" />
         당신은 우리 회사의 자랑스러운 인재!
       </footer>
     </section>

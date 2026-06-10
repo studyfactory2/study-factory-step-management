@@ -60,7 +60,7 @@ export function TaskDetailPage({
         <Sparkles aria-hidden className="h-8 w-8 fill-current" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[430px] space-y-5">
+      <div className="relative mx-auto w-full max-w-[360px] space-y-5">
         <TaskDetailHeader onBack={onBack} onHelpRequestOpen={onHelpRequestOpen} />
 
         {isLoading && (

@@ -20,27 +20,41 @@ export function StatusCard({ label, value, helper, icon: Icon, tone }: StatusCar
   return (
     <article
       className={cn(
-        "grid min-h-[86px] grid-cols-[1fr_76px] grid-rows-[1fr_auto] gap-x-2 rounded-[18px] border px-3.5 py-3 shadow-sm",
+        "grid min-h-[92px] grid-cols-[1fr_72px] grid-rows-[auto_1fr] gap-x-2 rounded-[16px] border px-3 py-2.5 shadow-sm",
         toneClassNames[tone]
       )}
     >
-      <div className="row-span-2 flex min-w-0 items-center gap-2 self-center">
+      <div className="col-span-2 flex min-w-0 items-center gap-2">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
           <Icon aria-hidden className="h-3.5 w-3.5" />
         </div>
-        <p className="min-w-0 truncate text-[12px] font-black text-[#6B514C]">{label}</p>
+        <p className="text-[12px] font-black leading-tight text-[#6B514C]">{label}</p>
       </div>
-      <p className="self-center text-right text-[10px] font-bold leading-tight text-[#6B514C]">
+      <div className="self-end">
+        <p className="whitespace-nowrap text-[15px] font-black leading-none tracking-normal">{value}건</p>
+      </div>
+      <p className="self-end text-right text-[9px] font-bold leading-tight text-[#6B514C]">
         <HighlightedHelper helper={helper} />
       </p>
-      <div className="self-end text-right">
-        <p className="text-[20px] font-black leading-none tracking-normal">{value}건</p>
-      </div>
     </article>
   );
 }
 
 function HighlightedHelper({ helper }: { helper: string }) {
+  const weeklyChangeMatch = helper.match(/^지난주 대비 (\d+건) (증가|감소)$/);
+
+  if (weeklyChangeMatch) {
+    return (
+      <span className="block">
+        <span className="block">지난주 대비</span>
+        <span className="block">
+          <strong className="text-[10px] font-black text-[#3F2C28]">{weeklyChangeMatch[1]}</strong>
+          {` ${weeklyChangeMatch[2]}`}
+        </span>
+      </span>
+    );
+  }
+
   const match = helper.match(/(\d+건)/);
 
   if (!match || match.index === undefined) {
@@ -53,7 +67,7 @@ function HighlightedHelper({ helper }: { helper: string }) {
   return (
     <>
       {before}
-      <strong className="text-[11px] font-black text-[#3F2C28]">{match[0]}</strong>
+      <strong className="text-[10px] font-black text-[#3F2C28]">{match[0]}</strong>
       {after}
     </>
   );
