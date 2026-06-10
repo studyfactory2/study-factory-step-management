@@ -20,7 +20,7 @@ export function StatusCard({ label, value, helper, icon: Icon, tone }: StatusCar
   return (
     <article
       className={cn(
-        "grid min-h-[66px] grid-cols-[1fr_58px] grid-rows-[auto_1fr] gap-x-1.5 rounded-[13px] border px-2 py-1.5 shadow-sm",
+        "grid min-h-[60px] grid-cols-[1fr_58px] grid-rows-[auto_1fr] gap-x-1.5 rounded-[13px] border px-2 py-1 shadow-sm",
         toneClassNames[tone]
       )}
     >
@@ -31,7 +31,7 @@ export function StatusCard({ label, value, helper, icon: Icon, tone }: StatusCar
         <p className="text-[10px] font-black leading-tight text-[#6B514C]">{label}</p>
       </div>
       <div className="self-end">
-        <p className="whitespace-nowrap text-[12px] font-black leading-none tracking-normal">{value}건</p>
+        <p className="whitespace-nowrap text-[14px] font-black leading-none tracking-normal">{value}건</p>
       </div>
       <p className="self-end text-right text-[8px] font-bold leading-tight text-[#6B514C]">
         <HighlightedHelper helper={helper} />
