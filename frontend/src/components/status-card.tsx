@@ -20,23 +20,21 @@ export function StatusCard({ label, value, helper, icon: Icon, tone }: StatusCar
   return (
     <article
       className={cn(
-        "flex min-h-[88px] flex-col rounded-[18px] border px-3.5 py-3 shadow-sm",
+        "grid min-h-[86px] grid-cols-[1fr_76px] grid-rows-[1fr_auto] gap-x-2 rounded-[18px] border px-3.5 py-3 shadow-sm",
         toneClassNames[tone]
       )}
     >
-      <div className="flex w-full items-start justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
-            <Icon aria-hidden className="h-3.5 w-3.5" />
-          </div>
-          <p className="min-w-0 truncate text-[12px] font-black text-[#6B514C]">{label}</p>
+      <div className="row-span-2 flex min-w-0 items-center gap-2 self-center">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
+          <Icon aria-hidden className="h-3.5 w-3.5" />
         </div>
-        <p className="max-w-[72px] text-right text-[10px] font-bold leading-tight text-[#6B514C]">
-          <HighlightedHelper helper={helper} />
-        </p>
+        <p className="min-w-0 truncate text-[12px] font-black text-[#6B514C]">{label}</p>
       </div>
-      <div className="mt-2 pl-9">
-        <p className="text-[25px] font-black leading-none tracking-normal">{value}건</p>
+      <p className="self-center text-right text-[10px] font-bold leading-tight text-[#6B514C]">
+        <HighlightedHelper helper={helper} />
+      </p>
+      <div className="self-end text-right">
+        <p className="text-[20px] font-black leading-none tracking-normal">{value}건</p>
       </div>
     </article>
   );
