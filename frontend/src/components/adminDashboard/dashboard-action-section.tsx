@@ -26,46 +26,44 @@ export function DashboardActionSection({
   onSelectPositionTree
 }: DashboardActionSectionProps) {
   return (
-    <section className="relative grid gap-5 md:grid-cols-2">
+    <section className="relative grid grid-cols-2 gap-1.5">
       <button
-        className="flex min-h-[110px] items-center justify-between rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-6 text-left shadow-[0_8px_0_#EFC6BE]"
+        className="flex min-h-[54px] items-center justify-between rounded-[16px] border border-[#F2C9C2] bg-[#FFFEFC] px-2.5 py-2.5 text-left shadow-[0_3px_0_#EFC6BE]"
         onClick={onOpenMemberManagement}
         type="button"
       >
-        <div>
-          <p className="text-2xl font-semibold text-[#5A3E3B]">직원관리</p>
-          <p className="mt-2 text-sm font-medium text-[#9B7A75]">
-            사원 사전등록/삭제, 로그인 화면 조직도 생성 기능
-          </p>
+        <div className="min-w-0 pr-1.5">
+          <p className="text-[11px] font-black text-[#5A3E3B]">직원관리</p>
+          <p className="mt-0.5 text-[7px] font-bold text-[#9B7A75]">사전등록/직위트리 관리</p>
         </div>
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FBE6EA] text-primary">
-          <UsersRound aria-hidden className="h-7 w-7" />
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#FBE6EA] text-primary">
+          <UsersRound aria-hidden className="h-3.5 w-3.5" />
         </span>
       </button>
       <button
-        className="flex min-h-[110px] items-center justify-between rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-6 text-left shadow-[0_8px_0_#EFC6BE]"
+        className="flex min-h-[54px] items-center justify-between rounded-[16px] border border-[#F2C9C2] bg-[#FFFEFC] px-2.5 py-2.5 text-left shadow-[0_3px_0_#EFC6BE]"
         type="button"
       >
-        <div>
-          <p className="text-2xl font-semibold text-[#5A3E3B]">알림코멘트</p>
-          <p className="mt-2 text-sm font-medium text-[#9B7A75]">알림과 코멘트 내역을 확인합니다.</p>
+        <div className="min-w-0 pr-1.5">
+          <p className="text-[11px] font-black text-[#5A3E3B]">알림코멘트</p>
+          <p className="mt-0.5 text-[7px] font-bold text-[#9B7A75]">알림/코멘트 확인</p>
         </div>
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#EEE8FF] text-[#8B72C8]">
-          <Bell aria-hidden className="h-7 w-7" />
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EEE8FF] text-[#8B72C8]">
+          <Bell aria-hidden className="h-3.5 w-3.5" />
         </span>
       </button>
       {isMemberManagementOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#3F2C28]/30 px-4 py-6">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#3F2C28]/30 px-3 py-5">
           <div
             className={cn(
-              "flex max-h-[calc(100dvh-48px)] w-full flex-col rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] p-6 shadow-[0_18px_44px_rgba(90,62,59,0.18)]",
-              memberManagementView === "positionTree" ? "max-w-[860px]" : "max-w-[760px]"
+              "flex max-h-[calc(100dvh-40px)] w-full flex-col rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] p-4 shadow-[0_18px_44px_rgba(90,62,59,0.18)]",
+              "max-w-[390px]"
             )}
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-2xl font-black text-[#3F2C28]">직원관리</p>
-                <p className="mt-2 text-sm font-semibold text-[#9B7A75]">
+                <p className="text-[18px] font-black text-[#3F2C28]">직원관리</p>
+                <p className="mt-1 text-[11px] font-semibold text-[#9B7A75]">
                   {memberManagementView === "menu" && "관리할 항목을 선택해주세요."}
                   {memberManagementView === "preRegister" && "사원 사전등록 정보를 입력해주세요."}
                   {memberManagementView === "positionTree" && "로그인 화면 조직도를 관리해주세요."}
@@ -73,42 +71,42 @@ export function DashboardActionSection({
               </div>
               <button
                 aria-label="직원관리 닫기"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FBE6EA] text-primary"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FBE6EA] text-primary"
                 onClick={onCloseMemberManagement}
                 type="button"
               >
-                <X aria-hidden className="h-5 w-5" />
+                <X aria-hidden className="h-4 w-4" />
               </button>
             </div>
             {memberManagementView === "menu" ? (
-              <div className="mt-7 grid gap-4 sm:grid-cols-2">
+              <div className="mt-4 grid grid-cols-2 gap-2">
                 <button
-                  className="flex min-h-[150px] flex-col items-start justify-between rounded-[22px] border border-[#F2C9C2] bg-[#FFF8F9] p-5 text-left transition hover:-translate-y-0.5 hover:border-primary"
+                  className="flex min-h-[84px] flex-col items-start justify-between rounded-[16px] border border-[#F2C9C2] bg-[#FFF8F9] p-3 text-left transition hover:-translate-y-0.5 hover:border-primary"
                   onClick={onSelectMemberPreRegister}
                   type="button"
                 >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-sm">
-                    <UserPlus aria-hidden className="h-6 w-6" />
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+                    <UserPlus aria-hidden className="h-4 w-4" />
                   </span>
-                  <span className="text-lg font-black text-[#3F2C28]">사원 사전등록 관리</span>
+                  <span className="text-[11px] font-black leading-4 text-[#3F2C28]">사원 사전등록 관리</span>
                 </button>
                 <button
-                  className="flex min-h-[150px] flex-col items-start justify-between rounded-[22px] border border-[#D9D1F3] bg-[#F7F3FF] p-5 text-left transition hover:-translate-y-0.5 hover:border-[#8B72C8]"
+                  className="flex min-h-[84px] flex-col items-start justify-between rounded-[16px] border border-[#D9D1F3] bg-[#F7F3FF] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#8B72C8]"
                   onClick={onSelectPositionTree}
                   type="button"
                 >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#8B72C8] shadow-sm">
-                    <GitBranch aria-hidden className="h-6 w-6" />
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#8B72C8] shadow-sm">
+                    <GitBranch aria-hidden className="h-4 w-4" />
                   </span>
-                  <span className="text-lg font-black text-[#3F2C28]">로그인 화면 직위트리 관리</span>
+                  <span className="text-[11px] font-black leading-4 text-[#3F2C28]">로그인 화면 직위트리 관리</span>
                 </button>
               </div>
             ) : memberManagementView === "preRegister" ? (
-              <div className="mt-7 overflow-y-auto pr-1">
+              <div className="mt-4 overflow-y-auto pr-1">
                 {memberPreRegisterPanel}
               </div>
             ) : (
-              <div className="mt-6 min-h-0 overflow-y-auto pr-1">
+              <div className="mt-4 min-h-0 overflow-y-auto pr-1">
                 {positionTreeManagementPanel}
               </div>
             )}

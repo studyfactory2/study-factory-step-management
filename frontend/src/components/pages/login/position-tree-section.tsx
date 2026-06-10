@@ -15,8 +15,8 @@ export function PositionTreeSection({
   selectedPositionId
 }: PositionTreeSectionProps) {
   return (
-    <section className="mb-5 rounded-[24px] border border-[#EBCDD1] bg-white/86 p-4 shadow-soft backdrop-blur">
-      <div className="mb-4 flex items-center justify-center rounded-full bg-[#FFF1F6] px-4 py-2">
+    <section className="mb-4 rounded-[22px] border border-[#EBCDD1] bg-white/86 p-3.5 shadow-soft backdrop-blur">
+      <div className="mb-3 flex items-center justify-center rounded-full bg-[#FFF1F6] px-4 py-1.5">
         <h2 className="text-center text-[20px] font-black tracking-normal text-[#3F2C28]">
           직위트리
         </h2>

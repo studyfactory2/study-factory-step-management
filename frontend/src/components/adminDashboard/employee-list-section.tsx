@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { flushSync } from "react-dom";
 import type { AdminDashboardEmployee } from "@/api/admin";
-import { statusLabels } from "./constants";
 
 type VisibleTaskStatus = "REGISTERED" | "IN_PROGRESS" | "REVIEW_REQUESTED";
 type DropIndicator = {
@@ -208,12 +207,12 @@ export function EmployeeListSection({
   }
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-2.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl font-black text-[#3F2C28]">함께 프로젝트 중</h2>
+        <h2 className="text-[17px] font-black text-[#3F2C28]">함께 프로젝트 중</h2>
       </div>
-      <div className="rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 p-7 shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="rounded-[22px] border border-[#F1CFD5] bg-[#FFFEFC]/95 p-2.5 shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
+        <div className="grid grid-cols-5 gap-1.5">
           {favoriteSlots.map((employee, index) => (
             employee ? (
               <EmployeeCard
@@ -333,7 +332,7 @@ function EmployeeCard({
 
   return (
     <article
-      className={`relative min-h-[252px] cursor-grab rounded-[24px] border border-[#F1CFD5] bg-white px-5 py-5 text-center shadow-[0_8px_0_#F3D1D8] transition active:cursor-grabbing ${
+      className={`relative min-h-[104px] cursor-grab rounded-[12px] border border-[#F1CFD5] bg-white px-1.5 py-2.5 text-center shadow-[0_3px_0_#F3D1D8] transition active:cursor-grabbing ${
         isDragging ? "opacity-0" : ""
       }`}
       draggable={draggable}
@@ -345,39 +344,36 @@ function EmployeeCard({
     >
       {dropIndicatorSide && !isDragging && (
         <span
-          className={`pointer-events-none absolute bottom-4 top-4 z-10 w-2 rounded-full bg-primary/30 shadow-[0_0_18px_rgba(241,136,164,0.65)] ${
-            dropIndicatorSide === "left" ? "-left-3" : "-right-3"
+          className={`pointer-events-none absolute bottom-2 top-2 z-10 w-1 rounded-full bg-primary/30 shadow-[0_0_18px_rgba(241,136,164,0.65)] ${
+            dropIndicatorSide === "left" ? "-left-1.5" : "-right-1.5"
           }`}
         />
       )}
       <button
         aria-label={`${employee.name} 삭제`}
-        className="absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border border-[#F1CFD5] bg-[#FFF8F9] text-xs font-black text-primary"
+        className="absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full border border-[#F1CFD5] bg-[#FFF8F9] text-[8px] font-black leading-none text-primary"
         onClick={onRemove}
         type="button"
       >
         ×
       </button>
-      <span className="block text-sm font-black text-[#8F7470]">
+      <span className="block truncate pl-3.5 text-[7px] font-black leading-tight text-[#8F7470]">
         {employee.positionName ?? "직원"}
       </span>
-      <p className="mt-5 text-xl font-black text-[#3F2C28]">{employee.name}</p>
-      <p className="mt-2 text-sm font-black text-primary">
-        {employee.highestTaskStatus ? statusLabels[employee.highestTaskStatus] : "업무등록"}
-      </p>
-      <div className="my-4 border-t border-[#F1CFD5]" />
+      <p className="mt-1.5 truncate text-[10px] font-black leading-tight text-[#3F2C28]">{employee.name}</p>
+      <div className="my-1.5 border-t border-[#F1CFD5]" />
       <button
-        className={`mx-auto h-10 w-32 rounded-full border border-[#F1CFD5] text-sm font-black ${getStatusClassName(visibleStatus)}`}
+        className={`mx-auto h-5 w-full rounded-full border border-[#F1CFD5] text-[7px] font-black ${getStatusClassName(visibleStatus)}`}
         onClick={handleStatusClick}
         type="button"
       >
         {getShortStatusLabel(visibleStatus)}
       </button>
-      <p className={`mt-2 text-sm font-black ${getStatusTextClassName(visibleStatus)}`}>
+      <p className={`mt-1 text-[10px] font-black leading-none ${getStatusTextClassName(visibleStatus)}`}>
         {visibleStatusCount}건
       </p>
-      <button className="mt-5 h-9 w-full rounded-full border border-[#F0B9C8] bg-white text-sm font-black text-primary">
-        상세정보
+      <button className="mt-1.5 h-5 w-full rounded-full border border-[#F0B9C8] bg-white text-[7px] font-black text-primary">
+        상세
       </button>
     </article>
   );
@@ -394,16 +390,16 @@ function EmptySlot({
 }) {
   return (
     <button
-      className="flex min-h-[252px] flex-col items-center justify-center rounded-[24px] border border-dashed border-[#F1CFD5] bg-[#FFF8F9] px-5 py-5 text-center transition hover:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex min-h-[104px] flex-col items-center justify-center rounded-[12px] border border-dashed border-[#F1CFD5] bg-[#FFF8F9] px-1.5 py-2.5 text-center transition hover:border-primary disabled:cursor-not-allowed disabled:opacity-60"
       disabled={disabled}
       onClick={onSelect}
       type="button"
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-black text-[#F188A4] shadow-sm">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-black text-[#F188A4] shadow-sm">
         +
       </span>
-      <p className="mt-4 text-sm font-black text-[#9C7D79]">{slotNumber}번 슬롯</p>
-      <p className="mt-1 text-xs font-bold text-[#B79A94]">직원 미선택</p>
+      <p className="mt-1.5 text-[8px] font-black text-[#9C7D79]">{slotNumber}번</p>
+      <p className="mt-0.5 text-[7px] font-bold text-[#B79A94]">미선택</p>
     </button>
   );
 }
@@ -461,7 +457,7 @@ function FavoriteMemberAddModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/25 px-4">
-      <div className="w-full max-w-[520px] rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC] p-7 shadow-[0_18px_40px_rgba(63,44,40,0.18)]">
+      <div className="w-full max-w-[390px] rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC] p-7 shadow-[0_18px_40px_rgba(63,44,40,0.18)]">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-2xl font-black text-[#3F2C28]">직원 선택</h3>
           <button
@@ -525,7 +521,7 @@ function FavoriteMemberAddModal({
             취소
           </button>
           <button
-            className="h-11 rounded-full bg-primary px-8 text-sm font-black text-white disabled:opacity-60"
+            className="h-11 rounded-full bg-primary px-5 text-sm font-black text-white disabled:opacity-60"
             disabled={!selectedMemberId || isUpdating}
             onClick={handleSubmit}
             type="button"

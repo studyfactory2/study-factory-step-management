@@ -211,16 +211,16 @@ export function TaskCreateForm({
   }
 
   return (
-    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
-      <h2 className="text-2xl font-semibold text-[#5A3E3B]">새 업무 등록</h2>
+    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#EFC6BE]">
+      <h2 className="text-[17px] font-black text-[#5A3E3B]">새 업무 등록</h2>
       {message && (
-        <p className="mt-4 rounded-2xl bg-[#FFF8F6] px-5 py-3 text-sm font-black text-primary">
+        <p className="mt-3 rounded-2xl bg-[#FFF8F6] px-4 py-2.5 text-[11px] font-black text-primary">
           {message}
         </p>
       )}
-      <div className="mt-7 space-y-5">
+      <div className="mt-4 space-y-4">
         {isDraftLoading && (
-          <div className="rounded-[20px] border border-dashed border-[#F2C9C2] bg-white px-6 py-8 text-center text-sm font-black text-[#9B7A75]">
+          <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-4 py-6 text-center text-[11px] font-black text-[#9B7A75]">
             임시저장 업무를 불러오는 중입니다.
           </div>
         )}
@@ -274,18 +274,18 @@ function TaskDraftCard({
   const attachmentInputId = `task-attachment-${draft.id}`;
 
   return (
-    <article className="rounded-[20px] border border-[#F2C9C2] bg-white px-6 py-6">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <p className="text-sm font-black text-primary">업무 {index + 1}</p>
+    <article className="rounded-[18px] border border-[#F2C9C2] bg-white px-3 py-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-[11px] font-black text-primary">업무 {index + 1}</p>
         {isLocked && (
-          <span className="rounded-full bg-[#E8F3DF] px-4 py-1.5 text-xs font-black text-[#6D956A]">
+          <span className="rounded-full bg-[#E8F3DF] px-3 py-1 text-[9px] font-black text-[#6D956A]">
             임시저장됨
           </span>
         )}
       </div>
-      <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-2.5">
         <select
-          className="min-h-[52px] rounded-[12px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-5 text-base font-bold text-[#8F7470] outline-none disabled:opacity-70"
+          className="min-h-10 rounded-[11px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-3 text-[12px] font-bold text-[#8F7470] outline-none disabled:opacity-70"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onChange={(event) =>
             onUpdate(draft.id, (currentDraft) => ({
@@ -303,7 +303,7 @@ function TaskDraftCard({
           ))}
         </select>
         <input
-          className="h-[52px] w-full rounded-[12px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-5 text-base font-bold outline-none placeholder:text-[#B79A94] disabled:opacity-70"
+          className="h-10 w-full rounded-[11px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-3 text-[12px] font-bold outline-none placeholder:text-[#B79A94] disabled:opacity-70"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onChange={(event) =>
             onUpdate(draft.id, (currentDraft) => ({
@@ -315,9 +315,9 @@ function TaskDraftCard({
           value={draft.title}
         />
       </div>
-      <div className="mt-4 rounded-[16px] border-2 border-[#F2C9C2] bg-[#FFF8F6] p-4">
+      <div className="mt-3 rounded-[14px] border-2 border-[#F2C9C2] bg-[#FFF8F6] p-3">
         <textarea
-          className="h-28 w-full resize-none bg-transparent text-base font-bold leading-7 outline-none placeholder:text-[#B79A94] disabled:opacity-70"
+          className="h-24 w-full resize-none bg-transparent text-[12px] font-bold leading-5 outline-none placeholder:text-[#B79A94] disabled:opacity-70"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onChange={(event) =>
             onUpdate(draft.id, (currentDraft) => ({
@@ -329,7 +329,7 @@ function TaskDraftCard({
           value={draft.description}
         />
         <label
-          className={`mt-4 flex min-h-[68px] cursor-pointer items-center justify-center rounded-[14px] border-2 border-dashed border-[#F2C9C2] bg-white px-5 text-center text-sm font-black text-[#9B7A75] ${
+          className={`mt-3 flex min-h-12 cursor-pointer items-center justify-center rounded-[12px] border-2 border-dashed border-[#F2C9C2] bg-white px-3 text-center text-[10px] font-black leading-4 text-[#9B7A75] ${
             isLocked || isSaving || isSubmitting || isLoading ? "pointer-events-none opacity-70" : ""
           }`}
           htmlFor={attachmentInputId}
@@ -348,9 +348,9 @@ function TaskDraftCard({
           type="file"
         />
       </div>
-      <div className="mt-5 flex flex-wrap justify-end gap-3">
+      <div className="mt-3 grid grid-cols-3 gap-1.5">
         <button
-          className="min-h-[52px] rounded-full border border-[#D9D1F3] bg-[#F7F3FF] px-10 text-base font-black text-[#8B72C8] transition hover:bg-[#F0EAFF] disabled:opacity-60"
+          className="h-9 rounded-full border border-[#D9D1F3] bg-[#F7F3FF] px-2 text-[10px] font-black text-[#8B72C8] transition hover:bg-[#F0EAFF] disabled:opacity-60"
           disabled={!isLocked || isSaving || isSubmitting || isLoading}
           onClick={() => onEdit(draft.id)}
           type="button"
@@ -358,7 +358,7 @@ function TaskDraftCard({
           수정
         </button>
         <button
-          className="min-h-[52px] rounded-full border border-[#F0B9C8] bg-white px-10 text-base font-black text-primary transition hover:bg-[#FFF7F8] disabled:opacity-60"
+          className="h-9 rounded-full border border-[#F0B9C8] bg-white px-2 text-[10px] font-black text-primary transition hover:bg-[#FFF7F8] disabled:opacity-60"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onClick={() => void onSave(draft.id)}
           type="button"
@@ -366,7 +366,7 @@ function TaskDraftCard({
           {isSaving ? "저장 중" : "임시저장"}
         </button>
         <button
-          className="min-h-[52px] rounded-full bg-primary px-12 text-base font-black text-white disabled:opacity-60"
+          className="h-9 rounded-full bg-primary px-2 text-[10px] font-black text-white disabled:opacity-60"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onClick={() => void onSubmit(draft)}
           type="button"

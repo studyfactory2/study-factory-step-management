@@ -83,7 +83,7 @@ export function AllTasksPage({
   }
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-background px-4 py-8 text-foreground sm:px-8">
+    <main className="min-h-dvh overflow-hidden bg-background px-3 py-4 text-foreground">
       <div className="pointer-events-none fixed left-10 top-20 text-[#F0C957]">
         <Sparkles aria-hidden className="h-9 w-9 fill-current" />
       </div>
@@ -91,7 +91,7 @@ export function AllTasksPage({
         <Sparkles aria-hidden className="h-8 w-8 fill-current" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[1180px] space-y-7">
+      <div className="relative mx-auto w-full max-w-[360px] space-y-5">
         <AllTasksHeader isAdmin={isAdmin} onBack={onBack} taskCount={tasks.length} />
 
         <section className="rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-6 py-6 shadow-[0_8px_0_#EFC6BE]">

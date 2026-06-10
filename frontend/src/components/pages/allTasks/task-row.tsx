@@ -11,7 +11,7 @@ type TaskRowProps = {
 export function TaskRow({ onDetailOpen, task }: TaskRowProps) {
   return (
     <article
-      className={`relative grid items-center gap-5 rounded-2xl border border-[#F2C9C2] bg-[#FFF8F6] px-6 pb-5 shadow-[0_7px_0_#EFC6BE] lg:grid-cols-[1fr_140px_140px] ${
+      className={`relative grid items-center gap-5 rounded-2xl border border-[#F2C9C2] bg-[#FFF8F6] px-6 pb-5 shadow-[0_7px_0_#EFC6BE]  ${
         task.isNew ? "pt-10" : "pt-5"
       }`}
     >

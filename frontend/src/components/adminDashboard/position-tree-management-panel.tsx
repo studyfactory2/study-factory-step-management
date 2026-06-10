@@ -286,16 +286,16 @@ export function PositionTreeManagementPanel({
   }
 
   return (
-    <section className="relative rounded-[22px] border border-[#D9D1F3] bg-[#F8F5FF] px-5 py-5">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <section className="relative rounded-[18px] border border-[#D9D1F3] bg-[#F8F5FF] px-3 py-3">
+      <div className="flex items-start justify-between gap-2">
         <div>
-          <h2 className="text-xl font-semibold text-[#5A3E3B]">로그인 화면 직위트리 관리</h2>
-          <p className="mt-1 text-sm font-bold text-[#9B7A75]">
+          <h2 className="text-[14px] font-black text-[#5A3E3B]">로그인 화면 직위트리 관리</h2>
+          <p className="mt-0.5 text-[9px] font-bold leading-3 text-[#9B7A75]">
             직위를 추가하고 드래그해서 로그인 화면의 직급 구조를 연결합니다.
           </p>
         </div>
         <button
-          className="h-9 rounded-full border-2 border-[#8B72C8] bg-white px-6 text-sm font-semibold text-[#8B72C8]"
+          className="h-7 shrink-0 rounded-full border-2 border-[#8B72C8] bg-white px-3 text-[10px] font-black text-[#8B72C8]"
           onClick={onClose}
           type="button"
         >
@@ -303,23 +303,23 @@ export function PositionTreeManagementPanel({
         </button>
       </div>
 
-      <div className="mt-5 rounded-[18px] border border-[#D9D1F3] bg-white p-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-lg font-black text-[#3F2C28]">직위 트리 구성</p>
-          <div className="flex items-center gap-2">
-            {isSaving && <span className="text-xs font-black text-[#8B72C8]">저장 중</span>}
+      <div className="mt-3 rounded-[16px] border border-[#D9D1F3] bg-white p-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[12px] font-black text-[#3F2C28]">직위 트리 구성</p>
+          <div className="flex items-center gap-1.5">
+            {isSaving && <span className="text-[9px] font-black text-[#8B72C8]">저장 중</span>}
             <button
-              className="flex h-9 items-center gap-1.5 rounded-full bg-[#8B72C8] px-4 text-xs font-black text-white shadow-sm"
+              className="flex h-7 items-center gap-1 rounded-full bg-[#8B72C8] px-2.5 text-[9px] font-black text-white shadow-sm"
               onClick={handleOpenCreateModal}
               type="button"
             >
-              <Plus aria-hidden className="h-3.5 w-3.5" />
+              <Plus aria-hidden className="h-3 w-3" />
               직위 추가
             </button>
           </div>
         </div>
         {draggingPosition && (
-          <div className="mt-3 rounded-[14px] border border-[#D9D1F3] bg-[#F7F3FF] px-4 py-3 text-center text-sm font-black text-[#5A3E3B]">
+          <div className="mt-2 rounded-[12px] border border-[#D9D1F3] bg-[#F7F3FF] px-2.5 py-2 text-center text-[9px] font-black text-[#5A3E3B]">
             {dropTargetPosition ? (
               <>
                 <span className="text-[#8B72C8]">{draggingPosition.name}</span>
@@ -335,17 +335,17 @@ export function PositionTreeManagementPanel({
             )}
           </div>
         )}
-        <div className="mt-4 max-h-[280px] overflow-auto rounded-[16px] bg-[#FFFEFC] px-5 py-9">
+        <div className="mt-2.5 max-h-[260px] overflow-auto rounded-[14px] bg-[#FFFEFC] px-3 py-5">
           {isLoading ? (
-            <p className="rounded-[14px] bg-[#F8F5FF] px-4 py-4 text-sm font-bold text-[#8B72C8]">
+            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[10px] font-bold text-[#8B72C8]">
               로그인 화면 조직도를 불러오는 중입니다.
             </p>
           ) : flatPositions.length === 0 ? (
-            <p className="rounded-[14px] bg-[#F8F5FF] px-4 py-4 text-sm font-bold text-[#8B72C8]">
+            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[10px] font-bold text-[#8B72C8]">
               등록된 직위가 없습니다.
             </p>
           ) : (
-            <div className="flex min-w-max justify-center gap-8">
+            <div className="flex min-w-max justify-center gap-4">
               {positions.map((position, index) => (
                 <PositionTreeEditorNode
                   depth={0}
@@ -388,30 +388,30 @@ export function PositionTreeManagementPanel({
           )}
         </div>
       </div>
-      <div className="mt-4 rounded-[18px] border border-[#D9D1F3] bg-white p-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-base font-black text-[#3F2C28]">상위 직위 설정</p>
-          <span className="text-xs font-bold text-[#9B7A75]">드래그 없이도 관계를 바꿀 수 있습니다.</span>
+      <div className="mt-3 rounded-[16px] border border-[#D9D1F3] bg-white p-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[11px] font-black text-[#3F2C28]">상위 직위 설정</p>
+          <span className="text-[8px] font-bold text-[#9B7A75]">드래그 없이 관계 변경</span>
         </div>
-        <div className="mt-3 max-h-[170px] space-y-2 overflow-y-auto pr-1">
+        <div className="mt-2 max-h-[130px] space-y-1.5 overflow-y-auto pr-1">
           {flatPositions.length === 0 ? (
-            <p className="rounded-[14px] bg-[#F8F5FF] px-4 py-4 text-sm font-bold text-[#8B72C8]">
+            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[10px] font-bold text-[#8B72C8]">
               등록된 직위가 없습니다.
             </p>
           ) : (
             flatPositions.map((position) => (
               <div
-                className="grid items-center gap-2 rounded-[14px] border border-[#EEE2E5] bg-[#FFFEFC] px-3 py-2 sm:grid-cols-[1fr_220px]"
+                className="grid items-center gap-1.5 rounded-[12px] border border-[#EEE2E5] bg-[#FFFEFC] px-2 py-1.5"
                 key={position.id}
               >
                 <div>
-                  <p className="text-sm font-black text-[#3F2C28]">{position.name}</p>
-                  <p className="mt-0.5 text-xs font-bold text-[#9B7A75]">
+                  <p className="text-[10px] font-black text-[#3F2C28]">{position.name}</p>
+                  <p className="mt-0.5 text-[8px] font-bold text-[#9B7A75]">
                     {position.subtitle || "설명 없음"}
                   </p>
                 </div>
                 <select
-                  className="h-10 rounded-[12px] border border-[#D9D1F3] bg-white px-3 text-xs font-bold text-[#8D706B] outline-none"
+                  className="h-8 rounded-[10px] border border-[#D9D1F3] bg-white px-2 text-[9px] font-bold text-[#8D706B] outline-none"
                   disabled={isSaving}
                   onChange={(event) =>
                     void handleParentChange(position.id, event.target.value ? Number(event.target.value) : null)
@@ -561,7 +561,7 @@ function PositionCreateModal({
             placeholder="역할 설명 예: 개발관리"
             value={subtitle}
           />
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 ">
             <input
               className="h-11 rounded-[12px] border-2 border-[#D9D1F3] bg-white px-4 text-sm font-bold text-[#8D706B] outline-none"
               onChange={(event) => onDutyChange(event.target.value)}
@@ -582,7 +582,7 @@ function PositionCreateModal({
               ))}
             </select>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 ">
             <label className="flex h-11 items-center gap-2 rounded-[12px] border-2 border-[#D9D1F3] bg-white px-4 text-sm font-bold text-[#8D706B]">
               <input
                 checked={isLoginVisible}
@@ -718,8 +718,8 @@ function PositionTreeEditorNode({
       />
 
       {children.length > 0 && (
-        <div className="relative mt-6 flex min-w-max flex-col items-center">
-          <span className="absolute left-1/2 top-[-1.5rem] h-[1.55rem] w-0.5 -translate-x-1/2 rounded-full bg-[#D9D1F3]" />
+        <div className="relative mt-4 flex min-w-max flex-col items-center">
+          <span className="absolute left-1/2 top-[-1rem] h-[1.05rem] w-0.5 -translate-x-1/2 rounded-full bg-[#D9D1F3]" />
           <span
             className={cn(
               "absolute top-[-1px] h-0.5 rounded-full bg-[#D9D1F3]",
@@ -731,7 +731,7 @@ function PositionTreeEditorNode({
           />
           <div
             className={cn(
-              "grid justify-items-center gap-3 pt-4",
+              "grid justify-items-center gap-2 pt-3",
               children.length === 1 && "grid-cols-1",
               children.length === 2 && "grid-cols-2",
               children.length === 3 && "grid-cols-3",
@@ -740,7 +740,7 @@ function PositionTreeEditorNode({
           >
             {children.map((child, childIndex) => (
               <div className="relative" key={child.id}>
-                <span className="absolute left-1/2 top-[-1.05rem] h-[1.1rem] w-0.5 -translate-x-1/2 rounded-full bg-[#D9D1F3]" />
+                <span className="absolute left-1/2 top-[-0.8rem] h-[0.85rem] w-0.5 -translate-x-1/2 rounded-full bg-[#D9D1F3]" />
                 <PositionTreeEditorNode
                   depth={depth + 1}
                   draggingId={draggingId}
@@ -809,7 +809,7 @@ function PositionTreeCard({
   return (
     <article
       className={cn(
-        "relative flex min-h-[78px] w-[112px] cursor-grab select-none flex-col items-center justify-center rounded-[14px] border px-2.5 py-2 text-center shadow-sm transition active:cursor-grabbing",
+        "relative flex min-h-[56px] w-[82px] cursor-grab select-none flex-col items-center justify-center rounded-[11px] border px-1.5 py-1.5 text-center shadow-sm transition active:cursor-grabbing",
         toneClassNames[(index + depth) % toneClassNames.length],
         isDropTarget && "scale-[1.06] border-2 border-[#8B72C8] bg-[#F7F3FF] shadow-[0_0_0_5px_rgba(139,114,200,0.18)]",
         isDragging && "opacity-25"
@@ -852,7 +852,7 @@ function PositionTreeCard({
     >
       <button
         aria-label={`${position.name} 삭제`}
-        className="absolute left-1 top-1 z-20 flex h-4 w-4 items-center justify-center rounded-full bg-white/90 text-[#C46E7B] shadow-sm transition hover:bg-[#FFECEF]"
+        className="absolute left-0.5 top-0.5 z-20 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white/90 text-[#C46E7B] shadow-sm transition hover:bg-[#FFECEF]"
         draggable={false}
         onClick={(event) => {
           event.preventDefault();
@@ -868,24 +868,24 @@ function PositionTreeCard({
         }}
         type="button"
       >
-        <X aria-hidden className="h-2.5 w-2.5 stroke-[3]" />
+        <X aria-hidden className="h-2 w-2 stroke-[3]" />
       </button>
       {isDropTarget && !isDragging && (
-        <span className="pointer-events-none absolute -top-7 left-1/2 z-10 w-max -translate-x-1/2 rounded-full bg-[#8B72C8] px-3 py-1 text-[10px] font-black text-white shadow-sm">
+        <span className="pointer-events-none absolute -top-6 left-1/2 z-10 w-max -translate-x-1/2 rounded-full bg-[#8B72C8] px-2 py-0.5 text-[8px] font-black text-white shadow-sm">
           여기 하위로 이동
         </span>
       )}
       {isDropTarget && !isDragging && (
-        <span className="pointer-events-none absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-[#8B72C8]" />
+        <span className="pointer-events-none absolute -top-1.5 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 bg-[#8B72C8]" />
       )}
-      <p className="pointer-events-none text-[12px] font-black leading-tight text-[#3F2C28]">
+      <p className="pointer-events-none text-[9px] font-black leading-tight text-[#3F2C28]">
         {position.name}
       </p>
-      <p className="pointer-events-none mt-0.5 line-clamp-1 text-[9px] font-bold leading-tight text-[#9B7A75]">
+      <p className="pointer-events-none mt-0.5 line-clamp-1 text-[7px] font-bold leading-tight text-[#9B7A75]">
         {position.subtitle || "설명 없음"}
       </p>
       {!position.isLoginVisible && (
-        <span className="pointer-events-none mt-0.5 rounded-full bg-white/80 px-1.5 py-0.5 text-[8px] font-black text-[#9B7A75]">
+        <span className="pointer-events-none mt-0.5 rounded-full bg-white/80 px-1 py-0.5 text-[6px] font-black text-[#9B7A75]">
           로그인 숨김
         </span>
       )}

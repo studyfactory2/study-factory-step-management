@@ -20,27 +20,41 @@ export function StatusCard({ label, value, helper, icon: Icon, tone }: StatusCar
   return (
     <article
       className={cn(
-        "flex min-h-[78px] items-center gap-3 rounded-[18px] border px-4 py-3 shadow-sm",
+        "grid min-h-[92px] grid-cols-[1fr_72px] grid-rows-[auto_1fr] gap-x-2 rounded-[16px] border px-3 py-2.5 shadow-sm",
         toneClassNames[tone]
       )}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
-        <Icon aria-hidden className="h-5 w-5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-[#9C7D79]">{label}</p>
-        <div className="mt-1 flex items-end justify-between gap-2">
-          <p className="text-2xl font-black leading-none tracking-normal">{value}건</p>
-          <p className="pb-0.5 text-right text-sm font-bold text-[#6B514C]">
-            <HighlightedHelper helper={helper} />
-          </p>
+      <div className="col-span-2 flex min-w-0 items-center gap-2">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
+          <Icon aria-hidden className="h-3.5 w-3.5" />
         </div>
+        <p className="text-[12px] font-black leading-tight text-[#6B514C]">{label}</p>
       </div>
+      <div className="self-end">
+        <p className="whitespace-nowrap text-[15px] font-black leading-none tracking-normal">{value}건</p>
+      </div>
+      <p className="self-end text-right text-[9px] font-bold leading-tight text-[#6B514C]">
+        <HighlightedHelper helper={helper} />
+      </p>
     </article>
   );
 }
 
 function HighlightedHelper({ helper }: { helper: string }) {
+  const weeklyChangeMatch = helper.match(/^지난주 대비 (\d+건) (증가|감소)$/);
+
+  if (weeklyChangeMatch) {
+    return (
+      <span className="block">
+        <span className="block">지난주 대비</span>
+        <span className="block">
+          <strong className="text-[10px] font-black text-[#3F2C28]">{weeklyChangeMatch[1]}</strong>
+          {` ${weeklyChangeMatch[2]}`}
+        </span>
+      </span>
+    );
+  }
+
   const match = helper.match(/(\d+건)/);
 
   if (!match || match.index === undefined) {
@@ -53,7 +67,7 @@ function HighlightedHelper({ helper }: { helper: string }) {
   return (
     <>
       {before}
-      <strong className="text-[15px] font-black text-[#3F2C28]">{match[0]}</strong>
+      <strong className="text-[10px] font-black text-[#3F2C28]">{match[0]}</strong>
       {after}
     </>
   );
