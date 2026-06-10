@@ -11,43 +11,45 @@ type TaskRowProps = {
 export function TaskRow({ onDetailOpen, task }: TaskRowProps) {
   return (
     <article
-      className={`relative grid items-center gap-5 rounded-2xl border border-[#F2C9C2] bg-[#FFF8F6] px-6 pb-5 shadow-[0_7px_0_#EFC6BE]  ${
-        task.isNew ? "pt-10" : "pt-5"
+      className={`relative grid grid-cols-[1fr_74px] items-center gap-x-2 gap-y-2 rounded-[15px] border border-[#F2C9C2] bg-[#FFF8F6] px-3 pb-3 shadow-[0_4px_0_#EFC6BE]  ${
+        task.isNew ? "pt-7" : "pt-3"
       }`}
     >
       {task.isNew && (
-        <span className="absolute left-4 top-3 rounded-full bg-primary px-3 py-1 text-[11px] font-black uppercase text-white shadow-sm">
+        <span className="absolute left-3 top-2 rounded-full bg-primary px-2 py-0.5 text-[8px] font-black uppercase text-white shadow-sm">
           new
         </span>
       )}
-      <div>
-        <p className="text-xl font-semibold text-[#5A3E3B]">
+      <div className="min-w-0">
+        <p className="line-clamp-2 text-[11px] font-black leading-4 text-[#5A3E3B]">
           {task.memberPositionName ?? roleLabels[task.memberRole]} {task.memberName} - {task.taskTitle}
         </p>
-        <p className="mt-2 text-sm font-medium text-[#9B7A75]">
+        <p className="mt-1 text-[8px] font-medium leading-3 text-[#9B7A75]">
           업무 등록일: {formatDateTime(task.startedAt)}
         </p>
         {task.taskStatus === "REVIEW_REQUESTED" && task.submittedAt && (
-          <p className="text-sm font-medium text-[#9B7A75]">
+          <p className="text-[8px] font-medium leading-3 text-[#9B7A75]">
             제출일: {formatDateTime(task.submittedAt)}
           </p>
         )}
-        <p className="mt-2 min-h-5 text-sm font-bold text-[#8F7470]">
+        <p className="mt-1 min-h-3 truncate text-[9px] font-bold text-[#8F7470]">
           {task.oneLineComment || "\u00A0"}
         </p>
       </div>
-      <span
-        className={`flex h-10 items-center justify-center rounded-full border border-[#F1CFD5] text-sm font-black ${getStatusClassName(task.taskStatus)}`}
-      >
-        {getStatusLabel(task.taskStatus)}
-      </span>
-      <button
-        className="h-10 rounded-full border-2 border-primary bg-white text-sm font-semibold text-primary"
-        onClick={onDetailOpen}
-        type="button"
-      >
-        상세보기
-      </button>
+      <div className="flex flex-col gap-1.5">
+        <span
+          className={`flex h-6 items-center justify-center rounded-full border border-[#F1CFD5] text-[8px] font-black ${getStatusClassName(task.taskStatus)}`}
+        >
+          {getStatusLabel(task.taskStatus)}
+        </span>
+        <button
+          className="h-6 rounded-full border border-primary bg-white text-[8px] font-black text-primary"
+          onClick={onDetailOpen}
+          type="button"
+        >
+          상세보기
+        </button>
+      </div>
     </article>
   );
 }

@@ -8,23 +8,23 @@ type AllTasksHeaderProps = {
 
 export function AllTasksHeader({ isAdmin, onBack, taskCount }: AllTasksHeaderProps) {
   return (
-    <header className="rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 px-7 py-6 shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <header className="rounded-[20px] border border-[#F1CFD5] bg-[#FFFEFC]/95 px-3 py-3 shadow-[0_8px_18px_rgba(239,126,158,0.12)]">
+      <div className="grid grid-cols-[72px_1fr_54px] items-center gap-2">
         <button
-          className="flex h-11 items-center gap-2 rounded-full border-2 border-[#F2C9C2] bg-white px-5 text-sm font-black text-primary"
+          className="flex h-8 items-center justify-center gap-1 rounded-full border border-[#F2C9C2] bg-white px-2 text-[10px] font-black text-primary"
           onClick={onBack}
           type="button"
         >
-          <ArrowLeft aria-hidden className="h-4 w-4" />
+          <ArrowLeft aria-hidden className="h-3 w-3" />
           돌아가기
         </button>
-        <div className="text-center">
-          <h1 className="mt-1 text-3xl font-black tracking-normal text-[#3F2C28]">
+        <div className="min-w-0 text-center">
+          <h1 className="truncate text-[19px] font-black tracking-normal text-[#3F2C28]">
             {isAdmin ? "전체 업무" : "내 전체 업무"}
           </h1>
         </div>
-        <div className="flex h-11 items-center gap-2 rounded-full bg-[#FFF1F6] px-5 text-sm font-black text-[#9B7A75]">
-          <BriefcaseBusiness aria-hidden className="h-4 w-4 text-primary" />
+        <div className="flex h-8 items-center justify-center gap-1 rounded-full bg-[#FFF1F6] px-2 text-[10px] font-black text-[#9B7A75]">
+          <BriefcaseBusiness aria-hidden className="h-3 w-3 text-primary" />
           {taskCount}건
         </div>
       </div>

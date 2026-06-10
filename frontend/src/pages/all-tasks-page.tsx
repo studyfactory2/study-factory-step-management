@@ -91,10 +91,10 @@ export function AllTasksPage({
         <Sparkles aria-hidden className="h-8 w-8 fill-current" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[360px] space-y-5">
+      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
         <AllTasksHeader isAdmin={isAdmin} onBack={onBack} taskCount={tasks.length} />
 
-        <section className="rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-6 py-6 shadow-[0_8px_0_#EFC6BE]">
+        <section className="rounded-[20px] border border-[#F2C9C2] bg-[#FFFEFC] px-3 py-3 shadow-[0_5px_0_#EFC6BE]">
           <AllTasksFilterBar
             onSortToggle={() => setSortOrder((current) => (current === "LATEST" ? "OLDEST" : "LATEST"))}
             onStatusToggle={handleStatusToggle}
@@ -103,19 +103,19 @@ export function AllTasksPage({
           />
 
           {message && (
-            <div className="mt-5 rounded-[16px] border border-[#F2C9C2] bg-[#FFF8F9] px-4 py-3 text-sm font-black text-primary">
+            <div className="mt-3 rounded-[14px] border border-[#F2C9C2] bg-[#FFF8F9] px-3 py-2 text-[11px] font-black text-primary">
               {message}
             </div>
           )}
 
-          <div className="mt-6 rounded-[18px] border border-[#F2C9C2] bg-white p-5">
-            <div className="max-h-[calc(100dvh-310px)] min-h-[360px] space-y-4 overflow-y-auto pr-3">
+          <div className="mt-3 rounded-[16px] border border-[#F2C9C2] bg-white p-2">
+            <div className="max-h-[calc(100dvh-220px)] min-h-[330px] space-y-2.5 overflow-y-auto pr-1.5">
               {isLoading ? (
-                <div className="flex h-40 items-center justify-center rounded-2xl border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-sm font-semibold text-[#9B7A75]">
+                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-[11px] font-semibold text-[#9B7A75]">
                   업무를 불러오는 중입니다.
                 </div>
               ) : tasks.length === 0 ? (
-                <div className="flex h-40 items-center justify-center rounded-2xl border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-sm font-semibold text-[#9B7A75]">
+                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-[11px] font-semibold text-[#9B7A75]">
                   표시할 업무가 없습니다.
                 </div>
               ) : (

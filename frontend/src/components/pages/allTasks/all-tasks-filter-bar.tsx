@@ -15,14 +15,14 @@ export function AllTasksFilterBar({
   sortOrder
 }: AllTasksFilterBarProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="flex items-center justify-between gap-1.5">
+      <div className="grid flex-1 grid-cols-4 gap-1">
         {taskStatusOptions.map((option) => {
           const isSelected = selectedStatuses.includes(option.value);
 
           return (
             <button
-              className={`h-11 rounded-full border-2 px-6 text-sm font-black transition ${
+              className={`h-7 rounded-full border px-1 text-[8px] font-black transition ${
                 isSelected
                   ? "border-primary bg-primary text-white"
                   : "border-[#F2C9C2] bg-[#FFF8F6] text-[#9B7A75]"
@@ -37,7 +37,7 @@ export function AllTasksFilterBar({
         })}
       </div>
       <button
-        className="h-11 rounded-full border-2 border-[#D9D1F3] bg-[#F7F3FF] px-7 text-sm font-black text-[#8B72C8]"
+        className="h-7 rounded-full border border-[#D9D1F3] bg-[#F7F3FF] px-2 text-[8px] font-black text-[#8B72C8]"
         onClick={onSortToggle}
         type="button"
       >
