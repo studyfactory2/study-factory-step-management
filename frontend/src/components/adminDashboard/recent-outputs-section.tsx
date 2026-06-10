@@ -4,6 +4,7 @@ import { roleLabels } from "./constants";
 import { formatDateTime } from "./utils";
 
 type RecentOutputsSectionProps = {
+  onAllTasksOpen: () => void;
   onDetailOpen: (taskId: number) => void;
   onSortOrderToggle: () => void;
   onStatusToggle: (value: TaskStatus) => void;
@@ -20,6 +21,7 @@ const taskStatusOptions: Array<{ label: string; value: TaskStatus }> = [
 ];
 
 export function RecentOutputsSection({
+  onAllTasksOpen,
   onDetailOpen,
   onSortOrderToggle,
   onStatusToggle,
@@ -62,6 +64,7 @@ export function RecentOutputsSection({
             </button>
             <button
               className="h-11 rounded-full border-2 border-primary bg-white px-8 text-sm font-semibold text-primary"
+              onClick={onAllTasksOpen}
               type="button"
             >
               전체 업무보기

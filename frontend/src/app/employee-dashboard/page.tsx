@@ -47,6 +47,7 @@ export default function EmployeeDashboardRoutePage() {
     <EmployeeDashboardPage
       accessToken={accessToken}
       currentMember={currentMember}
+      onAllTasksOpen={() => router.push("/tasks")}
       onLogout={handleLogout}
       onTaskDetailOpen={(taskId) => router.push(`/tasks/${taskId}`)}
     />

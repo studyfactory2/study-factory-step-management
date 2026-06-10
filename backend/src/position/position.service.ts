@@ -106,34 +106,33 @@ export class PositionService {
     }
 
     const positionIds = await this.findPositionTreeIds(id);
-    const activeMemberCount = await this.positionRepository.countActiveMembersByPositionIds(positionIds);
-    if (activeMemberCount > 0) {
+    const memberCount = await this.positionRepository.countMembersByPositionIds(positionIds);
+    if (memberCount > 0) {
       throw new ConflictException("해당 직위를 사용하는 직원이 있어 삭제할 수 없습니다.");
     }
 
-    await this.deactivatePositionTree(id);
+    const preRegistrationCount = await this.positionRepository.countPreRegistrationsByPositionIds(positionIds);
+    if (preRegistrationCount > 0) {
+      throw new ConflictException("해당 직위를 사용하는 사전등록 정보가 있어 삭제할 수 없습니다.");
+    }
+
+    await this.deletePositionTree(id);
   }
 
   private async findPositionTreeIds(id: number): Promise<number[]> {
-    const children = await this.positionRepository.findActiveDescendants(id);
+    const children = await this.positionRepository.findDescendants(id);
     const childIds = await Promise.all(children.map((child) => this.findPositionTreeIds(child.id)));
 
     return [id, ...childIds.flat()];
   }
 
-  private async deactivatePositionTree(id: number): Promise<void> {
-    const children = await this.positionRepository.findActiveDescendants(id);
+  private async deletePositionTree(id: number): Promise<void> {
+    const children = await this.positionRepository.findDescendants(id);
 
     for (const child of children) {
-      await this.deactivatePositionTree(child.id);
+      await this.deletePositionTree(child.id);
     }
 
-    const position = await this.positionRepository.findActiveById(id);
-    if (!position) {
-      return;
-    }
-
-    position.isActive = false;
-    await this.positionRepository.save(position);
+    await this.positionRepository.deleteById(id);
   }
 }

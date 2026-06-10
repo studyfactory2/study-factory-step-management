@@ -100,7 +100,7 @@ export function DashboardActionSection({
                   <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#8B72C8] shadow-sm">
                     <GitBranch aria-hidden className="h-6 w-6" />
                   </span>
-                  <span className="text-lg font-black text-[#3F2C28]">로그인 화면 조직도 관리</span>
+                  <span className="text-lg font-black text-[#3F2C28]">로그인 화면 직위트리 관리</span>
                 </button>
               </div>
             ) : memberManagementView === "preRegister" ? (

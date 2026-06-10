@@ -30,6 +30,15 @@ export class TaskController {
   }
 
   @UseGuards(JWTAuthGuard)
+  @Get("all-work-status")
+  async findAllWorkStatus(
+    @Query() query: TaskRecentWorkStatusQueryRequest,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.taskService.findAllWorkStatus(query, currentMember);
+  }
+
+  @UseGuards(JWTAuthGuard)
   @Get("drafts")
   async findDrafts(@CurrentMember() currentMember: CurrentMemberType) {
     return this.taskService.findDrafts(currentMember);

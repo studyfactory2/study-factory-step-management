@@ -14,7 +14,7 @@ export type TaskCountRow = {
 };
 
 type FindRecentWorkStatusOptions = {
-  limit: number;
+  limit?: number;
   memberId?: number;
   sortOrder?: TaskSortOrder;
   statuses: TaskStatus[];
@@ -127,7 +127,11 @@ export class TaskRepository {
 
     queryBuilder.addOrderBy("comments.updatedAt", "DESC");
 
-    return queryBuilder.take(options.limit).getMany();
+    if (options.limit) {
+      queryBuilder.take(options.limit);
+    }
+
+    return queryBuilder.getMany();
   }
 
   async findDetailById(id: number): Promise<Task | null> {

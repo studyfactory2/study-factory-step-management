@@ -29,10 +29,12 @@ import { TaskCreateForm, type TaskCreateDraftSubmit } from "@/components/adminDa
 import { isAssignableMember } from "@/components/adminDashboard/utils";
 import type { StoredMember } from "@/lib/auth-storage";
 import type { Member, TaskStatus } from "@/types/domain";
+import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 
 type EmployeeDashboardPageProps = {
   accessToken: string;
   currentMember: StoredMember;
+  onAllTasksOpen: () => void;
   onLogout: () => void;
   onTaskDetailOpen: (taskId: number) => void;
 };
@@ -45,6 +47,7 @@ type ConfirmDialogState = {
 export function EmployeeDashboardPage({
   accessToken,
   currentMember,
+  onAllTasksOpen,
   onLogout,
   onTaskDetailOpen
 }: Partial<EmployeeDashboardPageProps>) {
@@ -205,7 +208,7 @@ export function EmployeeDashboardPage({
     }
   }
 
-  if (!accessToken || !currentMember || !onLogout || !onTaskDetailOpen) {
+  if (!accessToken || !currentMember || !onAllTasksOpen || !onLogout || !onTaskDetailOpen) {
     return null;
   }
 
@@ -250,6 +253,7 @@ export function EmployeeDashboardPage({
           onSubmit={handleCreateTask}
         />
         <RecentOutputsSection
+          onAllTasksOpen={onAllTasksOpen}
           onDetailOpen={onTaskDetailOpen}
           onSortOrderToggle={handleRecentTaskSortToggle}
           onStatusToggle={handleRecentTaskStatusToggle}
@@ -261,30 +265,13 @@ export function EmployeeDashboardPage({
       </div>
 
       {confirmDialog && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#3F2C28]/35 px-4">
-          <div className="w-full max-w-[420px] rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] p-7 text-center shadow-[0_18px_44px_rgba(90,62,59,0.2)]">
-            <p className="text-2xl font-black text-[#3F2C28]">함께 프로젝트 중 직원 삭제</p>
-            <p className="mt-3 text-sm font-bold leading-6 text-[#8F7470]">
-              {confirmDialog.memberName} 님을 목록에서 삭제할까요?
-            </p>
-            <div className="mt-7 grid grid-cols-2 gap-3">
-              <button
-                className="h-11 rounded-full border border-[#F0B9C8] bg-white text-sm font-black text-primary"
-                onClick={() => setConfirmDialog(null)}
-                type="button"
-              >
-                취소
-              </button>
-              <button
-                className="h-11 rounded-full bg-primary text-sm font-black text-white shadow-sm"
-                onClick={() => handleDeleteFavoriteMember(confirmDialog.memberId)}
-                type="button"
-              >
-                삭제
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          confirmLabel="삭제"
+          description={`${confirmDialog.memberName} 님을 목록에서 삭제할까요?`}
+          onCancel={() => setConfirmDialog(null)}
+          onConfirm={() => handleDeleteFavoriteMember(confirmDialog.memberId)}
+          title="함께 프로젝트 중 직원 삭제"
+        />
       )}
     </main>
   );

@@ -160,6 +160,42 @@ export class TaskService {
     }));
   }
 
+  async findAllWorkStatus(
+    query: TaskRecentWorkStatusQueryRequest = {},
+    currentMember: CurrentMember
+  ): Promise<TaskRecentWorkStatusResponse[]> {
+    const statuses = query.status?.length
+      ? query.status
+      : [
+          TaskStatus.REGISTERED,
+          TaskStatus.IN_PROGRESS,
+          TaskStatus.REVIEW_REQUESTED,
+          TaskStatus.COMPLETED
+        ];
+    const memberId = this.isAdminRole(currentMember.role) ? undefined : currentMember.memberId;
+    const tasks = await this.taskRepository.findRecentWorkStatus({
+      memberId,
+      sortOrder: query.sortOrder,
+      statuses,
+      viewerId: currentMember.memberId
+    });
+
+    return tasks.map((task) => ({
+      taskId: task.id,
+      taskTitle: task.title,
+      oneLineComment: this.findLatestCommentOneLineComment(task),
+      taskStatus: task.status,
+      memberId: task.assignee.id,
+      memberName: this.getDisplayName(task.assignee),
+      memberRole: task.assignee.roleType,
+      memberPositionName: task.assignee.positionInfo?.name ?? null,
+      startedAt: task.createdAt,
+      submittedAt: task.status === TaskStatus.REVIEW_REQUESTED ? task.reviewRequestedAt : null,
+      attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl),
+      isNew: this.isNewTaskForMember(task, currentMember.memberId)
+    }));
+  }
+
   async findDetail(id: number, currentMember?: CurrentMember): Promise<TaskDetailResponse> {
     const task = await this.taskRepository.findDetailById(id);
 

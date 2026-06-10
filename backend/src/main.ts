@@ -9,8 +9,14 @@ async function bootstrap() {
   app.useStaticAssets(process.env.UPLOAD_DIR ?? "uploads", {
     prefix: "/uploads"
   });
+
+  const allowedOrigins = (process.env.FRONTEND_ORIGIN ?? "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: ["http://localhost:3000"],
+    origin: allowedOrigins,
     credentials: true
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));

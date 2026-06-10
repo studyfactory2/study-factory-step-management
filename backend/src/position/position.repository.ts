@@ -78,6 +78,14 @@ export class PositionRepository {
     });
   }
 
+  async findDescendants(parentId: number): Promise<Position[]> {
+    return this.positionRepository.find({
+      where: {
+        parentId
+      }
+    });
+  }
+
   async findActiveByIds(ids: number[]): Promise<Position[]> {
     if (ids.length === 0) {
       return [];
@@ -102,6 +110,34 @@ export class PositionRepository {
         positionId: In(positionIds)
       }
     });
+  }
+
+  async countMembersByPositionIds(positionIds: number[]): Promise<number> {
+    if (positionIds.length === 0) {
+      return 0;
+    }
+
+    return this.memberRepository.count({
+      where: {
+        positionId: In(positionIds)
+      }
+    });
+  }
+
+  async countPreRegistrationsByPositionIds(positionIds: number[]): Promise<number> {
+    if (positionIds.length === 0) {
+      return 0;
+    }
+
+    return this.positionRepository.manager
+      .createQueryBuilder()
+      .from("member_pre_registration", "preRegistration")
+      .where("preRegistration.position_id IN (:...positionIds)", { positionIds })
+      .getCount();
+  }
+
+  async deleteById(id: number): Promise<void> {
+    await this.positionRepository.delete(id);
   }
 
   async findDutyByPositionIdAndDuty(
