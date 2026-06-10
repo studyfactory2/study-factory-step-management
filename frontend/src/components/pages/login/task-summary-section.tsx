@@ -4,7 +4,7 @@ import { createStatusCards } from "./constants";
 
 export function TaskSummarySection({ taskSummary }: { taskSummary: TaskStatusSummary }) {
   return (
-    <section className="mb-3 rounded-[17px] border border-[#EBCDD1] bg-white/86 p-2 shadow-soft backdrop-blur">
+    <section className="mb-1 rounded-[17px] border border-[#EBCDD1] bg-white/86 p-2 shadow-soft backdrop-blur">
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <h2 className="text-[15px] font-black tracking-normal text-[#3F2C28]">전체업무현황</h2>
         <div className="shrink-0 rounded-full bg-[#FFF1C9] px-2.5 py-1 text-[9px] font-bold text-[#B18735]">

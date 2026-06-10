@@ -41,7 +41,7 @@ export function LoginFormSection({
   rememberName
 }: LoginFormSectionProps) {
   return (
-    <section className="mt-5 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur ">
+    <section className="mt-1 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur ">
       <div className="mb-0.5 flex justify-center text-[#F188A4]">
         <Heart aria-hidden className="h-5 w-5 fill-current" />
       </div>
