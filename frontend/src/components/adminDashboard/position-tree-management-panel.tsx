@@ -30,6 +30,13 @@ type DragPreview = {
   y: number;
 };
 
+function getPositionIdFromPoint(x: number, y: number): number | null {
+  const targetElement = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-position-id]");
+  const targetId = Number(targetElement?.dataset.positionId);
+
+  return Number.isFinite(targetId) ? targetId : null;
+}
+
 export function PositionTreeManagementPanel({
   accessToken,
   onClose,
@@ -75,6 +82,12 @@ export function PositionTreeManagementPanel({
 
   useEffect(() => {
     function handlePointerMove(event: PointerEvent) {
+      if (pointerDraggingId !== null) {
+        event.preventDefault();
+        const targetId = getPositionIdFromPoint(event.clientX, event.clientY);
+        setDropTargetId(targetId !== null && targetId !== pointerDraggingId ? targetId : null);
+      }
+
       setDragPreview((preview) =>
         preview
           ? {
@@ -86,21 +99,33 @@ export function PositionTreeManagementPanel({
       );
     }
 
-    function handlePointerUp() {
+    function handlePointerUp(event: PointerEvent) {
+      if (pointerDraggingId !== null) {
+        event.preventDefault();
+        const targetId = getPositionIdFromPoint(event.clientX, event.clientY);
+
+        if (targetId !== null && targetId !== pointerDraggingId) {
+          void handleDrop(targetId, pointerDraggingId);
+          return;
+        }
+      }
+
       setPointerDraggingId(null);
       setDraggingId(null);
       setDropTargetId(null);
       setDragPreview(null);
     }
 
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointermove", handlePointerMove, { passive: false });
+    window.addEventListener("pointerup", handlePointerUp, { passive: false });
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
     };
-  }, []);
+    // Drag listeners only need to rebind when touch dragging starts or ends.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pointerDraggingId]);
 
   function resetCreateForm() {
     setName("");
@@ -277,14 +302,6 @@ export function PositionTreeManagementPanel({
     setDropTargetId(positionId);
   }
 
-  function handlePointerDrop(positionId: number) {
-    if (pointerDraggingId === null) {
-      return;
-    }
-
-    void handleDrop(positionId, pointerDraggingId);
-  }
-
   return (
     <section className="relative rounded-[18px] border border-[#D9D1F3] bg-[#F8F5FF] px-3 py-3">
       <div className="flex items-start justify-between gap-2">
@@ -381,7 +398,6 @@ export function PositionTreeManagementPanel({
                   position={position}
                   onPointerDragStart={handlePointerDragStart}
                   onPointerEnter={handlePointerEnter}
-                  onPointerDrop={handlePointerDrop}
                 />
               ))}
             </div>
@@ -678,7 +694,6 @@ function PositionTreeEditorNode({
   onBlockedDrag,
   onPointerDragStart,
   onPointerEnter,
-  onPointerDrop,
   position
 }: {
   depth: number;
@@ -693,7 +708,6 @@ function PositionTreeEditorNode({
   onBlockedDrag: () => void;
   onPointerDragStart: (position: PositionTreeNode, x: number, y: number) => void;
   onPointerEnter: (positionId: number) => void;
-  onPointerDrop: (positionId: number) => void;
   position: PositionTreeNode;
 }) {
   const children = position.children ?? [];
@@ -713,7 +727,6 @@ function PositionTreeEditorNode({
         onBlockedDrag={onBlockedDrag}
         onPointerDragStart={onPointerDragStart}
         onPointerEnter={onPointerEnter}
-        onPointerDrop={onPointerDrop}
         position={position}
       />
 
@@ -754,7 +767,6 @@ function PositionTreeEditorNode({
                   onBlockedDrag={onBlockedDrag}
                   onPointerDragStart={onPointerDragStart}
                   onPointerEnter={onPointerEnter}
-                  onPointerDrop={onPointerDrop}
                   position={child}
                 />
               </div>
@@ -779,7 +791,6 @@ function PositionTreeCard({
   onBlockedDrag,
   onPointerDragStart,
   onPointerEnter,
-  onPointerDrop,
   position
 }: {
   depth: number;
@@ -794,7 +805,6 @@ function PositionTreeCard({
   onBlockedDrag: () => void;
   onPointerDragStart: (position: PositionTreeNode, x: number, y: number) => void;
   onPointerEnter: (positionId: number) => void;
-  onPointerDrop: (positionId: number) => void;
   position: PositionTreeNode;
 }) {
   const isDragging = draggingId === position.id;
@@ -808,8 +818,9 @@ function PositionTreeCard({
 
   return (
     <article
+      data-position-id={position.id}
       className={cn(
-        "relative flex min-h-[56px] w-[82px] cursor-grab select-none flex-col items-center justify-center rounded-[11px] border px-1.5 py-1.5 text-center shadow-sm transition active:cursor-grabbing",
+        "relative flex min-h-[56px] w-[82px] touch-none cursor-grab select-none flex-col items-center justify-center rounded-[11px] border px-1.5 py-1.5 text-center shadow-sm transition active:cursor-grabbing",
         toneClassNames[(index + depth) % toneClassNames.length],
         isDropTarget && "scale-[1.06] border-2 border-[#8B72C8] bg-[#F7F3FF] shadow-[0_0_0_5px_rgba(139,114,200,0.18)]",
         isDragging && "opacity-25"
@@ -826,12 +837,15 @@ function PositionTreeCard({
         }
 
         event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
         onPointerDragStart(position, event.clientX, event.clientY);
       }}
       onPointerEnter={() => onPointerEnter(position.id)}
       onPointerUp={(event: ReactPointerEvent<HTMLElement>) => {
         event.stopPropagation();
-        onPointerDrop(position.id);
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
       }}
       onDragEnd={onDragEnd}
       onDragEnter={(event) => {

@@ -29,8 +29,8 @@ export function RoleTree({ positions, selectedPositionId, onSelectPosition }: Ro
   }
 
   return (
-    <div className="overflow-x-auto pb-1">
-      <div className="flex min-w-max justify-center gap-3 px-1">
+    <div className="overflow-x-auto pb-0.5">
+      <div className="flex min-w-max justify-center gap-2 px-0.5">
         {visiblePositions.map((position, index) => (
           <PositionNode
             index={index}
@@ -76,15 +76,15 @@ function PositionNode({
   return (
     <div className="relative flex flex-col items-center">
       <PositionCard
-        className="w-[84px]"
+        className="w-[76px]"
         index={index}
         onSelect={() => onSelectPosition(position.id)}
         position={position}
       />
 
       {children.length > 0 && (
-        <div className="relative mt-5 w-full min-w-max">
-          <span className="absolute left-1/2 top-[-1.25rem] h-[1.32rem] w-0.5 -translate-x-1/2 rounded-full bg-[#E5C5CB]" />
+        <div className="relative mt-3.5 w-full min-w-max">
+          <span className="absolute left-1/2 top-[-0.9rem] h-[0.95rem] w-0.5 -translate-x-1/2 rounded-full bg-[#E5C5CB]" />
           <span
             className={cn(
               "absolute top-[-1px] h-0.5 rounded-full bg-[#E5C5CB]",
@@ -96,7 +96,7 @@ function PositionNode({
           />
           <div
             className={cn(
-              "grid justify-items-center gap-2 pt-4",
+              "grid justify-items-center gap-1.5 pt-3",
               children.length === 1 && "grid-cols-1",
               children.length === 2 && "grid-cols-2",
               children.length === 3 && "grid-cols-3",
@@ -105,7 +105,7 @@ function PositionNode({
           >
             {children.map((child, childIndex) => (
               <div className="relative" key={child.id}>
-                <span className="absolute left-1/2 top-[-1.05rem] h-[1.1rem] w-0.5 -translate-x-1/2 rounded-full bg-[#E5C5CB]" />
+                <span className="absolute left-1/2 top-[-0.8rem] h-[0.85rem] w-0.5 -translate-x-1/2 rounded-full bg-[#E5C5CB]" />
                 <PositionNode
                   index={childIndex + index + 1}
                   onSelectPosition={onSelectPosition}
@@ -138,19 +138,19 @@ function PositionCard({
   return (
     <button
       className={cn(
-        "flex min-h-[60px] w-full flex-col items-center justify-center rounded-[14px] border px-1.5 py-2 text-center shadow-sm transition",
+        "flex min-h-[50px] w-full flex-col items-center justify-center rounded-[12px] border px-1 py-1.5 text-center shadow-sm transition",
         toneClassName,
         className
       )}
       onClick={onSelect}
       type="button"
     >
-      <span className="mb-1 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-white text-primary shadow-sm">
-        <Icon aria-hidden className="h-3 w-3" />
+      <span className="mb-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-white text-primary shadow-sm">
+        <Icon aria-hidden className="h-2.5 w-2.5" />
       </span>
-      <span className="text-[11px] font-black leading-tight">{position.name}</span>
+      <span className="text-[10px] font-black leading-tight">{position.name}</span>
       {position.subtitle && (
-        <span className="mt-0.5 max-w-full rounded-full bg-white/80 px-1.5 py-0.5 text-[8px] font-bold leading-tight text-muted-foreground">
+        <span className="mt-0.5 max-w-full rounded-full bg-white/80 px-1 py-0.5 text-[7px] font-bold leading-tight text-muted-foreground">
           {position.subtitle}
         </span>
       )}

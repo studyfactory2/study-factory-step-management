@@ -274,8 +274,8 @@ function setSoftDragImage(event: DragEvent<HTMLElement>) {
 
   dragImage.style.width = `${rect.width}px`;
   dragImage.style.height = `${rect.height}px`;
-  dragImage.style.opacity = "0.06";
-  dragImage.style.filter = "saturate(0.35) brightness(1.18)";
+  dragImage.style.opacity = "0.02";
+  dragImage.style.filter = "saturate(0.18) brightness(1.35)";
   dragImage.style.pointerEvents = "none";
   dragImage.style.position = "fixed";
   dragImage.style.top = "-1000px";
@@ -333,7 +333,7 @@ function EmployeeCard({
   return (
     <article
       className={`relative min-h-[104px] cursor-grab rounded-[12px] border border-[#F1CFD5] bg-white px-1.5 py-2.5 text-center shadow-[0_3px_0_#F3D1D8] transition active:cursor-grabbing ${
-        isDragging ? "opacity-0" : ""
+        isDragging ? "opacity-[0.06] grayscale brightness-125" : ""
       }`}
       draggable={draggable}
       onDragEnd={onDragEnd}

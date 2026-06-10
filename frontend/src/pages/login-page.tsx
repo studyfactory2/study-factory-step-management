@@ -106,8 +106,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <Sparkles aria-hidden className="h-6 w-6 fill-current" />
       </div>
 
-      <header className="mb-7 pt-3 text-center">
-        <h1 className="text-[34px] font-black leading-tight tracking-normal text-[#3F2C28]">
+      <header className="mb-5 pt-2 text-center">
+        <h1 className="whitespace-nowrap font-['Gaegu','NanumSquareRound',cursive] text-[26px] font-bold leading-tight tracking-normal text-[#3F2C28]">
           자격증공장 업무전달현황
         </h1>
       </header>

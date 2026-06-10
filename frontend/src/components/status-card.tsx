@@ -20,20 +20,20 @@ export function StatusCard({ label, value, helper, icon: Icon, tone }: StatusCar
   return (
     <article
       className={cn(
-        "grid min-h-[92px] grid-cols-[1fr_72px] grid-rows-[auto_1fr] gap-x-2 rounded-[16px] border px-3 py-2.5 shadow-sm",
+        "grid min-h-[74px] grid-cols-[1fr_62px] grid-rows-[auto_1fr] gap-x-1.5 rounded-[14px] border px-2.5 py-2 shadow-sm",
         toneClassNames[tone]
       )}
     >
-      <div className="col-span-2 flex min-w-0 items-center gap-2">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
-          <Icon aria-hidden className="h-3.5 w-3.5" />
+      <div className="col-span-2 flex min-w-0 items-center gap-1.5">
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
+          <Icon aria-hidden className="h-3 w-3" />
         </div>
-        <p className="text-[12px] font-black leading-tight text-[#6B514C]">{label}</p>
+        <p className="text-[11px] font-black leading-tight text-[#6B514C]">{label}</p>
       </div>
       <div className="self-end">
-        <p className="whitespace-nowrap text-[15px] font-black leading-none tracking-normal">{value}건</p>
+        <p className="whitespace-nowrap text-[13px] font-black leading-none tracking-normal">{value}건</p>
       </div>
-      <p className="self-end text-right text-[9px] font-bold leading-tight text-[#6B514C]">
+      <p className="self-end text-right text-[8px] font-bold leading-tight text-[#6B514C]">
         <HighlightedHelper helper={helper} />
       </p>
     </article>
@@ -48,7 +48,7 @@ function HighlightedHelper({ helper }: { helper: string }) {
       <span className="block">
         <span className="block">지난주 대비</span>
         <span className="block">
-          <strong className="text-[10px] font-black text-[#3F2C28]">{weeklyChangeMatch[1]}</strong>
+          <strong className="text-[9px] font-black text-[#3F2C28]">{weeklyChangeMatch[1]}</strong>
           {` ${weeklyChangeMatch[2]}`}
         </span>
       </span>
@@ -67,7 +67,7 @@ function HighlightedHelper({ helper }: { helper: string }) {
   return (
     <>
       {before}
-      <strong className="text-[10px] font-black text-[#3F2C28]">{match[0]}</strong>
+      <strong className="text-[9px] font-black text-[#3F2C28]">{match[0]}</strong>
       {after}
     </>
   );

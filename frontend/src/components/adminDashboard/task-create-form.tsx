@@ -285,7 +285,7 @@ function TaskDraftCard({
       </div>
       <div className="grid gap-2.5">
         <select
-          className="min-h-10 rounded-[11px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-3 text-[12px] font-bold text-[#8F7470] outline-none disabled:opacity-70"
+          className="h-[38px] appearance-none rounded-[11px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-3 text-[12px] font-bold text-[#8F7470] outline-none disabled:opacity-70"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onChange={(event) =>
             onUpdate(draft.id, (currentDraft) => ({
@@ -303,7 +303,7 @@ function TaskDraftCard({
           ))}
         </select>
         <input
-          className="h-10 w-full rounded-[11px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-3 text-[12px] font-bold outline-none placeholder:text-[#B79A94] disabled:opacity-70"
+          className="h-[38px] w-full rounded-[11px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-3 text-[12px] font-bold outline-none placeholder:text-[#B79A94] disabled:opacity-70"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onChange={(event) =>
             onUpdate(draft.id, (currentDraft) => ({
