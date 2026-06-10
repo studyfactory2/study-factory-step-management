@@ -20,18 +20,20 @@ export function StatusCard({ label, value, helper, icon: Icon, tone }: StatusCar
   return (
     <article
       className={cn(
-        "flex min-h-[78px] items-center gap-3 rounded-[18px] border px-4 py-3 shadow-sm",
+        "flex min-h-[112px] flex-col items-start justify-between rounded-[18px] border px-3.5 py-3 shadow-sm",
         toneClassNames[tone]
       )}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
-        <Icon aria-hidden className="h-5 w-5" />
+      <div className="flex w-full items-center gap-2">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
+          <Icon aria-hidden className="h-4 w-4" />
+        </div>
+        <p className="min-w-0 truncate text-[13px] font-black text-[#6B514C]">{label}</p>
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-[#9C7D79]">{label}</p>
-        <div className="mt-1 flex items-end justify-between gap-2">
-          <p className="text-2xl font-black leading-none tracking-normal">{value}건</p>
-          <p className="pb-0.5 text-right text-sm font-bold text-[#6B514C]">
+      <div className="w-full">
+        <p className="text-[26px] font-black leading-none tracking-normal">{value}건</p>
+        <div className="mt-2 min-h-[34px]">
+          <p className="text-[12px] font-bold leading-snug text-[#6B514C]">
             <HighlightedHelper helper={helper} />
           </p>
         </div>
@@ -53,7 +55,7 @@ function HighlightedHelper({ helper }: { helper: string }) {
   return (
     <>
       {before}
-      <strong className="text-[15px] font-black text-[#3F2C28]">{match[0]}</strong>
+      <strong className="text-[13px] font-black text-[#3F2C28]">{match[0]}</strong>
       {after}
     </>
   );
