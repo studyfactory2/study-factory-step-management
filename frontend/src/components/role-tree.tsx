@@ -84,10 +84,10 @@ function PositionNode({
 
       {children.length > 0 && (
         <div className="relative mt-8 w-full min-w-max">
-          <span className="absolute left-1/2 top-[-2rem] h-8 w-px -translate-x-1/2 bg-[#E5C5CB]" />
+          <span className="absolute left-1/2 top-[-2rem] h-[2.05rem] w-0.5 -translate-x-1/2 rounded-full bg-[#E5C5CB]" />
           <span
             className={cn(
-              "absolute top-0 h-px bg-[#E5C5CB]",
+              "absolute top-[-1px] h-0.5 rounded-full bg-[#E5C5CB]",
               children.length === 1 && "left-1/2 right-1/2",
               children.length === 2 && "left-1/4 right-1/4",
               children.length === 3 && "left-[16.666%] right-[16.666%]",
@@ -105,7 +105,7 @@ function PositionNode({
           >
             {children.map((child, childIndex) => (
               <div className="relative" key={child.id}>
-                <span className="absolute left-1/2 top-[-1.25rem] h-5 w-px -translate-x-1/2 bg-[#E5C5CB]" />
+                <span className="absolute left-1/2 top-[-1.3rem] h-[1.35rem] w-0.5 -translate-x-1/2 rounded-full bg-[#E5C5CB]" />
                 <PositionNode
                   index={childIndex + index + 1}
                   onSelectPosition={onSelectPosition}

@@ -1,0 +1,71 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  Bell,
+  BriefcaseBusiness,
+  CheckCircle2,
+  ClipboardList
+} from "lucide-react";
+import type { TaskStatusSummary } from "@/api/task";
+
+export type StatusCardItem = {
+  label: string;
+  value: string;
+  helper: string;
+  icon: LucideIcon;
+  tone: "pink" | "lavender" | "gold" | "sage";
+};
+
+export const defaultSummary: TaskStatusSummary = {
+  registered: 0,
+  registeredToday: 0,
+  inProgress: 0,
+  inProgressWeeklyChange: 0,
+  reviewRequested: 0,
+  reviewRequestedWeeklyChange: 0,
+  completedThisMonth: 0
+};
+
+export function createStatusCards(summary: TaskStatusSummary): StatusCardItem[] {
+  return [
+    {
+      label: "업무등록",
+      value: String(summary.registered),
+      helper: `오늘 ${summary.registeredToday}건 등록`,
+      icon: ClipboardList,
+      tone: "pink"
+    },
+    {
+      label: "진행 중",
+      value: String(summary.inProgress),
+      helper: formatWeeklyChange(summary.inProgressWeeklyChange),
+      icon: BriefcaseBusiness,
+      tone: "lavender"
+    },
+    {
+      label: "검토요청",
+      value: String(summary.reviewRequested),
+      helper: formatWeeklyChange(summary.reviewRequestedWeeklyChange),
+      icon: Bell,
+      tone: "gold"
+    },
+    {
+      label: "완료",
+      value: String(summary.completedThisMonth),
+      helper: "이번 달 완료",
+      icon: CheckCircle2,
+      tone: "sage"
+    }
+  ];
+}
+
+function formatWeeklyChange(change: number): string {
+  if (change > 0) {
+    return `지난주 대비 ${change}건 증가`;
+  }
+
+  if (change < 0) {
+    return `지난주 대비 ${Math.abs(change)}건 감소`;
+  }
+
+  return "지난주와 동일";
+}

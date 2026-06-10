@@ -719,10 +719,10 @@ function PositionTreeEditorNode({
 
       {children.length > 0 && (
         <div className="relative mt-6 flex min-w-max flex-col items-center">
-          <span className="absolute left-1/2 top-[-1.5rem] h-6 w-px -translate-x-1/2 bg-[#D9D1F3]" />
+          <span className="absolute left-1/2 top-[-1.5rem] h-[1.55rem] w-0.5 -translate-x-1/2 rounded-full bg-[#D9D1F3]" />
           <span
             className={cn(
-              "absolute top-0 h-px bg-[#D9D1F3]",
+              "absolute top-[-1px] h-0.5 rounded-full bg-[#D9D1F3]",
               children.length === 1 && "left-1/2 right-1/2",
               children.length === 2 && "left-1/4 right-1/4",
               children.length === 3 && "left-[16.666%] right-[16.666%]",
@@ -740,7 +740,7 @@ function PositionTreeEditorNode({
           >
             {children.map((child, childIndex) => (
               <div className="relative" key={child.id}>
-                <span className="absolute left-1/2 top-[-1rem] h-4 w-px -translate-x-1/2 bg-[#D9D1F3]" />
+                <span className="absolute left-1/2 top-[-1.05rem] h-[1.1rem] w-0.5 -translate-x-1/2 rounded-full bg-[#D9D1F3]" />
                 <PositionTreeEditorNode
                   depth={depth + 1}
                   draggingId={draggingId}
