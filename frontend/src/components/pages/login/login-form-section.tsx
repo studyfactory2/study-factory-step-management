@@ -4,7 +4,6 @@ import type { FormEvent } from "react";
 import {
   Eye,
   EyeOff,
-  Heart,
   Lock,
   Sparkles,
   UserPlus,
@@ -41,11 +40,7 @@ export function LoginFormSection({
   rememberName
 }: LoginFormSectionProps) {
   return (
-    <section className="mt-1 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur ">
-      <div className="mb-0.5 flex justify-center text-[#F188A4]">
-        <Heart aria-hidden className="h-5 w-5 fill-current" />
-      </div>
-
+    <section className="mt-0.5 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur ">
       <form className="space-y-3" onSubmit={onSubmit}>
         <div className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-2">
           <span className="text-[15px] font-black text-[#4B332E]">이름</span>

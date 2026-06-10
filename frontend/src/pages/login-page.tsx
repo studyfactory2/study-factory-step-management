@@ -98,7 +98,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[360px] flex-col px-5 py-6 text-[#4B332E] ">
+    <main className="mx-auto flex min-h-dvh w-full max-w-[360px] flex-col px-5 py-4 text-[#4B332E] ">
       <div className="pointer-events-none fixed left-8 top-12 text-[#F0C957]">
         <Sparkles aria-hidden className="h-7 w-7 fill-current" />
       </div>
@@ -106,8 +106,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <Sparkles aria-hidden className="h-6 w-6 fill-current" />
       </div>
 
-      <header className="mb-5 pt-2 text-center">
-        <h1 className="whitespace-nowrap font-['Gaegu','NanumSquareRound',cursive] text-[26px] font-bold leading-tight tracking-normal text-[#3F2C28]">
+      <header className="mb-3 pt-1 text-center">
+        <h1 className="whitespace-nowrap text-[23px] font-bold leading-tight tracking-normal text-muted-foreground">
           자격증공장 업무전달현황
         </h1>
       </header>
