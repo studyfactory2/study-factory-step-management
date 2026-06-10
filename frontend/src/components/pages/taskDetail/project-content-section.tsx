@@ -76,31 +76,31 @@ export function ProjectContentSection({
   }
 
   return (
-    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]">
-      <h2 className="text-2xl font-black text-[#3F2C28]">프로젝트내용</h2>
-      <div className="mt-5 rounded-[20px] border border-[#F2C9C2] bg-white px-6 py-6">
+    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-4 py-4 shadow-[0_6px_0_#EFC6BE]">
+      <h2 className="text-[15px] font-black text-[#3F2C28]">프로젝트내용</h2>
+      <div className="mt-3 rounded-[16px] border border-[#F2C9C2] bg-white px-4 py-4">
         {isEditing ? (
           <textarea
-            className="min-h-[180px] w-full resize-none bg-transparent text-base font-bold leading-8 text-[#5A3E3B] outline-none"
+            className="min-h-[120px] w-full resize-none bg-transparent text-[11px] font-bold leading-5 text-[#5A3E3B] outline-none"
             onChange={(event) => setDescription(event.target.value)}
             value={description}
           />
         ) : (
-          <p className="whitespace-pre-wrap text-base font-bold leading-8 text-[#5A3E3B]">
+          <p className="whitespace-pre-wrap text-[11px] font-bold leading-5 text-[#5A3E3B]">
             <HighlightedDescription task={task} />
           </p>
         )}
       </div>
       {task.attachments.length > 0 && (
         <>
-          <p className="mt-6 text-base font-black text-primary">첨부한 사진들</p>
+          <p className="mt-4 text-[11px] font-black text-primary">첨부한 사진들</p>
           <AttachmentImageGrid attachments={task.attachments} onImagePreview={onImagePreview} />
         </>
       )}
       {message && (
-        <p className="mt-3 text-sm font-black text-primary">{message}</p>
+        <p className="mt-2 text-[10px] font-black text-primary">{message}</p>
       )}
-      <div className="mt-5 flex justify-end gap-3">
+      <div className="mt-3 flex justify-end gap-2">
         <input
           accept="image/jpeg,image/png,image/webp"
           className="hidden"
@@ -110,7 +110,7 @@ export function ProjectContentSection({
           type="file"
         />
         <button
-          className="h-11 rounded-full bg-[#FBE6EA] px-5 text-sm font-black text-primary disabled:opacity-60"
+          className="h-7 rounded-full bg-[#FBE6EA] px-3 text-[10px] font-black text-primary disabled:opacity-60"
           disabled={isSaving}
           onClick={() => fileInputRef.current?.click()}
           type="button"
@@ -118,7 +118,7 @@ export function ProjectContentSection({
           + 사진첨부
         </button>
         <button
-          className="h-11 rounded-full border border-[#F2C9C2] bg-white px-5 text-sm font-black text-[#9B7A75] disabled:opacity-60"
+          className="h-7 rounded-full border border-[#F2C9C2] bg-white px-3 text-[10px] font-black text-[#9B7A75] disabled:opacity-60"
           disabled={isSaving}
           onClick={handleDescriptionEdit}
           type="button"

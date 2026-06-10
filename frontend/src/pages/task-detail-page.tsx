@@ -60,18 +60,18 @@ export function TaskDetailPage({
         <Sparkles aria-hidden className="h-8 w-8 fill-current" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[360px] space-y-5">
+      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
         <TaskDetailHeader onBack={onBack} onHelpRequestOpen={onHelpRequestOpen} />
 
         {isLoading && (
-          <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-12 text-center shadow-[0_8px_0_#EFC6BE]">
-            <p className="text-lg font-black text-[#5A3E3B]">업무 상세를 불러오는 중입니다.</p>
+          <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-4 py-8 text-center shadow-[0_6px_0_#EFC6BE]">
+            <p className="text-[13px] font-black text-[#5A3E3B]">업무 상세를 불러오는 중입니다.</p>
           </section>
         )}
 
         {message && (
-          <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-10 text-center shadow-[0_8px_0_#EFC6BE]">
-            <p className="text-lg font-black text-primary">{message}</p>
+          <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-4 py-7 text-center shadow-[0_6px_0_#EFC6BE]">
+            <p className="text-[13px] font-black text-primary">{message}</p>
           </section>
         )}
 

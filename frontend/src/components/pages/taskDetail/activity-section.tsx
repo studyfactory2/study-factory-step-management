@@ -38,42 +38,39 @@ export function ActivitySection({ accessToken, currentMemberRole }: ActivitySect
   }, [accessToken]);
 
   return (
-    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]">
-      <h2 className="text-2xl font-black text-[#3F2C28]">{isEmployee ? "내 업무 코멘트" : "활동내역"}</h2>
-      <p className="mt-2 text-sm font-bold text-[#9B7A75]">코멘트 한 줄 말 · 최신순</p>
-      <div className="mt-5 max-h-[360px] space-y-4 overflow-y-auto pr-3">
+    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-4 py-4 shadow-[0_6px_0_#EFC6BE]">
+      <h2 className="text-[15px] font-black text-[#3F2C28]">{isEmployee ? "내 업무 코멘트" : "활동내역"}</h2>
+      <div className="mt-3 max-h-[170px] space-y-2 overflow-y-auto pr-1.5">
         {isLoading && (
-          <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-5 py-8 text-center text-sm font-bold text-[#BFA4A0]">
+          <div className="rounded-[14px] border border-dashed border-[#F2C9C2] bg-white px-4 py-6 text-center text-[10px] font-bold text-[#BFA4A0]">
             {isEmployee ? "내 업무 코멘트를 불러오는 중입니다." : "활동내역을 불러오는 중입니다."}
           </div>
         )}
         {message && (
-          <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-5 py-8 text-center text-sm font-bold text-primary">
+          <div className="rounded-[14px] border border-dashed border-[#F2C9C2] bg-white px-4 py-6 text-center text-[10px] font-bold text-primary">
             {message}
           </div>
         )}
         {!isLoading && !message && activities.length === 0 && (
-          <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-5 py-8 text-center text-sm font-bold text-[#BFA4A0]">
+          <div className="rounded-[14px] border border-dashed border-[#F2C9C2] bg-white px-4 py-6 text-center text-[10px] font-bold text-[#BFA4A0]">
             등록된 코멘트 한 줄 말이 없습니다.
           </div>
         )}
         {activities.map((comment) => (
           <article
-            className="grid items-center gap-4 rounded-[18px] border border-[#F2C9C2] bg-white px-5 py-4 "
+            className="grid grid-cols-[48px_42px_1fr_76px] items-center gap-1 rounded-[14px] border border-[#F2C9C2] bg-white px-2 py-1.5"
             key={comment.id}
           >
-            <p className="font-black text-[#5A3E3B]">
+            <p className="truncate text-[8px] font-black text-[#5A3E3B]">
               {comment.creatorPositionName ?? roleLabels[comment.creatorRoleType]} {comment.creatorName}
             </p>
-            <span className={`flex h-9 items-center justify-center rounded-full border border-[#F2C9C2] text-sm font-black ${getStatusClassName(comment.status)}`}>
+            <span className={`flex h-3 items-center justify-center rounded-[5px] border border-[#F2C9C2] px-0.5 text-[5px] font-black leading-none ${getStatusClassName(comment.status)}`}>
               {getStatusLabel(comment.status)}
             </span>
-            <div>
-              <p className={`text-sm font-bold ${comment.oneLineComment ? "text-[#5A3E3B]" : "text-[#BFA4A0]"}`}>
-                {comment.oneLineComment || "\u00A0"}
-              </p>
-            </div>
-            <p className="text-right text-sm font-bold text-[#BFA4A0]">{formatDateTime(comment.updatedAt)}</p>
+            <p className={`truncate pl-2.5 text-[8px] font-bold ${comment.oneLineComment ? "text-[#5A3E3B]" : "text-[#BFA4A0]"}`}>
+              {comment.oneLineComment || "\u00A0"}
+            </p>
+            <p className="whitespace-nowrap text-right text-[6px] font-bold text-[#BFA4A0]">{formatDateTime(comment.updatedAt)}</p>
           </article>
         ))}
       </div>
