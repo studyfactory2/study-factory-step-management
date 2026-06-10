@@ -20,18 +20,18 @@ export function StatusCard({ label, value, helper, icon: Icon, tone }: StatusCar
   return (
     <article
       className={cn(
-        "grid min-h-[74px] grid-cols-[1fr_62px] grid-rows-[auto_1fr] gap-x-1.5 rounded-[14px] border px-2.5 py-2 shadow-sm",
+        "grid min-h-[66px] grid-cols-[1fr_58px] grid-rows-[auto_1fr] gap-x-1.5 rounded-[13px] border px-2 py-1.5 shadow-sm",
         toneClassNames[tone]
       )}
     >
       <div className="col-span-2 flex min-w-0 items-center gap-1.5">
-        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
-          <Icon aria-hidden className="h-3 w-3" />
+        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current/35 bg-white/70">
+          <Icon aria-hidden className="h-2.5 w-2.5" />
         </div>
-        <p className="text-[11px] font-black leading-tight text-[#6B514C]">{label}</p>
+        <p className="text-[10px] font-black leading-tight text-[#6B514C]">{label}</p>
       </div>
       <div className="self-end">
-        <p className="whitespace-nowrap text-[13px] font-black leading-none tracking-normal">{value}건</p>
+        <p className="whitespace-nowrap text-[12px] font-black leading-none tracking-normal">{value}건</p>
       </div>
       <p className="self-end text-right text-[8px] font-bold leading-tight text-[#6B514C]">
         <HighlightedHelper helper={helper} />
