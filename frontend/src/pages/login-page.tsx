@@ -27,6 +27,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [rememberName, setRememberName] = useState(false);
   const [positions, setPositions] = useState<PositionTreeNode[]>([]);
+  const [isPositionTreeLoading, setIsPositionTreeLoading] = useState(true);
   const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
   const [positionTreeMessage, setPositionTreeMessage] = useState("");
   const [message, setMessage] = useState("");
@@ -50,6 +51,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }, []);
 
   useEffect(() => {
+    setIsPositionTreeLoading(true);
     getPositionTree()
       .then((positionTree) => {
         setPositions(positionTree);
@@ -60,7 +62,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         setPositions([]);
         setSelectedPositionId(null);
         setPositionTreeMessage("로그인 화면 조직도를 불러오지 못했습니다.");
-      });
+      })
+      .finally(() => setIsPositionTreeLoading(false));
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -113,6 +116,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       </header>
 
       <PositionTreeSection
+        isLoading={isPositionTreeLoading}
         message={positionTreeMessage}
         onSelectPosition={setSelectedPositionId}
         positions={positions}

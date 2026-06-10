@@ -48,11 +48,11 @@ export function createStatusCards(summary: TaskStatusSummary): StatusCardItem[] 
 
 function formatWeeklyChange(change: number): string {
   if (change > 0) {
-    return `↑ ${change}건`;
+    return `지난주 대비 ${change}건 ↑`;
   }
 
   if (change < 0) {
-    return `↓ ${Math.abs(change)}건`;
+    return `지난주 대비 ${Math.abs(change)}건 ↓`;
   }
 
   return "지난주 대비 -";
