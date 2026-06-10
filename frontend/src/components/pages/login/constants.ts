@@ -1,17 +1,9 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Bell,
-  BriefcaseBusiness,
-  CheckCircle2,
-  ClipboardList
-} from "lucide-react";
 import type { TaskStatusSummary } from "@/api/task";
 
 export type StatusCardItem = {
   label: string;
   value: string;
   helper: string;
-  icon: LucideIcon;
   tone: "pink" | "lavender" | "gold" | "sage";
 };
 
@@ -30,29 +22,25 @@ export function createStatusCards(summary: TaskStatusSummary): StatusCardItem[] 
     {
       label: "업무등록",
       value: String(summary.registered),
-      helper: `오늘 ${summary.registeredToday}건 등록`,
-      icon: ClipboardList,
+      helper: `오늘 ${summary.registeredToday}건`,
       tone: "pink"
     },
     {
       label: "진행 중",
       value: String(summary.inProgress),
       helper: formatWeeklyChange(summary.inProgressWeeklyChange),
-      icon: BriefcaseBusiness,
       tone: "lavender"
     },
     {
       label: "검토요청",
       value: String(summary.reviewRequested),
       helper: formatWeeklyChange(summary.reviewRequestedWeeklyChange),
-      icon: Bell,
       tone: "gold"
     },
     {
       label: "완료",
       value: String(summary.completedThisMonth),
       helper: "이번 달 완료",
-      icon: CheckCircle2,
       tone: "sage"
     }
   ];
@@ -60,12 +48,12 @@ export function createStatusCards(summary: TaskStatusSummary): StatusCardItem[] 
 
 function formatWeeklyChange(change: number): string {
   if (change > 0) {
-    return `지난주 대비 ${change}건 증가`;
+    return `↑ ${change}건`;
   }
 
   if (change < 0) {
-    return `지난주 대비 ${Math.abs(change)}건 감소`;
+    return `↓ ${Math.abs(change)}건`;
   }
 
-  return "지난주와 동일";
+  return "지난주 대비 -";
 }

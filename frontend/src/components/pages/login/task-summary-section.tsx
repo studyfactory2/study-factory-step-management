@@ -12,7 +12,7 @@ export function TaskSummarySection({ taskSummary }: { taskSummary: TaskStatusSum
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-4 gap-1">
         {createStatusCards(taskSummary).map((card) => (
           <StatusCard key={card.label} {...card} />
         ))}
