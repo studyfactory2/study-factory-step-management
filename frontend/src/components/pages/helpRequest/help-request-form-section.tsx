@@ -51,7 +51,7 @@ export function HelpRequestFormSection({
   tasks
 }: HelpRequestFormSectionProps) {
   return (
-    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
+    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-black text-[#3F2C28]">도움요청 작성</h2>
       <p className="mt-2 text-sm font-bold text-[#9B7A75]">
         내 프로젝트 중 하나를 선택한 뒤, 도움을 요청할 사원에게 프로젝트를 보여주고 코멘트를 받을 수 있습니다.
@@ -71,7 +71,7 @@ export function HelpRequestFormSection({
 
       {!isLoading && !message && (
         <div className="mt-8 space-y-5">
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid gap-5 ">
             <TaskDropdown
               isOpen={isTaskDropdownOpen}
               onSelectTask={onSelectTask}
@@ -104,7 +104,7 @@ export function HelpRequestFormSection({
             onAttachmentChange={onAttachmentChange}
           />
 
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid gap-5 ">
             <button
               className="min-h-[58px] rounded-full bg-primary text-base font-black text-white disabled:opacity-60"
               disabled={isSubmitting}
@@ -149,7 +149,7 @@ function TaskDropdown({
         onClick={onToggle}
         type="button"
       >
-        <span className="min-w-[120px]">업무선택 ▼</span>
+        <span className="min-w-[82px]">업무선택 ▼</span>
         <span className={`truncate font-bold ${selectedTask ? "text-[#9B7A75]" : "text-[#BFA4A0]"}`}>
           {selectedTask?.taskTitle ?? "내 프로젝트 중 하나선택"}
         </span>
@@ -200,7 +200,7 @@ function MemberDropdown({
         onClick={onToggle}
         type="button"
       >
-        <span className="min-w-[150px]">도움을 요청할 사원 ▼</span>
+        <span className="min-w-[92px]">도움을 요청할 사원 ▼</span>
         <span className={`truncate font-bold ${selectedMember ? "text-[#9B7A75]" : "text-[#BFA4A0]"}`}>
           {selectedMember ? `${getMemberPositionName(selectedMember)} ${selectedMember.name}` : "함께 확인할 사원을 선택하세요"}
         </span>

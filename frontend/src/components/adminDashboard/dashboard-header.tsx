@@ -10,7 +10,7 @@ type DashboardHeaderProps = {
 
 export function DashboardHeader({ isCentered = false, roleType, title }: DashboardHeaderProps) {
   return (
-    <header className={`flex items-center rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 px-8 py-5 shadow-[0_10px_22px_rgba(239,126,158,0.12)] ${
+    <header className={`flex items-center rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 px-5 py-4 shadow-[0_10px_22px_rgba(239,126,158,0.12)] ${
       isCentered ? "justify-center" : "justify-between"
     }`}>
       <h1 className="text-[28px] font-black tracking-normal text-[#3F2C28]">

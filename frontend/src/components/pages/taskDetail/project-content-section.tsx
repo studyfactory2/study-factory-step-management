@@ -76,7 +76,7 @@ export function ProjectContentSection({
   }
 
   return (
-    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
+    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-black text-[#3F2C28]">프로젝트내용</h2>
       <div className="mt-5 rounded-[20px] border border-[#F2C9C2] bg-white px-6 py-6">
         {isEditing ? (
@@ -110,7 +110,7 @@ export function ProjectContentSection({
           type="file"
         />
         <button
-          className="h-11 rounded-full bg-[#FBE6EA] px-8 text-sm font-black text-primary disabled:opacity-60"
+          className="h-11 rounded-full bg-[#FBE6EA] px-5 text-sm font-black text-primary disabled:opacity-60"
           disabled={isSaving}
           onClick={() => fileInputRef.current?.click()}
           type="button"
@@ -118,7 +118,7 @@ export function ProjectContentSection({
           + 사진첨부
         </button>
         <button
-          className="h-11 rounded-full border border-[#F2C9C2] bg-white px-8 text-sm font-black text-[#9B7A75] disabled:opacity-60"
+          className="h-11 rounded-full border border-[#F2C9C2] bg-white px-5 text-sm font-black text-[#9B7A75] disabled:opacity-60"
           disabled={isSaving}
           onClick={handleDescriptionEdit}
           type="button"

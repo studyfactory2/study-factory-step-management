@@ -69,7 +69,7 @@ export function MemberPreRegisterPanel({
       className={
         layout === "modal"
           ? "rounded-[22px] border border-[#F2C9C2] bg-[#FFF8F9] px-6 py-6"
-          : "rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]"
+          : "rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]"
       }
     >
       <div className="flex items-center justify-between gap-5">
@@ -85,8 +85,8 @@ export function MemberPreRegisterPanel({
       <form
         className={
           layout === "modal"
-            ? "mt-7 grid gap-4 sm:grid-cols-2"
-            : "mt-7 grid gap-5 lg:grid-cols-[1fr_1fr_180px_180px_auto]"
+            ? "mt-7 grid gap-4 "
+            : "mt-7 grid gap-5 "
         }
         onSubmit={handleSubmit}
       >
@@ -135,7 +135,7 @@ export function MemberPreRegisterPanel({
           ))}
         </select>
         <button
-          className="h-11 rounded-full bg-primary px-8 text-sm font-bold text-white disabled:opacity-60 sm:col-span-2 lg:col-span-1"
+          className="h-11 rounded-full bg-primary px-5 text-sm font-bold text-white disabled:opacity-60  "
           disabled={isSubmitting}
           type="submit"
         >

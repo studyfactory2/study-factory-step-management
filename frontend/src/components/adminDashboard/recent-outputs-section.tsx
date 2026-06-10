@@ -30,7 +30,7 @@ export function RecentOutputsSection({
   selectedStatuses
 }: RecentOutputsSectionProps) {
   return (
-    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
+    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]">
       <div className="space-y-5">
         <h2 className="text-2xl font-semibold text-[#5A3E3B]">최근 작업 근황</h2>
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -63,7 +63,7 @@ export function RecentOutputsSection({
               {selectedSortOrder === "LATEST" ? "최신순" : "과거순"}
             </button>
             <button
-              className="h-11 rounded-full border-2 border-primary bg-white px-8 text-sm font-semibold text-primary"
+              className="h-11 rounded-full border-2 border-primary bg-white px-5 text-sm font-semibold text-primary"
               onClick={onAllTasksOpen}
               type="button"
             >
@@ -81,7 +81,7 @@ export function RecentOutputsSection({
           )}
           {recentOutputs.map((output) => (
             <article
-              className={`relative grid items-center gap-5 rounded-2xl border border-[#F2C9C2] bg-[#FFF8F6] px-6 pb-5 shadow-[0_7px_0_#EFC6BE] lg:grid-cols-[1fr_140px_140px] ${
+              className={`relative grid items-center gap-5 rounded-2xl border border-[#F2C9C2] bg-[#FFF8F6] px-6 pb-5 shadow-[0_7px_0_#EFC6BE]  ${
                 output.isNew ? "pt-10" : "pt-5"
               }`}
               key={output.taskId}

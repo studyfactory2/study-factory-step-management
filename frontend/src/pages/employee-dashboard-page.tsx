@@ -213,7 +213,7 @@ export function EmployeeDashboardPage({
   }
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-background px-4 py-8 text-foreground sm:px-8">
+    <main className="min-h-dvh overflow-hidden bg-background px-3 py-4 text-foreground">
       <div className="pointer-events-none fixed left-10 top-20 text-[#F0C957]">
         <Sparkles aria-hidden className="h-9 w-9 fill-current" />
       </div>
@@ -221,7 +221,7 @@ export function EmployeeDashboardPage({
         <Sparkles aria-hidden className="h-8 w-8 fill-current" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[1180px] space-y-7">
+      <div className="relative mx-auto w-full max-w-[430px] space-y-5">
         <DashboardHeader
           isCentered
           roleType={currentMember.roleType}
@@ -230,7 +230,7 @@ export function EmployeeDashboardPage({
         <GreetingCard memberName={currentMember.name} />
         <MessageBanner message={message} />
         {isLoading ? (
-          <section className="rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 p-8 text-center text-sm font-black text-[#9C7D79] shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
+          <section className="rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 p-5 text-center text-sm font-black text-[#9C7D79] shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
             직원 대시보드를 불러오는 중입니다.
           </section>
         ) : (

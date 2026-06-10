@@ -26,9 +26,9 @@ export function DashboardActionSection({
   onSelectPositionTree
 }: DashboardActionSectionProps) {
   return (
-    <section className="relative grid gap-5 md:grid-cols-2">
+    <section className="relative grid gap-5 ">
       <button
-        className="flex min-h-[110px] items-center justify-between rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-6 text-left shadow-[0_8px_0_#EFC6BE]"
+        className="flex min-h-[110px] items-center justify-between rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-5 text-left shadow-[0_8px_0_#EFC6BE]"
         onClick={onOpenMemberManagement}
         type="button"
       >
@@ -43,7 +43,7 @@ export function DashboardActionSection({
         </span>
       </button>
       <button
-        className="flex min-h-[110px] items-center justify-between rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-6 text-left shadow-[0_8px_0_#EFC6BE]"
+        className="flex min-h-[110px] items-center justify-between rounded-[24px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-5 text-left shadow-[0_8px_0_#EFC6BE]"
         type="button"
       >
         <div>
@@ -59,7 +59,7 @@ export function DashboardActionSection({
           <div
             className={cn(
               "flex max-h-[calc(100dvh-48px)] w-full flex-col rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] p-6 shadow-[0_18px_44px_rgba(90,62,59,0.18)]",
-              memberManagementView === "positionTree" ? "max-w-[860px]" : "max-w-[760px]"
+              "max-w-[390px]"
             )}
           >
             <div className="flex items-start justify-between gap-4">
@@ -81,7 +81,7 @@ export function DashboardActionSection({
               </button>
             </div>
             {memberManagementView === "menu" ? (
-              <div className="mt-7 grid gap-4 sm:grid-cols-2">
+              <div className="mt-7 grid gap-4 ">
                 <button
                   className="flex min-h-[150px] flex-col items-start justify-between rounded-[22px] border border-[#F2C9C2] bg-[#FFF8F9] p-5 text-left transition hover:-translate-y-0.5 hover:border-primary"
                   onClick={onSelectMemberPreRegister}

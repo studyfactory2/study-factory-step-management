@@ -113,7 +113,7 @@ export function HelpRequestPage({ accessToken, onBack }: HelpRequestPageProps) {
   }
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-background px-4 py-8 text-foreground sm:px-8">
+    <main className="min-h-dvh overflow-hidden bg-background px-3 py-4 text-foreground">
       <div className="pointer-events-none fixed left-10 top-20 text-[#F0C957]">
         <Sparkles aria-hidden className="h-9 w-9 fill-current" />
       </div>
@@ -121,7 +121,7 @@ export function HelpRequestPage({ accessToken, onBack }: HelpRequestPageProps) {
         <Sparkles aria-hidden className="h-8 w-8 fill-current" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[1180px] space-y-7">
+      <div className="relative mx-auto w-full max-w-[430px] space-y-5">
         <HelpRequestHeader onBack={onBack} />
         <HelpRequestFormSection
           attachments={attachments}
@@ -159,7 +159,7 @@ export function HelpRequestPage({ accessToken, onBack }: HelpRequestPageProps) {
         />
         <ReceivedHelpRequestsSection receivedHelpRequests={receivedHelpRequests} />
 
-        <footer className="rounded-[24px] bg-[#FFF8F6] px-8 py-5 text-center text-base font-black text-[#5A3E3B]">
+        <footer className="rounded-[24px] bg-[#FFF8F6] px-5 py-4 text-center text-base font-black text-[#5A3E3B]">
           도움요청은 내 프로젝트를 필요한 사람에게만 보여주는 기능입니다.
         </footer>
       </div>

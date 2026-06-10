@@ -211,7 +211,7 @@ export function TaskCreateForm({
   }
 
   return (
-    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
+    <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-semibold text-[#5A3E3B]">새 업무 등록</h2>
       {message && (
         <p className="mt-4 rounded-2xl bg-[#FFF8F6] px-5 py-3 text-sm font-black text-primary">
@@ -283,7 +283,7 @@ function TaskDraftCard({
           </span>
         )}
       </div>
-      <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-4 ">
         <select
           className="min-h-[52px] rounded-[12px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-5 text-base font-bold text-[#8F7470] outline-none disabled:opacity-70"
           disabled={isLocked || isSaving || isSubmitting || isLoading}

@@ -11,7 +11,7 @@ export function AttachmentImageGrid({ attachments, onImagePreview }: AttachmentI
     <div className="mt-4 flex flex-wrap gap-3">
       {attachments.map((attachment) => (
         <button
-          className="w-28 overflow-hidden rounded-[18px] border border-[#F2C9C2] bg-[#FFF8F6] p-1.5 shadow-sm sm:w-32"
+          className="w-28 overflow-hidden rounded-[18px] border border-[#F2C9C2] bg-[#FFF8F6] p-1.5 shadow-sm "
           key={attachment.id}
           onClick={() => onImagePreview(attachment.imageUrl)}
           type="button"

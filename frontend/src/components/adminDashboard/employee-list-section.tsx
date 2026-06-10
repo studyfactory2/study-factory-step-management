@@ -213,7 +213,7 @@ export function EmployeeListSection({
         <h2 className="text-2xl font-black text-[#3F2C28]">함께 프로젝트 중</h2>
       </div>
       <div className="rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 p-7 shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 grid-cols-2">
           {favoriteSlots.map((employee, index) => (
             employee ? (
               <EmployeeCard
@@ -461,7 +461,7 @@ function FavoriteMemberAddModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/25 px-4">
-      <div className="w-full max-w-[520px] rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC] p-7 shadow-[0_18px_40px_rgba(63,44,40,0.18)]">
+      <div className="w-full max-w-[390px] rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC] p-7 shadow-[0_18px_40px_rgba(63,44,40,0.18)]">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-2xl font-black text-[#3F2C28]">직원 선택</h3>
           <button
@@ -525,7 +525,7 @@ function FavoriteMemberAddModal({
             취소
           </button>
           <button
-            className="h-11 rounded-full bg-primary px-8 text-sm font-black text-white disabled:opacity-60"
+            className="h-11 rounded-full bg-primary px-5 text-sm font-black text-white disabled:opacity-60"
             disabled={!selectedMemberId || isUpdating}
             onClick={handleSubmit}
             type="button"

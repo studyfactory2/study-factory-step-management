@@ -45,7 +45,7 @@ export function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/35 px-4 py-6 backdrop-blur-sm">
-      <section className="max-h-[calc(100dvh-48px)] w-full max-w-[520px] overflow-y-auto rounded-[26px] border border-[#EBCDD1] bg-[#FFFEFC] p-5 shadow-[0_18px_60px_rgba(111,74,71,0.24)]">
+      <section className="max-h-[calc(100dvh-48px)] w-full max-w-[390px] overflow-y-auto rounded-[26px] border border-[#EBCDD1] bg-[#FFFEFC] p-5 shadow-[0_18px_60px_rgba(111,74,71,0.24)]">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-[24px] font-black tracking-normal text-[#3F2C28]">직원 등록</h2>

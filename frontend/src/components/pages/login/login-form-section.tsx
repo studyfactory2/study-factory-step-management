@@ -41,13 +41,13 @@ export function LoginFormSection({
   rememberName
 }: LoginFormSectionProps) {
   return (
-    <section className="mt-5 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur lg:px-6 lg:py-4">
+    <section className="mt-5 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur ">
       <div className="mb-0.5 flex justify-center text-[#F188A4]">
         <Heart aria-hidden className="h-5 w-5 fill-current" />
       </div>
 
       <form className="space-y-3" onSubmit={onSubmit}>
-        <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 lg:grid-cols-[100px_1fr]">
+        <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 ">
           <span className="text-base font-black text-[#4B332E]">이름</span>
           <label className="flex min-h-[48px] items-center gap-3 rounded-[16px] border border-[#EBCDD1] bg-white px-4 shadow-sm">
             <UserRound aria-hidden className="h-5 w-5 text-[#F188A4]" />
@@ -61,7 +61,7 @@ export function LoginFormSection({
           </label>
         </div>
 
-        <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 lg:grid-cols-[100px_1fr]">
+        <div className="grid grid-cols-[78px_1fr] items-center gap-2.5 ">
           <span className="text-base font-black text-[#4B332E]">비밀번호</span>
           <label className="flex min-h-[48px] items-center gap-3 rounded-[16px] border border-[#EBCDD1] bg-white px-4 shadow-sm">
             <Lock aria-hidden className="h-5 w-5 text-[#F188A4]" />

@@ -59,7 +59,7 @@ export function CommentSection({ accessToken, onTaskUpdate, task }: CommentSecti
   }
 
   return (
-    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
+    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]">
       <div className="flex items-center justify-between gap-5">
         <h2 className="text-2xl font-black text-[#3F2C28]">코멘트 남기기</h2>
         <input
@@ -71,7 +71,7 @@ export function CommentSection({ accessToken, onTaskUpdate, task }: CommentSecti
           type="file"
         />
         <button
-          className="h-11 rounded-full bg-[#FBE6EA] px-8 text-sm font-black text-primary"
+          className="h-11 rounded-full bg-[#FBE6EA] px-5 text-sm font-black text-primary"
           onClick={() => fileInputRef.current?.click()}
           type="button"
         >
@@ -105,9 +105,9 @@ export function CommentSection({ accessToken, onTaskUpdate, task }: CommentSecti
           </div>
         </div>
       )}
-      <div className="mt-5 grid gap-3 lg:grid-cols-[90px_1fr]">
+      <div className="mt-5 grid gap-3 ">
         <span className="flex h-11 items-center text-base font-black text-[#5A3E3B]">상태변경</span>
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid gap-3 grid-cols-2">
           {statusOptions.map((option) => (
             <button
               className={`h-11 rounded-full border border-[#F2C9C2] text-sm font-black ${
@@ -127,7 +127,7 @@ export function CommentSection({ accessToken, onTaskUpdate, task }: CommentSecti
       {message && (
         <p className="mt-4 text-sm font-black text-primary">{message}</p>
       )}
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-4 ">
         <button
           className="min-h-[52px] rounded-full bg-primary text-base font-black text-white disabled:opacity-60"
           disabled={isSubmitting}

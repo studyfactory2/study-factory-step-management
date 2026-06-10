@@ -98,7 +98,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[920px] flex-col px-5 py-6 text-[#4B332E] lg:px-8">
+    <main className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col px-5 py-6 text-[#4B332E] ">
       <div className="pointer-events-none fixed left-8 top-12 text-[#F0C957]">
         <Sparkles aria-hidden className="h-7 w-7 fill-current" />
       </div>

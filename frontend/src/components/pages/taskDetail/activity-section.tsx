@@ -38,7 +38,7 @@ export function ActivitySection({ accessToken, currentMemberRole }: ActivitySect
   }, [accessToken]);
 
   return (
-    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-8 py-8 shadow-[0_8px_0_#EFC6BE]">
+    <section className="rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] px-5 py-6 shadow-[0_8px_0_#EFC6BE]">
       <h2 className="text-2xl font-black text-[#3F2C28]">{isEmployee ? "내 업무 코멘트" : "활동내역"}</h2>
       <p className="mt-2 text-sm font-bold text-[#9B7A75]">코멘트 한 줄 말 · 최신순</p>
       <div className="mt-5 max-h-[360px] space-y-4 overflow-y-auto pr-3">
@@ -59,7 +59,7 @@ export function ActivitySection({ accessToken, currentMemberRole }: ActivitySect
         )}
         {activities.map((comment) => (
           <article
-            className="grid items-center gap-4 rounded-[18px] border border-[#F2C9C2] bg-white px-5 py-4 lg:grid-cols-[180px_120px_1fr_180px]"
+            className="grid items-center gap-4 rounded-[18px] border border-[#F2C9C2] bg-white px-5 py-4 "
             key={comment.id}
           >
             <p className="font-black text-[#5A3E3B]">

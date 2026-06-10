@@ -11,7 +11,7 @@ export function ImagePreviewDialog({ imageUrl, onClose }: ImagePreviewDialogProp
       role="presentation"
     >
       <div
-        className="relative max-h-full w-full max-w-[980px] rounded-[24px] border border-[#F2C9C2] bg-white p-4 shadow-[0_8px_0_#EFC6BE]"
+        className="relative max-h-full w-full max-w-[390px] rounded-[24px] border border-[#F2C9C2] bg-white p-4 shadow-[0_8px_0_#EFC6BE]"
         onClick={(event) => event.stopPropagation()}
       >
         <button

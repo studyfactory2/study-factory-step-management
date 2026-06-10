@@ -401,7 +401,7 @@ export function PositionTreeManagementPanel({
           ) : (
             flatPositions.map((position) => (
               <div
-                className="grid items-center gap-2 rounded-[14px] border border-[#EEE2E5] bg-[#FFFEFC] px-3 py-2 sm:grid-cols-[1fr_220px]"
+                className="grid items-center gap-2 rounded-[14px] border border-[#EEE2E5] bg-[#FFFEFC] px-3 py-2 "
                 key={position.id}
               >
                 <div>
@@ -561,7 +561,7 @@ function PositionCreateModal({
             placeholder="역할 설명 예: 개발관리"
             value={subtitle}
           />
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 ">
             <input
               className="h-11 rounded-[12px] border-2 border-[#D9D1F3] bg-white px-4 text-sm font-bold text-[#8D706B] outline-none"
               onChange={(event) => onDutyChange(event.target.value)}
@@ -582,7 +582,7 @@ function PositionCreateModal({
               ))}
             </select>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 ">
             <label className="flex h-11 items-center gap-2 rounded-[12px] border-2 border-[#D9D1F3] bg-white px-4 text-sm font-bold text-[#8D706B]">
               <input
                 checked={isLoginVisible}
