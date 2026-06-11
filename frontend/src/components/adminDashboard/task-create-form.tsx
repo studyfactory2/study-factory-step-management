@@ -5,6 +5,7 @@ import {
   publishTaskDraft,
   updateTaskDraft
 } from "@/api/task";
+import { ImagePreviewDialog } from "@/components/pages/taskDetail/image-preview-dialog";
 import type { Member } from "@/types/domain";
 import { roleLabels } from "./constants";
 
@@ -33,6 +34,11 @@ type TaskDraftForm = {
   id: number;
   isSaved: boolean;
   title: string;
+};
+
+type LocalImagePreview = {
+  key: string;
+  url: string;
 };
 
 const createEmptyDraft = (id: number): TaskDraftForm => ({
@@ -285,6 +291,19 @@ function TaskDraftCard({
 }) {
   const isLocked = draft.isSaved;
   const attachmentInputId = `task-attachment-${draft.id}`;
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const imagePreviews = useMemo<LocalImagePreview[]>(() => {
+    return draft.attachments.map((attachment) => ({
+      key: `${attachment.name}-${attachment.lastModified}-${attachment.size}`,
+      url: URL.createObjectURL(attachment)
+    }));
+  }, [draft.attachments]);
+
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+    };
+  }, [imagePreviews]);
 
   return (
     <article className="rounded-[18px] border border-[#F2C9C2] bg-white px-3 py-4">
@@ -347,8 +366,8 @@ function TaskDraftCard({
           }`}
           htmlFor={attachmentInputId}
         >
-          {draft.attachmentNames.length > 0
-            ? draft.attachmentNames.join(", ")
+          {draft.attachments.length > 0
+            ? "사진 또는 수기메모를 다시 선택하려면 이 영역을 선택하세요"
             : "사진 또는 수기메모를 첨부하려면 이 영역을 선택하세요"}
         </label>
         <input
@@ -360,6 +379,25 @@ function TaskDraftCard({
           onChange={(event) => onAttachmentChange(draft.id, event)}
           type="file"
         />
+        {imagePreviews.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {imagePreviews.map((preview, previewIndex) => (
+              <button
+                aria-label={`첨부 이미지 ${previewIndex + 1} 크게 보기`}
+                className="w-[58px] overflow-hidden rounded-[14px] border border-[#F2C9C2] bg-white p-1 shadow-sm transition active:scale-95"
+                key={preview.key}
+                onClick={() => setPreviewImageUrl(preview.url)}
+                type="button"
+              >
+                <img
+                  alt=""
+                  className="aspect-square w-full rounded-[10px] object-cover"
+                  src={preview.url}
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className="mt-3 grid grid-cols-3 gap-1.5">
         <button
@@ -387,6 +425,9 @@ function TaskDraftCard({
           {isSubmitting ? "등록 중" : "업무 등록"}
         </button>
       </div>
+      {previewImageUrl && (
+        <ImagePreviewDialog imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl(null)} />
+      )}
     </article>
   );
 }
