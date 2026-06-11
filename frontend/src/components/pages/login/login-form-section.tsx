@@ -43,6 +43,22 @@ function isIosDevice() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
+function isIosInAppBrowser() {
+  if (typeof window === "undefined" || !isIosDevice()) {
+    return false;
+  }
+
+  return /KAKAOTALK|Instagram|FBAN|FBAV|NAVER|Line/i.test(window.navigator.userAgent);
+}
+
+function isKakaoInAppBrowser() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return /KAKAOTALK/i.test(window.navigator.userAgent);
+}
+
 function isStandaloneMode() {
   if (typeof window === "undefined") {
     return false;
@@ -71,6 +87,7 @@ export function LoginFormSection({
   const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installMessage, setInstallMessage] = useState("");
   const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
+  const [isSafariConfirmOpen, setIsSafariConfirmOpen] = useState(false);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
 
   useEffect(() => {
@@ -105,6 +122,11 @@ export function LoginFormSection({
       return;
     }
 
+    if (isIosInAppBrowser()) {
+      setIsSafariConfirmOpen(true);
+      return;
+    }
+
     if (installPromptEvent) {
       await installPromptEvent.prompt();
       const choice = await installPromptEvent.userChoice;
@@ -120,6 +142,21 @@ export function LoginFormSection({
     }
 
     setIsInstallGuideOpen(true);
+  }
+
+  function handleOpenSafariConfirm() {
+    setIsSafariConfirmOpen(false);
+
+    if (isKakaoInAppBrowser()) {
+      const externalUrl = `kakaotalk://web/openExternal?url=${encodeURIComponent(window.location.href)}`;
+      window.location.href = externalUrl;
+      window.setTimeout(() => {
+        setInstallMessage("Safari로 이동되지 않으면 카카오톡 우측 상단 메뉴에서 Safari로 열기를 선택해주세요.");
+      }, 800);
+      return;
+    }
+
+    setInstallMessage("현재 브라우저에서는 Safari 자동 이동이 제한됩니다. 우측 상단 메뉴에서 Safari로 열기를 선택해주세요.");
   }
 
   return (
@@ -216,6 +253,33 @@ export function LoginFormSection({
           <p className="text-center text-[11px] font-black text-[#E97999]">{installMessage}</p>
         )}
       </form>
+
+      {isSafariConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/25 px-5">
+          <div className="w-full max-w-[320px] rounded-[24px] border border-[#EBCDD1] bg-[#FFFEFC] p-5 text-center shadow-soft">
+            <h2 className="text-[17px] font-black text-[#3F2C28]">Safari로 이동하기</h2>
+            <p className="mt-3 text-[12px] font-bold leading-5 text-[#8F7470]">
+              iOS에서의 설치는 Safari에서만 가능합니다. Safari로 이동하시겠습니까?
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button
+                className="h-10 rounded-full border border-[#EBCDD1] bg-white text-sm font-black text-[#9C7D79]"
+                onClick={() => setIsSafariConfirmOpen(false)}
+                type="button"
+              >
+                취소
+              </button>
+              <button
+                className="h-10 rounded-full bg-primary text-sm font-black text-white"
+                onClick={handleOpenSafariConfirm}
+                type="button"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isInstallGuideOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/25 px-5">
