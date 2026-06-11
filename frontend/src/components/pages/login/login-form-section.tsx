@@ -1,6 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import {
   Eye,
   EyeOff,
@@ -25,6 +26,34 @@ type LoginFormSectionProps = {
   rememberName: boolean;
 };
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
+type NavigatorWithStandalone = Navigator & {
+  standalone?: boolean;
+};
+
+function isIosDevice() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
+function isStandaloneMode() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as NavigatorWithStandalone).standalone === true
+  );
+}
+
 export function LoginFormSection({
   isPasswordVisible,
   isSubmitting,
@@ -39,6 +68,60 @@ export function LoginFormSection({
   password,
   rememberName
 }: LoginFormSectionProps) {
+  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installMessage, setInstallMessage] = useState("");
+  const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+
+  useEffect(() => {
+    setIsAppInstalled(isStandaloneMode());
+
+    function handleBeforeInstallPrompt(event: Event) {
+      event.preventDefault();
+      setInstallPromptEvent(event as BeforeInstallPromptEvent);
+      setInstallMessage("");
+    }
+
+    function handleAppInstalled() {
+      setInstallPromptEvent(null);
+      setIsAppInstalled(true);
+      setInstallMessage("홈화면에 추가되었습니다.");
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  async function handleInstallClick() {
+    setInstallMessage("");
+
+    if (isAppInstalled) {
+      setInstallMessage("이미 홈화면에서 앱처럼 실행 중입니다.");
+      return;
+    }
+
+    if (installPromptEvent) {
+      await installPromptEvent.prompt();
+      const choice = await installPromptEvent.userChoice;
+
+      if (choice.outcome === "accepted") {
+        setInstallMessage("홈화면에 추가되었습니다.");
+      } else {
+        setInstallMessage("설치를 취소했습니다.");
+      }
+
+      setInstallPromptEvent(null);
+      return;
+    }
+
+    setIsInstallGuideOpen(true);
+  }
+
   return (
     <section className="mt-0.5 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur ">
       <form className="space-y-2.5" onSubmit={onSubmit}>
@@ -123,12 +206,36 @@ export function LoginFormSection({
 
         <button
           className="flex min-h-[38px] w-full items-center justify-center gap-2 rounded-[15px] bg-[#FFF7F8] px-4 py-2 text-sm font-black text-[#E97999] transition hover:bg-[#FFF0F2]"
+          onClick={handleInstallClick}
           type="button"
         >
           <UserPlus aria-hidden className="h-4 w-4" />
           홈화면에 추가하기
         </button>
+        {installMessage && (
+          <p className="text-center text-[11px] font-black text-[#E97999]">{installMessage}</p>
+        )}
       </form>
+
+      {isInstallGuideOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/25 px-5">
+          <div className="w-full max-w-[320px] rounded-[24px] border border-[#EBCDD1] bg-[#FFFEFC] p-5 text-center shadow-soft">
+            <h2 className="text-[17px] font-black text-[#3F2C28]">홈화면에 추가하기</h2>
+            <p className="mt-3 text-[12px] font-bold leading-5 text-[#8F7470]">
+              {isIosDevice()
+                ? "Safari 하단 공유 버튼을 누른 뒤 홈 화면에 추가를 선택해주세요."
+                : "브라우저 메뉴에서 앱 설치 또는 홈 화면에 추가를 선택해주세요."}
+            </p>
+            <button
+              className="mt-5 h-10 w-full rounded-full bg-primary text-sm font-black text-white"
+              onClick={() => setIsInstallGuideOpen(false)}
+              type="button"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

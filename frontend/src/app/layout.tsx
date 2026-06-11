@@ -1,9 +1,20 @@
 import type { Metadata, Viewport } from "next";
+import { PwaServiceWorkerRegister } from "@/components/pwa-service-worker-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "자격증공장 사원업무현황",
-  description: "업무 지시와 진행상황 코멘트을 관리하는 모바일 업무 앱"
+  description: "업무 지시와 진행상황 코멘트을 관리하는 모바일 업무 앱",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "업무현황"
+  },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/apple-touch-icon.png"
+  }
 };
 
 export const viewport: Viewport = {
@@ -20,7 +31,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <PwaServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }
