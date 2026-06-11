@@ -57,6 +57,7 @@ export function TaskCreateForm({
   const [drafts, setDrafts] = useState<TaskDraftForm[]>([createEmptyDraft(1)]);
   const [message, setMessage] = useState("");
   const [isDraftLoading, setIsDraftLoading] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [savingDraftId, setSavingDraftId] = useState<number | null>(null);
 
   const sortedAssignees = useMemo(() => {
@@ -212,35 +213,47 @@ export function TaskCreateForm({
 
   return (
     <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#EFC6BE]">
-      <h2 className="text-[17px] font-black text-[#5A3E3B]">새 업무 등록</h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-[17px] font-black text-[#5A3E3B]">새 업무 등록</h2>
+        <button
+          aria-expanded={!isCollapsed}
+          className="shrink-0 rounded-full border border-[#F0B9C8] bg-[#FFF8F6] px-3 py-1.5 text-[10px] font-black text-primary transition hover:bg-white"
+          onClick={() => setIsCollapsed((currentValue) => !currentValue)}
+          type="button"
+        >
+          {isCollapsed ? "펼치기" : "접어두기"}
+        </button>
+      </div>
       {message && (
         <p className="mt-3 rounded-2xl bg-[#FFF8F6] px-4 py-2.5 text-[11px] font-black text-primary">
           {message}
         </p>
       )}
-      <div className="mt-4 space-y-4">
-        {isDraftLoading && (
-          <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-4 py-6 text-center text-[11px] font-black text-[#9B7A75]">
-            임시저장 업무를 불러오는 중입니다.
-          </div>
-        )}
-        {!isDraftLoading && drafts.map((draft, index) => (
-          <TaskDraftCard
-            assignees={sortedAssignees}
-            draft={draft}
-            index={index}
-            isLoading={isLoading}
-            isSaving={savingDraftId === draft.id}
-            isSubmitting={isSubmitting}
-            key={draft.id}
-            onAttachmentChange={handleFileChange}
-            onEdit={handleEditDraft}
-            onSave={handleSaveDraft}
-            onSubmit={handleSubmitDraft}
-            onUpdate={updateDraft}
-          />
-        ))}
-      </div>
+      {!isCollapsed && (
+        <div className="mt-4 space-y-4">
+          {isDraftLoading && (
+            <div className="rounded-[18px] border border-dashed border-[#F2C9C2] bg-white px-4 py-6 text-center text-[11px] font-black text-[#9B7A75]">
+              임시저장 업무를 불러오는 중입니다.
+            </div>
+          )}
+          {!isDraftLoading && drafts.map((draft, index) => (
+            <TaskDraftCard
+              assignees={sortedAssignees}
+              draft={draft}
+              index={index}
+              isLoading={isLoading}
+              isSaving={savingDraftId === draft.id}
+              isSubmitting={isSubmitting}
+              key={draft.id}
+              onAttachmentChange={handleFileChange}
+              onEdit={handleEditDraft}
+              onSave={handleSaveDraft}
+              onSubmit={handleSubmitDraft}
+              onUpdate={updateDraft}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
