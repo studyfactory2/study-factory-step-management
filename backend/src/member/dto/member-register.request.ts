@@ -14,8 +14,9 @@ export class MemberRegisterRequest {
 
   toEntity(
     passwordHash: string,
-    branch: string,
     displayName: string,
+    organizationId: number | null,
+    branchId: number | null,
     positionId: number,
     positionDutyId: number | null,
     roleType: MemberRole
@@ -28,7 +29,8 @@ export class MemberRegisterRequest {
     member.positionDutyId = positionDutyId;
     member.passwordHash = passwordHash;
     member.avatarUrl = null;
-    member.branch = branch;
+    member.organizationId = organizationId;
+    member.branchId = branchId;
     member.isActive = true;
 
     return member;

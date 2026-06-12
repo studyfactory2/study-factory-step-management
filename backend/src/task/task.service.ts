@@ -15,7 +15,10 @@ import {
   TaskCategorySummaryItemResponse,
   TaskRecentWorkStatusResponse
 } from "./dto/task-recent-work-status.response";
-import { TaskStatusSummaryResponse } from "./dto/task-status-summary.response";
+import {
+  TaskStatusSummaryByBranchResponse,
+  TaskStatusSummaryResponse
+} from "./dto/task-status-summary.response";
 import { TaskAttachment } from "./entity/task-attachment.entity";
 import { TaskComment } from "../task-comment/entity/task-comment.entity";
 import { UploadFile } from "../upload/type/upload-file.type";
@@ -36,14 +39,16 @@ export class TaskService {
   ) {}
 
   async getStatusSummary(): Promise<TaskStatusSummaryResponse> {
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    const startOfThisWeek = this.getStartOfWeek(now);
-    const startOfLastWeek = new Date(startOfThisWeek);
-    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const ranges = this.getSummaryDateRanges();
+    const {
+      endOfMonth,
+      now,
+      startOfLastWeek,
+      startOfMonth,
+      startOfThisWeek,
+      startOfToday,
+      startOfTomorrow
+    } = ranges;
 
     const [
       registered,
@@ -95,6 +100,51 @@ export class TaskService {
       reviewRequested,
       reviewRequestedWeeklyChange: reviewRequestedThisWeek - reviewRequestedLastWeek,
       completedThisMonth
+    };
+  }
+
+  async getStatusSummaryByBranch(): Promise<TaskStatusSummaryByBranchResponse[]> {
+    const rows = await this.taskRepository.findStatusSummaryRowsByAssigneeOrganization(
+      this.getSummaryDateRanges()
+    );
+
+    return rows.map((row) => {
+      const inProgressThisWeek = Number(row.inProgressThisWeek);
+      const inProgressLastWeek = Number(row.inProgressLastWeek);
+      const reviewRequestedThisWeek = Number(row.reviewRequestedThisWeek);
+      const reviewRequestedLastWeek = Number(row.reviewRequestedLastWeek);
+
+      return {
+        branch: row.branch ?? "미지정",
+        registered: Number(row.registered),
+        registeredToday: Number(row.registeredToday),
+        inProgress: Number(row.inProgress),
+        inProgressWeeklyChange: inProgressThisWeek - inProgressLastWeek,
+        reviewRequested: Number(row.reviewRequested),
+        reviewRequestedWeeklyChange: reviewRequestedThisWeek - reviewRequestedLastWeek,
+        completedThisMonth: Number(row.completedThisMonth)
+      };
+    });
+  }
+
+  private getSummaryDateRanges() {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const startOfThisWeek = this.getStartOfWeek(now);
+    const startOfLastWeek = new Date(startOfThisWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    return {
+      endOfMonth,
+      now,
+      startOfLastWeek,
+      startOfMonth,
+      startOfThisWeek,
+      startOfToday,
+      startOfTomorrow
     };
   }
 
@@ -396,7 +446,7 @@ export class TaskService {
     return {
       id: member.id,
       name: this.getDisplayName(member),
-      branch: member.branch,
+      branch: member.branchInfo?.name ?? null,
       roleType: member.roleType,
       positionName: member.positionInfo?.name ?? null
     };

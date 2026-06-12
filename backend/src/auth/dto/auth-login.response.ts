@@ -7,6 +7,10 @@ export class AuthLoginResponse {
     id: number;
     name: string;
     branch: string | null;
+    organizationId: number | null;
+    organizationName: string | null;
+    branchId: number | null;
+    branchName: string | null;
     roleType: MemberRole;
   };
 }

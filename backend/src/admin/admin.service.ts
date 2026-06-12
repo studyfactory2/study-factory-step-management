@@ -47,7 +47,7 @@ export class AdminService {
         id: currentMember.id,
         name: this.getDisplayName(currentMember),
         roleType: currentMember.roleType,
-        branch: currentMember.branch
+        branch: currentMember.branchInfo?.name ?? null
       },
       employees: this.toEmployeeResponses(employees, taskCountRows),
       branchGroups,
@@ -174,7 +174,7 @@ export class AdminService {
         name: this.getDisplayName(member),
         roleType: member.roleType,
         positionName: member.positionInfo?.name ?? null,
-        branch: member.branch,
+        branch: member.branchInfo?.name ?? null,
         highestTaskStatus: this.getHighestTaskStatus(taskCounts),
         taskCounts
       };

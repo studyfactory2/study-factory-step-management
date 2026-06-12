@@ -19,6 +19,19 @@ export type TaskCategoryCountRow = {
   count: string;
 };
 
+export type TaskStatusSummaryByBranchRow = {
+  branch: string | null;
+  registered: string;
+  registeredToday: string;
+  inProgress: string;
+  inProgressThisWeek: string;
+  inProgressLastWeek: string;
+  reviewRequested: string;
+  reviewRequestedThisWeek: string;
+  reviewRequestedLastWeek: string;
+  completedThisMonth: string;
+};
+
 type FindRecentWorkStatusOptions = {
   category?: TaskCategory;
   limit?: number;
@@ -84,6 +97,74 @@ export class TaskRepository {
         isDraft: false
       }
     });
+  }
+
+  async findStatusSummaryRowsByAssigneeOrganization({
+    endOfMonth,
+    now,
+    startOfLastWeek,
+    startOfMonth,
+    startOfThisWeek,
+    startOfToday,
+    startOfTomorrow
+  }: {
+    endOfMonth: Date;
+    now: Date;
+    startOfLastWeek: Date;
+    startOfMonth: Date;
+    startOfThisWeek: Date;
+    startOfToday: Date;
+    startOfTomorrow: Date;
+  }): Promise<TaskStatusSummaryByBranchRow[]> {
+    return this.taskRepository
+      .createQueryBuilder("task")
+      .innerJoin("task.assignee", "assignee")
+      .leftJoin("assignee.organization", "organization")
+      .select("organization.name", "branch")
+      .addSelect("COUNT(*) FILTER (WHERE task.status = :registered)", "registered")
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :registered AND task.createdAt >= :startOfToday AND task.createdAt < :startOfTomorrow)",
+        "registeredToday"
+      )
+      .addSelect("COUNT(*) FILTER (WHERE task.status = :inProgress)", "inProgress")
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :inProgress AND task.updatedAt >= :startOfThisWeek AND task.updatedAt < :now)",
+        "inProgressThisWeek"
+      )
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :inProgress AND task.updatedAt >= :startOfLastWeek AND task.updatedAt < :startOfThisWeek)",
+        "inProgressLastWeek"
+      )
+      .addSelect("COUNT(*) FILTER (WHERE task.status = :reviewRequested)", "reviewRequested")
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :reviewRequested AND task.updatedAt >= :startOfThisWeek AND task.updatedAt < :now)",
+        "reviewRequestedThisWeek"
+      )
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :reviewRequested AND task.updatedAt >= :startOfLastWeek AND task.updatedAt < :startOfThisWeek)",
+        "reviewRequestedLastWeek"
+      )
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :completed AND task.completedAt >= :startOfMonth AND task.completedAt < :endOfMonth)",
+        "completedThisMonth"
+      )
+      .where("task.isDraft = false")
+      .groupBy("organization.name")
+      .orderBy("organization.name", "ASC", "NULLS LAST")
+      .setParameters({
+        completed: TaskStatus.COMPLETED,
+        endOfMonth,
+        inProgress: TaskStatus.IN_PROGRESS,
+        now,
+        registered: TaskStatus.REGISTERED,
+        reviewRequested: TaskStatus.REVIEW_REQUESTED,
+        startOfLastWeek,
+        startOfMonth,
+        startOfThisWeek,
+        startOfToday,
+        startOfTomorrow
+      })
+      .getRawMany<TaskStatusSummaryByBranchRow>();
   }
 
   async findActiveCountRowsByAssigneeAndStatus(statuses: TaskStatus[]): Promise<TaskCountRow[]> {

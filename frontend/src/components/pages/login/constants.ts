@@ -1,4 +1,4 @@
-import type { TaskStatusSummary } from "@/api/task";
+import type { TaskStatusSummary, TaskStatusSummaryByBranch } from "@/api/task";
 
 export type StatusCardItem = {
   label: string;
@@ -16,6 +16,17 @@ export const defaultSummary: TaskStatusSummary = {
   reviewRequestedWeeklyChange: 0,
   completedThisMonth: 0
 };
+
+export const defaultBranchSummaries: TaskStatusSummaryByBranch[] = [
+  {
+    branch: "수험생연구소",
+    ...defaultSummary
+  },
+  {
+    branch: "자격증공장",
+    ...defaultSummary
+  }
+];
 
 export function createStatusCards(summary: TaskStatusSummary): StatusCardItem[] {
   return [

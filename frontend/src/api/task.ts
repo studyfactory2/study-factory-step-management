@@ -13,6 +13,10 @@ export type TaskStatusSummary = {
   completedThisMonth: number;
 };
 
+export type TaskStatusSummaryByBranch = TaskStatusSummary & {
+  branch: string;
+};
+
 export type TaskCategory = "DEVELOPMENT" | "OPERATION" | "MEMBER" | "ORDER";
 
 export type TaskCategorySummaryItem = {
@@ -160,6 +164,18 @@ export async function getTaskStatusSummary(): Promise<TaskStatusSummary> {
   }
 
   return response.json() as Promise<TaskStatusSummary>;
+}
+
+export async function getTaskStatusSummaryByBranch(): Promise<TaskStatusSummaryByBranch[]> {
+  const response = await fetch(`${API_BASE_URL}/api/tasks/status-summary/branches`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("소속별 업무 현황을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskStatusSummaryByBranch[]>;
 }
 
 export async function getTaskCategorySummary(

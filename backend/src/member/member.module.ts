@@ -5,12 +5,14 @@ import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { PositionModule } from "../position/position.module";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
 import { Member } from "./entity/member.entity";
+import { OrganizationBranch } from "./entity/organization-branch.entity";
+import { Organization } from "./entity/organization.entity";
 import { MemberController } from "./member.controller";
 import { MemberRepository } from "./member.repository";
 import { MemberService } from "./member.service";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Member, MemberPreRegistration]), PositionModule],
+  imports: [TypeOrmModule.forFeature([Member, MemberPreRegistration, Organization, OrganizationBranch]), PositionModule],
   controllers: [MemberController],
   providers: [MemberService, MemberRepository, JWTAuthGuard, AdminOrCeoGuard],
   exports: [MemberService, MemberRepository]

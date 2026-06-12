@@ -3,6 +3,8 @@ import { BaseEntity } from "../../common/entity/base.entity";
 import { PositionDuty } from "../../position/entity/position-duty.entity";
 import { Position } from "../../position/entity/position.entity";
 import { MemberRole } from "../enum/member-role.enum";
+import { OrganizationBranch } from "./organization-branch.entity";
+import { Organization } from "./organization.entity";
 
 @Entity({ name: "member" })
 export class Member extends BaseEntity {
@@ -18,8 +20,19 @@ export class Member extends BaseEntity {
   @Column({ name: "avatar_url", type: "varchar", nullable: true })
   avatarUrl: string | null;
 
-  @Column({ type: "varchar", nullable: true })
-  branch: string | null;
+  @Column({ name: "organization_id", type: "int", nullable: true })
+  organizationId: number | null;
+
+  @ManyToOne(() => Organization, { nullable: true })
+  @JoinColumn({ name: "organization_id" })
+  organization: Organization | null;
+
+  @Column({ name: "branch_id", type: "int", nullable: true })
+  branchId: number | null;
+
+  @ManyToOne(() => OrganizationBranch, { nullable: true })
+  @JoinColumn({ name: "branch_id" })
+  branchInfo: OrganizationBranch | null;
 
   @Column({ name: "position_id", type: "int", nullable: true })
   positionId: number | null;

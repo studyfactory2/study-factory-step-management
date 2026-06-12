@@ -222,6 +222,7 @@ export function AdminDashboardPage({
       await createTask(accessToken, {
         title: request.title,
         description: request.description,
+        category: "OPERATION",
         attachments: request.attachments,
         assigneeScope: "SINGLE",
         assigneeId: request.assigneeId

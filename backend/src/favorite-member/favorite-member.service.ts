@@ -164,7 +164,7 @@ export class FavoriteMemberService {
         name: this.getDisplayName(member),
         roleType: member.roleType,
         positionName: member.positionInfo?.name ?? null,
-        branch: member.branch,
+        branch: member.branchInfo?.name ?? null,
         highestTaskStatus: this.getHighestTaskStatus(taskCounts),
         taskCounts
       };

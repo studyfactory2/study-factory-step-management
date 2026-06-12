@@ -14,6 +14,8 @@ import { HelpRequestModule } from "./help-request/help-request.module";
 import { jwtConfig } from "./config/jwt.config";
 import { Member } from "./member/entity/member.entity";
 import { MemberPreRegistration } from "./member/entity/member-pre-registration.entity";
+import { OrganizationBranch } from "./member/entity/organization-branch.entity";
+import { Organization } from "./member/entity/organization.entity";
 import { MemberModule } from "./member/member.module";
 import { PositionDuty } from "./position/entity/position-duty.entity";
 import { Position } from "./position/entity/position.entity";
@@ -43,6 +45,8 @@ import { TaskModule } from "./task/task.module";
           HelpRequestAttachment,
           Member,
           MemberPreRegistration,
+          Organization,
+          OrganizationBranch,
           RefreshToken,
           Position,
           PositionDuty,

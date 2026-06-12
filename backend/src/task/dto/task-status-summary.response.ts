@@ -7,3 +7,7 @@ export class TaskStatusSummaryResponse {
   reviewRequestedWeeklyChange: number;
   completedThisMonth: number;
 }
+
+export class TaskStatusSummaryByBranchResponse extends TaskStatusSummaryResponse {
+  branch: string;
+}
