@@ -3,6 +3,7 @@ import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { PositionCreateRequest } from "./dto/position-create.request";
 import { PositionTreeUpdateRequest } from "./dto/position-tree-update.request";
+import { PositionUpdateRequest } from "./dto/position-update.request";
 import { PositionService } from "./position.service";
 
 @Controller("positions")
@@ -29,6 +30,15 @@ export class PositionController {
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
   async updatePositionTree(@Body() request: PositionTreeUpdateRequest) {
     return this.positionService.updateTree(request);
+  }
+
+  @Patch(":id")
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
+  async updatePosition(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() request: PositionUpdateRequest
+  ) {
+    return this.positionService.update(id, request);
   }
 
   @Delete(":id")

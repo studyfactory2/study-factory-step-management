@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from "@nestjs/common
 import { PositionCreateRequest } from "./dto/position-create.request";
 import { PositionResponse, PositionTreeResponse } from "./dto/position.response";
 import { PositionTreeUpdateRequest } from "./dto/position-tree-update.request";
+import { PositionUpdateRequest } from "./dto/position-update.request";
 import { PositionDuty } from "./entity/position-duty.entity";
 import { Position } from "./entity/position.entity";
 import { PositionRepository } from "./position.repository";
@@ -97,6 +98,21 @@ export class PositionService {
     );
 
     return this.findTree();
+  }
+
+  async update(id: number, request: PositionUpdateRequest): Promise<PositionResponse> {
+    const position = await this.positionRepository.findActiveById(id);
+    if (!position) {
+      throw new NotFoundException("직위 정보를 찾을 수 없습니다.");
+    }
+
+    if (request.name?.trim()) {
+      position.name = request.name.trim();
+    }
+
+    const savedPosition = await this.positionRepository.save(position);
+
+    return PositionResponse.from(savedPosition);
   }
 
   async delete(id: number): Promise<void> {

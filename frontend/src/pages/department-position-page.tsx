@@ -8,13 +8,11 @@ import {
   Crown,
   Factory,
   FlaskConical,
-  Folder,
   GripVertical,
   Pencil,
   Plus,
   RefreshCw,
   Save,
-  Smile,
   Tag,
   Trash2,
   UserRound,
@@ -22,7 +20,14 @@ import {
   X
 } from "lucide-react";
 import { getOrganizations, updateOrganizations, type OrganizationOption } from "@/api/member";
-import { getPositionTree, type PositionTreeNode } from "@/api/position";
+import {
+  createPosition,
+  deletePosition,
+  getPositionTree,
+  updatePosition,
+  updatePositionTree,
+  type PositionTreeNode
+} from "@/api/position";
 
 type DepartmentPositionPageProps = {
   accessToken: string;
@@ -76,8 +81,11 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
     name: string;
   } | null>(null);
   const [message, setMessage] = useState("");
+  const [draggedPositionId, setDraggedPositionId] = useState<number | null>(null);
+  const [dragOverPositionId, setDragOverPositionId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingDepartments, setIsSavingDepartments] = useState(false);
+  const [isSavingPositions, setIsSavingPositions] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -113,7 +121,7 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
   }, []);
 
   const visiblePositions = useMemo(
-    () => positions.filter((position) => position.isActive),
+    () => buildVisiblePositionTree(positions),
     [positions]
   );
 
@@ -138,32 +146,36 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
     void persistDepartments(nextDepartments, "부서가 추가되었습니다.");
   }
 
-  function handleAddPosition() {
+  async function refreshPositions() {
+    const positionResponse = await getPositionTree();
+
+    setPositions(flattenPositions(positionResponse));
+  }
+
+  async function handleAddPosition() {
     const nextName = positionName.trim();
     if (!nextName) {
       setMessage("새 직급 이름을 입력해주세요.");
       return;
     }
 
-    setPositions((current) => [
-      ...current,
-      {
-        children: [],
-        displayOrder: current.length + 1,
-        duties: [],
-        dutyOptions: [],
-        id: Date.now(),
-        isActive: true,
+    setIsSavingPositions(true);
+    setMessage("");
+
+    try {
+      await createPosition(accessToken, {
         isAdmin: false,
         isLoginVisible: true,
-        name: nextName,
-        parentId: null,
-        subtitle: null,
-        depth: 0
-      }
-    ]);
-    setPositionName("");
-    setMessage("직급이 화면에 추가되었습니다. 직급 저장 API는 다음 단계에서 연결됩니다.");
+        name: nextName
+      });
+      await refreshPositions();
+      setPositionName("");
+      setMessage("직급이 추가되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "직급을 추가하지 못했습니다.");
+    } finally {
+      setIsSavingPositions(false);
+    }
   }
 
   function handleStartDepartmentEdit(department: DepartmentOption, index: number) {
@@ -211,30 +223,45 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
     });
   }
 
-  function handleSavePositionEdit() {
+  async function handleSavePositionEdit() {
     if (!positionEditDraft?.name.trim()) {
       setMessage("직급 이름을 입력해주세요.");
       return;
     }
 
-    setPositions((current) => current.map((position) => (
-      position.id === positionEditDraft.id
-        ? {
-          ...position,
-          name: positionEditDraft.name.trim()
-        }
-        : position
-    )));
-    setPositionEditDraft(null);
-    setMessage("직급이 수정되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+    setIsSavingPositions(true);
+    setMessage("");
+
+    try {
+      await updatePosition(accessToken, positionEditDraft.id, {
+        name: positionEditDraft.name.trim()
+      });
+      await refreshPositions();
+      setPositionEditDraft(null);
+      setMessage("직급이 수정되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "직급을 수정하지 못했습니다.");
+    } finally {
+      setIsSavingPositions(false);
+    }
   }
 
-  function handleDeletePosition(id: number) {
-    setPositions((current) => current.filter((position) => position.id !== id));
-    if (positionEditDraft?.id === id) {
-      setPositionEditDraft(null);
+  async function handleDeletePosition(id: number) {
+    setIsSavingPositions(true);
+    setMessage("");
+
+    try {
+      await deletePosition(accessToken, id);
+      await refreshPositions();
+      if (positionEditDraft?.id === id) {
+        setPositionEditDraft(null);
+      }
+      setMessage("직급이 삭제되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "직급을 삭제하지 못했습니다.");
+    } finally {
+      setIsSavingPositions(false);
     }
-    setMessage("직급이 삭제되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
   }
 
   async function persistDepartments(nextDepartments: DepartmentOption[], successMessage: string) {
@@ -264,8 +291,54 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
     }
   }
 
-  function handleSavePositionOrder() {
-    setMessage("직급 정렬 저장 API는 다음 단계에서 연결됩니다.");
+  function handlePositionDrop(targetPositionId: number) {
+    if (!draggedPositionId || draggedPositionId === targetPositionId) {
+      setDraggedPositionId(null);
+      setDragOverPositionId(null);
+      return;
+    }
+
+    if (isPositionDescendant(targetPositionId, draggedPositionId, positions)) {
+      setMessage("자기 하위 직급 아래로는 이동할 수 없습니다.");
+      setDraggedPositionId(null);
+      setDragOverPositionId(null);
+      return;
+    }
+
+    setPositions((current) => current.map((position) => (
+      position.id === draggedPositionId
+        ? {
+          ...position,
+          parentId: targetPositionId
+        }
+        : position
+    )));
+    setDraggedPositionId(null);
+    setDragOverPositionId(null);
+    setMessage("직급 상하관계가 변경되었습니다. 저장하기를 눌러 반영해주세요.");
+  }
+
+  async function handleSavePositionOrder() {
+    setIsSavingPositions(true);
+    setMessage("");
+
+    try {
+      await updatePositionTree(accessToken, {
+        positions: positions
+          .filter((position) => position.isActive)
+          .map((position, index) => ({
+            displayOrder: index,
+            id: position.id,
+            parentId: position.parentId
+          }))
+      });
+      await refreshPositions();
+      setMessage("직급 상하관계가 저장되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "직급 상하관계를 저장하지 못했습니다.");
+    } finally {
+      setIsSavingPositions(false);
+    }
   }
 
   return (
@@ -391,10 +464,20 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
             ) : null}
             {!isLoading && visiblePositions.map((position, index) => (
               <PositionRow
+                dragOverPositionId={dragOverPositionId}
+                draggedPositionId={draggedPositionId}
                 index={index}
                 key={position.id}
                 onCancelEdit={() => setPositionEditDraft(null)}
+                onDragEnd={() => {
+                  setDraggedPositionId(null);
+                  setDragOverPositionId(null);
+                }}
+                onDragEnter={() => setDragOverPositionId(position.id)}
+                onDragStart={() => setDraggedPositionId(position.id)}
+                onDrop={() => handlePositionDrop(position.id)}
                 onDelete={() => handleDeletePosition(position.id)}
+                disabled={isSavingPositions}
                 onEdit={() => handleStartPositionEdit(position)}
                 onEditDraftChange={(name) => setPositionEditDraft((current) => current ? {
                   ...current,
@@ -408,25 +491,13 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
           </div>
 
           <AddControl
-            hasSmile
+            disabled={isSavingPositions}
             onAdd={handleAddPosition}
             onChange={setPositionName}
             placeholder="새 직급 이름 입력"
             value={positionName}
           />
         </ManagementCard>
-
-        <section className="rounded-[16px] border border-[#D8D1CE] bg-white px-3 py-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-          <h2 className="flex items-center gap-2 text-[17px] font-normal text-[#222222]">
-            <Folder aria-hidden className="h-5 w-5 fill-[#FFE6A8] text-[#8C6B2B]" />
-            정렬 안내
-          </h2>
-          <p className="mt-2 pl-8 text-[12px] font-normal leading-5 text-[#6F6662]">
-            직급은 위에서 아래로 상위에서 하위 순으로 정렬됩니다.
-            <br />
-            손잡이를 드래그해 순서를 변경하세요.
-          </p>
-        </section>
 
         <div className="grid grid-cols-[1fr_1.25fr] gap-2 pb-4">
           <button
@@ -438,12 +509,13 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
             초기화
           </button>
           <button
-            className="flex h-12 items-center justify-center gap-2 rounded-[13px] border border-[#9FCBFF] bg-[#EAF4FF] text-[18px] font-normal text-[#2D70CB] shadow-sm"
+            className="flex h-12 items-center justify-center gap-2 rounded-[13px] border border-[#9FCBFF] bg-[#EAF4FF] text-[18px] font-normal text-[#2D70CB] shadow-sm disabled:opacity-60"
+            disabled={isSavingPositions}
             onClick={handleSavePositionOrder}
             type="button"
           >
             <Save aria-hidden className="h-5 w-5" />
-            저장하기
+            {isSavingPositions ? "저장 중" : "저장하기"}
           </button>
         </div>
       </div>
@@ -523,8 +595,15 @@ function EditActions({
 }
 
 function PositionRow({
+  disabled,
+  draggedPositionId,
+  dragOverPositionId,
   index,
   onCancelEdit,
+  onDragEnd,
+  onDragEnter,
+  onDragStart,
+  onDrop,
   onDelete,
   onEdit,
   onEditDraftChange,
@@ -532,8 +611,15 @@ function PositionRow({
   position,
   positionEditDraft
 }: {
+  disabled: boolean;
+  draggedPositionId: number | null;
+  dragOverPositionId: number | null;
   index: number;
   onCancelEdit: () => void;
+  onDragEnd: () => void;
+  onDragEnter: () => void;
+  onDragStart: () => void;
+  onDrop: () => void;
   onDelete: () => void;
   onEdit: () => void;
   onEditDraftChange: (name: string) => void;
@@ -545,11 +631,35 @@ function PositionRow({
   const positionName = positionEditDraft?.name ?? position.name;
   const meta = getPositionMeta(positionName, index);
   const PositionIcon = meta.icon;
+  const isDragged = draggedPositionId === position.id;
+  const isDragTarget = dragOverPositionId === position.id && draggedPositionId !== position.id;
 
   return (
-    <div className="grid grid-cols-[22px_minmax(0,1fr)] items-center gap-1">
-      <GripVertical aria-hidden className="h-5 w-5 text-[#6F6662]" />
-      <div className={`grid h-[40px] grid-cols-[34px_minmax(0,1fr)_54px_76px] items-center rounded-[12px] border px-2 ${meta.className}`}>
+    <div
+      className={`grid grid-cols-[22px_minmax(0,1fr)] items-center gap-1 ${isDragged ? "opacity-50" : ""}`}
+      draggable={!disabled && !isEditing}
+      onDragEnd={onDragEnd}
+      onDragEnter={(event) => {
+        event.preventDefault();
+        onDragEnter();
+      }}
+      onDragOver={(event) => event.preventDefault()}
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = "move";
+        onDragStart();
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        onDrop();
+      }}
+    >
+      <GripVertical aria-hidden className="h-5 w-5 cursor-grab text-[#6F6662]" />
+      <div
+        className={`grid h-[40px] grid-cols-[34px_minmax(0,1fr)_54px_76px] items-center rounded-[12px] border px-2 ${
+          isDragTarget ? "ring-2 ring-[#2D70CB]/30" : ""
+        } ${meta.className}`}
+        style={{ marginLeft: `${Math.min(position.depth, 2) * 14}px` }}
+      >
         <PositionIcon aria-hidden className={`h-5 w-5 ${meta.iconClassName}`} />
         {isEditing ? (
           <input
@@ -570,6 +680,7 @@ function PositionRow({
           />
         ) : (
           <RowActions
+            disabled={disabled}
             iconOnly
             onDelete={onDelete}
             onEdit={onEdit}
@@ -582,7 +693,6 @@ function PositionRow({
 
 function AddControl({
   disabled = false,
-  hasSmile = false,
   onAdd,
   onChange,
   onColorSelect,
@@ -591,7 +701,6 @@ function AddControl({
   value
 }: {
   disabled?: boolean;
-  hasSmile?: boolean;
   onAdd: () => void;
   onChange: (value: string) => void;
   onColorSelect?: (colorIndex: number) => void;
@@ -601,14 +710,13 @@ function AddControl({
 }) {
   return (
     <div className="mt-3 grid grid-cols-[minmax(0,1fr)_84px] items-center gap-2">
-      <label className="grid h-11 grid-cols-[minmax(0,1fr)_26px] items-center rounded-[12px] border border-[#D8D1CE] bg-white px-3 shadow-sm">
+      <label className="flex h-11 items-center rounded-[12px] border border-[#D8D1CE] bg-white px-3 shadow-sm">
         <input
-          className="min-w-0 bg-transparent text-[13px] font-normal outline-none placeholder:text-[#9A918C]"
+          className="min-w-0 flex-1 bg-transparent text-[13px] font-normal outline-none placeholder:text-[#9A918C]"
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           value={value}
         />
-        {hasSmile ? <Smile aria-hidden className="h-5 w-5 text-[#4F4542]" /> : null}
       </label>
       <button
         className="flex h-11 items-center justify-center gap-1 rounded-[12px] border border-[#9FCBFF] bg-[#EAF4FF] text-[18px] font-normal text-[#2D70CB] shadow-sm disabled:opacity-60"
@@ -619,24 +727,26 @@ function AddControl({
         <Plus aria-hidden className="h-5 w-5" />
         추가
       </button>
-      <div className="col-span-2 flex justify-center gap-3">
-        {colorSwatches.map((swatch, index) => {
-          const isSelected = selectedColorIndex === index;
+      {onColorSelect ? (
+        <div className="col-span-2 flex justify-center gap-3">
+          {colorSwatches.map((swatch, index) => {
+            const isSelected = selectedColorIndex === index;
 
-          return (
-          <button
-            aria-label={`색상 ${index + 1} 선택`}
-            aria-pressed={isSelected}
-            className={`h-5 w-5 rounded-full border shadow-sm ${swatch.dotClassName} ${
-              isSelected ? "border-[#222222] ring-2 ring-[#222222]/20" : "border-black/10"
-            }`}
-            key={swatch.dotClassName}
-            onClick={() => onColorSelect?.(index)}
-            type="button"
-          />
-          );
-        })}
-      </div>
+            return (
+              <button
+                aria-label={`색상 ${index + 1} 선택`}
+                aria-pressed={isSelected}
+                className={`h-5 w-5 rounded-full border shadow-sm ${swatch.dotClassName} ${
+                  isSelected ? "border-[#222222] ring-2 ring-[#222222]/20" : "border-black/10"
+                }`}
+                key={swatch.dotClassName}
+                onClick={() => onColorSelect(index)}
+                type="button"
+              />
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -694,6 +804,54 @@ function resolveDepartmentColorIndex(name: string, index: number) {
 
 function isTemporaryDepartmentId(id: number) {
   return id > 1_000_000_000_000;
+}
+
+function buildVisiblePositionTree(positions: FlatPosition[]): FlatPosition[] {
+  const activeNonAdminPositions = positions
+    .filter((position) => position.isActive && !position.isAdmin)
+    .sort((left, right) => left.displayOrder - right.displayOrder || left.id - right.id);
+  const visibleIdSet = new Set(activeNonAdminPositions.map((position) => position.id));
+  const childrenByParentId = new Map<number | null, FlatPosition[]>();
+  const visiblePositions: FlatPosition[] = [];
+
+  for (const position of activeNonAdminPositions) {
+    const parentId = position.parentId && visibleIdSet.has(position.parentId)
+      ? position.parentId
+      : null;
+    const siblings = childrenByParentId.get(parentId) ?? [];
+
+    siblings.push(position);
+    childrenByParentId.set(parentId, siblings);
+  }
+
+  function visit(parentId: number | null, depth: number) {
+    const children = childrenByParentId.get(parentId) ?? [];
+
+    for (const child of children) {
+      visiblePositions.push({
+        ...child,
+        depth
+      });
+      visit(child.id, depth + 1);
+    }
+  }
+
+  visit(null, 0);
+
+  return visiblePositions;
+}
+
+function isPositionDescendant(targetId: number, parentId: number, positions: FlatPosition[]): boolean {
+  const target = positions.find((position) => position.id === targetId);
+  if (!target?.parentId) {
+    return false;
+  }
+
+  if (target.parentId === parentId) {
+    return true;
+  }
+
+  return isPositionDescendant(target.parentId, parentId, positions);
 }
 
 function getPositionMeta(name: string, index: number): {

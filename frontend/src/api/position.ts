@@ -55,6 +55,10 @@ export type PositionTreeUpdateRequest = {
   }[];
 };
 
+export type PositionUpdateRequest = {
+  name?: string;
+};
+
 export async function createPosition(
   accessToken: string,
   request: PositionCreateRequest
@@ -97,6 +101,29 @@ export async function updatePositionTree(
   }
 
   return response.json() as Promise<PositionTreeNode[]>;
+}
+
+export async function updatePosition(
+  accessToken: string,
+  id: number,
+  request: PositionUpdateRequest
+): Promise<PositionTreeNode> {
+  const response = await fetch(`${API_BASE_URL}/api/positions/${id}`, {
+    body: JSON.stringify(request),
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    method: "PATCH"
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+
+    throw new Error(getErrorMessage(error, "직위를 수정하지 못했습니다."));
+  }
+
+  return response.json() as Promise<PositionTreeNode>;
 }
 
 export async function deletePosition(accessToken: string, id: number): Promise<void> {
