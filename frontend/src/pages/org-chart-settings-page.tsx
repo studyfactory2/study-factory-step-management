@@ -155,53 +155,7 @@ export function OrgChartSettingsPage({ onBack }: OrgChartSettingsPageProps) {
           step="1"
           title="조직도 모양 만들기"
         >
-          <div className="mt-3 space-y-2 text-[12px] font-normal">
-            <ShapeFloorRow
-              floor="3층"
-              groups={[
-                [{ checked: true, label: "1" }],
-                [{ checked: true, label: "2" }]
-              ]}
-            />
-            <ShapeFloorRow
-              floor="2층"
-              groups={[
-                [
-                  { checked: true, label: "1" },
-                  { checked: true, label: "2" }
-                ],
-                [
-                  { checked: true, label: "1" },
-                  { checked: true, label: "2" }
-                ]
-              ]}
-            />
-            <ShapeFloorRow
-              floor="1층"
-              groups={[
-                [
-                  { checked: true, label: "1" },
-                  { checked: true, label: "2" },
-                  { checked: true, label: "3" }
-                ],
-                [
-                  { checked: true, label: "1" },
-                  { checked: true, label: "2" },
-                  { checked: true, label: "3" }
-                ],
-                [
-                  { checked: true, label: "1" },
-                  { checked: true, label: "2" },
-                  { checked: true, label: "3" }
-                ],
-                [
-                  { checked: true, label: "1" },
-                  { checked: true, label: "2" },
-                  { checked: true, label: "3" }
-                ]
-              ]}
-            />
-          </div>
+          <ShapeLayoutPreview />
           <StepActions />
         </StepCard>
 
@@ -299,28 +253,59 @@ function StepCard({
   );
 }
 
-function ShapeFloorRow({
-  floor,
-  groups
-}: {
-  floor: string;
-  groups: {
-    checked: boolean;
-    label: string;
-  }[][];
-}) {
+function ShapeLayoutPreview() {
   return (
-    <div className="grid grid-cols-[34px_minmax(0,1fr)] items-center gap-1">
-      <span className="text-[12px] font-normal text-[#222222]">{floor}</span>
-      <div className="grid grid-cols-4 items-center gap-1">
-        {groups.map((group, groupIndex) => (
-          <div className="flex justify-center gap-0.5" key={`${floor}-${groupIndex}`}>
-            {group.map((item, itemIndex) => (
-              <ShapeCheckbox
-                checked={item.checked}
-                key={`${floor}-${groupIndex}-${item.label}-${itemIndex}`}
-                label={item.label}
-              />
+    <div className="mt-3 grid grid-cols-[34px_minmax(0,1fr)] text-[12px] font-normal">
+      <span className="pt-1.5 text-[#222222]">3층</span>
+      <div className="grid grid-cols-4 items-start gap-1">
+        <div className="col-span-2 flex justify-center">
+          <ShapeCheckbox checked label="1" />
+        </div>
+        <div className="col-span-2 flex justify-center">
+          <ShapeCheckbox checked label="2" />
+        </div>
+      </div>
+
+      <span />
+      <div className="grid h-5 grid-cols-4 gap-1">
+        {[0, 1].map((group) => (
+          <div className="relative col-span-2" key={`top-connector-${group}`}>
+            <span className="absolute left-1/2 top-0 h-2.5 w-px -translate-x-1/2 bg-[#B9B1AD]" />
+            <span className="absolute left-1/4 right-1/4 top-2.5 h-px bg-[#B9B1AD]" />
+            <span className="absolute left-1/4 top-2.5 h-2.5 w-px bg-[#B9B1AD]" />
+            <span className="absolute right-1/4 top-2.5 h-2.5 w-px bg-[#B9B1AD]" />
+          </div>
+        ))}
+      </div>
+
+      <span className="pt-1.5 text-[#222222]">2층</span>
+      <div className="grid grid-cols-4 gap-1">
+        {["1", "2", "1", "2"].map((label, index) => (
+          <div className="flex justify-center" key={`second-${label}-${index}`}>
+            <ShapeCheckbox checked label={label} />
+          </div>
+        ))}
+      </div>
+
+      <span />
+      <div className="grid h-5 grid-cols-4 gap-1">
+        {[0, 1, 2, 3].map((group) => (
+          <div className="relative" key={`bottom-connector-${group}`}>
+            <span className="absolute left-1/2 top-0 h-2.5 w-px -translate-x-1/2 bg-[#B9B1AD]" />
+            <span className="absolute left-[15%] right-[15%] top-2.5 h-px bg-[#B9B1AD]" />
+            <span className="absolute left-[15%] top-2.5 h-2.5 w-px bg-[#B9B1AD]" />
+            <span className="absolute left-1/2 top-2.5 h-2.5 w-px -translate-x-1/2 bg-[#B9B1AD]" />
+            <span className="absolute right-[15%] top-2.5 h-2.5 w-px bg-[#B9B1AD]" />
+          </div>
+        ))}
+      </div>
+
+      <span className="pt-1.5 text-[#222222]">1층</span>
+      <div className="grid grid-cols-4 gap-1">
+        {[0, 1, 2, 3].map((group) => (
+          <div className="flex justify-center gap-0.5" key={`first-${group}`}>
+            {["1", "2", "3"].map((label) => (
+              <ShapeCheckbox checked key={`first-${group}-${label}`} label={label} />
             ))}
           </div>
         ))}
