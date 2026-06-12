@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Clipboard } from "lucide-react";
+import { Check, ChevronDown, Clipboard, MessageCircle } from "lucide-react";
 import type { AdminDashboardRecentOutput, AdminDashboardSortOrder } from "@/api/admin";
 import type { TaskStatus } from "@/types/domain";
 
@@ -150,7 +150,7 @@ export function RecentOutputsSection({
 
           return (
             <button
-              className="grid min-h-[52px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
+              className="grid min-h-[56px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
               key={output.taskId}
               onClick={() => onDetailOpen(output.taskId)}
               type="button"
@@ -167,10 +167,16 @@ export function RecentOutputsSection({
                   {formatCompactDateTime(output.updatedAt ?? output.startedAt)}
                 </span>
               </span>
-              <span className="flex min-w-0 items-center pl-5 pr-1.5">
+              <span className="flex min-w-0 flex-col justify-center pl-5 pr-1.5">
                 <span className="truncate text-[10px] font-normal leading-3 text-[#222222]">
                   {output.taskTitle}
                 </span>
+                {output.oneLineComment && (
+                  <span className="mt-1 flex min-w-0 items-center gap-1 text-[7px] font-normal leading-none text-[#9A918D]">
+                    <MessageCircle aria-hidden className="h-2.5 w-2.5 shrink-0 text-[#9A918D]" />
+                    <span className="truncate">{output.oneLineComment}</span>
+                  </span>
+                )}
               </span>
               <span className="flex items-center justify-center px-0">
                 <span className={`flex h-[18px] w-[50px] items-center justify-center gap-0.5 rounded-full text-[7px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
