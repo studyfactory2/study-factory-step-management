@@ -145,8 +145,10 @@ export function RecentOutputsSection({
 
         {filteredOutputs.map((output) => {
           const direction = getOutputDirection(output);
+          const isCompleted = output.taskStatus === "COMPLETED";
           const isCreatorReceiver = direction === "TO_CREATOR";
           const isMemberReceiver = direction === "TO_MEMBER";
+          const completedTextClassName = isCompleted ? "line-through decoration-[#8E8581] decoration-1" : "";
 
           return (
             <button
@@ -157,22 +159,22 @@ export function RecentOutputsSection({
             >
               <span className={getStatusBarClassName(output.taskStatus)} />
               <span className="flex min-w-0 flex-col items-start justify-center pl-2.5 pr-1 text-left font-normal leading-none">
-                <span className={`line-clamp-1 break-keep text-[9px] ${isCreatorReceiver ? "text-[#2D70CB]" : "text-[#4F4542]"}`}>
+                <span className={`line-clamp-1 break-keep text-[9px] ${isCreatorReceiver && !isCompleted ? "text-[#2D70CB]" : "text-[#4F4542]"} ${completedTextClassName}`}>
                   {output.creatorName ?? output.memberName}
                 </span>
-                <span className="mt-0.5 line-clamp-1 break-keep text-[7px] text-[#7B716D]">
+                <span className={`mt-0.5 line-clamp-1 break-keep text-[7px] text-[#7B716D] ${completedTextClassName}`}>
                   {output.creatorOrganizationName ?? "미지정"}
                 </span>
-                <span className="mt-0.5 whitespace-nowrap text-[6px] text-[#9A918D]">
+                <span className={`mt-0.5 whitespace-nowrap text-[6px] text-[#9A918D] ${completedTextClassName}`}>
                   {formatCompactDateTime(output.updatedAt ?? output.startedAt)}
                 </span>
               </span>
               <span className="flex min-w-0 flex-col justify-center pl-5 pr-1.5">
-                <span className="truncate text-[10px] font-normal leading-3 text-[#222222]">
+                <span className={`truncate text-[10px] font-normal leading-3 text-[#222222] ${completedTextClassName}`}>
                   {output.taskTitle}
                 </span>
                 {output.oneLineComment && (
-                  <span className="mt-1 flex min-w-0 items-center gap-1 text-[7px] font-normal leading-none text-[#9A918D]">
+                  <span className={`mt-1 flex min-w-0 items-center gap-1 text-[7px] font-normal leading-none text-[#9A918D] ${completedTextClassName}`}>
                     <MessageCircle aria-hidden className="h-2.5 w-2.5 shrink-0 text-[#9A918D]" />
                     <span className="truncate">{output.oneLineComment}</span>
                   </span>
@@ -180,14 +182,14 @@ export function RecentOutputsSection({
               </span>
               <span className="flex items-center justify-center px-0">
                 <span className={`flex h-[18px] w-[50px] items-center justify-center gap-0.5 rounded-full text-[7px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
-                  {direction === "TO_CREATOR" && <span aria-hidden>←</span>}
+                  {!isCompleted && direction === "TO_CREATOR" && <span aria-hidden>←</span>}
                   <span>{getStatusLabel(output.taskStatus)}</span>
-                  {direction === "TO_MEMBER" && <span aria-hidden>→</span>}
-                  {output.taskStatus === "COMPLETED" && <Check aria-hidden className="h-2.5 w-2.5 stroke-[2.5]" />}
+                  {!isCompleted && direction === "TO_MEMBER" && <span aria-hidden>→</span>}
+                  {isCompleted && <Check aria-hidden className="h-2.5 w-2.5 stroke-[2.5]" />}
                 </span>
               </span>
               <span className="flex min-w-0 items-center justify-center px-0 text-center text-[9px] font-normal leading-3">
-                <span className={`line-clamp-2 break-keep ${isMemberReceiver ? "text-[#2D70CB]" : "text-[#4F4542]"}`}>
+                <span className={`line-clamp-2 break-keep ${isMemberReceiver && !isCompleted ? "text-[#2D70CB]" : "text-[#4F4542]"} ${completedTextClassName}`}>
                   {output.memberName}
                 </span>
               </span>
