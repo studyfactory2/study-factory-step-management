@@ -8,9 +8,6 @@ import { appConfig } from "./config/app.config";
 import { databaseConfig } from "./config/database.config";
 import { FavoriteMember } from "./favorite-member/entity/favorite-member.entity";
 import { FavoriteMemberModule } from "./favorite-member/favorite-member.module";
-import { HelpRequestAttachment } from "./help-request/entity/help-request-attachment.entity";
-import { HelpRequest } from "./help-request/entity/help-request.entity";
-import { HelpRequestModule } from "./help-request/help-request.module";
 import { jwtConfig } from "./config/jwt.config";
 import { Member } from "./member/entity/member.entity";
 import { MemberPreRegistration } from "./member/entity/member-pre-registration.entity";
@@ -41,8 +38,6 @@ import { TaskModule } from "./task/task.module";
         url: configService.getOrThrow<string>("database.url"),
         entities: [
           FavoriteMember,
-          HelpRequest,
-          HelpRequestAttachment,
           Member,
           MemberPreRegistration,
           Organization,
@@ -62,7 +57,6 @@ import { TaskModule } from "./task/task.module";
     AdminModule,
     AuthModule,
     FavoriteMemberModule,
-    HelpRequestModule,
     MemberModule,
     PositionModule,
     TaskCommentModule,
