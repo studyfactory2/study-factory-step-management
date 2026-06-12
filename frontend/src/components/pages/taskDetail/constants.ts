@@ -25,16 +25,16 @@ export function getStatusLabel(status: TaskStatus) {
 
 export function getStatusClassName(status: TaskStatus) {
   if (status === "REGISTERED") {
-    return "bg-[#FBE6EA] text-primary";
+    return "border-[#F3C9D5] bg-[#FFF0F4] text-[#D93D72]";
   }
 
   if (status === "IN_PROGRESS") {
-    return "bg-[#EEE8FF] text-[#8B72C8]";
+    return "border-[#E7CD6C] bg-[#FFF6D8] text-[#9A7416]";
   }
 
   if (status === "REVIEW_REQUESTED") {
-    return "bg-[#FFF1D7] text-[#C88449]";
+    return "border-[#9ECBF2] bg-[#EAF6FF] text-[#1572CC]";
   }
 
-  return "bg-[#E8F3DF] text-[#6D956A]";
+  return "border-[#D9D9D9] bg-[#F3F3F3] text-[#6B6B6B]";
 }
