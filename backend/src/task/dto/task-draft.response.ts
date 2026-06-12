@@ -5,6 +5,7 @@ export class TaskDraftResponse {
   title: string;
   description: string;
   category: TaskCategory;
+  oneLineComment: string | null;
   assigneeId: number;
   createdAt: Date;
   updatedAt: Date;

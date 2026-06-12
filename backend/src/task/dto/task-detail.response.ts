@@ -23,6 +23,7 @@ export class TaskDetailResponse {
   title: string;
   description: string;
   category: TaskCategory;
+  oneLineComment: string | null;
   descriptionHighlightStart: number | null;
   descriptionHighlightEnd: number | null;
   descriptionHighlightExpiresAt: Date | null;

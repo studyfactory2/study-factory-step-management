@@ -27,6 +27,7 @@ export type TaskCreateRequest = {
   title: string;
   description: string;
   category: TaskCategory;
+  oneLineComment?: string;
   assigneeScope: TaskAssigneeScope;
   assigneeId?: number;
   branch?: string;
@@ -42,6 +43,7 @@ export type TaskDraftSaveRequest = {
   assigneeId: number;
   category?: TaskCategory;
   description?: string;
+  oneLineComment?: string;
   title: string;
 };
 
@@ -50,6 +52,7 @@ export type TaskDraft = {
   assigneeId: number;
   category: TaskCategory;
   description: string;
+  oneLineComment: string | null;
   title: string;
   createdAt: string;
   updatedAt: string;
@@ -116,6 +119,7 @@ export type TaskDetail = {
   title: string;
   description: string;
   category: TaskCategory;
+  oneLineComment: string | null;
   descriptionHighlightStart: number | null;
   descriptionHighlightEnd: number | null;
   descriptionHighlightExpiresAt: string | null;
@@ -196,6 +200,10 @@ export async function createTask(
 
   if (request.category) {
     formData.append("category", request.category);
+  }
+
+  if (request.oneLineComment) {
+    formData.append("oneLineComment", request.oneLineComment);
   }
 
   if (request.assigneeId !== undefined) {

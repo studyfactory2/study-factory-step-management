@@ -23,6 +23,9 @@ export class Task extends BaseEntity {
   })
   category: TaskCategory;
 
+  @Column({ name: "one_line_comment", type: "varchar", nullable: true })
+  oneLineComment: string | null;
+
   @Column({ name: "description_highlight_start", type: "int", nullable: true })
   descriptionHighlightStart: number | null;
 

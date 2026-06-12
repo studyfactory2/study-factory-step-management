@@ -201,6 +201,7 @@ CREATE TABLE tasks (
   title VARCHAR NOT NULL,
   description TEXT NOT NULL,
   category task_category_enum NOT NULL DEFAULT 'OPERATION',
+  one_line_comment VARCHAR,
   description_highlight_start INTEGER,
   description_highlight_end INTEGER,
   description_highlight_expires_at TIMESTAMP,

@@ -26,6 +26,10 @@ export class TaskCreateRequest {
   @IsEnum(TaskCategory, { message: "유효하지 않은 업무 카테고리입니다." })
   category: TaskCategory;
 
+  @IsOptional()
+  @IsString({ message: "한줄멘트는 문자열이어야 합니다." })
+  oneLineComment?: string;
+
   @IsEnum(TaskAssigneeScope, { message: "유효하지 않은 담당자 지정 방식입니다." })
   assigneeScope: TaskAssigneeScope;
 
@@ -55,6 +59,7 @@ export class TaskCreateRequest {
     task.title = this.title;
     task.description = this.description;
     task.category = this.category;
+    task.oneLineComment = this.oneLineComment?.trim() || null;
     task.descriptionHighlightStart = null;
     task.descriptionHighlightEnd = null;
     task.descriptionHighlightExpiresAt = null;

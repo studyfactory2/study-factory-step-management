@@ -15,6 +15,10 @@ export class TaskDraftSaveRequest {
   @IsEnum(TaskCategory, { message: "유효하지 않은 업무 카테고리입니다." })
   category?: TaskCategory;
 
+  @IsOptional()
+  @IsString({ message: "한줄멘트는 문자열이어야 합니다." })
+  oneLineComment?: string;
+
   @IsNumber({}, { message: "담당자 ID는 숫자여야 합니다." })
   assigneeId: number;
 
@@ -23,6 +27,7 @@ export class TaskDraftSaveRequest {
     task.title = this.title;
     task.description = this.description ?? "";
     task.category = this.category ?? TaskCategory.OPERATION;
+    task.oneLineComment = this.oneLineComment?.trim() || null;
     task.descriptionHighlightStart = null;
     task.descriptionHighlightEnd = null;
     task.descriptionHighlightExpiresAt = null;

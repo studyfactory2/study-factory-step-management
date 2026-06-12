@@ -230,6 +230,7 @@ export class TaskService {
       title: task.title,
       description: task.description,
       category: task.category,
+      oneLineComment: task.oneLineComment,
       descriptionHighlightStart: this.isDescriptionHighlightActive(task)
         ? task.descriptionHighlightStart
         : null,
@@ -323,6 +324,9 @@ export class TaskService {
     draft.title = request.title;
     draft.description = request.description ?? "";
     draft.category = request.category ?? draft.category;
+    draft.oneLineComment = request.oneLineComment === undefined
+      ? draft.oneLineComment
+      : request.oneLineComment.trim() || null;
     draft.assigneeId = request.assigneeId;
 
     const savedDraft = await this.taskRepository.save(draft);
@@ -404,6 +408,7 @@ export class TaskService {
       title: task.title,
       description: task.description,
       category: task.category,
+      oneLineComment: task.oneLineComment,
       assigneeId: task.assigneeId,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt
@@ -508,7 +513,7 @@ export class TaskService {
       return comment.updatedAt.getTime() > latest.updatedAt.getTime() ? comment : latest;
     }, null as Task["comments"][number] | null);
 
-    return latestComment?.oneLineComment ?? null;
+    return latestComment?.oneLineComment ?? task.oneLineComment ?? null;
   }
 
   private getDisplayName(member: Member): string {

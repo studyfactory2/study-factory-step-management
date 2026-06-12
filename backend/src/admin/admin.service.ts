@@ -265,6 +265,6 @@ export class AdminService {
       return comment.updatedAt.getTime() > latest.updatedAt.getTime() ? comment : latest;
     }, null as Task["comments"][number] | null);
 
-    return latestComment?.oneLineComment ?? null;
+    return latestComment?.oneLineComment ?? task.oneLineComment ?? null;
   }
 }
