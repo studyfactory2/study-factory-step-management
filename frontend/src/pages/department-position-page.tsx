@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   type LucideIcon,
   Building2,
+  Check,
   Crown,
   Factory,
   FlaskConical,
@@ -17,7 +18,8 @@ import {
   Tag,
   Trash2,
   UserRound,
-  Wrench
+  Wrench,
+  X
 } from "lucide-react";
 import { getOrganizations, type OrganizationOption } from "@/api/member";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
@@ -62,7 +64,16 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
   const [positions, setPositions] = useState<FlatPosition[]>([]);
   const [departmentName, setDepartmentName] = useState("");
   const [departmentColorIndex, setDepartmentColorIndex] = useState(0);
+  const [departmentEditDraft, setDepartmentEditDraft] = useState<{
+    colorIndex: number;
+    id: number;
+    name: string;
+  } | null>(null);
   const [positionName, setPositionName] = useState("");
+  const [positionEditDraft, setPositionEditDraft] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -148,6 +159,74 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
     setMessage("직급이 화면에 추가되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
   }
 
+  function handleStartDepartmentEdit(department: DepartmentOption, index: number) {
+    setDepartmentEditDraft({
+      colorIndex: department.colorIndex ?? resolveDepartmentColorIndex(department.name, index),
+      id: department.id,
+      name: department.name
+    });
+  }
+
+  function handleSaveDepartmentEdit() {
+    if (!departmentEditDraft?.name.trim()) {
+      setMessage("부서 이름을 입력해주세요.");
+      return;
+    }
+
+    setDepartments((current) => current.map((department) => (
+      department.id === departmentEditDraft.id
+        ? {
+          ...department,
+          colorIndex: departmentEditDraft.colorIndex,
+          name: departmentEditDraft.name.trim()
+        }
+        : department
+    )));
+    setDepartmentEditDraft(null);
+    setMessage("부서가 수정되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+  }
+
+  function handleDeleteDepartment(id: number) {
+    setDepartments((current) => current.filter((department) => department.id !== id));
+    if (departmentEditDraft?.id === id) {
+      setDepartmentEditDraft(null);
+    }
+    setMessage("부서가 삭제되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+  }
+
+  function handleStartPositionEdit(position: FlatPosition) {
+    setPositionEditDraft({
+      id: position.id,
+      name: position.name
+    });
+  }
+
+  function handleSavePositionEdit() {
+    if (!positionEditDraft?.name.trim()) {
+      setMessage("직급 이름을 입력해주세요.");
+      return;
+    }
+
+    setPositions((current) => current.map((position) => (
+      position.id === positionEditDraft.id
+        ? {
+          ...position,
+          name: positionEditDraft.name.trim()
+        }
+        : position
+    )));
+    setPositionEditDraft(null);
+    setMessage("직급이 수정되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+  }
+
+  function handleDeletePosition(id: number) {
+    setPositions((current) => current.filter((position) => position.id !== id));
+    if (positionEditDraft?.id === id) {
+      setPositionEditDraft(null);
+    }
+    setMessage("직급이 삭제되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+  }
+
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
       <div className="mx-auto w-full max-w-[360px] space-y-3">
@@ -181,19 +260,68 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
               <EmptyState label="부서를 불러오는 중입니다." />
             ) : null}
             {!isLoading && departments.map((department, index) => {
-              const meta = getDepartmentMeta(department.name, index, department.colorIndex);
+              const isEditing = departmentEditDraft?.id === department.id;
+              const displayName = isEditing ? departmentEditDraft.name : department.name;
+              const displayColorIndex = isEditing ? departmentEditDraft.colorIndex : department.colorIndex;
+              const meta = getDepartmentMeta(displayName, index, displayColorIndex);
               const DepartmentIcon = meta.icon;
 
               return (
                 <div
-                  className={`grid h-[46px] grid-cols-[36px_minmax(0,1fr)_104px] items-center rounded-[13px] border px-2 ${meta.className}`}
+                  className={`grid grid-cols-[36px_minmax(0,1fr)_104px] items-center rounded-[13px] border px-2 ${
+                    isEditing ? "min-h-[72px] py-2" : "h-[46px]"
+                  } ${meta.className}`}
                   key={department.id}
                 >
                   <span className="flex h-8 w-8 items-center justify-center">
                     <DepartmentIcon aria-hidden className="h-6 w-6" />
                   </span>
-                  <span className="truncate text-[15px] font-normal text-[#222222]">{department.name}</span>
-                  <RowActions />
+                  {isEditing ? (
+                    <input
+                      className="min-w-0 rounded-[8px] border border-[#D8D1CE] bg-white px-2 py-1 text-[13px] font-normal outline-none"
+                      onChange={(event) => setDepartmentEditDraft((current) => current ? {
+                        ...current,
+                        name: event.target.value
+                      } : current)}
+                      value={departmentEditDraft.name}
+                    />
+                  ) : (
+                    <span className="truncate text-[15px] font-normal text-[#222222]">{department.name}</span>
+                  )}
+                  {isEditing ? (
+                    <EditActions
+                      onCancel={() => setDepartmentEditDraft(null)}
+                      onSave={handleSaveDepartmentEdit}
+                    />
+                  ) : (
+                    <RowActions
+                      onDelete={() => handleDeleteDepartment(department.id)}
+                      onEdit={() => handleStartDepartmentEdit(department, index)}
+                    />
+                  )}
+                  {isEditing ? (
+                    <div className="col-span-3 mt-1 flex justify-center gap-2">
+                      {colorSwatches.map((swatch, colorIndex) => {
+                        const isSelected = departmentEditDraft.colorIndex === colorIndex;
+
+                        return (
+                          <button
+                            aria-label={`부서 색상 ${colorIndex + 1} 선택`}
+                            aria-pressed={isSelected}
+                            className={`h-4 w-4 rounded-full border shadow-sm ${swatch.dotClassName} ${
+                              isSelected ? "border-[#222222] ring-2 ring-[#222222]/20" : "border-black/10"
+                            }`}
+                            key={swatch.dotClassName}
+                            onClick={() => setDepartmentEditDraft((current) => current ? {
+                              ...current,
+                              colorIndex
+                            } : current)}
+                            type="button"
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
@@ -222,7 +350,16 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
               <PositionRow
                 index={index}
                 key={position.id}
+                onCancelEdit={() => setPositionEditDraft(null)}
+                onDelete={() => handleDeletePosition(position.id)}
+                onEdit={() => handleStartPositionEdit(position)}
+                onEditDraftChange={(name) => setPositionEditDraft((current) => current ? {
+                  ...current,
+                  name
+                } : current)}
+                onSaveEdit={handleSavePositionEdit}
                 position={position}
+                positionEditDraft={positionEditDraft?.id === position.id ? positionEditDraft : null}
               />
             ))}
           </div>
@@ -298,14 +435,22 @@ function ManagementCard({
   );
 }
 
-function RowActions({ iconOnly = false }: { iconOnly?: boolean }) {
+function RowActions({
+  iconOnly = false,
+  onDelete,
+  onEdit
+}: {
+  iconOnly?: boolean;
+  onDelete: () => void;
+  onEdit: () => void;
+}) {
   return (
     <span className="flex items-center justify-end gap-2 text-[12px] font-normal text-[#222222]">
-      <button className="flex items-center gap-1" type="button">
+      <button className="flex items-center gap-1" onClick={onEdit} type="button">
         <Pencil aria-hidden className="h-4 w-4" />
         {iconOnly ? null : "수정"}
       </button>
-      <button className="flex items-center gap-1" type="button">
+      <button className="flex items-center gap-1" onClick={onDelete} type="button">
         <Trash2 aria-hidden className="h-4 w-4" />
         {iconOnly ? null : "삭제"}
       </button>
@@ -313,14 +458,47 @@ function RowActions({ iconOnly = false }: { iconOnly?: boolean }) {
   );
 }
 
+function EditActions({
+  onCancel,
+  onSave
+}: {
+  onCancel: () => void;
+  onSave: () => void;
+}) {
+  return (
+    <span className="flex items-center justify-end gap-2 text-[#222222]">
+      <button aria-label="저장" onClick={onSave} type="button">
+        <Check aria-hidden className="h-4 w-4 text-[#2D70CB]" />
+      </button>
+      <button aria-label="취소" onClick={onCancel} type="button">
+        <X aria-hidden className="h-4 w-4 text-[#A24F4F]" />
+      </button>
+    </span>
+  );
+}
+
 function PositionRow({
   index,
-  position
+  onCancelEdit,
+  onDelete,
+  onEdit,
+  onEditDraftChange,
+  onSaveEdit,
+  position,
+  positionEditDraft
 }: {
   index: number;
+  onCancelEdit: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
+  onEditDraftChange: (name: string) => void;
+  onSaveEdit: () => void;
   position: FlatPosition;
+  positionEditDraft: { id: number; name: string } | null;
 }) {
-  const meta = getPositionMeta(position.name, index);
+  const isEditing = Boolean(positionEditDraft);
+  const positionName = positionEditDraft?.name ?? position.name;
+  const meta = getPositionMeta(positionName, index);
   const PositionIcon = meta.icon;
 
   return (
@@ -328,11 +506,30 @@ function PositionRow({
       <GripVertical aria-hidden className="h-5 w-5 text-[#6F6662]" />
       <div className={`grid h-[40px] grid-cols-[34px_minmax(0,1fr)_54px_76px] items-center rounded-[12px] border px-2 ${meta.className}`}>
         <PositionIcon aria-hidden className={`h-5 w-5 ${meta.iconClassName}`} />
-        <span className="truncate text-[16px] font-normal text-[#222222]">{position.name}</span>
+        {isEditing ? (
+          <input
+            className="min-w-0 rounded-[8px] border border-[#D8D1CE] bg-white px-2 py-1 text-[13px] font-normal outline-none"
+            onChange={(event) => onEditDraftChange(event.target.value)}
+            value={positionName}
+          />
+        ) : (
+          <span className="truncate text-[16px] font-normal text-[#222222]">{position.name}</span>
+        )}
         <span className="text-center text-[10px] font-normal text-[#8D8580]">
           {position.parentId ? "" : "최상위"}
         </span>
-        <RowActions iconOnly />
+        {isEditing ? (
+          <EditActions
+            onCancel={onCancelEdit}
+            onSave={onSaveEdit}
+          />
+        ) : (
+          <RowActions
+            iconOnly
+            onDelete={onDelete}
+            onEdit={onEdit}
+          />
+        )}
       </div>
     </div>
   );
@@ -433,6 +630,18 @@ function getDepartmentMeta(name: string, index: number, colorIndex?: number): {
     className: colorSwatches[(index + 1) % colorSwatches.length].rowClassName,
     icon: Building2
   };
+}
+
+function resolveDepartmentColorIndex(name: string, index: number) {
+  if (name.includes("자격증")) {
+    return 0;
+  }
+
+  if (name.includes("수험생")) {
+    return 2;
+  }
+
+  return (index + 1) % colorSwatches.length;
 }
 
 function getPositionMeta(name: string, index: number): {
