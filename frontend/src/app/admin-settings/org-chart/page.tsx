@@ -11,6 +11,7 @@ import {
 
 export default function OrgChartSettingsRoutePage() {
   const router = useRouter();
+  const [accessToken, setAccessToken] = useState("");
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -27,16 +28,18 @@ export default function OrgChartSettingsRoutePage() {
       return;
     }
 
+    setAccessToken(auth.accessToken);
     setCurrentMember(auth.currentMember);
     setIsReady(true);
   }, [router]);
 
-  if (!isReady || !currentMember) {
+  if (!isReady || !accessToken || !currentMember) {
     return null;
   }
 
   return (
     <OrgChartSettingsPage
+      accessToken={accessToken}
       onBack={() => router.push("/admin-settings")}
     />
   );

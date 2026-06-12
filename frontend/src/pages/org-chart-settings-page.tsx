@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import {
   Building2,
   Camera,
@@ -12,8 +12,18 @@ import {
   Tag,
   UsersRound
 } from "lucide-react";
+import {
+  getActiveOrganizationChart,
+  resetOrganizationChartFromPositionTree,
+  updateActiveOrganizationChart,
+  type OrganizationChart,
+  type OrganizationChartNode,
+  type OrganizationChartNodeUpdate
+} from "@/api/organization-chart";
+import { MessageBanner } from "@/components/adminDashboard/message-banner";
 
 type OrgChartSettingsPageProps = {
+  accessToken: string;
   onBack?: () => void;
 };
 
@@ -38,94 +48,60 @@ const branchRows = [
   }
 ];
 
-const factoryTree = {
-  root: {
-    name: "김지원",
-    position: "대표"
-  },
-  departments: [
-    {
-      name: "자격증공장",
-      manager: {
-        name: "박서연",
-        position: "공장장"
-      },
-      members: [
-        {
-          name: "김성일",
-          position: "직원"
-        },
-        {
-          name: "윤하늘",
-          position: "스텝"
-        },
-        {
-          name: "강수빈",
-          position: "직원"
-        }
-      ]
-    },
-    {
-      name: "선택 안 함",
-      manager: {
-        name: "-",
-        position: "-"
-      },
-      members: []
-    }
-  ]
-};
+export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPageProps) {
+  const [chart, setChart] = useState<OrganizationChart | null>(null);
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-const labTree = {
-  root: {
-    name: "-",
-    position: "-"
-  },
-  departments: [
-    {
-      name: "수험생연구소",
-      manager: {
-        name: "이도현",
-        position: "연구소장"
-      },
-      members: [
-        {
-          name: "김태환",
-          position: "연구원"
-        },
-        {
-          name: "박지윤",
-          position: "연구원"
-        }
-      ]
-    },
-    {
-      name: "수험생연구소",
-      manager: {
-        name: "-",
-        position: "부소장"
-      },
-      members: [
-        {
-          name: "이서준",
-          position: "연구원"
-        },
-        {
-          name: "-",
-          position: "연구원"
-        },
-        {
-          name: "정민호",
-          position: "-"
-        }
-      ]
-    }
-  ]
-};
+  useEffect(() => {
+    getActiveOrganizationChart()
+      .then((nextChart) => {
+        setChart(nextChart);
+        setMessage("");
+      })
+      .catch((error) => {
+        setMessage(error instanceof Error ? error.message : "조직도를 불러오지 못했습니다.");
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
-export function OrgChartSettingsPage({ onBack }: OrgChartSettingsPageProps) {
   if (!onBack) {
     return null;
+  }
+
+  async function handleReset() {
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      const nextChart = await resetOrganizationChartFromPositionTree(accessToken);
+      setChart(nextChart);
+      setMessage("현재 직위트리 기준으로 조직도를 다시 불러왔습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "조직도를 초기화하지 못했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleSave() {
+    if (!chart) {
+      return;
+    }
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      const nextChart = await updateActiveOrganizationChart(accessToken, flattenChartNodes(chart.nodes));
+      setChart(nextChart);
+      setMessage("조직도를 저장했습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "조직도를 저장하지 못했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -147,6 +123,8 @@ export function OrgChartSettingsPage({ onBack }: OrgChartSettingsPageProps) {
             3단계로 조직도를 만들어보세요
           </p>
         </header>
+
+        <MessageBanner message={message} />
 
         <StepCard
           accent="bg-[#FFD6DC]"
@@ -187,12 +165,23 @@ export function OrgChartSettingsPage({ onBack }: OrgChartSettingsPageProps) {
           step="3"
           title="조직도 내용채우기"
         >
-          <div className="mt-3 overflow-x-auto pb-1">
-            <div className="flex min-w-[680px] gap-4">
-              <OrgTreePreview tree={factoryTree} />
-              <OrgTreePreview tree={labTree} />
+          {isLoading ? (
+            <div className="mt-3 rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-6 text-center text-[12px] text-[#7B716D]">
+              저장된 조직도를 불러오는 중입니다.
             </div>
-          </div>
+          ) : chart?.nodes.length ? (
+            <div className="mt-3 overflow-x-auto pb-1">
+              <div className="flex min-w-max justify-center gap-3">
+                {chart.nodes.map((node) => (
+                  <OrgNodePreview key={node.id} node={node} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-3 rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-6 text-center text-[12px] text-[#7B716D]">
+              저장된 조직도 노드가 없습니다.
+            </div>
+          )}
           <div className="mt-3 space-y-1 text-[10px] font-normal leading-4 text-[#7B716D]">
             <p>직급 또는 이름 둘 중 하나만 입력해도 OK!</p>
             <p>부서명은 3층 직급 아래 좌우로 갈라지는 분배 라인 위에 표시됩니다</p>
@@ -202,17 +191,21 @@ export function OrgChartSettingsPage({ onBack }: OrgChartSettingsPageProps) {
         <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-3">
           <button
             className="flex h-12 items-center justify-center gap-1.5 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] text-[14px] font-normal text-[#4F4542] shadow-sm"
+            disabled={isSaving}
+            onClick={handleReset}
             type="button"
           >
             <RotateCcw aria-hidden className="h-4 w-4" />
             초기화
           </button>
           <button
-            className="flex h-12 items-center justify-center gap-2 rounded-[12px] border border-[#2E8CDD] bg-[#1F8FE5] text-[16px] font-normal text-white shadow-sm"
+            className="flex h-12 items-center justify-center gap-2 rounded-[12px] border border-[#2E8CDD] bg-[#1F8FE5] text-[16px] font-normal text-white shadow-sm disabled:opacity-60"
+            disabled={isSaving || !chart}
+            onClick={handleSave}
             type="button"
           >
             <Save aria-hidden className="h-5 w-5" />
-            저장하기
+            {isSaving ? "저장 중" : "저장하기"}
           </button>
         </div>
         <p className="text-center text-[11px] font-normal text-[#7B716D]">
@@ -364,68 +357,36 @@ function StepActions() {
   );
 }
 
-function OrgTreePreview({
-  tree
-}: {
-  tree: {
-    departments: {
-      manager: {
-        name: string;
-        position: string;
-      };
-      members: {
-        name: string;
-        position: string;
-      }[];
-      name: string;
-    }[];
-    root: {
-      name: string;
-      position: string;
-    };
-  };
-}) {
+function OrgNodePreview({ node }: { node: OrganizationChartNode }) {
+  const children = node.children ?? [];
+
   return (
-    <div className="w-[330px] text-center">
-      <OrgPersonCard person={tree.root} wide />
-      <div className="mx-auto h-5 w-px bg-[#B9B1AD]" />
-      <div className="mx-auto h-px w-[230px] bg-[#B9B1AD]" />
-      <div className="grid grid-cols-2 gap-3 pt-1">
-        {tree.departments.map((department) => (
-          <div className="flex flex-col items-center" key={`${department.name}-${department.manager.name}`}>
-            <span className="mb-1 rounded-full border border-[#D8D1CE] bg-[#FFFEFC] px-2 py-0.5 text-[10px] font-normal text-[#4F4542]">
-              {department.name}
-            </span>
-            <OrgPersonCard person={department.manager} />
-            <div className="h-5 w-px bg-[#B9B1AD]" />
-            <div className="h-px w-[134px] bg-[#B9B1AD]" />
-            <div className="mt-1 grid grid-cols-3 gap-1">
-              {department.members.length > 0
-                ? department.members.map((member) => (
-                  <OrgPersonCard compact key={`${department.name}-${member.name}-${member.position}`} person={member} />
-                ))
-                : (
-                  <OrgPersonCard compact person={{ name: "-", position: "-" }} />
-                )}
-            </div>
+    <div className="relative flex flex-col items-center text-center">
+      <OrgPersonCard node={node} />
+      {children.length > 0 ? (
+        <div className="relative mt-3 min-w-max">
+          <span className="absolute left-1/2 top-[-0.75rem] h-3 w-px -translate-x-1/2 bg-[#B9B1AD]" />
+          <span className="absolute left-[18%] right-[18%] top-0 h-px bg-[#B9B1AD]" />
+          <div className={`grid gap-2 pt-3 ${children.length === 1 ? "grid-cols-1" : children.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+            {children.map((child) => (
+              <div className="relative flex justify-center" key={child.id}>
+                <span className="absolute left-1/2 top-[-0.75rem] h-3 w-px -translate-x-1/2 bg-[#B9B1AD]" />
+                <OrgNodePreview node={child} />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
 function OrgPersonCard({
   compact = false,
-  person,
-  wide = false
+  node
 }: {
   compact?: boolean;
-  person: {
-    name: string;
-    position: string;
-  };
-  wide?: boolean;
+  node: OrganizationChartNode;
 }) {
   return (
     <button
@@ -433,19 +394,38 @@ function OrgPersonCard({
         compact
           ? "grid-cols-1 px-1 py-1 text-[9px]"
           : "grid-cols-[28px_minmax(0,1fr)_12px] px-2 py-2 text-[11px]"
-      } ${wide ? "w-[116px]" : compact ? "w-[42px]" : "w-[118px]"}`}
+      } ${compact ? "w-[42px]" : "w-[118px]"}`}
       type="button"
     >
       <span className="flex h-7 w-7 items-center justify-center rounded-[7px] border border-[#D8D1CE] bg-[#F7F7F7]">
         <Camera aria-hidden className="h-4 w-4 text-[#777777]" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate">직급: {person.position}</span>
-        <span className="block truncate">이름: {person.name}</span>
+        <span className="block truncate">직급: {node.positionName ?? node.displayName ?? "-"}</span>
+        <span className="block truncate">이름: {node.memberName ?? "-"}</span>
       </span>
       {!compact ? <ChevronDown aria-hidden className="h-3 w-3 text-[#6F6662]" /> : null}
     </button>
   );
+}
+
+function flattenChartNodes(nodes: OrganizationChartNode[]): OrganizationChartNodeUpdate[] {
+  return nodes.flatMap((node) => [
+    {
+      displayName: node.displayName,
+      displayOrder: node.displayOrder,
+      floor: node.floor,
+      id: node.id,
+      imageUrl: node.imageUrl,
+      isEnabled: node.isEnabled,
+      memberId: node.memberId,
+      organizationId: node.organizationId,
+      parentId: node.parentId,
+      positionId: node.positionId,
+      slotKey: node.slotKey
+    },
+    ...flattenChartNodes(node.children ?? [])
+  ]);
 }
 
 export default OrgChartSettingsPage;
