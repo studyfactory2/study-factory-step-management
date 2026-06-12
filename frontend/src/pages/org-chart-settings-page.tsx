@@ -35,6 +35,7 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isShapeEditing, setIsShapeEditing] = useState(false);
+  const [shapeDraftNodes, setShapeDraftNodes] = useState<OrganizationChartNodeUpdate[]>([]);
   const [tempNodeId, setTempNodeId] = useState(-1);
 
   useEffect(() => {
@@ -51,6 +52,8 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
   }, []);
 
   const departmentRows = chart ? getDepartmentRows(chart.nodes) : [];
+  const enabledChartNodes = chart ? filterEnabledChartNodes(chart.nodes) : [];
+  const shapePreviewNodes = isShapeEditing ? shapeDraftNodes : flattenChartNodes(chart?.nodes ?? []);
 
   if (!onBack) {
     return null;
@@ -106,25 +109,41 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
     });
   }
 
-  function handleToggleShapeSlot(slot: ShapeSlot) {
-    if (!chart || !isShapeEditing) {
+  function handleStartShapeEdit() {
+    setShapeDraftNodes(flattenChartNodes(chart?.nodes ?? []));
+    setIsShapeEditing(true);
+  }
+
+  function handleCompleteShapeEdit() {
+    if (!isShapeEditing) {
       return;
     }
 
-    const flatNodes = flattenChartNodes(chart.nodes);
-    const existingNode = flatNodes.find((node) => node.slotKey === slot.slotKey);
+    if (chart) {
+      setChart({
+        ...chart,
+        nodes: buildChartNodeTree(shapeDraftNodes, chart.nodes)
+      });
+    }
+
+    setIsShapeEditing(false);
+  }
+
+  function handleToggleShapeSlot(slot: ShapeSlot) {
+    if (!isShapeEditing) {
+      return;
+    }
+
+    const existingNode = shapeDraftNodes.find((node) => node.slotKey === slot.slotKey);
     const isChecked = Boolean(existingNode?.isEnabled);
-    const negativeNodeCount = flatNodes.filter((node) => node.id < 0).length;
+    const negativeNodeCount = shapeDraftNodes.filter((node) => node.id < 0).length;
     const nextFlatNodes = isChecked
-      ? flatNodes.map((node) => isDescendantSlot(node.slotKey, slot.slotKey) ? { ...node, isEnabled: false } : node)
-      : ensureSlotNodes(flatNodes, slot, tempNodeId);
+      ? shapeDraftNodes.map((node) => isDescendantSlot(node.slotKey, slot.slotKey) ? { ...node, isEnabled: false } : node)
+      : ensureSlotNodes(shapeDraftNodes, slot, tempNodeId);
     const nextNegativeNodeCount = nextFlatNodes.filter((node) => node.id < 0).length;
 
     setTempNodeId((currentId) => currentId - Math.max(nextNegativeNodeCount - negativeNodeCount, 0));
-    setChart({
-      ...chart,
-      nodes: buildChartNodeTree(nextFlatNodes)
-    });
+    setShapeDraftNodes(nextFlatNodes);
   }
 
   return (
@@ -157,14 +176,14 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
           title="조직도 모양 만들기"
         >
           <ShapeLayoutPreview
-            checkedSlotKeys={new Set(flattenChartNodes(chart?.nodes ?? []).filter((node) => node.isEnabled).map((node) => node.slotKey))}
+            checkedSlotKeys={new Set(shapePreviewNodes.filter((node) => node.isEnabled).map((node) => node.slotKey))}
             isEditing={isShapeEditing}
             onToggleSlot={handleToggleShapeSlot}
           />
           <StepActions
             isEditing={isShapeEditing}
-            onComplete={() => setIsShapeEditing(false)}
-            onEdit={() => setIsShapeEditing(true)}
+            onComplete={handleCompleteShapeEdit}
+            onEdit={handleStartShapeEdit}
           />
         </StepCard>
 
@@ -196,7 +215,6 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
           <p className="mt-3 text-[11px] font-normal leading-4 text-[#7B716D]">
             체크된 2층 칸만 부서 입력 구간으로 표시됩니다
           </p>
-          <StepActions />
         </StepCard>
 
         <StepCard
@@ -210,10 +228,10 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
             <div className="mt-3 rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-6 text-center text-[12px] text-[#7B716D]">
               저장된 조직도를 불러오는 중입니다.
             </div>
-          ) : chart?.nodes.length ? (
+          ) : enabledChartNodes.length ? (
             <div className="mt-3 overflow-x-auto pb-1">
               <div className="flex min-w-max justify-center gap-2">
-                {chart.nodes.map((node) => (
+                {enabledChartNodes.map((node) => (
                   <OrgNodePreview key={node.id} node={node} />
                 ))}
               </div>
@@ -266,21 +284,49 @@ function DepartmentSelect({
   onChange: (nodeId: number, organizationId: number | null) => void;
   organizations: OrganizationOption[];
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOrganization = organizations.find((organization) => organization.id === node.organizationId) ?? null;
+  const options: Array<OrganizationOption | null> = [null, ...organizations];
+
   return (
     <div className="relative">
-      <select
-        className="h-10 w-full appearance-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 pr-8 text-[13px] font-normal text-[#222222] shadow-sm outline-none"
-        onChange={(event) => onChange(node.id, event.target.value ? Number(event.target.value) : null)}
-        value={node.organizationId ?? ""}
+      <button
+        className="flex h-10 w-full items-center justify-between rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-left text-[13px] font-normal text-[#222222] shadow-sm transition hover:border-[#B9D7EF] hover:bg-[#F7FBFF]"
+        onClick={() => setIsOpen((current) => !current)}
+        type="button"
       >
-        <option value="">선택 안 함</option>
-        {organizations.map((organization) => (
-          <option key={organization.id} value={organization.id}>
-            {organization.name}
-          </option>
-        ))}
-      </select>
-      <ChevronDown aria-hidden className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6F6662]" />
+        <span className={selectedOrganization ? "text-[#222222]" : "text-[#8B817D]"}>
+          {selectedOrganization?.name ?? "선택 안 함"}
+        </span>
+        <ChevronDown
+          aria-hidden
+          className={`h-4 w-4 text-[#6F6662] transition ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+      {isOpen ? (
+        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-[10px] border border-[#D8D1CE] bg-white py-1 shadow-[0_10px_24px_rgba(95,73,68,0.14)]">
+          {options.map((organization) => {
+            const isSelected = (organization?.id ?? null) === node.organizationId;
+
+            return (
+              <button
+                className={`flex h-8 w-full items-center justify-between px-3 text-left text-[12px] font-normal transition ${
+                  isSelected ? "bg-[#F3FAFF] text-[#416A83]" : "text-[#2F2926] hover:bg-[#FFF7F8]"
+                }`}
+                key={organization?.id ?? "none"}
+                onClick={() => {
+                  onChange(node.id, organization?.id ?? null);
+                  setIsOpen(false);
+                }}
+                type="button"
+              >
+                {organization?.name ?? "선택 안 함"}
+                {isSelected ? <Check aria-hidden className="h-3.5 w-3.5" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -323,6 +369,15 @@ function updateChartNode(
   });
 }
 
+function filterEnabledChartNodes(nodes: OrganizationChartNode[]): OrganizationChartNode[] {
+  return nodes
+    .filter((node) => node.isEnabled)
+    .map((node) => ({
+      ...node,
+      children: filterEnabledChartNodes(node.children ?? [])
+    }));
+}
+
 function StepCard({
   accent,
   children,
@@ -339,7 +394,7 @@ function StepCard({
   title: string;
 }) {
   return (
-    <section className="grid grid-cols-[7px_minmax(0,1fr)] overflow-hidden rounded-[16px] border border-[#D8D1CE] bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
+    <section className="grid grid-cols-[7px_minmax(0,1fr)] overflow-visible rounded-[16px] border border-[#D8D1CE] bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
       <span className={accent} />
       <div className="p-3">
         <h2 className="flex items-center gap-2 text-[20px] font-normal text-[#111111]">
@@ -687,14 +742,23 @@ function isDescendantSlot(slotKey: string, parentSlotKey: string) {
   return false;
 }
 
-function buildChartNodeTree(nodes: OrganizationChartNodeUpdate[]): OrganizationChartNode[] {
-  const responseNodes: OrganizationChartNode[] = nodes.map((node) => ({
-    ...node,
-    children: [],
-    memberName: null,
-    organizationName: null,
-    positionName: null
-  }));
+function buildChartNodeTree(
+  nodes: OrganizationChartNodeUpdate[],
+  sourceNodes: OrganizationChartNode[] = []
+): OrganizationChartNode[] {
+  const sourceNodeMap = new Map(flattenResponseNodes(sourceNodes).map((node) => [node.id, node]));
+  const sourceSlotMap = new Map(flattenResponseNodes(sourceNodes).map((node) => [node.slotKey, node]));
+  const responseNodes: OrganizationChartNode[] = nodes.map((node) => {
+    const sourceNode = sourceNodeMap.get(node.id) ?? sourceSlotMap.get(node.slotKey);
+
+    return {
+      ...node,
+      children: [],
+      memberName: sourceNode?.memberName ?? null,
+      organizationName: sourceNode?.organizationName ?? null,
+      positionName: sourceNode?.positionName ?? null
+    };
+  });
   const nodeMap = new Map(responseNodes.map((node) => [node.id, node]));
   const slotMap = new Map(responseNodes.map((node) => [node.slotKey, node]));
   const roots: OrganizationChartNode[] = [];
