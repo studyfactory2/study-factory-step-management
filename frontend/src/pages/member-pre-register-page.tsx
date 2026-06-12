@@ -455,7 +455,7 @@ function PendingPreRegistrationCard({
             <strong className="block truncate text-[15px] font-normal text-[#222222]">
               {preRegistration.name}
             </strong>
-            <dl className="mt-1 space-y-0.5 text-[11px] font-normal">
+            <dl className="mt-0.5 space-y-0 text-[11px] font-normal leading-4">
               <ProfileLine
                 icon={<MapPin aria-hidden className="h-3.5 w-3.5 text-[#7B8B91]" />}
                 label="지역"
@@ -516,12 +516,12 @@ function ProfileLine({
   value: string;
 }) {
   return (
-    <div className="grid min-h-6 grid-cols-[54px_minmax(0,1fr)] items-center gap-1.5">
+    <div className="grid min-h-5 grid-cols-[48px_minmax(0,1fr)] items-center gap-0.5">
       <dt className="flex items-center gap-0.5 text-[#9A918D]">
         {icon}
         <span>{label}</span>
       </dt>
-      <dd className="flex min-w-0 items-center justify-between gap-1.5 text-[#4F4542]">
+      <dd className="flex min-w-0 items-center justify-between gap-1 text-[#4F4542]">
         <span className="min-w-0 truncate">{value}</span>
         {action}
       </dd>
