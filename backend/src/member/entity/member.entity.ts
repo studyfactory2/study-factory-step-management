@@ -20,6 +20,18 @@ export class Member extends BaseEntity {
   @Column({ name: "avatar_url", type: "varchar", nullable: true })
   avatarUrl: string | null;
 
+  @Column({ type: "int", nullable: true })
+  age: number | null;
+
+  @Column({ name: "joined_at", type: "date", nullable: true })
+  joinedAt: string | null;
+
+  @Column({ name: "phone_number", type: "varchar", nullable: true })
+  phoneNumber: string | null;
+
+  @Column({ name: "duty_text", type: "varchar", nullable: true })
+  dutyText: string | null;
+
   @Column({ name: "organization_id", type: "int", nullable: true })
   organizationId: number | null;
 

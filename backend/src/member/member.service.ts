@@ -207,6 +207,10 @@ export class MemberService {
       positionDuty?.id ?? null,
       roleType
     );
+    member.age = preRegistration.age;
+    member.joinedAt = preRegistration.joinedAt;
+    member.phoneNumber = preRegistration.phoneNumber;
+    member.dutyText = preRegistration.dutyText;
 
     preRegistration.isRegistered = true;
     await this.memberRepository.savePreRegistration(preRegistration);

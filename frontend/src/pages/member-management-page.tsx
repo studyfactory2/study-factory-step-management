@@ -216,7 +216,7 @@ function EmployeeOrganizationSection({ group }: { group: OrganizationGroup }) {
           </span>
         </h2>
 
-        <div className="mt-2 space-y-3">
+        <div className="mt-2 max-h-[360px] space-y-3 overflow-y-auto pr-1">
           {positionGroups.map((positionGroup) => (
             <EmployeePositionTable
               key={positionGroup.positionName}
@@ -243,22 +243,10 @@ function EmployeePositionTable({ positionGroup }: { positionGroup: PositionGroup
         <span className="text-[10px] text-[#7B716D]">({positionGroup.members.length}명)</span>
       </h3>
 
-      <div className="overflow-x-auto pb-1">
-        <div className="min-w-[610px]">
-          <div className="grid grid-cols-[70px_42px_74px_82px_106px_minmax(130px,1fr)] border-y border-dashed border-[#D8D1CE] py-1 text-center text-[10px] font-normal text-[#7B716D]">
-            <span>이름</span>
-            <span>나이</span>
-            <span>입사일</span>
-            <span>거주지</span>
-            <span>전화번호</span>
-            <span>담당업무</span>
-          </div>
-          <div className="mt-1 space-y-1">
-            {positionGroup.members.map((member) => (
-              <EmployeeRow key={member.id} member={member} />
-            ))}
-          </div>
-        </div>
+      <div className="space-y-1.5">
+        {positionGroup.members.map((member) => (
+          <EmployeeRow key={member.id} member={member} />
+        ))}
       </div>
     </div>
   );
@@ -266,14 +254,35 @@ function EmployeePositionTable({ positionGroup }: { positionGroup: PositionGroup
 
 function EmployeeRow({ member }: { member: Member }) {
   return (
-    <div className="grid min-h-8 grid-cols-[70px_42px_74px_82px_106px_minmax(130px,1fr)] items-center rounded-[10px] border border-[#E6DFDC] bg-[#FFFEFC] px-1 py-1 text-center text-[11px] font-normal text-[#4F4542]">
-      <span className="truncate text-[#2D70CB]">{member.name}</span>
-      <span>-</span>
-      <span>{formatPlainDate(member.createdAt)}</span>
-      <span className="truncate">{member.branchName ?? member.branch ?? "-"}</span>
-      <span>-</span>
-      <span className="truncate text-left">{getMemberDutyName(member)}</span>
-    </div>
+    <article className="rounded-[10px] border border-[#E6DFDC] bg-[#FFFEFC] px-2 py-2 text-[11px] font-normal text-[#4F4542]">
+      <div className="grid grid-cols-[52px_minmax(0,1fr)_96px] items-center gap-1.5">
+        <span className="truncate text-[12px] text-[#2D70CB]">{member.name}</span>
+        <span className="truncate text-[#7B716D]">{getMemberDutyName(member)}</span>
+        <span className="whitespace-nowrap text-right text-[10px] text-[#6F6662]">
+          {formatPhoneNumber(member.phoneNumber ?? null)}
+        </span>
+      </div>
+      <div className="mt-1.5 grid grid-cols-3 gap-1">
+        <EmployeeInfoPill label="나이" value={member.age ? `${member.age}` : "-"} />
+        <EmployeeInfoPill label="입사일" value={formatPlainDate(member.joinedAt ?? member.createdAt)} />
+        <EmployeeInfoPill label="거주지" value={getMemberBranchName(member)} />
+      </div>
+    </article>
+  );
+}
+
+function EmployeeInfoPill({
+  label,
+  value
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <span className="min-w-0 rounded-[8px] bg-white px-1.5 py-1 text-center leading-4 shadow-[inset_0_0_0_1px_#EFE8E5]">
+      <span className="block text-[9px] text-[#9A918C]">{label}</span>
+      <span className="block truncate text-[10px] text-[#4F4542]">{value}</span>
+    </span>
   );
 }
 
@@ -325,8 +334,16 @@ function getMemberPositionName(member: Member) {
   return member.positionInfo?.name ?? "직위 미지정";
 }
 
+function getMemberBranchName(member: Member) {
+  return member.branchName
+    ?? member.branchInfo?.name
+    ?? member.branch
+    ?? "-";
+}
+
 function getMemberDutyName(member: Member) {
-  return member.positionDuty?.name
+  return member.dutyText
+    ?? member.positionDuty?.name
     ?? member.positionDuty?.duty
     ?? "담당 미지정";
 }
@@ -452,6 +469,19 @@ function formatPlainDate(value: string | null) {
     month: "2-digit",
     year: "2-digit"
   }).format(date);
+}
+
+function formatPhoneNumber(value: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 11) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+
+  return value;
 }
 
 export default MemberManagementPage;

@@ -23,8 +23,16 @@ export type Member = {
   name: string;
   displayName: string | null;
   avatarUrl: string | null;
+  age?: number | null;
   branch: string | null;
+  branchInfo?: {
+    id: number;
+    name: string;
+    organizationId: number;
+  } | null;
   branchName?: string | null;
+  dutyText?: string | null;
+  joinedAt?: string | null;
   organization?: {
     id: number;
     name: string;
@@ -36,6 +44,7 @@ export type Member = {
     id: number;
     name: string;
   } | null;
+  phoneNumber?: string | null;
   positionDutyId: number | null;
   positionDuty?: {
     duty: MemberDuty | null;
