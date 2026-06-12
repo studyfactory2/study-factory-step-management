@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AdminSettingsPage } from "@/pages/admin-settings-page";
+import { MemberPreRegisterPage } from "@/pages/member-pre-register-page";
 import {
   getStoredAuth,
   isAdminRole,
   type StoredMember
 } from "@/lib/auth-storage";
 
-export default function AdminSettingsRoutePage() {
+export default function MemberPreRegisterRoutePage() {
   const router = useRouter();
+  const [accessToken, setAccessToken] = useState("");
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -27,18 +28,19 @@ export default function AdminSettingsRoutePage() {
       return;
     }
 
+    setAccessToken(auth.accessToken);
     setCurrentMember(auth.currentMember);
     setIsReady(true);
   }, [router]);
 
-  if (!isReady || !currentMember) {
+  if (!isReady || !accessToken || !currentMember) {
     return null;
   }
 
   return (
-    <AdminSettingsPage
-      onBack={() => router.push("/admin-dashboard")}
-      onPreRegisterOpen={() => router.push("/admin-settings/member-pre-register")}
+    <MemberPreRegisterPage
+      accessToken={accessToken}
+      onBack={() => router.push("/admin-settings")}
     />
   );
 }

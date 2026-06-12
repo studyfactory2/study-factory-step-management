@@ -19,30 +19,36 @@ import {
 
 type AdminSettingsPageProps = {
   onBack?: () => void;
+  onPreRegisterOpen?: () => void;
 };
 
 const managementMenus = [
   {
+    action: "preRegister",
     icon: UserRound,
     label: "사원 사전등록",
     tone: "border-[#B8D8F5] bg-[#EAF3FF] text-[#2D70CB]"
   },
   {
+    action: null,
     icon: UsersRound,
     label: "사원관리",
     tone: "border-[#B8D8F5] bg-[#F4FAFF] text-[#2D70CB]"
   },
   {
+    action: null,
     icon: Tag,
     label: "부서/직급관리",
     tone: "border-[#F0C5C5] bg-[#FFF1F1] text-[#D95858]"
   },
   {
+    action: null,
     icon: Folder,
     label: "업무종류관리",
     tone: "border-[#F0DD96] bg-[#FFF9D9] text-[#C7961D]"
   },
   {
+    action: null,
     icon: TrafficCone,
     label: "상태표시관리",
     tone: "border-[#D2C3F0] bg-[#F4EEFF] text-[#6F55AE]"
@@ -50,7 +56,8 @@ const managementMenus = [
 ] as const;
 
 export function AdminSettingsPage({
-  onBack
+  onBack,
+  onPreRegisterOpen
 }: AdminSettingsPageProps) {
   if (!onBack) {
     return null;
@@ -91,6 +98,7 @@ export function AdminSettingsPage({
                 <button
                   className={`flex h-[52px] items-center justify-center gap-2 rounded-[12px] border text-[13px] font-normal shadow-sm ${menu.tone} ${isWide ? "col-span-2" : ""}`}
                   key={menu.label}
+                  onClick={menu.action === "preRegister" ? onPreRegisterOpen : undefined}
                   type="button"
                 >
                   <Icon aria-hidden className="h-5 w-5 shrink-0" />
