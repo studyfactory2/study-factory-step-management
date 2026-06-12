@@ -92,6 +92,56 @@ export class MemberService {
     return this.memberRepository.findPreRegistrations();
   }
 
+  async updatePreRegistration(id: number, request: MemberPreRegisterRequest): Promise<MemberPreRegistration> {
+    const preRegistration = await this.memberRepository.findPreRegistrationById(id);
+
+    if (!preRegistration) {
+      throw new MemberNotFoundException(id);
+    }
+
+    if (preRegistration.isRegistered) {
+      throw new MemberPreRegistrationDeleteException(id);
+    }
+
+    const positionInfo = await this.positionRepository.findActiveById(request.positionId);
+    if (!positionInfo) {
+      throw new MemberPositionNotFoundException(String(request.positionId));
+    }
+
+    const positionDuty = request.positionDutyId
+      ? await this.positionRepository.findDutyByIdAndPositionId(
+        request.positionDutyId,
+        request.positionId
+      )
+      : null;
+    if (request.positionDutyId && !positionDuty) {
+      throw new MemberPositionNotFoundException(String(request.positionId));
+    }
+
+    const roleType = this.resolveRoleType(positionInfo);
+    const branchInfo = await this.memberRepository.findBranchByName(request.branch);
+    const organizationInfo = request.organization
+      ? await this.memberRepository.findOrganizationByName(request.organization)
+      : null;
+
+    preRegistration.name = request.name;
+    preRegistration.age = request.age ?? null;
+    preRegistration.joinedAt = request.joinedAt ?? null;
+    preRegistration.phoneNumber = request.phoneNumber ?? null;
+    preRegistration.dutyText = request.dutyText ?? null;
+    preRegistration.branch = branchInfo?.name ?? request.branch;
+    preRegistration.organizationId = organizationInfo?.id ?? branchInfo?.organizationId ?? null;
+    preRegistration.branchId = branchInfo?.id ?? null;
+    preRegistration.affiliation = null;
+    preRegistration.position = null;
+    preRegistration.roleType = roleType;
+    preRegistration.duty = null;
+    preRegistration.positionId = positionInfo.id;
+    preRegistration.positionDutyId = positionDuty?.id ?? null;
+
+    return this.memberRepository.savePreRegistration(preRegistration);
+  }
+
   async deletePreRegistration(id: number): Promise<void> {
     const preRegistration = await this.memberRepository.findPreRegistrationById(id);
 

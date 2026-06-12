@@ -116,6 +116,29 @@ export async function preRegisterMember(
   }
 }
 
+export async function updateMemberPreRegistration(
+  accessToken: string,
+  id: number,
+  request: MemberPreRegisterRequest
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/members/pre-registrations/${id}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "직원 사전등록 정보를 수정하지 못했습니다.");
+  }
+}
+
 export async function registerMember(request: MemberRegisterRequest): Promise<Member> {
   const response = await fetch(`${API_BASE_URL}/api/members/register`, {
     method: "POST",

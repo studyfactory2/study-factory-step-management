@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
 import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
@@ -34,6 +34,15 @@ export class MemberController {
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
   async findPreRegistrations() {
     return this.memberService.findPreRegistrations();
+  }
+
+  @Patch("pre-registrations/:id")
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
+  async updatePreRegistration(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() request: MemberPreRegisterRequest
+  ) {
+    return this.memberService.updatePreRegistration(id, request);
   }
 
   @Delete("pre-registrations/:id")

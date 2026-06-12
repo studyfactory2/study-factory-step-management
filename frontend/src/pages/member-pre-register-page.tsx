@@ -25,6 +25,7 @@ import {
   deleteMemberPreRegistration,
   getMemberPreRegistrations,
   preRegisterMember,
+  updateMemberPreRegistration,
   type MemberPreRegistration
 } from "@/api/member";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
@@ -43,6 +44,18 @@ type DropdownOption = {
   depth?: number;
   label: string;
   value: string;
+};
+
+type PreRegistrationEditDraft = {
+  age: string;
+  dutyText: string;
+  joinedAt: string;
+  name: string;
+  organization: string;
+  phoneNumber: string;
+  positionId: string;
+  residenceCity: string;
+  residenceDistrict: string;
 };
 
 const organizationOptions = ["자격증공장", "수험생연구소"];
@@ -118,6 +131,9 @@ export function MemberPreRegisterPage({
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editDraft, setEditDraft] = useState<PreRegistrationEditDraft | null>(null);
+  const [isUpdatingId, setIsUpdatingId] = useState<number | null>(null);
 
   const flatPositions = useMemo(() => flattenPositions(positions), [positions]);
   const selectablePositions = flatPositions.filter((position) => !position.isAdmin && position.isActive);
@@ -232,6 +248,65 @@ export function MemberPreRegisterPage({
       setMessage(error instanceof Error ? error.message : "사전등록 정보를 삭제하지 못했습니다.");
     } finally {
       setIsDeletingId(null);
+    }
+  }
+
+  function handleStartEdit(preRegistration: MemberPreRegistration) {
+    setEditingId(preRegistration.id);
+    setEditDraft(createEditDraft(preRegistration));
+  }
+
+  function handleCancelEdit() {
+    setEditingId(null);
+    setEditDraft(null);
+  }
+
+  function handleEditDraftChange(nextDraft: Partial<PreRegistrationEditDraft>) {
+    setEditDraft((currentDraft) => currentDraft ? { ...currentDraft, ...nextDraft } : currentDraft);
+  }
+
+  async function handleSaveEdit(preRegistration: MemberPreRegistration) {
+    if (!editDraft) {
+      return;
+    }
+
+    if (
+      !editDraft.name.trim()
+      || !editDraft.age.trim()
+      || !editDraft.joinedAt.trim()
+      || !editDraft.residenceCity.trim()
+      || !editDraft.residenceDistrict.trim()
+      || !editDraft.phoneNumber.trim()
+      || !editDraft.organization.trim()
+      || !editDraft.positionId
+      || !editDraft.dutyText.trim()
+    ) {
+      setMessage("사진을 제외한 모든 항목을 입력해주세요.");
+      return;
+    }
+
+    setIsUpdatingId(preRegistration.id);
+    setMessage("");
+
+    try {
+      await updateMemberPreRegistration(accessToken, preRegistration.id, {
+        age: Number(editDraft.age),
+        branch: `${editDraft.residenceCity.trim()} ${editDraft.residenceDistrict.trim()}`,
+        dutyText: editDraft.dutyText.trim(),
+        joinedAt: editDraft.joinedAt,
+        name: editDraft.name.trim(),
+        organization: editDraft.organization,
+        phoneNumber: editDraft.phoneNumber.trim(),
+        positionId: Number(editDraft.positionId)
+      });
+      await refreshPreRegistrations();
+      setEditingId(null);
+      setEditDraft(null);
+      setMessage(`${editDraft.name.trim()}님의 사전등록 정보를 수정했습니다.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "사전등록 정보를 수정하지 못했습니다.");
+    } finally {
+      setIsUpdatingId(null);
     }
   }
 
@@ -426,10 +501,18 @@ export function MemberPreRegisterPage({
             ) : (
               pendingGroups.map((group) => (
                 <PendingPreRegistrationGroup
+                  editDraft={editDraft}
+                  editingId={editingId}
                   isDeletingId={isDeletingId}
+                  isUpdatingId={isUpdatingId}
                   key={group.organizationName}
+                  onCancelEdit={handleCancelEdit}
                   onDelete={handleDelete}
+                  onEdit={handleStartEdit}
+                  onEditDraftChange={handleEditDraftChange}
+                  onSaveEdit={handleSaveEdit}
                   organizationName={group.organizationName}
+                  positions={selectablePositions}
                   preRegistrations={group.items}
                 />
               ))
@@ -565,14 +648,30 @@ function CustomDropdown({
 }
 
 function PendingPreRegistrationGroup({
+  editDraft,
+  editingId,
   isDeletingId,
+  isUpdatingId,
+  onCancelEdit,
   onDelete,
+  onEdit,
+  onEditDraftChange,
+  onSaveEdit,
   organizationName,
+  positions,
   preRegistrations
 }: {
+  editDraft: PreRegistrationEditDraft | null;
+  editingId: number | null;
   isDeletingId: number | null;
+  isUpdatingId: number | null;
+  onCancelEdit: () => void;
   onDelete: (preRegistration: MemberPreRegistration) => void;
+  onEdit: (preRegistration: MemberPreRegistration) => void;
+  onEditDraftChange: (nextDraft: Partial<PreRegistrationEditDraft>) => void;
+  onSaveEdit: (preRegistration: MemberPreRegistration) => void;
   organizationName: string;
+  positions: FlatPosition[];
   preRegistrations: MemberPreRegistration[];
 }) {
   const organizationMeta = getOrganizationGroupMeta(organizationName);
@@ -592,10 +691,18 @@ function PendingPreRegistrationGroup({
       <div className="mt-2 space-y-1.5">
         {preRegistrations.map((preRegistration, index) => (
           <PendingPreRegistrationRow
+            editDraft={editingId === preRegistration.id ? editDraft : null}
             index={index + 1}
             isDeleting={isDeletingId === preRegistration.id}
+            isEditing={editingId === preRegistration.id}
+            isUpdating={isUpdatingId === preRegistration.id}
             key={preRegistration.id}
+            onCancelEdit={onCancelEdit}
             onDelete={() => onDelete(preRegistration)}
+            onEdit={() => onEdit(preRegistration)}
+            onEditDraftChange={onEditDraftChange}
+            onSaveEdit={() => onSaveEdit(preRegistration)}
+            positions={positions}
             preRegistration={preRegistration}
           />
         ))}
@@ -605,14 +712,30 @@ function PendingPreRegistrationGroup({
 }
 
 function PendingPreRegistrationRow({
+  editDraft,
   index,
   isDeleting,
+  isEditing,
+  isUpdating,
+  onCancelEdit,
   onDelete,
+  onEdit,
+  onEditDraftChange,
+  onSaveEdit,
+  positions,
   preRegistration
 }: {
+  editDraft: PreRegistrationEditDraft | null;
   index: number;
   isDeleting: boolean;
+  isEditing: boolean;
+  isUpdating: boolean;
+  onCancelEdit: () => void;
   onDelete: () => void;
+  onEdit: () => void;
+  onEditDraftChange: (nextDraft: Partial<PreRegistrationEditDraft>) => void;
+  onSaveEdit: () => void;
+  positions: FlatPosition[];
   preRegistration: MemberPreRegistration;
 }) {
   const positionName = preRegistration.positionInfo?.name ?? preRegistration.position ?? "직위 미지정";
@@ -623,6 +746,116 @@ function PendingPreRegistrationRow({
     ?? preRegistration.positionDuty?.duty
     ?? preRegistration.duty
     ?? "담당 미지정";
+
+  if (isEditing && editDraft) {
+    const districtOptions = editDraft.residenceCity ? residenceOptions[editDraft.residenceCity] ?? [] : [];
+
+    return (
+      <article className="rounded-[11px] border border-[#B9D7EF] bg-[#F7FBFF] px-2 py-2">
+        <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-1.5">
+          <span className="pt-2 text-center text-[12px] font-normal text-[#416A83]">{index}.</span>
+          <div className="min-w-0 space-y-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_58px] gap-1.5">
+              <input
+                className="h-9 rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+                onChange={(event) => onEditDraftChange({ name: event.target.value })}
+                placeholder="이름"
+                value={editDraft.name}
+              />
+              <input
+                className="h-9 rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+                min="1"
+                onChange={(event) => onEditDraftChange({ age: event.target.value })}
+                placeholder="나이"
+                type="number"
+                value={editDraft.age}
+              />
+            </div>
+            <input
+              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+              onChange={(event) => onEditDraftChange({ joinedAt: event.target.value })}
+              type="date"
+              value={editDraft.joinedAt}
+            />
+            <div className="grid grid-cols-2 gap-1.5">
+              <CustomDropdown
+                onChange={(value) => onEditDraftChange({ residenceCity: value, residenceDistrict: "" })}
+                options={Object.keys(residenceOptions).map((option) => ({
+                  label: option,
+                  value: option
+                }))}
+                placeholder="시"
+                value={editDraft.residenceCity}
+              />
+              <CustomDropdown
+                disabled={!editDraft.residenceCity}
+                onChange={(value) => onEditDraftChange({ residenceDistrict: value })}
+                options={districtOptions.map((option) => ({
+                  label: option,
+                  value: option
+                }))}
+                placeholder="구"
+                value={editDraft.residenceDistrict}
+              />
+            </div>
+            <input
+              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+              inputMode="numeric"
+              maxLength={13}
+              onChange={(event) => onEditDraftChange({ phoneNumber: formatPhoneInput(event.target.value) })}
+              placeholder="번호만 입력해주세요"
+              value={editDraft.phoneNumber}
+            />
+            <div className="grid grid-cols-2 gap-1.5">
+              <CustomDropdown
+                onChange={(value) => onEditDraftChange({ organization: value })}
+                options={organizationOptions.map((option) => ({
+                  label: option,
+                  value: option
+                }))}
+                placeholder="소속"
+                value={editDraft.organization}
+              />
+              <CustomDropdown
+                onChange={(value) => onEditDraftChange({ positionId: value })}
+                options={positions.map((position) => ({
+                  depth: position.depth,
+                  label: position.name,
+                  value: String(position.id)
+                }))}
+                placeholder="직위"
+                value={editDraft.positionId}
+              />
+            </div>
+            <input
+              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+              onChange={(event) => onEditDraftChange({ dutyText: event.target.value })}
+              placeholder="담당업무"
+              value={editDraft.dutyText}
+            />
+            <div className="flex justify-end gap-1.5">
+              <button
+                className="h-8 rounded-[8px] border border-[#D8D1CE] bg-white px-3 text-[11px] font-normal text-[#4F4542]"
+                onClick={onCancelEdit}
+                type="button"
+              >
+                취소
+              </button>
+              <button
+                className="flex h-8 items-center justify-center gap-1 rounded-[8px] border border-[#B9D7EF] bg-[#D8ECFF] px-3 text-[11px] font-normal text-[#416A83] disabled:opacity-60"
+                disabled={isUpdating}
+                onClick={onSaveEdit}
+                type="button"
+              >
+                <Save aria-hidden className="h-3.5 w-3.5" />
+                {isUpdating ? "저장 중" : "저장"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article className="rounded-[11px] border border-[#E6DFDC] bg-white px-2 py-2">
@@ -649,6 +882,7 @@ function PendingPreRegistrationRow({
         <div className="flex justify-end gap-1">
           <button
             className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#D8D1CE] bg-[#FFFEFC] text-[#4F4542]"
+            onClick={onEdit}
             title="수정"
             type="button"
           >
@@ -685,6 +919,51 @@ function getAffiliationLabel(affiliation: MemberPreRegistration["affiliation"]) 
 function getPreRegistrationOrganizationName(preRegistration: MemberPreRegistration) {
   return preRegistration.organization?.name
     ?? getAffiliationLabel(preRegistration.affiliation);
+}
+
+function createEditDraft(preRegistration: MemberPreRegistration): PreRegistrationEditDraft {
+  const residence = splitResidence(preRegistration.branch);
+
+  return {
+    age: preRegistration.age ? String(preRegistration.age) : "",
+    dutyText: preRegistration.dutyText
+      ?? preRegistration.positionDuty?.name
+      ?? preRegistration.positionDuty?.duty
+      ?? preRegistration.duty
+      ?? "",
+    joinedAt: preRegistration.joinedAt ?? "",
+    name: preRegistration.name,
+    organization: getPreRegistrationOrganizationName(preRegistration),
+    phoneNumber: formatPhoneInput(preRegistration.phoneNumber ?? ""),
+    positionId: preRegistration.positionId ? String(preRegistration.positionId) : "",
+    residenceCity: residence.city,
+    residenceDistrict: residence.district
+  };
+}
+
+function splitResidence(value: string | null): {
+  city: string;
+  district: string;
+} {
+  if (!value) {
+    return {
+      city: "",
+      district: ""
+    };
+  }
+
+  const matchedCity = Object.keys(residenceOptions).find((city) => value.startsWith(city));
+  if (!matchedCity) {
+    return {
+      city: "",
+      district: value
+    };
+  }
+
+  return {
+    city: matchedCity,
+    district: value.slice(matchedCity.length).trim()
+  };
 }
 
 function groupPreRegistrationsByOrganization(preRegistrations: MemberPreRegistration[]) {
