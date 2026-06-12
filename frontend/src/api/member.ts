@@ -4,9 +4,14 @@ import { handleUnauthorizedResponse } from "@/api/client";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 export type MemberPreRegisterRequest = {
+  age?: number;
   branch: string;
+  dutyText?: string;
+  joinedAt?: string;
   name: string;
-  positionDutyId: number;
+  organization?: string;
+  phoneNumber?: string;
+  positionDutyId?: number;
   positionId: number;
 };
 
@@ -19,11 +24,20 @@ export type MemberRegisterRequest = {
 export type MemberPreRegistration = {
   id: number;
   affiliation: MemberAffiliation | null;
+  age: number | null;
   branch: string;
   createdAt: string;
   duty: MemberDuty | null;
+  dutyText: string | null;
   isRegistered: boolean;
+  joinedAt: string | null;
   name: string;
+  organization?: {
+    id: number;
+    name: string;
+  } | null;
+  organizationId: number | null;
+  phoneNumber: string | null;
   position: MemberPosition | null;
   positionDutyId: number | null;
   positionDuty?: {

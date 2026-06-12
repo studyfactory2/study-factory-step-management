@@ -53,27 +53,36 @@ export class MemberService {
       throw new MemberPositionNotFoundException(String(request.positionId));
     }
 
-    const positionDuty = await this.positionRepository.findDutyByIdAndPositionId(
-      request.positionDutyId,
-      request.positionId
-    );
-    if (!positionDuty) {
+    const positionDuty = request.positionDutyId
+      ? await this.positionRepository.findDutyByIdAndPositionId(
+        request.positionDutyId,
+        request.positionId
+      )
+      : null;
+    if (request.positionDutyId && !positionDuty) {
       throw new MemberPositionNotFoundException(String(request.positionId));
     }
 
     const roleType = this.resolveRoleType(positionInfo);
     const branchInfo = await this.memberRepository.findBranchByName(request.branch);
+    const organizationInfo = request.organization
+      ? await this.memberRepository.findOrganizationByName(request.organization)
+      : null;
     const preRegistration = new MemberPreRegistration();
     preRegistration.name = request.name;
+    preRegistration.age = request.age ?? null;
+    preRegistration.joinedAt = request.joinedAt ?? null;
+    preRegistration.phoneNumber = request.phoneNumber ?? null;
+    preRegistration.dutyText = request.dutyText ?? null;
     preRegistration.branch = branchInfo?.name ?? request.branch;
-    preRegistration.organizationId = branchInfo?.organizationId ?? null;
+    preRegistration.organizationId = organizationInfo?.id ?? branchInfo?.organizationId ?? null;
     preRegistration.branchId = branchInfo?.id ?? null;
     preRegistration.affiliation = null;
     preRegistration.position = null;
     preRegistration.roleType = roleType;
     preRegistration.duty = null;
     preRegistration.positionId = positionInfo.id;
-    preRegistration.positionDutyId = positionDuty.id;
+    preRegistration.positionDutyId = positionDuty?.id ?? null;
     preRegistration.isRegistered = false;
 
     return this.memberRepository.savePreRegistration(preRegistration);
@@ -108,7 +117,7 @@ export class MemberService {
     }
 
     const { branch, branchId, organizationId, positionId, positionDutyId } = preRegistration;
-    if (!branch || !positionId || !positionDutyId) {
+    if (!branch || !positionId) {
       throw new MemberPreRegistrationNotFoundException(request.name, request.branch);
     }
 
@@ -127,11 +136,13 @@ export class MemberService {
       throw new MemberPositionNotFoundException(String(positionId));
     }
 
-    const positionDuty = await this.positionRepository.findDutyByIdAndPositionId(
-      positionDutyId,
-      position.id,
-    );
-    if (!positionDuty) {
+    const positionDuty = positionDutyId
+      ? await this.positionRepository.findDutyByIdAndPositionId(
+        positionDutyId,
+        position.id,
+      )
+      : null;
+    if (positionDutyId && !positionDuty) {
       throw new MemberPositionNotFoundException(String(positionId));
     }
 
@@ -143,7 +154,7 @@ export class MemberService {
       organizationId,
       branchId,
       position.id,
-      positionDuty.id,
+      positionDuty?.id ?? null,
       roleType
     );
 
