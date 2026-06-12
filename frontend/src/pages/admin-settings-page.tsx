@@ -5,6 +5,7 @@ import {
   Bell,
   BriefcaseBusiness,
   Building2,
+  ClipboardList,
   Crown,
   Folder,
   Lock,
@@ -53,6 +54,12 @@ const managementMenus = [
     icon: TrafficCone,
     label: "상태표시관리",
     tone: "border-[#D2C3F0] bg-[#F4EEFF] text-[#6F55AE]"
+  },
+  {
+    action: null,
+    icon: ClipboardList,
+    label: "게시판관리",
+    tone: "border-[#BFD8CE] bg-[#F0FAF5] text-[#3E8B66]"
   }
 ] as const;
 
@@ -92,13 +99,12 @@ export function AdminSettingsPage({
             관리 메뉴
           </h2>
           <div className="grid grid-cols-2 gap-2">
-            {managementMenus.map((menu, index) => {
+            {managementMenus.map((menu) => {
               const Icon = menu.icon;
-              const isWide = index === 4;
 
               return (
                 <button
-                  className={`flex h-[52px] items-center justify-center gap-2 rounded-[12px] border text-[13px] font-normal shadow-sm ${menu.tone} ${isWide ? "col-span-2" : ""}`}
+                  className={`flex h-[52px] items-center justify-center gap-2 rounded-[12px] border text-[13px] font-normal shadow-sm ${menu.tone}`}
                   key={menu.label}
                   onClick={menu.action === "preRegister" ? onPreRegisterOpen : undefined}
                   type="button"
