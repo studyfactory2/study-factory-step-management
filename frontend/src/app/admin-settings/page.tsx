@@ -37,7 +37,6 @@ export default function AdminSettingsRoutePage() {
 
   return (
     <AdminSettingsPage
-      currentMember={currentMember}
       onBack={() => router.push("/admin-dashboard")}
     />
   );

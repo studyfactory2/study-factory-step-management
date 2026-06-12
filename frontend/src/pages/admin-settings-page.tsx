@@ -16,17 +16,15 @@ import {
   UserRound,
   UsersRound
 } from "lucide-react";
-import type { StoredMember } from "@/lib/auth-storage";
 
 type AdminSettingsPageProps = {
-  currentMember?: StoredMember;
   onBack?: () => void;
 };
 
 const managementMenus = [
   {
     icon: UserRound,
-    label: "사원사전등록",
+    label: "사원 사전등록",
     tone: "border-[#B8D8F5] bg-[#EAF3FF] text-[#2D70CB]"
   },
   {
@@ -52,10 +50,9 @@ const managementMenus = [
 ] as const;
 
 export function AdminSettingsPage({
-  currentMember,
   onBack
 }: AdminSettingsPageProps) {
-  if (!currentMember || !onBack) {
+  if (!onBack) {
     return null;
   }
 
@@ -64,23 +61,20 @@ export function AdminSettingsPage({
       <div className="relative mx-auto w-full max-w-[360px] space-y-3">
         <header className="relative pb-2 text-center">
           <button
-            className="absolute left-0 top-0 h-10 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] px-3 text-[12px] font-normal text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[11px] font-normal text-[#333333] shadow-sm"
             onClick={onBack}
             type="button"
           >
             ← 뒤로가기
           </button>
           <h1 className="flex items-center justify-center gap-2 text-[24px] font-normal text-[#111111]">
-            <Settings aria-hidden className="h-7 w-7 fill-[#222222] text-[#222222]" />
+            <Settings aria-hidden className="h-7 w-7 text-[#222222]" />
             설정
           </h1>
           <div className="mt-3 inline-flex h-8 items-center gap-1 rounded-[10px] border border-[#F0C5C5] bg-[#FFF1F1] px-3 text-[12px] font-normal text-[#D95858]">
             <Lock aria-hidden className="h-3.5 w-3.5" />
             관리자 전용
           </div>
-          <p className="mt-3 text-[13px] font-normal text-[#7B716D] drop-shadow-[0_2px_1px_rgba(95,73,68,0.22)]">
-            관리 기능을 선택해주세요
-          </p>
         </header>
 
         <section className="rounded-[16px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
@@ -91,7 +85,7 @@ export function AdminSettingsPage({
           <div className="grid grid-cols-2 gap-2">
             {managementMenus.map((menu, index) => {
               const Icon = menu.icon;
-              const isWide = index === 3 || index === 4;
+              const isWide = index === 4;
 
               return (
                 <button
@@ -131,7 +125,6 @@ export function AdminSettingsPage({
               <Bell aria-hidden className="h-5 w-5 text-[#E0AA2E]" />
               알림 설정
             </h2>
-            <p className="mt-2 text-[11px] font-normal text-[#7B716D]">역할별 알림 규칙을 확인하세요</p>
 
             <div className="mt-3 divide-y divide-dashed divide-[#D8D1CE]">
               <NotificationRole
@@ -168,7 +161,7 @@ export function AdminSettingsPage({
             앱 정보
           </h2>
           <InfoRow label="버전:" value="v1.0.0" />
-          <InfoRow label="개발사:" value="우리 회사" />
+          <InfoRow label="개발사:" value="수험생 연구소" />
           <InfoRow label="문의:" value="support@example.com" />
           <div className="mt-3 flex items-center justify-center gap-4 border-t border-dashed border-[#D8D1CE] pt-3 text-[12px] font-normal text-[#6F6662]">
             <button type="button">이용약관</button>
@@ -176,10 +169,6 @@ export function AdminSettingsPage({
             <button type="button">개인정보처리방침</button>
           </div>
         </section>
-
-        <p className="pb-1 text-center text-[11px] font-normal text-[#7B716D]">
-          {currentMember.name} {currentMember.roleType === "CEO" ? "대표님" : "관리자님"} · 관리자 권한
-        </p>
       </div>
     </main>
   );
