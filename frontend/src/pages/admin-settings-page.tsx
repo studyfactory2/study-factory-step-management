@@ -118,12 +118,12 @@ export function AdminSettingsPage({
         </section>
 
         <button
-          className="grid w-full grid-cols-[5px_minmax(0,1fr)_24px] overflow-hidden rounded-[16px] border border-[#D8D1CE] bg-white text-left shadow-[0_2px_10px_rgba(95,73,68,0.08)]"
+          className="relative grid w-full grid-cols-[minmax(0,1fr)_24px] overflow-visible rounded-[16px] border border-[#D8D1CE] bg-white text-left shadow-[0_2px_10px_rgba(95,73,68,0.08)]"
           onClick={onOrgChartOpen}
           type="button"
         >
-          <span className="bg-[#FFD6DC]" />
-          <span className="px-3 py-4">
+          <span className="absolute bottom-[-1px] left-[-1px] top-[-1px] w-2.5 rounded-l-[16px] bg-[#FFD6DC]" />
+          <span className="py-4 pl-5 pr-3">
             <span className="flex items-center gap-2 text-[18px] font-normal text-[#222222]">
               <Building2 aria-hidden className="h-5 w-5 text-[#7B8B91]" />
               조직도 관리
@@ -135,9 +135,9 @@ export function AdminSettingsPage({
           <span className="flex items-center justify-center text-[28px] font-normal text-[#4F4542]">›</span>
         </button>
 
-        <section className="grid grid-cols-[5px_minmax(0,1fr)] overflow-hidden rounded-[16px] border border-[#D8D1CE] bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-          <span className="bg-[#D8ECFF]" />
-          <div className="px-3 py-4">
+        <section className="relative overflow-visible rounded-[16px] border border-[#D8D1CE] bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
+          <span className="absolute bottom-[-1px] left-[-1px] top-[-1px] w-2.5 rounded-l-[16px] bg-[#D8ECFF]" />
+          <div className="py-4 pl-5 pr-3">
             <h2 className="flex items-center gap-2 text-[18px] font-normal text-[#222222]">
               <Bell aria-hidden className="h-5 w-5 text-[#E0AA2E]" />
               알림 설정
