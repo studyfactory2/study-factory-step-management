@@ -2,6 +2,8 @@
 
 import { FormEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  BriefcaseBusiness,
+  Building2,
   Camera,
   ChevronDown,
   Check,
@@ -101,8 +103,8 @@ export function MemberPreRegisterPage({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!positionId || !positionDutyId) {
-      setMessage("직위와 담당 업무를 선택해주세요.");
+    if (!name.trim() || !region.trim() || !organization.trim() || !positionId || !positionDutyId) {
+      setMessage("사진을 제외한 모든 항목을 입력해주세요.");
       return;
     }
 
@@ -112,7 +114,7 @@ export function MemberPreRegisterPage({
     try {
       await preRegisterMember(accessToken, {
         branch: region,
-        name,
+        name: name.trim(),
         positionDutyId,
         positionId
       });
@@ -438,14 +440,14 @@ function PendingPreRegistrationCard({
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1 rounded-full border border-[#F0C5C5] bg-[#FFF1F1] px-2 py-0.5 text-[10px] font-normal text-[#D95858]">
             <Hourglass aria-hidden className="h-3 w-3" />
-            상태 사전등록
+            등록 대기
           </span>
           <span className="text-[10px] font-normal text-[#7B716D]">
             등록날짜 {formatDate(preRegistration.createdAt)}
           </span>
         </div>
 
-        <div className="mt-3 grid grid-cols-[42px_minmax(0,1fr)] gap-2.5">
+        <div className="mt-2 grid grid-cols-[42px_minmax(0,1fr)] gap-2">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F3F3] text-[15px] font-normal text-[#4F4542]">
             {preRegistration.name.slice(0, 1)}
           </span>
@@ -453,32 +455,49 @@ function PendingPreRegistrationCard({
             <strong className="block truncate text-[15px] font-normal text-[#222222]">
               {preRegistration.name}
             </strong>
-            <dl className="mt-1.5 space-y-1 text-[11px] font-normal">
-              <ProfileLine label="지역" value={preRegistration.branch} />
-              <ProfileLine label="소속" value={organizationName} />
-              <ProfileLine label="직급" value={positionName} />
-              <ProfileLine label="담당" value={dutyName} />
+            <dl className="mt-1 space-y-0.5 text-[11px] font-normal">
+              <ProfileLine
+                icon={<MapPin aria-hidden className="h-3.5 w-3.5 text-[#7B8B91]" />}
+                label="지역"
+                value={preRegistration.branch}
+              />
+              <ProfileLine
+                icon={<Building2 aria-hidden className="h-3.5 w-3.5 text-[#7B8B91]" />}
+                label="소속"
+                value={organizationName}
+              />
+              <ProfileLine
+                icon={<UserRound aria-hidden className="h-3.5 w-3.5 text-[#7B8B91]" />}
+                label="직급"
+                value={positionName}
+              />
+              <ProfileLine
+                action={
+                  <div className="flex shrink-0 gap-1">
+                    <button
+                      className="flex h-6 min-w-[42px] items-center justify-center gap-0.5 rounded-[7px] border border-[#D8D1CE] bg-white px-1.5 text-[10px] font-normal text-[#4F4542]"
+                      type="button"
+                    >
+                      <Pencil aria-hidden className="h-3 w-3" />
+                      수정
+                    </button>
+                    <button
+                      className="flex h-6 min-w-[42px] items-center justify-center gap-0.5 rounded-[7px] border border-[#F0C5C5] bg-[#FFF1F1] px-1.5 text-[10px] font-normal text-[#D95858] disabled:opacity-60"
+                      disabled={isDeleting}
+                      onClick={onDelete}
+                      type="button"
+                    >
+                      <Trash2 aria-hidden className="h-3 w-3" />
+                      {isDeleting ? "삭제 중" : "삭제"}
+                    </button>
+                  </div>
+                }
+                icon={<BriefcaseBusiness aria-hidden className="h-3.5 w-3.5 text-[#7B8B91]" />}
+                label="담당"
+                value={dutyName}
+              />
             </dl>
           </div>
-        </div>
-
-        <div className="mt-3 flex justify-end gap-1.5">
-          <button
-            className="flex h-8 min-w-[52px] items-center justify-center gap-1 rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[11px] font-normal text-[#4F4542]"
-            type="button"
-          >
-            <Pencil aria-hidden className="h-3.5 w-3.5" />
-            수정
-          </button>
-          <button
-            className="flex h-8 min-w-[52px] items-center justify-center gap-1 rounded-[9px] border border-[#F0C5C5] bg-[#FFF1F1] px-2 text-[11px] font-normal text-[#D95858] disabled:opacity-60"
-            disabled={isDeleting}
-            onClick={onDelete}
-            type="button"
-          >
-            <Trash2 aria-hidden className="h-3.5 w-3.5" />
-            {isDeleting ? "삭제 중" : "삭제"}
-          </button>
         </div>
       </div>
     </article>
@@ -486,16 +505,26 @@ function PendingPreRegistrationCard({
 }
 
 function ProfileLine({
+  action,
+  icon,
   label,
   value
 }: {
+  action?: ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
 }) {
   return (
-    <div className="grid grid-cols-[32px_minmax(0,1fr)] gap-2">
-      <dt className="text-[#9A918D]">{label}</dt>
-      <dd className="truncate text-[#4F4542]">{value}</dd>
+    <div className="grid min-h-6 grid-cols-[54px_minmax(0,1fr)] items-center gap-1.5">
+      <dt className="flex items-center gap-0.5 text-[#9A918D]">
+        {icon}
+        <span>{label}</span>
+      </dt>
+      <dd className="flex min-w-0 items-center justify-between gap-1.5 text-[#4F4542]">
+        <span className="min-w-0 truncate">{value}</span>
+        {action}
+      </dd>
     </div>
   );
 }
