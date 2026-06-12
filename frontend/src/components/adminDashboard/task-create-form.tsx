@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, ImagePlus, Pencil, Search } from "lucide-react";
+import { ImagePlus, Search } from "lucide-react";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import {
   createTaskDraft,
@@ -8,6 +8,7 @@ import {
   type TaskCategory,
   updateTaskDraft
 } from "@/api/task";
+import { RoleTree } from "@/components/role-tree";
 import { ImagePreviewDialog } from "@/components/pages/taskDetail/image-preview-dialog";
 import type { Member } from "@/types/domain";
 import { roleLabels } from "./constants";
@@ -41,10 +42,6 @@ type TaskDraftForm = {
   isSaved: boolean;
   oneLineComment: string;
   title: string;
-};
-
-type FlatPosition = PositionTreeNode & {
-  depth: number;
 };
 
 const categoryOptions: Array<{ label: string; value: TaskCategory }> = [
@@ -82,6 +79,8 @@ export function TaskCreateForm({
   const [isPositionLoading, setIsPositionLoading] = useState(true);
   const [isPositionTreeCollapsed, setIsPositionTreeCollapsed] = useState(false);
   const [savingDraftId, setSavingDraftId] = useState<number | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
 
   const sortedAssignees = useMemo(() => {
     return [...assignees].sort((first, second) => {
@@ -91,7 +90,27 @@ export function TaskCreateForm({
     });
   }, [assignees]);
 
-  const flatPositions = useMemo(() => flattenPositions(positions), [positions]);
+  const searchedAssignees = useMemo(() => {
+    const keyword = normalizeSearchText(searchKeyword);
+
+    if (!keyword) {
+      return [];
+    }
+
+    return sortedAssignees.filter((member) => {
+      const name = normalizeSearchText(getMemberDisplayName(member));
+      const position = normalizeSearchText(getMemberPositionName(member));
+      return name.includes(keyword) || position.includes(keyword);
+    });
+  }, [searchKeyword, sortedAssignees]);
+
+  const positionAssignees = useMemo(() => {
+    if (!selectedPositionId) {
+      return [];
+    }
+
+    return sortedAssignees.filter((member) => member.positionId === selectedPositionId);
+  }, [selectedPositionId, sortedAssignees]);
 
   useEffect(() => {
     async function loadDrafts() {
@@ -147,6 +166,27 @@ export function TaskCreateForm({
       attachments: files,
       attachmentNames: files.map((file) => file.name)
     }));
+  }
+
+  function selectAssigneeForEditableDraft(memberId: number) {
+    const member = sortedAssignees.find((candidate) => candidate.id === memberId);
+
+    if (member?.positionId) {
+      setSelectedPositionId(member.positionId);
+    }
+
+    setDrafts((currentDrafts) => {
+      const targetDraft = currentDrafts.find((draft) => !draft.isSaved) ?? currentDrafts[0];
+
+      return currentDrafts.map((draft) =>
+        draft.id === targetDraft.id
+          ? {
+              ...draft,
+              assigneeId: String(memberId)
+            }
+          : draft
+      );
+    });
   }
 
   async function handleSaveDraft(id: number) {
@@ -258,23 +298,28 @@ export function TaskCreateForm({
 
   return (
     <section className="rounded-[22px] border border-[#D9D5D2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#DDD6D2]">
-      <div className="text-center">
-        <h2 className="flex items-center justify-center gap-1.5 text-[18px] font-normal text-[#222222]">
-          새 업무 작성
-          <Pencil aria-hidden className="h-4 w-4 text-[#222222]" />
-        </h2>
-        <p className="mt-2 text-[13px] font-normal text-[#7B716D] drop-shadow-[0_2px_1px_rgba(95,73,68,0.24)]">
-          오늘도 화이팅
-        </p>
-      </div>
-
-      <div className="my-4 border-t border-dashed border-[#CFC7C3]" />
-
       {message && (
         <p className="mb-3 rounded-[12px] bg-[#FFF2F2] px-3 py-2 text-[11px] font-normal text-[#D83A42]">
           {message}
         </p>
       )}
+
+      <AssigneePicker
+        isLoading={isLoading}
+        isPositionLoading={isPositionLoading}
+        isPositionTreeCollapsed={isPositionTreeCollapsed}
+        onAssigneeSelect={selectAssigneeForEditableDraft}
+        onPositionSelect={setSelectedPositionId}
+        onPositionTreeCollapseToggle={() => setIsPositionTreeCollapsed((currentValue) => !currentValue)}
+        onSearchKeywordChange={setSearchKeyword}
+        positionAssignees={positionAssignees}
+        positions={positions}
+        searchKeyword={searchKeyword}
+        searchedAssignees={searchedAssignees}
+        selectedPositionId={selectedPositionId}
+      />
+
+      <div className="my-4 border-t border-dashed border-[#CFC7C3]" />
 
       {isDraftLoading && (
         <div className="rounded-[14px] border border-dashed border-[#D8D1CE] bg-white px-4 py-6 text-center text-[11px] font-normal text-[#7B716D]">
@@ -286,15 +331,12 @@ export function TaskCreateForm({
         <TaskDraftCard
           assignees={sortedAssignees}
           draft={draft}
-          flatPositions={flatPositions}
-          isLoading={isLoading || isPositionLoading}
-          isPositionTreeCollapsed={isPositionTreeCollapsed}
+          isLoading={isLoading}
           isSaving={savingDraftId === draft.id}
           isSubmitting={isSubmitting}
           key={draft.id}
           onAttachmentChange={handleFileChange}
           onEdit={handleEditDraft}
-          onPositionTreeCollapseToggle={() => setIsPositionTreeCollapsed((currentValue) => !currentValue)}
           onSave={handleSaveDraft}
           onSubmit={handleSubmitDraft}
           onUpdate={updateDraft}
@@ -304,95 +346,44 @@ export function TaskCreateForm({
   );
 }
 
-function TaskDraftCard({
-  assignees,
-  draft,
-  flatPositions,
+function AssigneePicker({
   isLoading,
+  isPositionLoading,
   isPositionTreeCollapsed,
-  isSaving,
-  isSubmitting,
-  onAttachmentChange,
-  onEdit,
+  onAssigneeSelect,
+  onPositionSelect,
   onPositionTreeCollapseToggle,
-  onSave,
-  onSubmit,
-  onUpdate
+  onSearchKeywordChange,
+  positionAssignees,
+  positions,
+  searchKeyword,
+  searchedAssignees,
+  selectedPositionId
 }: {
-  assignees: Member[];
-  draft: TaskDraftForm;
-  flatPositions: FlatPosition[];
   isLoading: boolean;
+  isPositionLoading: boolean;
   isPositionTreeCollapsed: boolean;
-  isSaving: boolean;
-  isSubmitting: boolean;
-  onAttachmentChange: (id: number, event: ChangeEvent<HTMLInputElement>) => void;
-  onEdit: (id: number) => void;
+  onAssigneeSelect: (memberId: number) => void;
+  onPositionSelect: (positionId: number) => void;
   onPositionTreeCollapseToggle: () => void;
-  onSave: (id: number) => void;
-  onSubmit: (draft: TaskDraftForm) => Promise<void>;
-  onUpdate: (id: number, updater: (draft: TaskDraftForm) => TaskDraftForm) => void;
+  onSearchKeywordChange: (value: string) => void;
+  positionAssignees: Member[];
+  positions: PositionTreeNode[];
+  searchKeyword: string;
+  searchedAssignees: Member[];
+  selectedPositionId: number | null;
 }) {
-  const isLocked = draft.isSaved;
-  const isDisabled = isLocked || isSaving || isSubmitting || isLoading;
-  const attachmentInputId = `task-attachment-${draft.id}`;
-  const selectedAssignee = assignees.find((member) => String(member.id) === draft.assigneeId);
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [selectedPositionId, setSelectedPositionId] = useState<number | null>(selectedAssignee?.positionId ?? null);
-
-  const positionAssignees = useMemo(() => {
-    if (!selectedPositionId) {
-      return [];
-    }
-
-    return assignees.filter((member) => member.positionId === selectedPositionId);
-  }, [assignees, selectedPositionId]);
-
-  const searchedAssignees = useMemo(() => {
-    const keyword = normalizeSearchText(searchKeyword);
-
-    if (!keyword) {
-      return [];
-    }
-
-    return assignees.filter((member) => {
-      const name = normalizeSearchText(getMemberDisplayName(member));
-      const position = normalizeSearchText(getMemberPositionName(member));
-      return name.includes(keyword) || position.includes(keyword);
-    });
-  }, [assignees, searchKeyword]);
-
-  function selectAssignee(memberId: number) {
-    const member = assignees.find((candidate) => candidate.id === memberId);
-    setSelectedPositionId(member?.positionId ?? null);
-    onUpdate(draft.id, (currentDraft) => ({
-      ...currentDraft,
-      assigneeId: String(memberId)
-    }));
-  }
-
-  function selectPosition(positionId: number) {
-    setSelectedPositionId(positionId);
-  }
-
   return (
-    <article className="space-y-4">
-      {isLocked && (
-        <div className="rounded-[10px] bg-[#F1F1F1] px-3 py-2 text-center text-[10px] font-normal text-[#6B6B6B]">
-          임시저장됨
-        </div>
-      )}
-
-      <section>
+    <section className="space-y-3">
+      <div>
         <div className="flex items-center gap-1.5 text-[13px] font-normal text-[#222222]">
           <Search aria-hidden className="h-4 w-4 text-[#222222]" />
           <span>담당자 찾기</span>
         </div>
         <input
           className="mt-2 h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-[12px] font-normal text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
-          disabled={isDisabled}
-          onChange={(event) => setSearchKeyword(event.target.value)}
+          disabled={isLoading}
+          onChange={(event) => onSearchKeywordChange(event.target.value)}
           placeholder="이름 또는 직위로 검색하세요"
           value={searchKeyword}
         />
@@ -401,9 +392,9 @@ function TaskDraftCard({
             {searchedAssignees.map((member) => (
               <button
                 className="flex h-8 w-full items-center justify-between rounded-[8px] px-2 text-left text-[11px] font-normal text-[#333333] hover:bg-[#F5FAFF] disabled:opacity-60"
-                disabled={isDisabled}
+                disabled={isLoading}
                 key={member.id}
-                onClick={() => selectAssignee(member.id)}
+                onClick={() => onAssigneeSelect(member.id)}
                 type="button"
               >
                 <span>{getMemberDisplayName(member)}</span>
@@ -412,62 +403,45 @@ function TaskDraftCard({
             ))}
           </div>
         )}
-      </section>
+      </div>
 
-      <section className="rounded-[14px] border border-[#D8D1CE] bg-[#F9F7F6] p-3">
+      <section className="rounded-[14px] border border-[#D8D1CE] bg-white px-1.5 py-2.5">
         <button
           aria-expanded={!isPositionTreeCollapsed}
-          className="flex h-8 w-full items-center justify-between text-[12px] font-normal text-[#333333]"
+          className="mb-2 flex h-7 w-full items-center justify-between px-1.5 text-[12px] font-normal text-[#333333]"
           onClick={onPositionTreeCollapseToggle}
           type="button"
         >
           <span>직위트리</span>
-          <span className="flex items-center gap-1 text-[10px] text-[#7B716D]">
+          <span className="text-[10px] text-[#7B716D]">
             {isPositionTreeCollapsed ? "펼치기" : "접어두기"}
-            {isPositionTreeCollapsed ? (
-              <ChevronRight aria-hidden className="h-3.5 w-3.5" />
-            ) : (
-              <ChevronDown aria-hidden className="h-3.5 w-3.5" />
-            )}
           </span>
         </button>
 
         {!isPositionTreeCollapsed && (
-          <div className="mt-2 max-h-[154px] space-y-1 overflow-y-auto">
-            {flatPositions.map((position) => {
-              const hasAssignees = assignees.some((member) => member.positionId === position.id);
-              const isSelected = selectedPositionId === position.id;
-
-              return (
-                <button
-                  className={`flex h-8 w-full items-center rounded-[8px] border px-2 text-left text-[11px] font-normal transition disabled:opacity-45 ${
-                    isSelected
-                      ? "border-[#9CC7F2] bg-[#EAF3FF] text-[#2D70CB]"
-                      : "border-transparent bg-white text-[#4F4542] hover:border-[#E4DCD9]"
-                  }`}
-                  disabled={isDisabled || !hasAssignees}
-                  key={position.id}
-                  onClick={() => selectPosition(position.id)}
-                  style={{ paddingLeft: `${8 + position.depth * 14}px` }}
-                  type="button"
-                >
-                  {position.name}
-                </button>
-              );
-            })}
-          </div>
+          isPositionLoading ? (
+            <div className="rounded-[12px] border border-dashed border-[#D9D2CF] bg-[#FFFAFA] px-3 py-5 text-center text-xs font-normal text-[#9C7D79]">
+              직위트리를 불러오는 중입니다.
+            </div>
+          ) : (
+            <RoleTree
+              onSelectPosition={onPositionSelect}
+              positions={positions}
+              selectedPositionId={selectedPositionId}
+            />
+          )
         )}
 
         {selectedPositionId && (
           <select
             className="mt-2 h-9 w-full rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-[12px] font-normal text-[#333333] outline-none disabled:opacity-60"
-            disabled={isDisabled || positionAssignees.length === 0}
+            disabled={isLoading || positionAssignees.length === 0}
             onChange={(event) => {
               if (event.target.value) {
-                selectAssignee(Number(event.target.value));
+                onAssigneeSelect(Number(event.target.value));
               }
             }}
-            value={draft.assigneeId}
+            value=""
           >
             <option value="">해당 직위 직원 선택</option>
             {positionAssignees.map((member) => (
@@ -478,14 +452,71 @@ function TaskDraftCard({
           </select>
         )}
       </section>
+    </section>
+  );
+}
+
+function TaskDraftCard({
+  assignees,
+  draft,
+  isLoading,
+  isSaving,
+  isSubmitting,
+  onAttachmentChange,
+  onEdit,
+  onSave,
+  onSubmit,
+  onUpdate
+}: {
+  assignees: Member[];
+  draft: TaskDraftForm;
+  isLoading: boolean;
+  isSaving: boolean;
+  isSubmitting: boolean;
+  onAttachmentChange: (id: number, event: ChangeEvent<HTMLInputElement>) => void;
+  onEdit: (id: number) => void;
+  onSave: (id: number) => void;
+  onSubmit: (draft: TaskDraftForm) => Promise<void>;
+  onUpdate: (id: number, updater: (draft: TaskDraftForm) => TaskDraftForm) => void;
+}) {
+  const isLocked = draft.isSaved;
+  const isDisabled = isLocked || isSaving || isSubmitting || isLoading;
+  const attachmentInputId = `task-attachment-${draft.id}`;
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+
+  return (
+    <article className="space-y-4">
+      {isLocked && (
+        <div className="rounded-[10px] bg-[#F1F1F1] px-3 py-2 text-center text-[10px] font-normal text-[#6B6B6B]">
+          임시저장됨
+        </div>
+      )}
 
       <section className="space-y-3 rounded-[16px] border border-[#D8D1CE] bg-white p-3">
-        <label className="block">
+        <div>
           <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] font-normal text-[#7B716D]">
             <span>제목</span>
-            <span className="min-w-0 truncate text-[#333333]">
-              담당자 : {selectedAssignee ? getMemberDisplayName(selectedAssignee) : "미선택"}
-            </span>
+            <div className="flex min-w-0 items-center gap-1 text-[#333333]">
+              <span className="shrink-0">담당자 :</span>
+              <select
+                className="min-w-0 max-w-[112px] truncate rounded-[7px] border border-[#D8D1CE] bg-white px-1.5 py-1 text-[10px] font-normal text-[#333333] outline-none disabled:opacity-60"
+                disabled={isDisabled}
+                onChange={(event) =>
+                  onUpdate(draft.id, (currentDraft) => ({
+                    ...currentDraft,
+                    assigneeId: event.target.value
+                  }))
+                }
+                value={draft.assigneeId}
+              >
+                <option value="">미선택</option>
+                {assignees.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {getMemberDisplayName(member)}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <input
             className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
@@ -499,7 +530,7 @@ function TaskDraftCard({
             placeholder="업무 제목"
             value={draft.title}
           />
-        </label>
+        </div>
 
         <textarea
           className="h-28 w-full resize-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 py-3 text-[13px] font-normal leading-6 text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
@@ -661,16 +692,6 @@ function isEmptyEditableDraft(draft: TaskDraftForm) {
     !draft.description &&
     !draft.oneLineComment
   );
-}
-
-function flattenPositions(positions: PositionTreeNode[], depth = 0): FlatPosition[] {
-  return positions.flatMap((position) => [
-    {
-      ...position,
-      depth
-    },
-    ...flattenPositions(position.children ?? [], depth + 1)
-  ]);
 }
 
 function normalizeSearchText(value: string) {
