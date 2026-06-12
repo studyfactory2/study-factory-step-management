@@ -138,8 +138,9 @@ export function EmployeeDashboardPage({
         assigneeId: request.assigneeId,
         assigneeScope: "SINGLE",
         attachments: request.attachments,
-        category: "OPERATION",
+        category: request.category,
         description: request.description,
+        oneLineComment: request.oneLineComment,
         title: request.title
       });
       setMessage("업무가 등록되었습니다.");
