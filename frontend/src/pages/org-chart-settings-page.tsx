@@ -155,22 +155,52 @@ export function OrgChartSettingsPage({ onBack }: OrgChartSettingsPageProps) {
           step="1"
           title="조직도 모양 만들기"
         >
-          <div className="mt-3 grid grid-cols-[38px_minmax(0,1fr)] gap-y-2 text-[12px] font-normal">
-            <span className="pt-2 text-[#222222]">3층</span>
-            <div className="grid grid-cols-2 gap-2">
-              <ShapeTree checkedGroups={[true, true, true, false, false]} root="1" />
-              <ShapeTree checkedGroups={[true, true, true, true, true]} root="2" />
-            </div>
-            <span className="pt-2 text-[#222222]">2층</span>
-            <div className="grid grid-cols-2 gap-2">
-              <ShapeBranch labels={["1", "2", "3"]} selected={[true, true, true]} />
-              <ShapeBranch labels={["1", "2", "3"]} selected={[true, false, false]} />
-            </div>
-            <span className="pt-2 text-[#222222]">1층</span>
-            <div className="grid grid-cols-2 gap-2">
-              <ShapeBranch labels={["1", "2", "3"]} selected={[true, true, false]} />
-              <ShapeBranch labels={["1", "2", "3"]} selected={[true, true, true]} />
-            </div>
+          <div className="mt-3 space-y-2 text-[12px] font-normal">
+            <ShapeFloorRow
+              floor="3층"
+              groups={[
+                [{ checked: true, label: "1" }],
+                [{ checked: true, label: "2" }]
+              ]}
+            />
+            <ShapeFloorRow
+              floor="2층"
+              groups={[
+                [
+                  { checked: true, label: "1" },
+                  { checked: true, label: "2" }
+                ],
+                [
+                  { checked: true, label: "1" },
+                  { checked: true, label: "2" }
+                ]
+              ]}
+            />
+            <ShapeFloorRow
+              floor="1층"
+              groups={[
+                [
+                  { checked: true, label: "1" },
+                  { checked: true, label: "2" },
+                  { checked: true, label: "3" }
+                ],
+                [
+                  { checked: true, label: "1" },
+                  { checked: true, label: "2" },
+                  { checked: true, label: "3" }
+                ],
+                [
+                  { checked: true, label: "1" },
+                  { checked: true, label: "2" },
+                  { checked: true, label: "3" }
+                ],
+                [
+                  { checked: true, label: "1" },
+                  { checked: true, label: "2" },
+                  { checked: true, label: "3" }
+                ]
+              ]}
+            />
           </div>
           <StepActions />
         </StepCard>
@@ -269,46 +299,32 @@ function StepCard({
   );
 }
 
-function ShapeTree({
-  checkedGroups,
-  root
+function ShapeFloorRow({
+  floor,
+  groups
 }: {
-  checkedGroups: boolean[];
-  root: string;
+  floor: string;
+  groups: {
+    checked: boolean;
+    label: string;
+  }[][];
 }) {
   return (
-    <div className="relative mx-auto flex w-[76px] flex-col items-center">
-      <ShapeCheckbox checked label={root} />
-      <div className="h-5 w-px bg-[#B9B1AD]" />
-      <div className="h-px w-[58px] bg-[#B9B1AD]" />
-      <div className="grid w-[76px] grid-cols-2 gap-1.5 pt-1">
-        <div className="flex flex-col items-center">
-          <ShapeCheckbox checked={checkedGroups[0]} label="1" />
-          <div className="h-4 w-px bg-[#B9B1AD]" />
-          <ShapeBranch labels={["1", "2", "3"]} selected={checkedGroups.slice(1, 4)} />
-        </div>
-        <div className="flex flex-col items-center">
-          <ShapeCheckbox checked={checkedGroups[4]} label="2" />
-          <div className="h-4 w-px bg-[#B9B1AD]" />
-          <ShapeBranch labels={["1", "2", "3"]} selected={[true, false, false]} />
-        </div>
+    <div className="grid grid-cols-[34px_minmax(0,1fr)] items-center gap-1">
+      <span className="text-[12px] font-normal text-[#222222]">{floor}</span>
+      <div className="grid grid-cols-4 items-center gap-1">
+        {groups.map((group, groupIndex) => (
+          <div className="flex justify-center gap-0.5" key={`${floor}-${groupIndex}`}>
+            {group.map((item, itemIndex) => (
+              <ShapeCheckbox
+                checked={item.checked}
+                key={`${floor}-${groupIndex}-${item.label}-${itemIndex}`}
+                label={item.label}
+              />
+            ))}
+          </div>
+        ))}
       </div>
-    </div>
-  );
-}
-
-function ShapeBranch({
-  labels,
-  selected
-}: {
-  labels: string[];
-  selected: boolean[];
-}) {
-  return (
-    <div className="flex justify-center gap-0.5">
-      {labels.map((label, index) => (
-        <ShapeCheckbox checked={selected[index] ?? false} key={`${label}-${index}`} label={label} />
-      ))}
     </div>
   );
 }
@@ -321,9 +337,9 @@ function ShapeCheckbox({
   label: string;
 }) {
   return (
-    <span className="flex h-6 min-w-7 items-center justify-center gap-0.5 rounded-[5px] border border-[#CFC7C3] bg-[#FFFEFC] px-0.5 text-[10px] font-normal text-[#222222]">
-      <span className="flex h-3 w-3 items-center justify-center border border-[#8C817D] bg-white">
-        {checked ? <Check aria-hidden className="h-2.5 w-2.5 text-[#222222]" /> : null}
+    <span className="flex h-6 min-w-5 items-center justify-center gap-0.5 rounded-[5px] border border-[#CFC7C3] bg-[#FFFEFC] px-0.5 text-[10px] font-normal text-[#222222]">
+      <span className="flex h-2.5 w-2.5 items-center justify-center border border-[#8C817D] bg-white">
+        {checked ? <Check aria-hidden className="h-2 w-2 text-[#222222]" /> : null}
       </span>
       {label}
     </span>
