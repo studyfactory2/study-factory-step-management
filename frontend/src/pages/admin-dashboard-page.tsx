@@ -10,16 +10,14 @@ import {
 import {
   deleteMemberPreRegistration,
   getMemberPreRegistrations,
-  getMembers,
   preRegisterMember,
   type MemberPreRegistration
 } from "@/api/member";
 import {
-  createTask,
   getTaskCategorySummary,
   type TaskCategorySummaryItem
 } from "@/api/task";
-import type { Member, TaskStatus } from "@/types/domain";
+import type { TaskStatus } from "@/types/domain";
 import {
   DashboardActionSection,
   type MemberManagementView
@@ -32,13 +30,12 @@ import {
   RecentOutputsSection,
   type RecentOutputScope
 } from "@/components/adminDashboard/recent-outputs-section";
-import { TaskCreateForm, type TaskCreateDraftSubmit } from "@/components/adminDashboard/task-create-form";
-import { isAssignableMember } from "@/components/adminDashboard/utils";
 import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 import { roleLabels } from "@/components/adminDashboard/constants";
 
 type AdminDashboardPageProps = {
   accessToken: string;
+  onTaskCreateOpen: () => void;
   onLogout: () => void;
   onTaskDetailOpen: (taskId: number) => void;
 };
@@ -86,12 +83,12 @@ type ConfirmDialogState = {
 
 export function AdminDashboardPage({
   accessToken,
+  onTaskCreateOpen,
   onLogout,
   onTaskDetailOpen
 }: AdminDashboardPageProps) {
   const [dashboard, setDashboard] = useState<AdminDashboard>(emptyDashboard);
   const [memberPreRegistrations, setMemberPreRegistrations] = useState<MemberPreRegistration[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
   const [categorySummary, setCategorySummary] = useState<TaskCategorySummaryItem[]>([]);
   const [recentTaskStatuses] = useState<TaskStatus[]>(allRecentTaskStatuses);
   const [recentTaskSortOrder] = useState<AdminDashboardSortOrder>("LATEST");
@@ -99,53 +96,36 @@ export function AdminDashboardPage({
   const [selectedRecentStatuses, setSelectedRecentStatuses] = useState<TaskStatus[]>([]);
   const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
   const [memberManagementView, setMemberManagementView] = useState<MemberManagementView>("menu");
-  const [isTaskCreateOpen, setIsTaskCreateOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isPreRegistrationLoading, setIsPreRegistrationLoading] = useState(false);
   const [isPreRegisterSubmitting, setIsPreRegisterSubmitting] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadDashboard() {
       try {
         const [
           dashboardResponse,
-          memberResponse,
           categorySummaryResponse
         ] = await Promise.all([
           getAdminDashboard(accessToken, {
             sortOrder: recentTaskSortOrder,
             statuses: recentTaskStatuses
           }),
-          getMembers(),
           getTaskCategorySummary({
             statuses: ["IN_PROGRESS"]
           })
         ]);
 
         setDashboard(dashboardResponse);
-        setMembers(memberResponse.filter(isAssignableMember));
         setCategorySummary(categorySummaryResponse);
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "대시보드를 불러오지 못했습니다.");
-      } finally {
-        setIsLoading(false);
       }
     }
 
     void loadDashboard();
   }, [accessToken, recentTaskSortOrder, recentTaskStatuses]);
-
-  async function refreshDashboard() {
-    const dashboardResponse = await getAdminDashboard(accessToken, {
-      sortOrder: recentTaskSortOrder,
-      statuses: recentTaskStatuses
-    });
-    setDashboard(dashboardResponse);
-    setCategorySummary(await getTaskCategorySummary({ statuses: ["IN_PROGRESS"] }));
-  }
 
   async function refreshMemberPreRegistrations() {
     setIsPreRegistrationLoading(true);
@@ -168,30 +148,6 @@ export function AdminDashboardPage({
 
       return [...currentStatuses, status];
     });
-  }
-
-  async function handleCreateTask(request: TaskCreateDraftSubmit) {
-    setMessage("");
-
-    setIsSubmitting(true);
-    try {
-      await createTask(accessToken, {
-        title: request.title,
-        description: request.description,
-        category: request.category,
-        oneLineComment: request.oneLineComment,
-        attachments: request.attachments,
-        assigneeScope: "SINGLE",
-        assigneeId: request.assigneeId
-      });
-      setMessage("업무가 등록되었습니다.");
-      setIsTaskCreateOpen(false);
-      await refreshDashboard();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "업무를 등록하지 못했습니다.");
-    } finally {
-      setIsSubmitting(false);
-    }
   }
 
   async function handlePreRegister(request: {
@@ -288,7 +244,7 @@ export function AdminDashboardPage({
             </div>
             <button
               className="flex h-8 items-center justify-center rounded-[8px] border border-[#C7CDD4] bg-[#EAF3FF] px-1 text-[8px] font-normal text-[#2D70CB] shadow-[0_1px_4px_rgba(45,112,203,0.08)]"
-              onClick={() => setIsTaskCreateOpen(true)}
+              onClick={onTaskCreateOpen}
               type="button"
             >
               <span className="mr-1 inline-flex">
@@ -337,30 +293,6 @@ export function AdminDashboardPage({
         />
         <DashboardLogout onLogout={onLogout} />
       </div>
-      {isTaskCreateOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#3F2C28]/30 px-3 py-5">
-          <div className="max-h-[calc(100dvh-40px)] w-full max-w-[390px] overflow-y-auto rounded-[20px] border border-[#D8D1CE] bg-[#FFFEFC] p-3 shadow-[0_18px_44px_rgba(90,62,59,0.18)]">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-[15px] font-normal text-[#222222]">새 업무 등록</h2>
-              <button
-                className="h-8 rounded-[9px] border border-[#D8D1CE] bg-white px-3 text-[10px] font-normal text-[#4F4542]"
-                onClick={() => setIsTaskCreateOpen(false)}
-                type="button"
-              >
-                닫기
-              </button>
-            </div>
-            <TaskCreateForm
-              accessToken={accessToken}
-              assignees={members}
-              isLoading={isLoading}
-              isSubmitting={isSubmitting}
-              onPublished={refreshDashboard}
-              onSubmit={handleCreateTask}
-            />
-          </div>
-        </div>
-      )}
       {confirmDialog && (
         <ConfirmDialog
           confirmLabel={confirmDialog.confirmLabel ?? "확인"}

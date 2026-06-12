@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AdminDashboardPage } from "@/pages/admin-dashboard-page";
+import { TaskCreatePage } from "@/pages/task-create-page";
 import {
-  clearAuth,
   getStoredAuth,
   isAdminRole,
   type StoredMember
 } from "@/lib/auth-storage";
 
-export default function AdminDashboardRoutePage() {
+export default function TaskCreateRoutePage() {
   const router = useRouter();
   const [accessToken, setAccessToken] = useState("");
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
@@ -24,31 +23,22 @@ export default function AdminDashboardRoutePage() {
       return;
     }
 
-    if (!isAdminRole(auth.currentMember.roleType)) {
-      router.replace("/employee-dashboard");
-      return;
-    }
-
     setAccessToken(auth.accessToken);
     setCurrentMember(auth.currentMember);
     setIsReady(true);
   }, [router]);
 
-  function handleLogout() {
-    clearAuth();
-    router.replace("/");
-  }
-
   if (!isReady || !accessToken || !currentMember) {
     return null;
   }
 
+  const dashboardPath = isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard";
+
   return (
-    <AdminDashboardPage
+    <TaskCreatePage
       accessToken={accessToken}
-      onTaskCreateOpen={() => router.push("/tasks/new")}
-      onLogout={handleLogout}
-      onTaskDetailOpen={(taskId) => router.push(`/tasks/${taskId}`)}
+      onBack={() => router.push(dashboardPath)}
+      onCreated={() => router.push(dashboardPath)}
     />
   );
 }
