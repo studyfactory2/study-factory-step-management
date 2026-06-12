@@ -454,7 +454,9 @@ function OrgNodePreview({ node }: { node: OrganizationChartNode }) {
       {children.length > 0 ? (
         <div className="relative mt-2 min-w-max">
           <span className="absolute left-1/2 top-[-0.55rem] h-2.5 w-px -translate-x-1/2 bg-[#B9B1AD]" />
-          <span className="absolute left-[18%] right-[18%] top-0 h-px bg-[#B9B1AD]" />
+          {children.length > 1 ? (
+            <span className={`absolute top-0 h-px bg-[#B9B1AD] ${getOrgConnectorClassName(children.length)}`} />
+          ) : null}
           <div className={`grid gap-1.5 pt-2.5 ${children.length === 1 ? "grid-cols-1" : children.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
             {children.map((child) => (
               <div className="relative flex justify-center" key={child.id}>
@@ -467,6 +469,14 @@ function OrgNodePreview({ node }: { node: OrganizationChartNode }) {
       ) : null}
     </div>
   );
+}
+
+function getOrgConnectorClassName(childCount: number) {
+  if (childCount === 2) {
+    return "left-[25%] right-[25%]";
+  }
+
+  return "left-[16.666%] right-[16.666%]";
 }
 
 function OrgPersonCard({
