@@ -45,7 +45,8 @@ export class TaskCommentService {
 
     await this.taskCommentRepository.markTaskViewed(taskId, currentMember.memberId);
 
-    return this.toResponse(savedComment);
+    const createdComment = await this.taskCommentRepository.findById(savedComment.id);
+    return this.toResponse(createdComment ?? savedComment);
   }
 
   async findByTaskId(
@@ -132,6 +133,13 @@ export class TaskCommentService {
     return {
       id: comment.id,
       taskId: comment.taskId,
+      creator: {
+        id: comment.creator.id,
+        name: this.getDisplayName(comment.creator),
+        branch: comment.creator.branchInfo?.name ?? null,
+        roleType: comment.creator.roleType,
+        positionName: comment.creator.positionInfo?.name ?? null
+      },
       content: comment.content,
       oneLineComment: comment.oneLineComment,
       status: comment.status,

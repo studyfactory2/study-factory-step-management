@@ -87,6 +87,7 @@ export type TaskCommentAttachment = {
 export type TaskComment = {
   id: number;
   taskId: number;
+  creator: TaskDetailMember;
   content: string;
   oneLineComment: string | null;
   status: TaskStatus;

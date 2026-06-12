@@ -469,6 +469,7 @@ export class TaskService {
     return {
       id: comment.id,
       taskId: comment.taskId,
+      creator: this.toTaskMemberResponse(comment.creator),
       content: comment.content,
       oneLineComment: comment.oneLineComment,
       status: comment.status,
