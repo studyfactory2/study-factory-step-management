@@ -60,6 +60,10 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
   }
 
   async function handleReset() {
+    if (!window.confirm("정말 초기화하겠습니까?")) {
+      return;
+    }
+
     setIsSaving(true);
     setMessage("");
 
@@ -215,6 +219,17 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
           <p className="mt-3 text-[11px] font-normal leading-4 text-[#7B716D]">
             체크된 2층 칸만 부서 입력 구간으로 표시됩니다
           </p>
+          <div className="mt-3 flex justify-end">
+            <button
+              className="flex h-9 items-center justify-center gap-1.5 rounded-[10px] border border-[#B9D7EF] bg-[#F3FAFF] px-4 text-[13px] font-normal text-[#416A83] shadow-sm disabled:opacity-60"
+              disabled={isSaving || !chart}
+              onClick={handleSave}
+              type="button"
+            >
+              <Save aria-hidden className="h-4 w-4" />
+              {isSaving ? "저장 중" : "저장하기"}
+            </button>
+          </div>
         </StepCard>
 
         <StepCard
@@ -245,31 +260,31 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
             <p>직급 또는 이름 둘 중 하나만 입력해도 OK!</p>
             <p>부서명은 3층 직급 아래 좌우로 갈라지는 분배 라인 위에 표시됩니다</p>
           </div>
-        </StepCard>
 
-        <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-3">
-          <button
-            className="flex h-12 items-center justify-center gap-1.5 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] text-[14px] font-normal text-[#4F4542] shadow-sm"
-            disabled={isSaving}
-            onClick={handleReset}
-            type="button"
-          >
-            <RotateCcw aria-hidden className="h-4 w-4" />
-            초기화
-          </button>
-          <button
-            className="flex h-12 items-center justify-center gap-2 rounded-[12px] border border-[#2E8CDD] bg-[#1F8FE5] text-[16px] font-normal text-white shadow-sm disabled:opacity-60"
-            disabled={isSaving || !chart}
-            onClick={handleSave}
-            type="button"
-          >
-            <Save aria-hidden className="h-5 w-5" />
-            {isSaving ? "저장 중" : "저장하기"}
-          </button>
-        </div>
-        <p className="text-center text-[11px] font-normal text-[#7B716D]">
-          저장 후 새업무작성 화면의 업무조직도에 반영됩니다
-        </p>
+          <div className="mt-3 grid grid-cols-[92px_minmax(0,1fr)] gap-3">
+            <button
+              className="flex h-12 items-center justify-center gap-1.5 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] text-[14px] font-normal text-[#4F4542] shadow-sm"
+              disabled={isSaving}
+              onClick={handleReset}
+              type="button"
+            >
+              <RotateCcw aria-hidden className="h-4 w-4" />
+              초기화
+            </button>
+            <button
+              className="flex h-12 items-center justify-center gap-2 rounded-[12px] border border-[#2E8CDD] bg-[#1F8FE5] text-[16px] font-normal text-white shadow-sm disabled:opacity-60"
+              disabled={isSaving || !chart}
+              onClick={handleSave}
+              type="button"
+            >
+              <Save aria-hidden className="h-5 w-5" />
+              {isSaving ? "저장 중" : "저장하기"}
+            </button>
+          </div>
+          <p className="mt-2 text-center text-[11px] font-normal text-[#7B716D]">
+            저장 후 새업무작성 화면의 업무조직도에 반영됩니다
+          </p>
+        </StepCard>
       </div>
     </main>
   );
@@ -394,9 +409,9 @@ function StepCard({
   title: string;
 }) {
   return (
-    <section className="grid grid-cols-[7px_minmax(0,1fr)] overflow-visible rounded-[16px] border border-[#D8D1CE] bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-      <span className={accent} />
-      <div className="p-3">
+    <section className="relative overflow-visible rounded-[16px] border border-[#D8D1CE] bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
+      <span className={`absolute bottom-[-1px] left-[-1px] top-[-1px] w-2.5 rounded-l-[16px] ${accent}`} />
+      <div className="py-3 pl-5 pr-3">
         <h2 className="flex items-center gap-2 text-[20px] font-normal text-[#111111]">
           {icon}
           {step}. {title}
