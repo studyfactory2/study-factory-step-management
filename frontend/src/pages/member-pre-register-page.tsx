@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Check,
   ClipboardPenLine,
-  Edit3,
   MapPin,
   Save,
   Trash2,
@@ -238,17 +237,9 @@ export function MemberPreRegisterPage({
               />
             </StepField>
 
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="pt-1">
               <button
-                className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] border border-[#E2C76F] bg-[#FFF3B8] text-[13px] font-normal text-[#8B6B10]"
-                onClick={resetForm}
-                type="button"
-              >
-                <Edit3 aria-hidden className="h-4 w-4" />
-                수정하기
-              </button>
-              <button
-                className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] border border-[#9DC7ED] bg-[#D8ECFF] text-[13px] font-normal text-[#2D70CB] disabled:opacity-60"
+                className="flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-[#9DC7ED] bg-[#D8ECFF] text-[13px] font-normal text-[#2D70CB] disabled:opacity-60"
                 disabled={isSubmitting}
                 type="submit"
               >
@@ -296,9 +287,6 @@ export function MemberPreRegisterPage({
           </div>
         </section>
 
-        <p className="rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] px-3 py-2 text-center text-[11px] font-normal text-[#6F6662]">
-          저장 후 사원이 앱 로그인 시 자동 매칭됩니다
-        </p>
       </div>
     </main>
   );
