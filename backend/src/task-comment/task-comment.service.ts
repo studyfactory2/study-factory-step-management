@@ -31,6 +31,7 @@ export class TaskCommentService {
     this.validateTaskCommentAccess(task, currentMember);
 
     const commentStatus = request.status ?? task.status;
+    this.validateTaskStatusUpdate(commentStatus, currentMember);
     await this.updateTaskStatus(task, commentStatus);
 
     const comment = request.toEntity(taskId, currentMember.memberId, commentStatus);
@@ -91,6 +92,12 @@ export class TaskCommentService {
 
     if (!isAssignee && !isCreator) {
       throw new ForbiddenException("업무 코멘트 권한이 없습니다.");
+    }
+  }
+
+  private validateTaskStatusUpdate(status: TaskStatus, currentMember: CurrentMember): void {
+    if (status === TaskStatus.COMPLETED && !this.isAdminRole(currentMember.role)) {
+      throw new ForbiddenException("완료 상태는 관리자 또는 CEO만 변경할 수 있습니다.");
     }
   }
 

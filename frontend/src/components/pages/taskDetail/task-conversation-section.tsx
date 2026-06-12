@@ -123,7 +123,7 @@ function InitialTaskBubble({
       </div>
 
       <BubbleTitle title={task.title} />
-      <p className="mt-3 whitespace-pre-wrap text-[14px] font-normal leading-7 text-[#1F1A18]">
+      <p className="mt-3 whitespace-pre-wrap text-[14px] font-normal leading-7 text-[#1F1A18] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]">
         {task.description}
       </p>
       <AttachmentPreviewGrid attachments={task.attachments} onImagePreview={onImagePreview} />
@@ -166,7 +166,7 @@ function CommentBubble({
       </div>
 
       <BubbleTitle title={taskTitle} />
-      <p className="mt-3 whitespace-pre-wrap text-[15px] font-normal leading-7 text-[#1F1A18]">
+      <p className="mt-3 whitespace-pre-wrap text-[14px] font-normal leading-7 text-[#1F1A18] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]">
         {comment.content}
       </p>
       <AttachmentPreviewGrid attachments={comment.attachments} onImagePreview={onImagePreview} />
@@ -178,7 +178,7 @@ function CommentBubble({
 function BubbleTitle({ title }: { title: string }) {
   return (
     <h2 className="mt-4 flex items-start gap-2 text-[18px] font-normal leading-6 text-[#181412]">
-      <ClipboardList aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-[#1572CC]" />
+      <ClipboardList aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-[#111111]" />
       <span className="min-w-0 break-keep">{title}</span>
     </h2>
   );
@@ -207,14 +207,14 @@ function AttachmentPreviewGrid({
     <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
       {attachments.map((attachment) => (
         <button
-          className="w-[96px] shrink-0 overflow-hidden rounded-[8px] border border-[#DED6D2] bg-white p-1"
+          className="w-[76px] shrink-0 overflow-hidden rounded-[8px] border border-[#DED6D2] bg-white p-1"
           key={attachment.id}
           onClick={() => onImagePreview(attachment.imageUrl)}
           type="button"
         >
           <img
             alt=""
-            className="aspect-[3/4] w-full rounded-[6px] object-cover"
+            className="aspect-square w-full rounded-[6px] object-cover"
             src={attachment.imageUrl}
           />
         </button>

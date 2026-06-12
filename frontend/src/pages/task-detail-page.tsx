@@ -20,6 +20,7 @@ type TaskDetailPageProps = {
 
 export function TaskDetailPage({
   accessToken,
+  currentMemberRole,
   onBack,
   taskId
 }: TaskDetailPageProps) {
@@ -66,6 +67,7 @@ export function TaskDetailPage({
             <TaskConversationSection onImagePreview={setPreviewImageUrl} task={task} />
             <CommentSection
               accessToken={accessToken}
+              currentMemberRole={currentMemberRole}
               onTaskUpdate={setTask}
               task={task}
             />
