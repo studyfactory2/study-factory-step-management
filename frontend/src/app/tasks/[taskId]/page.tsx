@@ -48,6 +48,7 @@ export default function TaskDetailRoutePage({ params }: TaskDetailRoutePageProps
   return (
     <TaskDetailPage
       accessToken={accessToken}
+      currentMemberId={currentMember.id}
       currentMemberRole={currentMember.roleType}
       onBack={() => router.push(isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard")}
       taskId={parsedTaskId}

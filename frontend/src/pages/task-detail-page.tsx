@@ -13,6 +13,7 @@ import { TaskDetailHeader } from "@/components/pages/taskDetail/task-detail-head
 
 type TaskDetailPageProps = {
   accessToken: string;
+  currentMemberId: number;
   currentMemberRole: MemberRole;
   onBack: () => void;
   taskId: number;
@@ -20,6 +21,7 @@ type TaskDetailPageProps = {
 
 export function TaskDetailPage({
   accessToken,
+  currentMemberId,
   currentMemberRole,
   onBack,
   taskId
@@ -67,6 +69,7 @@ export function TaskDetailPage({
             <TaskConversationSection onImagePreview={setPreviewImageUrl} task={task} />
             <CommentSection
               accessToken={accessToken}
+              currentMemberId={currentMemberId}
               currentMemberRole={currentMemberRole}
               onTaskUpdate={setTask}
               task={task}

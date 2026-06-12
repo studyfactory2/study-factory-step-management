@@ -12,6 +12,7 @@ import { getStatusClassName, statusOptions } from "./constants";
 
 type CommentSectionProps = {
   accessToken: string;
+  currentMemberId: number;
   currentMemberRole: MemberRole;
   onTaskUpdate: (task: TaskDetail) => void;
   task: TaskDetail;
@@ -21,6 +22,7 @@ const MAX_COMMENT_LENGTH = 500;
 
 export function CommentSection({
   accessToken,
+  currentMemberId,
   currentMemberRole,
   onTaskUpdate,
   task
@@ -34,6 +36,8 @@ export function CommentSection({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const nextCommentNumber = task.comments.length + 1;
   const canCompleteTask = currentMemberRole === "ADMIN" || currentMemberRole === "CEO";
+  const formTone = getCommentFormTone(task, currentMemberId, currentMemberRole);
+  const formToneClassName = getFormToneClassName(formTone);
 
   useEffect(() => {
     setSelectedStatus(task.status);
@@ -85,9 +89,9 @@ export function CommentSection({
   }
 
   return (
-    <section className="rounded-[18px] border-2 border-[#1687E8] bg-[#FFFEFC] px-3 py-3 shadow-sm">
+    <section className={`rounded-[18px] border-2 bg-[#FFFEFC] px-3 py-3 shadow-sm ${formToneClassName.section}`}>
       <div className="flex items-center gap-2">
-        <span className="flex h-8 min-w-10 items-center justify-center rounded-[8px] bg-[#1687E8] px-2 text-[13px] font-normal text-white">
+        <span className={`flex h-8 min-w-10 items-center justify-center rounded-[8px] px-2 text-[13px] font-normal text-white ${formToneClassName.index}`}>
           #{nextCommentNumber}
         </span>
         <span className="min-w-0 flex-1 text-[11px] font-normal text-[#6F6662]">작성중</span>
@@ -172,7 +176,7 @@ export function CommentSection({
           사진첨부
         </button>
         <button
-          className="flex h-9 items-center justify-center rounded-[8px] bg-[#1687E8] px-4 text-[12px] font-normal text-white disabled:opacity-60"
+          className={`flex h-9 items-center justify-center rounded-[8px] px-4 text-[12px] font-normal text-white disabled:opacity-60 ${formToneClassName.submit}`}
           disabled={isSubmitting}
           onClick={handleCommentSubmit}
           type="button"
@@ -200,6 +204,52 @@ export function CommentSection({
       )}
     </section>
   );
+}
+
+type CommentFormTone = "admin" | "assignee" | "creator";
+
+function getCommentFormTone(
+  task: TaskDetail,
+  currentMemberId: number,
+  currentMemberRole: MemberRole
+): CommentFormTone {
+  if (currentMemberId === task.creator.id) {
+    return "creator";
+  }
+
+  if (currentMemberId === task.assignee.id) {
+    return "assignee";
+  }
+
+  if (currentMemberRole === "ADMIN" || currentMemberRole === "CEO") {
+    return "admin";
+  }
+
+  return "assignee";
+}
+
+function getFormToneClassName(tone: CommentFormTone) {
+  if (tone === "creator") {
+    return {
+      index: "bg-[#D93D72]",
+      section: "border-[#D93D72]",
+      submit: "bg-[#D93D72]"
+    };
+  }
+
+  if (tone === "admin") {
+    return {
+      index: "bg-[#8B5CF6]",
+      section: "border-[#8B5CF6]",
+      submit: "bg-[#8B5CF6]"
+    };
+  }
+
+  return {
+    index: "bg-[#1687E8]",
+    section: "border-[#1687E8]",
+    submit: "bg-[#1687E8]"
+  };
 }
 
 function AttachmentPreview({ attachment }: { attachment: File }) {

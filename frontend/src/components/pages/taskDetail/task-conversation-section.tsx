@@ -6,6 +6,7 @@ import type {
   TaskDetailAttachment
 } from "@/api/task";
 import { formatDateTime } from "@/components/adminDashboard/utils";
+import type { MemberRole } from "@/types/domain";
 import { getStatusClassName, getStatusLabel } from "./constants";
 
 type TaskConversationSectionProps = {
@@ -13,13 +14,14 @@ type TaskConversationSectionProps = {
   task: TaskDetail;
 };
 
-type ConversationTone = "assignee" | "creator";
+type ConversationTone = "admin" | "assignee" | "creator";
 
 type TimelineAuthor = {
   branch: string | null;
   id: number;
   name: string;
   organizationName: string | null;
+  roleType: MemberRole;
 };
 
 export function TaskConversationSection({
@@ -37,7 +39,7 @@ export function TaskConversationSection({
       />
 
       {task.comments.map((comment, index) => {
-        const tone = comment.creator.id === task.creator.id ? "creator" : "assignee";
+        const tone = getConversationTone(task, comment);
 
         return (
           <TimelineEntry
@@ -87,14 +89,14 @@ function AuthorBadge({
   tone: ConversationTone;
 }) {
   const initial = author.name.trim().charAt(0) || "?";
-  const textColor = tone === "creator" ? "text-[#D93D72]" : "text-[#1572CC]";
+  const toneClassName = getToneClassName(tone);
 
   return (
     <aside className="w-[50px] shrink-0 text-center">
-      <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF4FF] text-[20px] font-normal ${textColor}`}>
+      <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-[20px] font-normal ${toneClassName.avatar}`}>
         {initial}
       </div>
-      <p className={`mt-2 break-keep text-[13px] font-normal leading-4 ${textColor}`}>
+      <p className={`mt-2 break-keep text-[13px] font-normal leading-4 ${toneClassName.text}`}>
         {author.name}
       </p>
       <p className="mt-1 break-keep text-[10px] font-normal leading-3 text-[#7D7471]">
@@ -146,18 +148,12 @@ function CommentBubble({
   taskTitle: string;
   tone: ConversationTone;
 }) {
-  const isCreator = tone === "creator";
-  const cardClassName = isCreator
-    ? "border-[#F0C5D2] bg-[#FFF3F7]"
-    : "border-[#B8D8F5] bg-[#EFF8FF]";
-  const indexClassName = isCreator
-    ? "border-[#F2C8D5] bg-[#FFF7FA] text-[#D93D72]"
-    : "border-[#66B7F4] bg-[#1687E8] text-white";
+  const toneClassName = getToneClassName(tone);
 
   return (
-    <article className={`rounded-[18px] border px-3 py-3 shadow-sm ${cardClassName}`}>
+    <article className={`rounded-[18px] border px-3 py-3 shadow-sm ${toneClassName.card}`}>
       <div className="flex items-center gap-2">
-        <span className={`flex h-6 min-w-9 items-center justify-center rounded-[7px] border px-2 text-[11px] font-normal ${indexClassName}`}>
+        <span className={`flex h-6 min-w-9 items-center justify-center rounded-[7px] border px-2 text-[11px] font-normal ${toneClassName.index}`}>
           #{index}
         </span>
         <span className="min-w-0 flex-1 text-[11px] font-normal text-[#6F6662]">
@@ -231,7 +227,7 @@ function OneLineComment({
   tone: ConversationTone;
   value: string | null;
 }) {
-  const iconColor = tone === "creator" ? "text-[#D93D72]" : "text-[#1572CC]";
+  const iconColor = getToneClassName(tone).text;
 
   return (
     <p className="mt-4 flex items-center gap-2 text-[14px] font-normal leading-5 text-[#1F1A18]">
@@ -239,4 +235,47 @@ function OneLineComment({
       {value && <span>{value}</span>}
     </p>
   );
+}
+
+function getConversationTone(task: TaskDetail, comment: TaskComment): ConversationTone {
+  if (comment.creator.id === task.creator.id) {
+    return "creator";
+  }
+
+  if (comment.creator.id === task.assignee.id) {
+    return "assignee";
+  }
+
+  if (comment.creator.roleType === "ADMIN" || comment.creator.roleType === "CEO") {
+    return "admin";
+  }
+
+  return "assignee";
+}
+
+function getToneClassName(tone: ConversationTone) {
+  if (tone === "creator") {
+    return {
+      avatar: "bg-[#FFF3F7] text-[#D93D72]",
+      card: "border-[#F0C5D2] bg-[#FFF3F7]",
+      index: "border-[#F2C8D5] bg-[#FFF7FA] text-[#D93D72]",
+      text: "text-[#D93D72]"
+    };
+  }
+
+  if (tone === "admin") {
+    return {
+      avatar: "bg-[#F4F0FF] text-[#8B5CF6]",
+      card: "border-[#CDBDFF] bg-[#F7F3FF]",
+      index: "border-[#BFA7FF] bg-[#8B5CF6] text-white",
+      text: "text-[#8B5CF6]"
+    };
+  }
+
+  return {
+    avatar: "bg-[#EAF4FF] text-[#1572CC]",
+    card: "border-[#B8D8F5] bg-[#EFF8FF]",
+    index: "border-[#66B7F4] bg-[#1687E8] text-white",
+    text: "text-[#1572CC]"
+  };
 }
