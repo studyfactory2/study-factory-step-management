@@ -58,7 +58,7 @@ export function RecentOutputsSection({
 
             return (
               <button
-                className={`h-[26px] w-[44px] shrink-0 rounded-[7px] border px-0 text-[7px] font-normal leading-none transition ${
+                className={`h-[20px] w-[44px] shrink-0 rounded-[6px] border px-0 text-[7px] font-normal leading-none transition ${
                   isSelected
                     ? getSelectedStatusButtonClassName(option.value)
                     : "border-[#E4DCD9] bg-white text-[#6F6662]"
@@ -75,7 +75,7 @@ export function RecentOutputsSection({
         <label className="relative block shrink-0">
           <select
             aria-label="최근 업무 범위"
-            className="h-[26px] w-[78px] appearance-none rounded-[7px] border border-[#D8D1CE] bg-white pl-1 pr-4 text-[8px] font-normal leading-none text-[#333333] outline-none"
+            className="h-[20px] w-[78px] appearance-none rounded-[6px] border border-[#D8D1CE] bg-white pl-1 pr-4 text-[8px] font-normal leading-none text-[#333333] outline-none"
             onChange={(event) => onScopeChange?.(event.target.value as RecentOutputScope)}
             value={selectedScope}
           >
@@ -92,7 +92,7 @@ export function RecentOutputsSection({
         </label>
       </div>
 
-      <div className="grid grid-cols-[50px_minmax(0,1fr)_52px_46px] gap-1.5 px-2 pb-1 text-center text-[8px] font-normal text-[#7B716D]">
+      <div className="grid grid-cols-[50px_minmax(0,1fr)_56px_56px] gap-1 px-2 pb-1 text-center text-[8px] font-normal text-[#7B716D]">
         <span>최초 작성자</span>
         <span>업무 제목</span>
         <span>상태</span>
@@ -108,7 +108,7 @@ export function RecentOutputsSection({
 
         {filteredOutputs.map((output) => (
           <button
-            className="grid min-h-[52px] w-full grid-cols-[5px_50px_minmax(0,1fr)_52px_46px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
+            className="grid min-h-[52px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
             key={output.taskId}
             onClick={() => onDetailOpen(output.taskId)}
             type="button"
@@ -130,12 +130,12 @@ export function RecentOutputsSection({
                 {output.taskTitle}
               </span>
             </span>
-            <span className="flex items-center justify-center px-1">
-              <span className={`flex h-[18px] w-[46px] items-center justify-center rounded-full text-[7px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
+            <span className="flex items-center justify-center px-0">
+              <span className={`flex h-[18px] w-[50px] items-center justify-center rounded-full text-[7px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
                 {getStatusLabel(output.taskStatus)}
               </span>
             </span>
-            <span className="flex min-w-0 items-center justify-center px-1 text-center text-[9px] font-normal leading-3 text-[#4F4542]">
+            <span className="flex min-w-0 items-center justify-center px-0 text-center text-[9px] font-normal leading-3 text-[#4F4542]">
               <span className="line-clamp-2 break-keep">{output.memberName}</span>
             </span>
           </button>
