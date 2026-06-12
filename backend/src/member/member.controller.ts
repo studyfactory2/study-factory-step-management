@@ -19,6 +19,11 @@ export class MemberController {
     return this.memberService.findBranches();
   }
 
+  @Get("organizations")
+  async findOrganizations() {
+    return this.memberService.findOrganizations();
+  }
+
   @Post("pre-registrations")
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
   async preRegister(@Body() request: MemberPreRegisterRequest) {

@@ -20,6 +20,7 @@ import {
   type OrganizationChartNode,
   type OrganizationChartNodeUpdate
 } from "@/api/organization-chart";
+import { getOrganizations, type OrganizationOption } from "@/api/member";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
 
 type OrgChartSettingsPageProps = {
@@ -27,29 +28,9 @@ type OrgChartSettingsPageProps = {
   onBack?: () => void;
 };
 
-const departmentOptions = ["자격증공장", "수험생연구소", "선택 안 함"];
-
-const branchRows = [
-  {
-    label: "3층-1 / 2층-1 사이",
-    value: "자격증공장"
-  },
-  {
-    label: "3층-1 / 2층-2 사이",
-    value: "선택 안 함"
-  },
-  {
-    label: "3층-2 / 2층-1 사이",
-    value: "수험생연구소"
-  },
-  {
-    label: "3층-2 / 2층-2 사이",
-    value: "수험생연구소"
-  }
-];
-
 export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPageProps) {
   const [chart, setChart] = useState<OrganizationChart | null>(null);
+  const [organizations, setOrganizations] = useState<OrganizationOption[]>([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -57,9 +38,10 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
   const [tempNodeId, setTempNodeId] = useState(-1);
 
   useEffect(() => {
-    getActiveOrganizationChart()
-      .then((nextChart) => {
+    Promise.all([getActiveOrganizationChart(), getOrganizations()])
+      .then(([nextChart, nextOrganizations]) => {
         setChart(nextChart);
+        setOrganizations(nextOrganizations);
         setMessage("");
       })
       .catch((error) => {
@@ -67,6 +49,8 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
       })
       .finally(() => setIsLoading(false));
   }, []);
+
+  const departmentRows = chart ? getDepartmentRows(chart.nodes) : [];
 
   if (!onBack) {
     return null;
@@ -104,6 +88,43 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
     } finally {
       setIsSaving(false);
     }
+  }
+
+  function handleDepartmentChange(nodeId: number, organizationId: number | null) {
+    if (!chart) {
+      return;
+    }
+
+    const selectedOrganization = organizations.find((organization) => organization.id === organizationId) ?? null;
+    setChart({
+      ...chart,
+      nodes: updateChartNode(chart.nodes, nodeId, (node) => ({
+        ...node,
+        organizationId,
+        organizationName: selectedOrganization?.name ?? null
+      }))
+    });
+  }
+
+  function handleToggleShapeSlot(slot: ShapeSlot) {
+    if (!chart || !isShapeEditing) {
+      return;
+    }
+
+    const flatNodes = flattenChartNodes(chart.nodes);
+    const existingNode = flatNodes.find((node) => node.slotKey === slot.slotKey);
+    const isChecked = Boolean(existingNode?.isEnabled);
+    const negativeNodeCount = flatNodes.filter((node) => node.id < 0).length;
+    const nextFlatNodes = isChecked
+      ? flatNodes.map((node) => isDescendantSlot(node.slotKey, slot.slotKey) ? { ...node, isEnabled: false } : node)
+      : ensureSlotNodes(flatNodes, slot, tempNodeId);
+    const nextNegativeNodeCount = nextFlatNodes.filter((node) => node.id < 0).length;
+
+    setTempNodeId((currentId) => currentId - Math.max(nextNegativeNodeCount - negativeNodeCount, 0));
+    setChart({
+      ...chart,
+      nodes: buildChartNodeTree(nextFlatNodes)
+    });
   }
 
   return (
@@ -155,15 +176,25 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
           title="부서 넣기"
         >
           <div className="mt-3 space-y-2">
-            {branchRows.map((row) => (
-              <div className="grid grid-cols-[118px_minmax(0,1fr)] items-center gap-2" key={row.label}>
-                <span className="text-[12px] font-normal text-[#222222]">{row.label}</span>
-                <SelectPreview value={row.value} />
+            {departmentRows.length > 0 ? (
+              departmentRows.map((row) => (
+                <div className="grid grid-cols-[118px_minmax(0,1fr)] items-center gap-2" key={row.node.slotKey}>
+                  <span className="text-[12px] font-normal text-[#222222]">{row.label}</span>
+                  <DepartmentSelect
+                    node={row.node}
+                    onChange={handleDepartmentChange}
+                    organizations={organizations}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-4 text-center text-[12px] font-normal text-[#7B716D]">
+                체크된 3층-2층 연결 구간이 없습니다.
               </div>
-            ))}
+            )}
           </div>
           <p className="mt-3 text-[11px] font-normal leading-4 text-[#7B716D]">
-            선택지: {departmentOptions.join(" / ")}
+            체크된 2층 칸만 부서 입력 구간으로 표시됩니다
           </p>
           <StepActions />
         </StepCard>
@@ -224,27 +255,72 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
       </div>
     </main>
   );
+}
 
-  function handleToggleShapeSlot(slot: ShapeSlot) {
-    if (!chart || !isShapeEditing) {
-      return;
-    }
+function DepartmentSelect({
+  node,
+  onChange,
+  organizations
+}: {
+  node: OrganizationChartNode;
+  onChange: (nodeId: number, organizationId: number | null) => void;
+  organizations: OrganizationOption[];
+}) {
+  return (
+    <div className="relative">
+      <select
+        className="h-10 w-full appearance-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 pr-8 text-[13px] font-normal text-[#222222] shadow-sm outline-none"
+        onChange={(event) => onChange(node.id, event.target.value ? Number(event.target.value) : null)}
+        value={node.organizationId ?? ""}
+      >
+        <option value="">선택 안 함</option>
+        {organizations.map((organization) => (
+          <option key={organization.id} value={organization.id}>
+            {organization.name}
+          </option>
+        ))}
+      </select>
+      <ChevronDown aria-hidden className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6F6662]" />
+    </div>
+  );
+}
 
-    const flatNodes = flattenChartNodes(chart.nodes);
-    const existingNode = flatNodes.find((node) => node.slotKey === slot.slotKey);
-    const isChecked = Boolean(existingNode?.isEnabled);
-    const negativeNodeCount = flatNodes.filter((node) => node.id < 0).length;
-    const nextFlatNodes = isChecked
-      ? flatNodes.map((node) => isDescendantSlot(node.slotKey, slot.slotKey) ? { ...node, isEnabled: false } : node)
-      : ensureSlotNodes(flatNodes, slot, tempNodeId);
-    const nextNegativeNodeCount = nextFlatNodes.filter((node) => node.id < 0).length;
+function getDepartmentRows(nodes: OrganizationChartNode[]) {
+  const flatNodes = flattenResponseNodes(nodes);
+  const nodeMap = new Map(flatNodes.map((node) => [node.id, node]));
 
-    setTempNodeId((currentId) => currentId - Math.max(nextNegativeNodeCount - negativeNodeCount, 0));
-    setChart({
-      ...chart,
-      nodes: buildChartNodeTree(nextFlatNodes)
-    });
-  }
+  return flatNodes
+    .filter((node) => {
+      const parent = node.parentId ? nodeMap.get(node.parentId) : null;
+
+      return node.floor === 2 && node.isEnabled && Boolean(parent?.isEnabled && parent.floor === 3);
+    })
+    .sort((left, right) => left.displayOrder - right.displayOrder || left.id - right.id)
+    .map((node) => ({
+      label: getDepartmentRowLabel(node.slotKey),
+      node
+    }));
+}
+
+function getDepartmentRowLabel(slotKey: string) {
+  const [, thirdFloorIndex = "1", secondFloorIndex = "1"] = slotKey.split("-");
+
+  return `3층-${thirdFloorIndex} / 2층-${secondFloorIndex} 사이`;
+}
+
+function updateChartNode(
+  nodes: OrganizationChartNode[],
+  nodeId: number,
+  updater: (node: OrganizationChartNode) => OrganizationChartNode
+): OrganizationChartNode[] {
+  return nodes.map((node) => {
+    const nextNode = node.id === nodeId ? updater(node) : node;
+
+    return {
+      ...nextNode,
+      children: updateChartNode(nextNode.children ?? [], nodeId, updater)
+    };
+  });
 }
 
 function StepCard({
@@ -398,18 +474,6 @@ function ShapeCheckbox({
         {checked ? <Check aria-hidden className="h-2 w-2 text-[#222222]" /> : null}
       </span>
       {label}
-    </button>
-  );
-}
-
-function SelectPreview({ value }: { value: string }) {
-  return (
-    <button
-      className="flex h-10 w-full items-center justify-between rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] shadow-sm"
-      type="button"
-    >
-      {value}
-      <ChevronDown aria-hidden className="h-4 w-4 text-[#6F6662]" />
     </button>
   );
 }

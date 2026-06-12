@@ -94,6 +94,7 @@ export function organizationChartNodesToPositionTree(nodes: OrganizationChartNod
       isAdmin: false,
       isLoginVisible: true,
       name: node.displayName ?? node.positionName ?? node.memberName ?? "미지정",
+      organizationName: node.organizationName,
       parentId: node.parentId,
       subtitle: node.memberName ?? node.organizationName
     }));

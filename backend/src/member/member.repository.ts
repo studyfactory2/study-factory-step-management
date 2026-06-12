@@ -86,6 +86,18 @@ export class MemberRepository {
     return Array.from(new Set(branches.map((branch) => branch.name)));
   }
 
+  async findOrganizations(): Promise<Organization[]> {
+    return this.organizationRepository.find({
+      where: {
+        isActive: true
+      },
+      order: {
+        displayOrder: "ASC",
+        name: "ASC"
+      }
+    });
+  }
+
   async findPreRegistrationById(id: number): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
       relations: {

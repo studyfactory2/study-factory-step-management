@@ -11,6 +11,7 @@ function getErrorMessage(error: ApiErrorResponse | null, fallbackMessage: string
 export type PositionTreeNode = {
   id: number;
   name: string;
+  organizationName?: string | null;
   subtitle: string | null;
   duties: string[];
   dutyOptions: {

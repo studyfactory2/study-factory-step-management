@@ -38,6 +38,15 @@ export class MemberService {
     return this.memberRepository.findBranches();
   }
 
+  async findOrganizations() {
+    const organizations = await this.memberRepository.findOrganizations();
+
+    return organizations.map((organization) => ({
+      id: organization.id,
+      name: organization.name
+    }));
+  }
+
   async preRegister(request: MemberPreRegisterRequest): Promise<MemberPreRegistration> {
     const positionInfo = await this.positionRepository.findActiveById(request.positionId);
     if (!positionInfo) {

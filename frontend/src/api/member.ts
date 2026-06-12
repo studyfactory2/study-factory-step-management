@@ -39,6 +39,11 @@ export type MemberPreRegistration = {
   updatedAt: string;
 };
 
+export type OrganizationOption = {
+  id: number;
+  name: string;
+};
+
 export async function getMembers(): Promise<Member[]> {
   const response = await fetch(`${API_BASE_URL}/api/members`, {
     cache: "no-store"
@@ -61,6 +66,18 @@ export async function getMemberBranches(): Promise<string[]> {
   }
 
   return response.json() as Promise<string[]>;
+}
+
+export async function getOrganizations(): Promise<OrganizationOption[]> {
+  const response = await fetch(`${API_BASE_URL}/api/members/organizations`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("소속 목록을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<OrganizationOption[]>;
 }
 
 export async function preRegisterMember(
