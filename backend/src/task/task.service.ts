@@ -447,6 +447,7 @@ export class TaskService {
       id: member.id,
       name: this.getDisplayName(member),
       branch: member.branchInfo?.name ?? null,
+      organizationName: member.organization?.name ?? null,
       roleType: member.roleType,
       positionName: member.positionInfo?.name ?? null
     };

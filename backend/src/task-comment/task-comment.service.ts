@@ -144,6 +144,7 @@ export class TaskCommentService {
         id: comment.creator.id,
         name: this.getDisplayName(comment.creator),
         branch: comment.creator.branchInfo?.name ?? null,
+        organizationName: comment.creator.organization?.name ?? null,
         roleType: comment.creator.roleType,
         positionName: comment.creator.positionInfo?.name ?? null
       },

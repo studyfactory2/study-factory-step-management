@@ -5,6 +5,7 @@ export class TaskCommentCreatorResponse {
   id: number;
   name: string;
   branch: string | null;
+  organizationName: string | null;
   roleType: MemberRole;
   positionName: string | null;
 }

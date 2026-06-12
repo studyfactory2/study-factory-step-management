@@ -19,6 +19,7 @@ type TimelineAuthor = {
   branch: string | null;
   id: number;
   name: string;
+  organizationName: string | null;
 };
 
 export function TaskConversationSection({
@@ -97,7 +98,7 @@ function AuthorBadge({
         {author.name}
       </p>
       <p className="mt-1 break-keep text-[10px] font-normal leading-3 text-[#7D7471]">
-        {author.branch ?? "소속 미지정"}
+        {author.organizationName ?? "소속 미지정"}
       </p>
     </aside>
   );
