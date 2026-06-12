@@ -184,14 +184,12 @@ export function CommentSection({
       {attachments.length > 0 && (
         <div className="mt-3 rounded-[10px] border border-[#D6D6D6] bg-white px-3 py-3">
           <p className="text-[10px] font-normal text-[#333333]">선택한 사진 {attachments.length}장</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
             {attachments.map((attachment) => (
-              <span
-                className="rounded-full bg-[#F4F7FA] px-3 py-1.5 text-[9px] font-normal text-[#4F4542]"
+              <AttachmentPreview
+                attachment={attachment}
                 key={`${attachment.name}-${attachment.lastModified}`}
-              >
-                {attachment.name}
-              </span>
+              />
             ))}
           </div>
         </div>
@@ -201,5 +199,28 @@ export function CommentSection({
         <p className="mt-3 text-[10px] font-normal text-[#D83A42]">{message}</p>
       )}
     </section>
+  );
+}
+
+function AttachmentPreview({ attachment }: { attachment: File }) {
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(attachment);
+    setPreviewUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [attachment]);
+
+  return (
+    <div className="w-[76px] shrink-0 overflow-hidden rounded-[8px] border border-[#DED6D2] bg-white p-1">
+      {previewUrl && (
+        <img
+          alt=""
+          className="aspect-square w-full rounded-[6px] object-cover"
+          src={previewUrl}
+        />
+      )}
+    </div>
   );
 }
