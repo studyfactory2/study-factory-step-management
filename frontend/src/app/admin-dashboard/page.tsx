@@ -46,7 +46,6 @@ export default function AdminDashboardRoutePage() {
   return (
     <AdminDashboardPage
       accessToken={accessToken}
-      onAllTasksOpen={() => router.push("/tasks")}
       onLogout={handleLogout}
       onTaskDetailOpen={(taskId) => router.push(`/tasks/${taskId}`)}
     />
