@@ -35,6 +35,7 @@ import { roleLabels } from "@/components/adminDashboard/constants";
 
 type AdminDashboardPageProps = {
   accessToken: string;
+  onSettingsOpen: () => void;
   onTaskCreateOpen: () => void;
   onLogout: () => void;
   onTaskDetailOpen: (taskId: number) => void;
@@ -83,6 +84,7 @@ type ConfirmDialogState = {
 
 export function AdminDashboardPage({
   accessToken,
+  onSettingsOpen,
   onTaskCreateOpen,
   onLogout,
   onTaskDetailOpen
@@ -179,11 +181,6 @@ export function AdminDashboardPage({
     setMemberManagementView("positionTree");
   }
 
-  function handleOpenMemberManagement() {
-    setMemberManagementView("menu");
-    setIsMemberManagementOpen(true);
-  }
-
   function handleCloseMemberManagement() {
     setIsMemberManagementOpen(false);
     setMemberManagementView("menu");
@@ -231,7 +228,7 @@ export function AdminDashboardPage({
             <button
               aria-label="설정"
               className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm"
-              onClick={handleOpenMemberManagement}
+              onClick={onSettingsOpen}
               type="button"
             >
               <Settings aria-hidden className="h-4.5 w-4.5" />

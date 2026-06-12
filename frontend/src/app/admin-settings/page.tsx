@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AdminDashboardPage } from "@/pages/admin-dashboard-page";
+import { AdminSettingsPage } from "@/pages/admin-settings-page";
 import {
-  clearAuth,
   getStoredAuth,
   isAdminRole,
   type StoredMember
 } from "@/lib/auth-storage";
 
-export default function AdminDashboardRoutePage() {
+export default function AdminSettingsRoutePage() {
   const router = useRouter();
-  const [accessToken, setAccessToken] = useState("");
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -29,27 +27,18 @@ export default function AdminDashboardRoutePage() {
       return;
     }
 
-    setAccessToken(auth.accessToken);
     setCurrentMember(auth.currentMember);
     setIsReady(true);
   }, [router]);
 
-  function handleLogout() {
-    clearAuth();
-    router.replace("/");
-  }
-
-  if (!isReady || !accessToken || !currentMember) {
+  if (!isReady || !currentMember) {
     return null;
   }
 
   return (
-    <AdminDashboardPage
-      accessToken={accessToken}
-      onSettingsOpen={() => router.push("/admin-settings")}
-      onTaskCreateOpen={() => router.push("/tasks/new")}
-      onLogout={handleLogout}
-      onTaskDetailOpen={(taskId) => router.push(`/tasks/${taskId}`)}
+    <AdminSettingsPage
+      currentMember={currentMember}
+      onBack={() => router.push("/admin-dashboard")}
     />
   );
 }
