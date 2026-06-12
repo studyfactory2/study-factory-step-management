@@ -518,8 +518,17 @@ function TaskDraftCard({
 
   return (
     <article className="space-y-4">
-      <section className="space-y-3 rounded-[16px] border border-[#D8D1CE] bg-white p-3">
-        <div className="grid grid-cols-4 gap-1">
+      <section className="relative space-y-3 rounded-[16px] border border-[#D8D1CE] bg-white p-3">
+        <button
+          className="absolute right-2 top-2 h-6 rounded-[7px] border border-[#D8D1CE] bg-white px-2 text-[8px] font-normal text-[#4F4542] transition hover:bg-[#F7F7F7] disabled:opacity-60"
+          disabled={isSaving || isSubmitting || isLoading}
+          onClick={() => onDelete(draft.id)}
+          type="button"
+        >
+          삭제
+        </button>
+
+        <div className="grid grid-cols-4 gap-1 pr-11">
           {categoryOptions.map((option) => {
             const isSelected = draft.category === option.value;
 
@@ -648,15 +657,7 @@ function TaskDraftCard({
         />
       </section>
 
-      <div className="grid grid-cols-4 gap-1.5">
-        <button
-          className="h-9 rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[10px] font-normal text-[#4F4542] transition hover:bg-[#F7F7F7] disabled:opacity-60"
-          disabled={isSaving || isSubmitting || isLoading}
-          onClick={() => onDelete(draft.id)}
-          type="button"
-        >
-          삭제
-        </button>
+      <div className="grid grid-cols-3 gap-1.5">
         <button
           className="h-9 rounded-[9px] border border-[#D8D1CE] bg-[#F3F1EF] px-2 text-[10px] font-normal text-[#6F6662] transition hover:bg-[#EBE7E4] disabled:opacity-60"
           disabled={!isLocked || isSaving || isSubmitting || isLoading}
