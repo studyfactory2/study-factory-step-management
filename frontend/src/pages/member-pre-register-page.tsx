@@ -5,8 +5,11 @@ import {
   Camera,
   ChevronDown,
   Check,
+  ClipboardList,
   ClipboardPenLine,
+  Hourglass,
   MapPin,
+  Pencil,
   Save,
   Trash2,
   UserRound
@@ -254,6 +257,7 @@ export function MemberPreRegisterPage({
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="flex items-center gap-2 text-[18px] font-normal text-[#222222]">
+                <ClipboardList aria-hidden className="h-5 w-5 text-[#4F6F82]" />
                 등록대기
                 <span className="rounded-full bg-[#FFF1F1] px-2 py-0.5 text-[11px] text-[#D95858]">
                   {pendingPreRegistrations.length}건
@@ -286,7 +290,6 @@ export function MemberPreRegisterPage({
             )}
           </div>
         </section>
-
       </div>
     </main>
   );
@@ -426,53 +429,49 @@ function PendingPreRegistrationCard({
 }) {
   const positionName = preRegistration.positionInfo?.name ?? preRegistration.position ?? "직위 미지정";
   const dutyName = preRegistration.positionDuty?.name ?? preRegistration.positionDuty?.duty ?? preRegistration.duty ?? "담당 미지정";
+  const organizationName = getAffiliationLabel(preRegistration.affiliation);
 
   return (
     <article className="grid grid-cols-[5px_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-[#E6DFDC] bg-[#FFFEFC] shadow-sm">
       <span className="bg-[#D95858]" />
       <div className="p-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 gap-2">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F3F3] text-[15px] font-normal text-[#4F4542]">
-              {preRegistration.name.slice(0, 1)}
-            </span>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <strong className="text-[15px] font-normal text-[#222222]">{preRegistration.name}</strong>
-                <span className="rounded-full border border-[#F0C5C5] bg-[#FFF1F1] px-2 py-0.5 text-[10px] font-normal text-[#D95858]">
-                  등록대기
-                </span>
-              </div>
-              <p className="mt-1 text-[11px] font-normal text-[#7B716D]">
-                등록일 {formatDate(preRegistration.createdAt)}
-              </p>
-            </div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-1 rounded-full border border-[#F0C5C5] bg-[#FFF1F1] px-2 py-0.5 text-[10px] font-normal text-[#D95858]">
+            <Hourglass aria-hidden className="h-3 w-3" />
+            상태 사전등록
+          </span>
+          <span className="text-[10px] font-normal text-[#7B716D]">
+            등록날짜 {formatDate(preRegistration.createdAt)}
+          </span>
+        </div>
+
+        <div className="mt-3 grid grid-cols-[42px_minmax(0,1fr)] gap-2.5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3F3F3] text-[15px] font-normal text-[#4F4542]">
+            {preRegistration.name.slice(0, 1)}
+          </span>
+          <div className="min-w-0">
+            <strong className="block truncate text-[15px] font-normal text-[#222222]">
+              {preRegistration.name}
+            </strong>
+            <dl className="mt-1.5 space-y-1 text-[11px] font-normal">
+              <ProfileLine label="지역" value={preRegistration.branch} />
+              <ProfileLine label="소속" value={organizationName} />
+              <ProfileLine label="직급" value={positionName} />
+              <ProfileLine label="담당" value={dutyName} />
+            </dl>
           </div>
         </div>
 
-        <dl className="mt-3 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] font-normal">
-          <InfoItem label="지역" value={preRegistration.branch} />
-          <InfoItem label="소속" value="소속 미지정" />
-          <InfoItem label="직위" value={positionName} />
-          <InfoItem label="담당" value={dutyName} />
-        </dl>
-
-        <div className="mt-3 grid grid-cols-3 gap-1.5">
+        <div className="mt-3 flex justify-end gap-1.5">
           <button
-            className="h-8 rounded-[9px] border border-[#D8D1CE] bg-white text-[11px] font-normal text-[#4F4542]"
+            className="flex h-8 min-w-[52px] items-center justify-center gap-1 rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[11px] font-normal text-[#4F4542]"
             type="button"
           >
+            <Pencil aria-hidden className="h-3.5 w-3.5" />
             수정
           </button>
           <button
-            className="flex h-8 items-center justify-center gap-1 rounded-[9px] border border-[#9DC7ED] bg-[#D8ECFF] text-[11px] font-normal text-[#2D70CB]"
-            type="button"
-          >
-            <Check aria-hidden className="h-3.5 w-3.5" />
-            저장
-          </button>
-          <button
-            className="flex h-8 items-center justify-center gap-1 rounded-[9px] border border-[#F0C5C5] bg-[#FFF1F1] text-[11px] font-normal text-[#D95858] disabled:opacity-60"
+            className="flex h-8 min-w-[52px] items-center justify-center gap-1 rounded-[9px] border border-[#F0C5C5] bg-[#FFF1F1] px-2 text-[11px] font-normal text-[#D95858] disabled:opacity-60"
             disabled={isDeleting}
             onClick={onDelete}
             type="button"
@@ -486,7 +485,7 @@ function PendingPreRegistrationCard({
   );
 }
 
-function InfoItem({
+function ProfileLine({
   label,
   value
 }: {
@@ -494,11 +493,24 @@ function InfoItem({
   value: string;
 }) {
   return (
-    <div className="rounded-[9px] bg-[#F7F7F7] px-2 py-1.5">
+    <div className="grid grid-cols-[32px_minmax(0,1fr)] gap-2">
       <dt className="text-[#9A918D]">{label}</dt>
-      <dd className="mt-0.5 truncate text-[#4F4542]">{value}</dd>
+      <dd className="truncate text-[#4F4542]">{value}</dd>
     </div>
   );
+}
+
+function getAffiliationLabel(affiliation: MemberPreRegistration["affiliation"]) {
+  switch (affiliation) {
+    case "CEO":
+    case "ADMIN":
+    case "DEVELOPMENT_TEAM":
+      return "수험생연구소";
+    case "STAFF":
+      return "자격증공장";
+    default:
+      return "소속 미지정";
+  }
 }
 
 function flattenPositions(positions: PositionTreeNode[], depth = 0): FlatPosition[] {
