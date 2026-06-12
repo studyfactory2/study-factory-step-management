@@ -6,6 +6,7 @@ export class AdminDashboardCurrentMemberResponse {
   id: number;
   name: string;
   roleType: MemberRole;
+  positionName: string | null;
   branch: string | null;
 }
 
@@ -41,11 +42,17 @@ export class AdminDashboardRecentOutputResponse {
   taskCategory: TaskCategory;
   oneLineComment: string | null;
   taskStatus: TaskStatus;
+  creatorId: number;
+  creatorName: string;
+  creatorRole: MemberRole;
+  creatorPositionName: string | null;
+  creatorOrganizationName: string | null;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;
   memberPositionName: string | null;
   startedAt: Date;
+  updatedAt: Date;
   submittedAt: Date | null;
   attachmentPreviewUrls: string[];
   isNew: boolean;

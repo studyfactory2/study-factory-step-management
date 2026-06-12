@@ -14,6 +14,7 @@ export type AdminDashboardCurrentMember = {
   id: number;
   name: string;
   roleType: MemberRole;
+  positionName: string | null;
   branch: string | null;
 };
 
@@ -38,11 +39,17 @@ export type AdminDashboardRecentOutput = {
   taskCategory: TaskCategory;
   oneLineComment: string | null;
   taskStatus: TaskStatus;
+  creatorId?: number;
+  creatorName?: string;
+  creatorRole?: MemberRole;
+  creatorPositionName?: string | null;
+  creatorOrganizationName?: string | null;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;
   memberPositionName: string | null;
   startedAt: string;
+  updatedAt?: string;
   submittedAt: string | null;
   attachmentPreviewUrls: string[];
   isNew: boolean;
