@@ -508,10 +508,36 @@ function TaskDraftCard({
   return (
     <article className="space-y-4">
       <section className="space-y-3 rounded-[16px] border border-[#D8D1CE] bg-white p-3">
+        <div className="grid grid-cols-4 gap-1">
+          {categoryOptions.map((option) => {
+            const isSelected = draft.category === option.value;
+
+            return (
+              <button
+                className={`h-6 rounded-[6px] border px-0.5 text-[7px] font-normal transition disabled:opacity-60 ${
+                  isSelected
+                    ? getCategoryButtonClassName(option.value)
+                    : "border-[#D8D1CE] bg-white text-[#6F6662]"
+                }`}
+                disabled={isDisabled}
+                key={option.value}
+                onClick={() =>
+                  onUpdate(draft.id, (currentDraft) => ({
+                    ...currentDraft,
+                    category: option.value
+                  }))
+                }
+                type="button"
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div>
           <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] font-normal text-[#7B716D]">
             <div className="flex items-center gap-1.5">
-              <span>제목</span>
               {isLocked && (
                 <span className="rounded-full bg-[#F1F1F1] px-2 py-0.5 text-[8px] font-normal text-[#6B6B6B]">
                   임시저장됨
@@ -609,33 +635,6 @@ function TaskDraftCard({
           placeholder="한 줄 멘트를 입력해주세요."
           value={draft.oneLineComment}
         />
-
-        <div className="grid grid-cols-4 gap-1.5">
-          {categoryOptions.map((option) => {
-            const isSelected = draft.category === option.value;
-
-            return (
-              <button
-                className={`h-8 rounded-[8px] border px-1 text-[9px] font-normal transition disabled:opacity-60 ${
-                  isSelected
-                    ? getCategoryButtonClassName(option.value)
-                    : "border-[#D8D1CE] bg-white text-[#6F6662]"
-                }`}
-                disabled={isDisabled}
-                key={option.value}
-                onClick={() =>
-                  onUpdate(draft.id, (currentDraft) => ({
-                    ...currentDraft,
-                    category: option.value
-                  }))
-                }
-                type="button"
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
       </section>
 
       <div className="grid grid-cols-3 gap-1.5">
