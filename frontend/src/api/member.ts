@@ -54,8 +54,19 @@ export type MemberPreRegistration = {
 };
 
 export type OrganizationOption = {
+  colorIndex?: number | null;
+  displayOrder?: number;
   id: number;
   name: string;
+};
+
+export type OrganizationUpdateRequest = {
+  organizations: {
+    colorIndex?: number | null;
+    displayOrder: number;
+    id?: number;
+    name: string;
+  }[];
 };
 
 export async function getMembers(): Promise<Member[]> {
@@ -89,6 +100,30 @@ export async function getOrganizations(): Promise<OrganizationOption[]> {
 
   if (!response.ok) {
     throw new Error("소속 목록을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<OrganizationOption[]>;
+}
+
+export async function updateOrganizations(
+  accessToken: string,
+  request: OrganizationUpdateRequest
+): Promise<OrganizationOption[]> {
+  const response = await fetch(`${API_BASE_URL}/api/members/organizations`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "부서 정보를 저장하지 못했습니다.");
   }
 
   return response.json() as Promise<OrganizationOption[]>;

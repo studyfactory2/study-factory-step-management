@@ -98,6 +98,15 @@ export class MemberRepository {
     });
   }
 
+  async findAllOrganizations(): Promise<Organization[]> {
+    return this.organizationRepository.find({
+      order: {
+        displayOrder: "ASC",
+        id: "ASC"
+      }
+    });
+  }
+
   async findPreRegistrationById(id: number): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
       relations: {
@@ -274,6 +283,10 @@ export class MemberRepository {
 
   async save(member: Member): Promise<Member> {
     return this.memberRepository.save(member);
+  }
+
+  async saveOrganizations(organizations: Organization[]): Promise<Organization[]> {
+    return this.organizationRepository.save(organizations);
   }
 
   async findPendingPreRegistrationByNameAndBranch(

@@ -21,10 +21,11 @@ import {
   Wrench,
   X
 } from "lucide-react";
-import { getOrganizations, type OrganizationOption } from "@/api/member";
+import { getOrganizations, updateOrganizations, type OrganizationOption } from "@/api/member";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
 
 type DepartmentPositionPageProps = {
+  accessToken: string;
   onBack: () => void;
 };
 
@@ -59,7 +60,7 @@ const colorSwatches = [
   }
 ];
 
-export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) {
+export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositionPageProps) {
   const [departments, setDepartments] = useState<DepartmentOption[]>([]);
   const [positions, setPositions] = useState<FlatPosition[]>([]);
   const [departmentName, setDepartmentName] = useState("");
@@ -76,6 +77,7 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
   } | null>(null);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingDepartments, setIsSavingDepartments] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -86,7 +88,10 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
           return;
         }
 
-        setDepartments(organizationResponse);
+        setDepartments(organizationResponse.map((organization, index) => ({
+          ...organization,
+          colorIndex: organization.colorIndex ?? resolveDepartmentColorIndex(organization.name, index)
+        })));
         setPositions(flattenPositions(positionResponse));
       })
       .catch((error: unknown) => {
@@ -119,16 +124,18 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
       return;
     }
 
-    setDepartments((current) => [
-      ...current,
+    const nextDepartments = [
+      ...departments,
       {
         colorIndex: departmentColorIndex,
         id: Date.now(),
         name: nextName
       }
-    ]);
+    ];
+
+    setDepartments(nextDepartments);
     setDepartmentName("");
-    setMessage("부서가 화면에 추가되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+    void persistDepartments(nextDepartments, "부서가 추가되었습니다.");
   }
 
   function handleAddPosition() {
@@ -156,7 +163,7 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
       }
     ]);
     setPositionName("");
-    setMessage("직급이 화면에 추가되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+    setMessage("직급이 화면에 추가되었습니다. 직급 저장 API는 다음 단계에서 연결됩니다.");
   }
 
   function handleStartDepartmentEdit(department: DepartmentOption, index: number) {
@@ -173,7 +180,7 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
       return;
     }
 
-    setDepartments((current) => current.map((department) => (
+    const nextDepartments = departments.map((department) => (
       department.id === departmentEditDraft.id
         ? {
           ...department,
@@ -181,17 +188,20 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
           name: departmentEditDraft.name.trim()
         }
         : department
-    )));
-    setDepartmentEditDraft(null);
-    setMessage("부서가 수정되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+    ));
+
+    setDepartments(nextDepartments);
+    void persistDepartments(nextDepartments, "부서가 수정되었습니다.");
   }
 
   function handleDeleteDepartment(id: number) {
-    setDepartments((current) => current.filter((department) => department.id !== id));
+    const nextDepartments = departments.filter((department) => department.id !== id);
+
+    setDepartments(nextDepartments);
     if (departmentEditDraft?.id === id) {
       setDepartmentEditDraft(null);
     }
-    setMessage("부서가 삭제되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+    void persistDepartments(nextDepartments, "부서가 삭제되었습니다.");
   }
 
   function handleStartPositionEdit(position: FlatPosition) {
@@ -225,6 +235,37 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
       setPositionEditDraft(null);
     }
     setMessage("직급이 삭제되었습니다. 저장 기능은 다음 단계에서 연결됩니다.");
+  }
+
+  async function persistDepartments(nextDepartments: DepartmentOption[], successMessage: string) {
+    setIsSavingDepartments(true);
+    setMessage("");
+
+    try {
+      const savedOrganizations = await updateOrganizations(accessToken, {
+        organizations: nextDepartments.map((department, index) => ({
+          colorIndex: department.colorIndex ?? resolveDepartmentColorIndex(department.name, index),
+          displayOrder: index,
+          id: isTemporaryDepartmentId(department.id) ? undefined : department.id,
+          name: department.name
+        }))
+      });
+
+      setDepartments(savedOrganizations.map((organization, index) => ({
+        ...organization,
+        colorIndex: organization.colorIndex ?? resolveDepartmentColorIndex(organization.name, index)
+      })));
+      setDepartmentEditDraft(null);
+      setMessage(successMessage);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "부서 정보를 저장하지 못했습니다.");
+    } finally {
+      setIsSavingDepartments(false);
+    }
+  }
+
+  function handleSavePositionOrder() {
+    setMessage("직급 정렬 저장 API는 다음 단계에서 연결됩니다.");
   }
 
   return (
@@ -295,6 +336,7 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
                     />
                   ) : (
                     <RowActions
+                      disabled={isSavingDepartments}
                       onDelete={() => handleDeleteDepartment(department.id)}
                       onEdit={() => handleStartDepartmentEdit(department, index)}
                     />
@@ -328,6 +370,7 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
           </div>
 
           <AddControl
+            disabled={isSavingDepartments}
             onAdd={handleAddDepartment}
             onChange={setDepartmentName}
             onColorSelect={setDepartmentColorIndex}
@@ -396,7 +439,7 @@ export function DepartmentPositionPage({ onBack }: DepartmentPositionPageProps) 
           </button>
           <button
             className="flex h-12 items-center justify-center gap-2 rounded-[13px] border border-[#9FCBFF] bg-[#EAF4FF] text-[18px] font-normal text-[#2D70CB] shadow-sm"
-            onClick={() => setMessage("저장 기능은 다음 단계에서 연결됩니다.")}
+            onClick={handleSavePositionOrder}
             type="button"
           >
             <Save aria-hidden className="h-5 w-5" />
@@ -436,21 +479,23 @@ function ManagementCard({
 }
 
 function RowActions({
+  disabled = false,
   iconOnly = false,
   onDelete,
   onEdit
 }: {
+  disabled?: boolean;
   iconOnly?: boolean;
   onDelete: () => void;
   onEdit: () => void;
 }) {
   return (
     <span className="flex items-center justify-end gap-2 text-[12px] font-normal text-[#222222]">
-      <button className="flex items-center gap-1" onClick={onEdit} type="button">
+      <button className="flex items-center gap-1 disabled:opacity-50" disabled={disabled} onClick={onEdit} type="button">
         <Pencil aria-hidden className="h-4 w-4" />
         {iconOnly ? null : "수정"}
       </button>
-      <button className="flex items-center gap-1" onClick={onDelete} type="button">
+      <button className="flex items-center gap-1 disabled:opacity-50" disabled={disabled} onClick={onDelete} type="button">
         <Trash2 aria-hidden className="h-4 w-4" />
         {iconOnly ? null : "삭제"}
       </button>
@@ -536,6 +581,7 @@ function PositionRow({
 }
 
 function AddControl({
+  disabled = false,
   hasSmile = false,
   onAdd,
   onChange,
@@ -544,6 +590,7 @@ function AddControl({
   selectedColorIndex,
   value
 }: {
+  disabled?: boolean;
   hasSmile?: boolean;
   onAdd: () => void;
   onChange: (value: string) => void;
@@ -564,7 +611,8 @@ function AddControl({
         {hasSmile ? <Smile aria-hidden className="h-5 w-5 text-[#4F4542]" /> : null}
       </label>
       <button
-        className="flex h-11 items-center justify-center gap-1 rounded-[12px] border border-[#9FCBFF] bg-[#EAF4FF] text-[18px] font-normal text-[#2D70CB] shadow-sm"
+        className="flex h-11 items-center justify-center gap-1 rounded-[12px] border border-[#9FCBFF] bg-[#EAF4FF] text-[18px] font-normal text-[#2D70CB] shadow-sm disabled:opacity-60"
+        disabled={disabled}
         onClick={onAdd}
         type="button"
       >
@@ -642,6 +690,10 @@ function resolveDepartmentColorIndex(name: string, index: number) {
   }
 
   return (index + 1) % colorSwatches.length;
+}
+
+function isTemporaryDepartmentId(id: number) {
+  return id > 1_000_000_000_000;
 }
 
 function getPositionMeta(name: string, index: number): {

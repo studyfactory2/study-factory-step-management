@@ -2,8 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { createHash } from "crypto";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";
+import { OrganizationUpdateRequest } from "./dto/organization-update.request";
 import { Member } from "./entity/member.entity";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
+import { Organization } from "./entity/organization.entity";
 import { MemberDuplicateCredentialException } from "./exception/member-duplicate-credential.exception";
 import { MemberPreRegistrationDeleteException } from "./exception/member-pre-registration-delete.exception";
 import { MemberPreRegistrationNotFoundException } from "./exception/member-pre-registration-not-found.exception";
@@ -42,9 +44,46 @@ export class MemberService {
     const organizations = await this.memberRepository.findOrganizations();
 
     return organizations.map((organization) => ({
+      colorIndex: organization.colorIndex,
+      displayOrder: organization.displayOrder,
       id: organization.id,
       name: organization.name
     }));
+  }
+
+  async updateOrganizations(request: OrganizationUpdateRequest) {
+    const savedOrganizations = await this.memberRepository.findAllOrganizations();
+    const savedById = new Map(savedOrganizations.map((organization) => [organization.id, organization]));
+    const requestIds = new Set(
+      request.organizations
+        .map((organization) => organization.id)
+        .filter((id): id is number => typeof id === "number" && id > 0)
+    );
+
+    const nextOrganizations = request.organizations.map((organizationRequest, index) => {
+      const trimmedName = organizationRequest.name.trim();
+      const organization = organizationRequest.id
+        ? savedById.get(organizationRequest.id) ?? new Organization()
+        : new Organization();
+
+      organization.name = trimmedName;
+      organization.colorIndex = organizationRequest.colorIndex ?? null;
+      organization.displayOrder = organizationRequest.displayOrder;
+      organization.isActive = true;
+
+      return organization;
+    });
+
+    for (const organization of savedOrganizations) {
+      if (!requestIds.has(organization.id)) {
+        organization.isActive = false;
+        nextOrganizations.push(organization);
+      }
+    }
+
+    await this.memberRepository.saveOrganizations(nextOrganizations);
+
+    return this.findOrganizations();
   }
 
   async preRegister(request: MemberPreRegisterRequest): Promise<MemberPreRegistration> {

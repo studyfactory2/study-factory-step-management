@@ -3,6 +3,7 @@ import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";
+import { OrganizationUpdateRequest } from "./dto/organization-update.request";
 import { MemberService } from "./member.service";
 
 @Controller("members")
@@ -22,6 +23,12 @@ export class MemberController {
   @Get("organizations")
   async findOrganizations() {
     return this.memberService.findOrganizations();
+  }
+
+  @Patch("organizations")
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
+  async updateOrganizations(@Body() request: OrganizationUpdateRequest) {
+    return this.memberService.updateOrganizations(request);
   }
 
   @Post("pre-registrations")

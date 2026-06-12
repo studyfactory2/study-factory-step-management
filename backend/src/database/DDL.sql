@@ -103,8 +103,8 @@ CREATE TABLE organizations (
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   name VARCHAR NOT NULL UNIQUE,
-  code VARCHAR NOT NULL UNIQUE,
   display_order INTEGER NOT NULL DEFAULT 0,
+  color_index INTEGER,
   is_active BOOLEAN NOT NULL DEFAULT true
 );
 
