@@ -215,6 +215,12 @@ export class TaskService {
       taskCategory: task.category,
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
+      creatorId: task.creator.id,
+      creatorName: this.getDisplayName(task.creator),
+      creatorRole: task.creator.roleType,
+      creatorPositionName: task.creator.positionInfo?.name ?? null,
+      creatorOrganizationName: task.creator.organization?.name ?? null,
+      lastActorId: this.findLatestActorId(task),
       memberId: task.assignee.id,
       memberName: this.getDisplayName(task.assignee),
       memberRole: task.assignee.roleType,
@@ -253,6 +259,12 @@ export class TaskService {
       taskCategory: task.category,
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
+      creatorId: task.creator.id,
+      creatorName: this.getDisplayName(task.creator),
+      creatorRole: task.creator.roleType,
+      creatorPositionName: task.creator.positionInfo?.name ?? null,
+      creatorOrganizationName: task.creator.organization?.name ?? null,
+      lastActorId: this.findLatestActorId(task),
       memberId: task.assignee.id,
       memberName: this.getDisplayName(task.assignee),
       memberRole: task.assignee.roleType,
@@ -447,6 +459,7 @@ export class TaskService {
       id: member.id,
       name: this.getDisplayName(member),
       branch: member.branchInfo?.name ?? null,
+      organizationName: member.organization?.name ?? null,
       roleType: member.roleType,
       positionName: member.positionInfo?.name ?? null
     };
@@ -469,6 +482,7 @@ export class TaskService {
     return {
       id: comment.id,
       taskId: comment.taskId,
+      creator: this.toTaskMemberResponse(comment.creator),
       content: comment.content,
       oneLineComment: comment.oneLineComment,
       status: comment.status,
@@ -555,15 +569,23 @@ export class TaskService {
   }
 
   private findLatestCommentOneLineComment(task: Task): string | null {
-    const latestComment = task.comments?.reduce((latest, comment) => {
+    const latestComment = this.findLatestComment(task);
+
+    return latestComment?.oneLineComment ?? task.oneLineComment ?? null;
+  }
+
+  private findLatestActorId(task: Task): number {
+    return this.findLatestComment(task)?.createdBy ?? task.createdBy;
+  }
+
+  private findLatestComment(task: Task): Task["comments"][number] | null {
+    return task.comments?.reduce((latest, comment) => {
       if (!latest) {
         return comment;
       }
 
       return comment.updatedAt.getTime() > latest.updatedAt.getTime() ? comment : latest;
     }, null as Task["comments"][number] | null);
-
-    return latestComment?.oneLineComment ?? task.oneLineComment ?? null;
   }
 
   private getDisplayName(member: Member): string {

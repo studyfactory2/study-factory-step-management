@@ -418,53 +418,6 @@ CREATE TABLE task_comment_attachments (
 CREATE INDEX idx_task_comment_attachments_task_comment_id
   ON task_comment_attachments (task_comment_id);
 
-CREATE TABLE help_requests (
-  id SERIAL PRIMARY KEY,
-  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
-  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
-  task_id INTEGER NOT NULL,
-  requester_id INTEGER NOT NULL,
-  receiver_id INTEGER NOT NULL,
-  content TEXT NOT NULL,
-  CONSTRAINT fk_help_requests_task_id
-    FOREIGN KEY (task_id)
-    REFERENCES tasks (id)
-    ON DELETE CASCADE,
-  CONSTRAINT fk_help_requests_requester_id
-    FOREIGN KEY (requester_id)
-    REFERENCES member (id)
-    ON DELETE CASCADE,
-  CONSTRAINT fk_help_requests_receiver_id
-    FOREIGN KEY (receiver_id)
-    REFERENCES member (id)
-    ON DELETE CASCADE
-);
-
-CREATE INDEX idx_help_requests_receiver_id
-  ON help_requests (receiver_id);
-
-CREATE INDEX idx_help_requests_requester_id
-  ON help_requests (requester_id);
-
-CREATE INDEX idx_help_requests_task_id
-  ON help_requests (task_id);
-
-CREATE TABLE help_request_attachments (
-  id SERIAL PRIMARY KEY,
-  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
-  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
-  help_request_id INTEGER NOT NULL,
-  image_url VARCHAR NOT NULL,
-  original_name VARCHAR,
-  CONSTRAINT fk_help_request_attachments_help_request_id
-    FOREIGN KEY (help_request_id)
-    REFERENCES help_requests (id)
-    ON DELETE CASCADE
-);
-
-CREATE INDEX idx_help_request_attachments_help_request_id
-  ON help_request_attachments (help_request_id);
-
 -- Default position tree and duties.
 INSERT INTO member_positions (name, subtitle, parent_id, display_order, is_login_visible, is_admin, is_active)
 VALUES

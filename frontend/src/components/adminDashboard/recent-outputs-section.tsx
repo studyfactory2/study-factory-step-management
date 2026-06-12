@@ -1,4 +1,5 @@
-import { ChevronDown, Clipboard } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Clipboard, MessageCircle } from "lucide-react";
 import type { AdminDashboardRecentOutput, AdminDashboardSortOrder } from "@/api/admin";
 import type { TaskStatus } from "@/types/domain";
 
@@ -43,6 +44,24 @@ export function RecentOutputsSection({
     filterOutputsByScope(recentOutputs, selectedScope, currentMemberId),
     selectedStatuses
   );
+  const [isScopeOpen, setIsScopeOpen] = useState(false);
+  const scopeDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleOutsideClick(event: MouseEvent) {
+      if (!scopeDropdownRef.current?.contains(event.target as Node)) {
+        setIsScopeOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  function handleScopeSelect(value: RecentOutputScope) {
+    onScopeChange?.(value);
+    setIsScopeOpen(false);
+  }
 
   return (
     <section className="rounded-[18px] border border-[#D8D1CE] bg-[#FFFEFC] p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
@@ -72,24 +91,42 @@ export function RecentOutputsSection({
             );
           })}
         </div>
-        <label className="relative block shrink-0">
-          <select
+        <div className="relative shrink-0" ref={scopeDropdownRef}>
+          <button
             aria-label="최근 업무 범위"
-            className="h-[20px] w-[78px] appearance-none rounded-[6px] border border-[#D8D1CE] bg-white pl-1 pr-4 text-[8px] font-normal leading-none text-[#333333] outline-none"
-            onChange={(event) => onScopeChange?.(event.target.value as RecentOutputScope)}
-            value={selectedScope}
+            aria-expanded={isScopeOpen}
+            className="flex h-[20px] w-[78px] items-center justify-between rounded-[6px] border border-[#D8D1CE] bg-white pl-1.5 pr-1 text-left text-[8px] font-normal leading-none text-[#333333] outline-none"
+            onClick={() => setIsScopeOpen((current) => !current)}
+            type="button"
           >
-            {Object.entries(scopeLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            aria-hidden
-            className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#8E8581]"
-          />
-        </label>
+            <span className="truncate">{scopeLabels[selectedScope]}</span>
+            <ChevronDown
+              aria-hidden
+              className={`h-3 w-3 shrink-0 text-[#8E8581] transition ${isScopeOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          {isScopeOpen && (
+            <div className="absolute right-0 top-[24px] z-30 w-[96px] overflow-hidden rounded-[7px] border border-[#D8D1CE] bg-white py-1 shadow-[0_8px_18px_rgba(95,73,68,0.16)]">
+              {Object.entries(scopeLabels).map(([value, label]) => {
+                const scopeValue = value as RecentOutputScope;
+                const isSelected = selectedScope === scopeValue;
+
+                return (
+                  <button
+                    className={`flex h-7 w-full items-center px-2 text-left text-[8px] font-normal ${
+                      isSelected ? "bg-[#EAF3FF] text-[#2D70CB]" : "text-[#4F4542] hover:bg-[#F7F7F7]"
+                    }`}
+                    key={value}
+                    onClick={() => handleScopeSelect(scopeValue)}
+                    type="button"
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-[50px_minmax(0,1fr)_56px_56px] gap-1 px-2 pb-1 text-center text-[8px] font-normal text-[#7B716D]">
@@ -106,43 +143,72 @@ export function RecentOutputsSection({
           </div>
         )}
 
-        {filteredOutputs.map((output) => (
-          <button
-            className="grid min-h-[52px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
-            key={output.taskId}
-            onClick={() => onDetailOpen(output.taskId)}
-            type="button"
-          >
-            <span className={getStatusBarClassName(output.taskStatus)} />
-            <span className="flex min-w-0 flex-col items-start justify-center pl-2.5 pr-1 text-left font-normal leading-none">
-              <span className="line-clamp-1 break-keep text-[9px] text-[#4F4542]">
-                {output.creatorName ?? output.memberName}
+        {filteredOutputs.map((output) => {
+          const direction = getOutputDirection(output);
+          const isCompleted = output.taskStatus === "COMPLETED";
+          const isCreatorReceiver = direction === "TO_CREATOR";
+          const isMemberReceiver = direction === "TO_MEMBER";
+          const completedTextClassName = isCompleted ? "line-through decoration-[#8E8581] decoration-1" : "";
+
+          return (
+            <button
+              className="grid min-h-[56px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
+              key={output.taskId}
+              onClick={() => onDetailOpen(output.taskId)}
+              type="button"
+            >
+              <span className={getStatusBarClassName(output.taskStatus)} />
+              <span className="flex min-w-0 flex-col items-start justify-center pl-2.5 pr-1 text-left font-normal leading-none">
+                <span className={`line-clamp-1 break-keep text-[9px] ${isCreatorReceiver && !isCompleted ? "text-[#2D70CB]" : "text-[#4F4542]"} ${completedTextClassName}`}>
+                  {output.creatorName ?? output.memberName}
+                </span>
+                <span className={`mt-0.5 line-clamp-1 break-keep text-[7px] text-[#7B716D] ${completedTextClassName}`}>
+                  {output.creatorOrganizationName ?? "미지정"}
+                </span>
+                <span className={`mt-0.5 whitespace-nowrap text-[6px] text-[#9A918D] ${completedTextClassName}`}>
+                  {formatCompactDateTime(output.updatedAt ?? output.startedAt)}
+                </span>
               </span>
-              <span className="mt-0.5 line-clamp-1 break-keep text-[7px] text-[#7B716D]">
-                {output.creatorOrganizationName ?? "미지정"}
+              <span className="flex min-w-0 flex-col justify-center pl-5 pr-1.5">
+                <span className={`truncate text-[10px] font-normal leading-3 text-[#222222] ${completedTextClassName}`}>
+                  {output.taskTitle}
+                </span>
+                {output.oneLineComment && (
+                  <span className={`mt-1 flex min-w-0 items-center gap-1 text-[7px] font-normal leading-none text-[#9A918D] ${completedTextClassName}`}>
+                    <MessageCircle aria-hidden className="h-2.5 w-2.5 shrink-0 text-[#9A918D]" />
+                    <span className="truncate">{output.oneLineComment}</span>
+                  </span>
+                )}
               </span>
-              <span className="mt-0.5 whitespace-nowrap text-[6px] text-[#9A918D]">
-                {formatCompactDateTime(output.updatedAt ?? output.startedAt)}
+              <span className="flex items-center justify-center px-0">
+                <span className={`flex h-[18px] w-[50px] items-center justify-center gap-0.5 rounded-full text-[7px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
+                  {!isCompleted && direction === "TO_CREATOR" && <span aria-hidden>←</span>}
+                  <span>{getStatusLabel(output.taskStatus)}</span>
+                  {!isCompleted && direction === "TO_MEMBER" && <span aria-hidden>→</span>}
+                  {isCompleted && <Check aria-hidden className="h-2.5 w-2.5 stroke-[2.5]" />}
+                </span>
               </span>
-            </span>
-            <span className="flex min-w-0 items-center pl-5 pr-1.5">
-              <span className="line-clamp-2 text-[10px] font-normal leading-3 text-[#222222]">
-                {output.taskTitle}
+              <span className="flex min-w-0 items-center justify-center px-0 text-center text-[9px] font-normal leading-3">
+                <span className={`line-clamp-2 break-keep ${isMemberReceiver && !isCompleted ? "text-[#2D70CB]" : "text-[#4F4542]"} ${completedTextClassName}`}>
+                  {output.memberName}
+                </span>
               </span>
-            </span>
-            <span className="flex items-center justify-center px-0">
-              <span className={`flex h-[18px] w-[50px] items-center justify-center rounded-full text-[7px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
-                {getStatusLabel(output.taskStatus)}
-              </span>
-            </span>
-            <span className="flex min-w-0 items-center justify-center px-0 text-center text-[9px] font-normal leading-3 text-[#4F4542]">
-              <span className="line-clamp-2 break-keep">{output.memberName}</span>
-            </span>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </section>
   );
+}
+
+function getOutputDirection(output: AdminDashboardRecentOutput) {
+  const lastActorId = output.lastActorId ?? output.creatorId;
+
+  if (lastActorId === output.memberId) {
+    return "TO_CREATOR";
+  }
+
+  return "TO_MEMBER";
 }
 
 function filterOutputsByScope(

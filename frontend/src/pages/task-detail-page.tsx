@@ -1,33 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
 import {
   getTaskDetail,
   type TaskDetail
 } from "@/api/task";
 import type { MemberRole } from "@/types/domain";
-import { ActivitySection } from "@/components/pages/taskDetail/activity-section";
 import { CommentSection } from "@/components/pages/taskDetail/comment-section";
 import { ImagePreviewDialog } from "@/components/pages/taskDetail/image-preview-dialog";
-import { InitialResultSection, CommentHistorySection } from "@/components/pages/taskDetail/result-sections";
-import { ProjectContentSection } from "@/components/pages/taskDetail/project-content-section";
+import { TaskConversationSection } from "@/components/pages/taskDetail/task-conversation-section";
 import { TaskDetailHeader } from "@/components/pages/taskDetail/task-detail-header";
-import { TaskSummarySection } from "@/components/pages/taskDetail/task-summary-section";
 
 type TaskDetailPageProps = {
   accessToken: string;
+  currentMemberId: number;
   currentMemberRole: MemberRole;
   onBack: () => void;
-  onHelpRequestOpen: () => void;
   taskId: number;
 };
 
 export function TaskDetailPage({
   accessToken,
+  currentMemberId,
   currentMemberRole,
   onBack,
-  onHelpRequestOpen,
   taskId
 }: TaskDetailPageProps) {
   const [task, setTask] = useState<TaskDetail | null>(null);
@@ -52,16 +48,9 @@ export function TaskDetailPage({
   }, [accessToken, taskId]);
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-background px-3 py-4 text-foreground">
-      <div className="pointer-events-none fixed left-10 top-20 text-[#F0C957]">
-        <Sparkles aria-hidden className="h-9 w-9 fill-current" />
-      </div>
-      <div className="pointer-events-none fixed right-12 top-28 text-[#F1A9C0]">
-        <Sparkles aria-hidden className="h-8 w-8 fill-current" />
-      </div>
-
+    <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
       <div className="relative mx-auto w-full max-w-[360px] space-y-3">
-        <TaskDetailHeader onBack={onBack} onHelpRequestOpen={onHelpRequestOpen} />
+        <TaskDetailHeader onBack={onBack} title={task?.title} />
 
         {isLoading && (
           <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-4 py-8 text-center shadow-[0_6px_0_#EFC6BE]">
@@ -77,21 +66,14 @@ export function TaskDetailPage({
 
         {task && (
           <>
-            <TaskSummarySection task={task} />
-            <ProjectContentSection
-              accessToken={accessToken}
-              onImagePreview={setPreviewImageUrl}
-              onTaskUpdate={setTask}
-              task={task}
-            />
-            <InitialResultSection onImagePreview={setPreviewImageUrl} task={task} />
-            <CommentHistorySection comments={task.comments.slice(1)} onImagePreview={setPreviewImageUrl} />
+            <TaskConversationSection onImagePreview={setPreviewImageUrl} task={task} />
             <CommentSection
               accessToken={accessToken}
+              currentMemberId={currentMemberId}
+              currentMemberRole={currentMemberRole}
               onTaskUpdate={setTask}
               task={task}
             />
-            <ActivitySection accessToken={accessToken} currentMemberRole={currentMemberRole} />
           </>
         )}
       </div>

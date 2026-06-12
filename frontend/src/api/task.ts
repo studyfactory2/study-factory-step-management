@@ -66,6 +66,7 @@ export type TaskDetailMember = {
   id: number;
   name: string;
   branch: string | null;
+  organizationName: string | null;
   roleType: MemberRole;
   positionName: string | null;
 };
@@ -87,6 +88,7 @@ export type TaskCommentAttachment = {
 export type TaskComment = {
   id: number;
   taskId: number;
+  creator: TaskDetailMember;
   content: string;
   oneLineComment: string | null;
   status: TaskStatus;
@@ -144,6 +146,12 @@ export type TaskRecentWorkStatus = {
   taskCategory: TaskCategory;
   oneLineComment: string | null;
   taskStatus: TaskStatus;
+  creatorId: number;
+  creatorName: string;
+  creatorRole: MemberRole;
+  creatorPositionName: string | null;
+  creatorOrganizationName: string | null;
+  lastActorId: number;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;

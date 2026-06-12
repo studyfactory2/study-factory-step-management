@@ -1,26 +1,21 @@
 type TaskDetailHeaderProps = {
   onBack: () => void;
-  onHelpRequestOpen: () => void;
+  title?: string;
 };
 
-export function TaskDetailHeader({ onBack, onHelpRequestOpen }: TaskDetailHeaderProps) {
+export function TaskDetailHeader({ onBack, title }: TaskDetailHeaderProps) {
   return (
-    <header className="relative flex items-center justify-center">
+    <header className="flex items-center gap-4 border-b border-[#DCE8F5] pb-3">
       <button
-        className="absolute left-0 h-7 rounded-full border border-[#F2C9C2] bg-white px-3 text-[10px] font-black text-[#9B7A75] shadow-sm"
+        className="h-7 shrink-0 bg-transparent px-0 text-[12px] font-normal text-[#111111]"
         onClick={onBack}
         type="button"
       >
         ← 뒤로
       </button>
-      <h1 className="text-[21px] font-black tracking-normal text-[#3F2C28]">업무상세</h1>
-      <button
-        className="absolute right-0 h-7 rounded-full bg-primary px-3 text-[10px] font-black text-white shadow-sm"
-        onClick={onHelpRequestOpen}
-        type="button"
-      >
-        도움요청
-      </button>
+      <h1 className="min-w-0 flex-1 truncate text-left text-[18px] font-normal tracking-normal text-[#1F1A18]">
+        업무상세{title ? ` - ${title}` : ""}
+      </h1>
     </header>
   );
 }

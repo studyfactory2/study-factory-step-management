@@ -31,6 +31,7 @@ export class TaskCommentService {
     this.validateTaskCommentAccess(task, currentMember);
 
     const commentStatus = request.status ?? task.status;
+    this.validateTaskStatusUpdate(commentStatus, currentMember);
     await this.updateTaskStatus(task, commentStatus);
 
     const comment = request.toEntity(taskId, currentMember.memberId, commentStatus);
@@ -45,7 +46,8 @@ export class TaskCommentService {
 
     await this.taskCommentRepository.markTaskViewed(taskId, currentMember.memberId);
 
-    return this.toResponse(savedComment);
+    const createdComment = await this.taskCommentRepository.findById(savedComment.id);
+    return this.toResponse(createdComment ?? savedComment);
   }
 
   async findByTaskId(
@@ -93,6 +95,12 @@ export class TaskCommentService {
     }
   }
 
+  private validateTaskStatusUpdate(status: TaskStatus, currentMember: CurrentMember): void {
+    if (status === TaskStatus.COMPLETED && !this.isAdminRole(currentMember.role)) {
+      throw new ForbiddenException("완료 상태는 관리자 또는 CEO만 변경할 수 있습니다.");
+    }
+  }
+
   private async updateTaskStatus(task: Task, status: TaskStatus): Promise<void> {
     task.updatedAt = new Date();
     task.status = status;
@@ -132,6 +140,14 @@ export class TaskCommentService {
     return {
       id: comment.id,
       taskId: comment.taskId,
+      creator: {
+        id: comment.creator.id,
+        name: this.getDisplayName(comment.creator),
+        branch: comment.creator.branchInfo?.name ?? null,
+        organizationName: comment.creator.organization?.name ?? null,
+        roleType: comment.creator.roleType,
+        positionName: comment.creator.positionInfo?.name ?? null
+      },
       content: comment.content,
       oneLineComment: comment.oneLineComment,
       status: comment.status,

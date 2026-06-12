@@ -43,11 +43,28 @@ export class TaskCommentRepository {
   async findByTaskId(taskId: number): Promise<TaskComment[]> {
     return this.taskCommentRepository
       .createQueryBuilder("comment")
+      .leftJoinAndSelect("comment.creator", "creator")
+      .leftJoinAndSelect("creator.positionInfo", "creatorPosition")
+      .leftJoinAndSelect("creator.branchInfo", "creatorBranch")
+      .leftJoinAndSelect("creator.organization", "creatorOrganization")
       .leftJoinAndSelect("comment.attachments", "attachments")
       .where("comment.taskId = :taskId", { taskId })
       .orderBy("comment.createdAt", "ASC")
       .addOrderBy("attachments.createdAt", "ASC")
       .getMany();
+  }
+
+  async findById(id: number): Promise<TaskComment | null> {
+    return this.taskCommentRepository
+      .createQueryBuilder("comment")
+      .leftJoinAndSelect("comment.creator", "creator")
+      .leftJoinAndSelect("creator.positionInfo", "creatorPosition")
+      .leftJoinAndSelect("creator.branchInfo", "creatorBranch")
+      .leftJoinAndSelect("creator.organization", "creatorOrganization")
+      .leftJoinAndSelect("comment.attachments", "attachments")
+      .where("comment.id = :id", { id })
+      .orderBy("attachments.createdAt", "ASC")
+      .getOne();
   }
 
   async findRecent(limit: number, memberId?: number): Promise<TaskComment[]> {
