@@ -337,7 +337,7 @@ export function TaskCreateForm({
             />
           ))}
           <button
-            className="h-10 w-full rounded-[10px] border border-[#B9D5EF] bg-[#F5FAFF] text-[12px] font-normal text-[#2D70CB] transition hover:bg-[#EAF3FF]"
+            className="h-10 w-full rounded-[10px] border border-dashed border-[#333333] bg-[#F7F7F7] text-[12px] font-normal text-[#222222] transition hover:bg-[#EFEFEF]"
             onClick={handleAddDraft}
             type="button"
           >
