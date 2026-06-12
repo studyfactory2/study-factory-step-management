@@ -128,7 +128,7 @@ export function TaskCreateForm({
           oneLineComment: draft.oneLineComment ?? "",
           title: draft.title
         }));
-        setDrafts([...draftForms, createEmptyDraft(draftForms.length + 1)]);
+        setDrafts(draftForms.length > 0 ? draftForms : [createEmptyDraft(1)]);
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "임시저장 업무를 불러오지 못했습니다.");
       } finally {
@@ -228,14 +228,7 @@ export function TaskCreateForm({
               }
             : draft
         );
-        const hasEditableEmptyDraft = savedDrafts.some(isEmptyEditableDraft);
-
-        if (hasEditableEmptyDraft) {
-          return savedDrafts;
-        }
-
-        const nextId = Math.max(...savedDrafts.map((draft) => draft.id)) + 1;
-        return [...savedDrafts, createEmptyDraft(nextId)];
+        return savedDrafts;
       });
       setMessage("업무가 임시저장되었습니다.");
     } catch (error) {
@@ -281,18 +274,17 @@ export function TaskCreateForm({
 
     setDrafts((currentDrafts) => {
       const remainingDrafts = currentDrafts.filter((currentDraft) => currentDraft.id !== draft.id);
-      const hasEditableEmptyDraft = remainingDrafts.some(isEmptyEditableDraft);
+      return remainingDrafts;
+    });
+  }
 
-      if (remainingDrafts.length === 0) {
-        return [createEmptyDraft(1)];
-      }
+  function handleAddDraft() {
+    setDrafts((currentDrafts) => {
+      const nextId = currentDrafts.length > 0
+        ? Math.max(...currentDrafts.map((draft) => draft.id)) + 1
+        : 1;
 
-      if (hasEditableEmptyDraft) {
-        return remainingDrafts;
-      }
-
-      const nextId = Math.max(...remainingDrafts.map((currentDraft) => currentDraft.id)) + 1;
-      return [...remainingDrafts, createEmptyDraft(nextId)];
+      return [...currentDrafts, createEmptyDraft(nextId)];
     });
   }
 
@@ -327,21 +319,32 @@ export function TaskCreateForm({
         </div>
       )}
 
-      {!isDraftLoading && drafts.map((draft) => (
-        <TaskDraftCard
-          assignees={sortedAssignees}
-          draft={draft}
-          isLoading={isLoading}
-          isSaving={savingDraftId === draft.id}
-          isSubmitting={isSubmitting}
-          key={draft.id}
-          onAttachmentChange={handleFileChange}
-          onEdit={handleEditDraft}
-          onSave={handleSaveDraft}
-          onSubmit={handleSubmitDraft}
-          onUpdate={updateDraft}
-        />
-      ))}
+      {!isDraftLoading && (
+        <div className="space-y-6">
+          {drafts.map((draft) => (
+            <TaskDraftCard
+              assignees={sortedAssignees}
+              draft={draft}
+              isLoading={isLoading}
+              isSaving={savingDraftId === draft.id}
+              isSubmitting={isSubmitting}
+              key={draft.id}
+              onAttachmentChange={handleFileChange}
+              onEdit={handleEditDraft}
+              onSave={handleSaveDraft}
+              onSubmit={handleSubmitDraft}
+              onUpdate={updateDraft}
+            />
+          ))}
+          <button
+            className="h-10 w-full rounded-[10px] border border-[#B9D5EF] bg-[#F5FAFF] text-[12px] font-normal text-[#2D70CB] transition hover:bg-[#EAF3FF]"
+            onClick={handleAddDraft}
+            type="button"
+          >
+            새 업무 추가
+          </button>
+        </div>
+      )}
     </section>
   );
 }
@@ -373,6 +376,13 @@ function AssigneePicker({
   searchedAssignees: Member[];
   selectedPositionId: number | null;
 }) {
+  const [isPositionAssigneeOpen, setIsPositionAssigneeOpen] = useState(false);
+
+  function handleAssigneeSelect(memberId: number) {
+    onAssigneeSelect(memberId);
+    setIsPositionAssigneeOpen(false);
+  }
+
   return (
     <section className="space-y-3">
       <div>
@@ -433,23 +443,34 @@ function AssigneePicker({
         )}
 
         {selectedPositionId && (
-          <select
-            className="mt-2 h-9 w-full rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-[12px] font-normal text-[#333333] outline-none disabled:opacity-60"
-            disabled={isLoading || positionAssignees.length === 0}
-            onChange={(event) => {
-              if (event.target.value) {
-                onAssigneeSelect(Number(event.target.value));
-              }
-            }}
-            value=""
-          >
-            <option value="">해당 직위 직원 선택</option>
-            {positionAssignees.map((member) => (
-              <option key={member.id} value={member.id}>
-                {getMemberDisplayName(member)}
-              </option>
-            ))}
-          </select>
+          <div className="relative mt-2">
+            <button
+              aria-expanded={isPositionAssigneeOpen}
+              className="flex h-9 w-full items-center justify-between rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-left text-[12px] font-normal text-[#333333] outline-none disabled:opacity-60"
+              disabled={isLoading || positionAssignees.length === 0}
+              onClick={() => setIsPositionAssigneeOpen((currentValue) => !currentValue)}
+              type="button"
+            >
+              <span>해당 직위 직원 선택</span>
+              <span className="text-[10px] text-[#8E8581]">{isPositionAssigneeOpen ? "접기" : "열기"}</span>
+            </button>
+
+            {isPositionAssigneeOpen && (
+              <div className="absolute left-0 right-0 top-[42px] z-20 max-h-[136px] overflow-y-auto rounded-[10px] border border-[#D8D1CE] bg-white p-1.5 shadow-[0_10px_24px_rgba(95,73,68,0.16)]">
+                {positionAssignees.map((member) => (
+                  <button
+                    className="flex h-8 w-full items-center justify-between rounded-[8px] px-2 text-left text-[11px] font-normal text-[#333333] hover:bg-[#F5FAFF]"
+                    key={member.id}
+                    onClick={() => handleAssigneeSelect(member.id)}
+                    type="button"
+                  >
+                    <span>{getMemberDisplayName(member)}</span>
+                    <span className="text-[10px] text-[#7B716D]">{getMemberPositionName(member)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </section>
     </section>
@@ -486,16 +507,17 @@ function TaskDraftCard({
 
   return (
     <article className="space-y-4">
-      {isLocked && (
-        <div className="rounded-[10px] bg-[#F1F1F1] px-3 py-2 text-center text-[10px] font-normal text-[#6B6B6B]">
-          임시저장됨
-        </div>
-      )}
-
       <section className="space-y-3 rounded-[16px] border border-[#D8D1CE] bg-white p-3">
         <div>
           <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] font-normal text-[#7B716D]">
-            <span>제목</span>
+            <div className="flex items-center gap-1.5">
+              <span>제목</span>
+              {isLocked && (
+                <span className="rounded-full bg-[#F1F1F1] px-2 py-0.5 text-[8px] font-normal text-[#6B6B6B]">
+                  임시저장됨
+                </span>
+              )}
+            </div>
             <div className="flex min-w-0 items-center gap-1 text-[#333333]">
               <span className="shrink-0">담당자 :</span>
               <select
@@ -681,16 +703,6 @@ function AttachmentPreview({
         />
       )}
     </button>
-  );
-}
-
-function isEmptyEditableDraft(draft: TaskDraftForm) {
-  return (
-    !draft.isSaved &&
-    !draft.assigneeId &&
-    !draft.title &&
-    !draft.description &&
-    !draft.oneLineComment
   );
 }
 
