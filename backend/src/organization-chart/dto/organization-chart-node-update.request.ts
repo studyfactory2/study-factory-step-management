@@ -1,12 +1,18 @@
 import { IsBoolean, IsInt, IsOptional, IsString, MaxLength } from "class-validator";
 
 export class OrganizationChartNodeUpdateRequest {
+  @IsOptional()
   @IsInt()
   id: number;
 
   @IsOptional()
   @IsInt()
   parentId?: number | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  parentSlotKey?: string | null;
 
   @IsInt()
   floor: number;

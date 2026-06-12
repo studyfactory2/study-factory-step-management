@@ -28,7 +28,9 @@ export type OrganizationChart = {
   nodes: OrganizationChartNode[];
 };
 
-export type OrganizationChartNodeUpdate = Omit<OrganizationChartNode, "children" | "memberName" | "organizationName" | "positionName">;
+export type OrganizationChartNodeUpdate = Omit<OrganizationChartNode, "children" | "memberName" | "organizationName" | "positionName"> & {
+  parentSlotKey?: string | null;
+};
 
 export async function getActiveOrganizationChart(): Promise<OrganizationChart> {
   const response = await fetch(`${API_BASE_URL}/api/organization-chart/active`, {

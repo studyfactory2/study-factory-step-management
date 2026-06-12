@@ -53,6 +53,8 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isShapeEditing, setIsShapeEditing] = useState(false);
+  const [tempNodeId, setTempNodeId] = useState(-1);
 
   useEffect(() => {
     getActiveOrganizationChart()
@@ -133,8 +135,16 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
           step="1"
           title="조직도 모양 만들기"
         >
-          <ShapeLayoutPreview />
-          <StepActions />
+          <ShapeLayoutPreview
+            checkedSlotKeys={new Set(flattenChartNodes(chart?.nodes ?? []).filter((node) => node.isEnabled).map((node) => node.slotKey))}
+            isEditing={isShapeEditing}
+            onToggleSlot={handleToggleShapeSlot}
+          />
+          <StepActions
+            isEditing={isShapeEditing}
+            onComplete={() => setIsShapeEditing(false)}
+            onEdit={() => setIsShapeEditing(true)}
+          />
         </StepCard>
 
         <StepCard
@@ -214,6 +224,27 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
       </div>
     </main>
   );
+
+  function handleToggleShapeSlot(slot: ShapeSlot) {
+    if (!chart || !isShapeEditing) {
+      return;
+    }
+
+    const flatNodes = flattenChartNodes(chart.nodes);
+    const existingNode = flatNodes.find((node) => node.slotKey === slot.slotKey);
+    const isChecked = Boolean(existingNode?.isEnabled);
+    const negativeNodeCount = flatNodes.filter((node) => node.id < 0).length;
+    const nextFlatNodes = isChecked
+      ? flatNodes.map((node) => isDescendantSlot(node.slotKey, slot.slotKey) ? { ...node, isEnabled: false } : node)
+      : ensureSlotNodes(flatNodes, slot, tempNodeId);
+    const nextNegativeNodeCount = nextFlatNodes.filter((node) => node.id < 0).length;
+
+    setTempNodeId((currentId) => currentId - Math.max(nextNegativeNodeCount - negativeNodeCount, 0));
+    setChart({
+      ...chart,
+      nodes: buildChartNodeTree(nextFlatNodes)
+    });
+  }
 }
 
 function StepCard({
@@ -246,16 +277,31 @@ function StepCard({
   );
 }
 
-function ShapeLayoutPreview() {
+function ShapeLayoutPreview({
+  checkedSlotKeys,
+  isEditing,
+  onToggleSlot
+}: {
+  checkedSlotKeys: Set<string>;
+  isEditing: boolean;
+  onToggleSlot: (slot: ShapeSlot) => void;
+}) {
+  const getSlot = (slotKey: string) => shapeSlots.find((slot) => slot.slotKey === slotKey);
+
   return (
     <div className="mt-3 grid grid-cols-[34px_minmax(0,1fr)] text-[12px] font-normal">
       <span className="pt-1.5 text-[#222222]">3층</span>
       <div className="grid grid-cols-4 items-start gap-1">
         <div className="col-span-2 flex justify-center">
-          <ShapeCheckbox checked label="1" />
+          <ShapeCheckbox
+            checked={checkedSlotKeys.has("3-1")}
+            isEditing={isEditing}
+            label="1"
+            onClick={() => onToggleSlot(getSlot("3-1") ?? shapeSlots[0])}
+          />
         </div>
         <div className="col-span-2 flex justify-center">
-          <ShapeCheckbox checked label="2" />
+          <ShapeCheckbox checked={checkedSlotKeys.has("3-2")} isEditing={isEditing} label="2" onClick={() => onToggleSlot(getSlot("3-2") ?? shapeSlots[1])} />
         </div>
       </div>
 
@@ -273,11 +319,20 @@ function ShapeLayoutPreview() {
 
       <span className="pt-1.5 text-[#222222]">2층</span>
       <div className="grid grid-cols-4 gap-1">
-        {["1", "2", "1", "2"].map((label, index) => (
+        {["1", "2", "1", "2"].map((label, index) => {
+          const slot = getSlot(`2-${Math.floor(index / 2) + 1}-${index % 2 + 1}`);
+
+          return (
           <div className="flex justify-center" key={`second-${label}-${index}`}>
-            <ShapeCheckbox checked label={label} />
+            <ShapeCheckbox
+              checked={slot ? checkedSlotKeys.has(slot.slotKey) : false}
+              isEditing={isEditing}
+              label={label}
+              onClick={() => slot && onToggleSlot(slot)}
+            />
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <span />
@@ -297,9 +352,21 @@ function ShapeLayoutPreview() {
       <div className="grid grid-cols-4 gap-1">
         {[0, 1, 2, 3].map((group) => (
           <div className="flex justify-center gap-0.5" key={`first-${group}`}>
-            {["1", "2", "3"].map((label) => (
-              <ShapeCheckbox checked key={`first-${group}-${label}`} label={label} />
-            ))}
+            {["1", "2", "3"].map((label, index) => {
+              const parentGroup = Math.floor(group / 2) + 1;
+              const secondIndex = group % 2 + 1;
+              const slot = getSlot(`1-${parentGroup}-${secondIndex}-${index + 1}`);
+
+              return (
+                <ShapeCheckbox
+                  checked={slot ? checkedSlotKeys.has(slot.slotKey) : false}
+                  isEditing={isEditing}
+                  key={`first-${group}-${label}`}
+                  label={label}
+                  onClick={() => slot && onToggleSlot(slot)}
+                />
+              );
+            })}
           </div>
         ))}
       </div>
@@ -309,18 +376,29 @@ function ShapeLayoutPreview() {
 
 function ShapeCheckbox({
   checked,
-  label
+  isEditing = false,
+  label,
+  onClick
 }: {
   checked: boolean;
+  isEditing?: boolean;
   label: string;
+  onClick?: () => void;
 }) {
   return (
-    <span className="flex h-6 min-w-5 items-center justify-center gap-0.5 rounded-[5px] border border-[#CFC7C3] bg-[#FFFEFC] px-0.5 text-[10px] font-normal text-[#222222]">
+    <button
+      className={`flex h-6 min-w-5 items-center justify-center gap-0.5 rounded-[5px] border px-0.5 text-[10px] font-normal text-[#222222] ${
+        isEditing ? "border-[#9DC7ED] bg-[#F4FAFF]" : "border-[#CFC7C3] bg-[#FFFEFC]"
+      }`}
+      disabled={!isEditing}
+      onClick={onClick}
+      type="button"
+    >
       <span className="flex h-2.5 w-2.5 items-center justify-center border border-[#8C817D] bg-white">
         {checked ? <Check aria-hidden className="h-2 w-2 text-[#222222]" /> : null}
       </span>
       {label}
-    </span>
+    </button>
   );
 }
 
@@ -336,11 +414,20 @@ function SelectPreview({ value }: { value: string }) {
   );
 }
 
-function StepActions() {
+function StepActions({
+  isEditing = false,
+  onComplete,
+  onEdit
+}: {
+  isEditing?: boolean;
+  onComplete?: () => void;
+  onEdit?: () => void;
+}) {
   return (
     <div className="mt-3 grid grid-cols-2 gap-2 px-9">
       <button
         className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] border border-[#E2C76F] bg-[#FFF3B8] text-[13px] font-normal text-[#8B6B10]"
+        onClick={onEdit}
         type="button"
       >
         <Edit3 aria-hidden className="h-4 w-4" />
@@ -348,10 +435,11 @@ function StepActions() {
       </button>
       <button
         className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] border border-[#2E8CDD] bg-[#1F8FE5] text-[13px] font-normal text-white"
+        onClick={onComplete}
         type="button"
       >
         <Check aria-hidden className="h-4 w-4" />
-        완료
+        {isEditing ? "완료" : "완료"}
       </button>
     </div>
   );
@@ -409,7 +497,10 @@ function OrgPersonCard({
   );
 }
 
-function flattenChartNodes(nodes: OrganizationChartNode[]): OrganizationChartNodeUpdate[] {
+function flattenChartNodes(
+  nodes: OrganizationChartNode[],
+  allNodes: OrganizationChartNode[] = nodes
+): OrganizationChartNodeUpdate[] {
   return nodes.flatMap((node) => [
     {
       displayName: node.displayName,
@@ -421,11 +512,155 @@ function flattenChartNodes(nodes: OrganizationChartNode[]): OrganizationChartNod
       memberId: node.memberId,
       organizationId: node.organizationId,
       parentId: node.parentId,
+      parentSlotKey: findParentSlotKey(allNodes, node.parentId),
       positionId: node.positionId,
       slotKey: node.slotKey
     },
-    ...flattenChartNodes(node.children ?? [])
+    ...flattenChartNodes(node.children ?? [], allNodes)
   ]);
+}
+
+type ShapeSlot = {
+  displayOrder: number;
+  floor: number;
+  label: string;
+  parentSlotKey: string | null;
+  slotKey: string;
+};
+
+const shapeSlots: ShapeSlot[] = [
+  { displayOrder: 1, floor: 3, label: "1", parentSlotKey: null, slotKey: "3-1" },
+  { displayOrder: 2, floor: 3, label: "2", parentSlotKey: null, slotKey: "3-2" },
+  { displayOrder: 1, floor: 2, label: "1", parentSlotKey: "3-1", slotKey: "2-1-1" },
+  { displayOrder: 2, floor: 2, label: "2", parentSlotKey: "3-1", slotKey: "2-1-2" },
+  { displayOrder: 3, floor: 2, label: "1", parentSlotKey: "3-2", slotKey: "2-2-1" },
+  { displayOrder: 4, floor: 2, label: "2", parentSlotKey: "3-2", slotKey: "2-2-2" },
+  ...[0, 1, 2, 3].flatMap((group) => {
+    const topIndex = Math.floor(group / 2) + 1;
+    const secondIndex = group % 2 + 1;
+    const parentSlotKey = `2-${topIndex}-${secondIndex}`;
+
+    return [1, 2, 3].map((itemIndex) => ({
+      displayOrder: group * 3 + itemIndex,
+      floor: 1,
+      label: String(itemIndex),
+      parentSlotKey,
+      slotKey: `1-${topIndex}-${secondIndex}-${itemIndex}`
+    }));
+  })
+];
+
+function ensureSlotNodes(nodes: OrganizationChartNodeUpdate[], slot: ShapeSlot, tempNodeId: number) {
+  const nextNodes = [...nodes];
+  let nextTempNodeId = tempNodeId;
+  const slotsToEnsure = getAncestorSlots(slot);
+
+  for (const currentSlot of slotsToEnsure) {
+    const existingNode = nextNodes.find((node) => node.slotKey === currentSlot.slotKey);
+    if (existingNode) {
+      existingNode.isEnabled = true;
+      continue;
+    }
+
+    nextNodes.push({
+      displayName: "직위 미정",
+      displayOrder: currentSlot.displayOrder,
+      floor: currentSlot.floor,
+      id: nextTempNodeId,
+      imageUrl: null,
+      isEnabled: true,
+      memberId: null,
+      organizationId: null,
+      parentId: null,
+      parentSlotKey: currentSlot.parentSlotKey,
+      positionId: null,
+      slotKey: currentSlot.slotKey
+    });
+    nextTempNodeId -= 1;
+  }
+
+  return nextNodes;
+}
+
+function getAncestorSlots(slot: ShapeSlot) {
+  const ancestors: ShapeSlot[] = [];
+  let currentSlot: ShapeSlot | undefined = slot;
+
+  while (currentSlot) {
+    ancestors.unshift(currentSlot);
+    currentSlot = currentSlot.parentSlotKey
+      ? shapeSlots.find((item) => item.slotKey === currentSlot?.parentSlotKey)
+      : undefined;
+  }
+
+  return ancestors;
+}
+
+function isDescendantSlot(slotKey: string, parentSlotKey: string) {
+  if (slotKey === parentSlotKey) {
+    return true;
+  }
+
+  let currentSlot = findSlot(slotKey);
+  while (currentSlot?.parentSlotKey) {
+    if (currentSlot.parentSlotKey === parentSlotKey) {
+      return true;
+    }
+
+    currentSlot = findSlot(currentSlot.parentSlotKey);
+  }
+
+  return false;
+}
+
+function buildChartNodeTree(nodes: OrganizationChartNodeUpdate[]): OrganizationChartNode[] {
+  const responseNodes: OrganizationChartNode[] = nodes.map((node) => ({
+    ...node,
+    children: [],
+    memberName: null,
+    organizationName: null,
+    positionName: null
+  }));
+  const nodeMap = new Map(responseNodes.map((node) => [node.id, node]));
+  const slotMap = new Map(responseNodes.map((node) => [node.slotKey, node]));
+  const roots: OrganizationChartNode[] = [];
+
+  for (const node of responseNodes) {
+    const parent = node.parentId ? nodeMap.get(node.parentId) : slotMap.get(findSlot(node.slotKey)?.parentSlotKey ?? "");
+    if (!parent) {
+      roots.push(node);
+      continue;
+    }
+
+    node.parentId = parent.id;
+    parent.children.push(node);
+  }
+
+  sortChartNodes(roots);
+
+  return roots;
+}
+
+function sortChartNodes(nodes: OrganizationChartNode[]) {
+  nodes.sort((left, right) => left.displayOrder - right.displayOrder || left.id - right.id);
+  nodes.forEach((node) => sortChartNodes(node.children));
+}
+
+function findSlot(slotKey: string) {
+  return shapeSlots.find((slot) => slot.slotKey === slotKey);
+}
+
+function findParentSlotKey(nodes: OrganizationChartNode[], parentId: number | null): string | null {
+  if (!parentId) {
+    return null;
+  }
+
+  const flatNodes = flattenResponseNodes(nodes);
+  return flatNodes.find((node) => node.id === parentId)?.slotKey ?? null;
+}
+
+function flattenResponseNodes(nodes: OrganizationChartNode[]): OrganizationChartNode[] {
+  return nodes.flatMap((node) => [node, ...flattenResponseNodes(node.children ?? [])]);
 }
 
 export default OrgChartSettingsPage;

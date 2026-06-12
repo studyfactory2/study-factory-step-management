@@ -89,9 +89,19 @@ export class OrganizationChartRepository {
       };
 
       const savedNodeMap = new Map<number, OrganizationChartNode>();
+      const siblingIndexMap = new Map<number | null, number>();
+
+      const getNextSiblingIndex = (parentPositionId: number | null) => {
+        const currentIndex = siblingIndexMap.get(parentPositionId) ?? 0;
+        const nextIndex = currentIndex + 1;
+        siblingIndexMap.set(parentPositionId, nextIndex);
+
+        return nextIndex;
+      };
 
       for (const position of positions) {
         const depth = getDepth(position);
+        const siblingIndex = getNextSiblingIndex(position.parentId);
         const node = manager.create(OrganizationChartNode, {
           chartId: savedChart.id,
           displayName: position.name,
@@ -100,7 +110,7 @@ export class OrganizationChartRepository {
           isEnabled: true,
           parentId: null,
           positionId: position.id,
-          slotKey: String(position.id)
+          slotKey: `3-${siblingIndex}`
         });
         const savedNode = await manager.save(node);
         savedNodeMap.set(position.id, savedNode);
@@ -118,7 +128,7 @@ export class OrganizationChartRepository {
         }
 
         node.parentId = parentNode.id;
-        node.slotKey = `${parentNode.slotKey}-${position.id}`;
+        node.slotKey = `${node.floor}-${parentNode.slotKey.replace(/^[0-9]-/, "")}-${getSiblingIndexFromSlot(node.slotKey)}`;
         await manager.save(node);
       }
 
@@ -128,8 +138,33 @@ export class OrganizationChartRepository {
 
   async saveNodes(chartId: number, nodes: OrganizationChartNodeUpdateRequest[]): Promise<void> {
     await this.nodeRepository.manager.transaction(async (manager) => {
+      const savedNodeByRequestId = new Map<number, OrganizationChartNode>();
+      const savedNodeBySlotKey = new Map<string, OrganizationChartNode>();
+
       for (const node of nodes) {
-        await manager.update(OrganizationChartNode, { chartId, id: node.id }, {
+        if (node.id > 0) {
+          await manager.update(OrganizationChartNode, { chartId, id: node.id }, {
+            displayName: node.displayName?.trim() || null,
+            displayOrder: node.displayOrder,
+            floor: node.floor,
+            imageUrl: node.imageUrl?.trim() || null,
+            isEnabled: node.isEnabled,
+            memberId: node.memberId ?? null,
+            organizationId: node.organizationId ?? null,
+            parentId: node.parentId && node.parentId > 0 ? node.parentId : null,
+            positionId: node.positionId ?? null,
+            slotKey: node.slotKey
+          });
+          const savedNode = await manager.findOneBy(OrganizationChartNode, { chartId, id: node.id });
+          if (savedNode) {
+            savedNodeByRequestId.set(node.id, savedNode);
+            savedNodeBySlotKey.set(savedNode.slotKey, savedNode);
+          }
+          continue;
+        }
+
+        const savedNode = await manager.save(OrganizationChartNode, {
+          chartId,
           displayName: node.displayName?.trim() || null,
           displayOrder: node.displayOrder,
           floor: node.floor,
@@ -137,11 +172,36 @@ export class OrganizationChartRepository {
           isEnabled: node.isEnabled,
           memberId: node.memberId ?? null,
           organizationId: node.organizationId ?? null,
-          parentId: node.parentId ?? null,
+          parentId: null,
           positionId: node.positionId ?? null,
           slotKey: node.slotKey
+        });
+        savedNodeByRequestId.set(node.id, savedNode);
+        savedNodeBySlotKey.set(savedNode.slotKey, savedNode);
+      }
+
+      for (const node of nodes) {
+        const savedNode = node.id > 0
+          ? savedNodeByRequestId.get(node.id)
+          : savedNodeByRequestId.get(node.id);
+        if (!savedNode) {
+          continue;
+        }
+
+        const parentNode = node.parentId
+          ? savedNodeByRequestId.get(node.parentId) ?? savedNodeBySlotKey.get(node.parentSlotKey ?? "")
+          : node.parentSlotKey
+            ? savedNodeBySlotKey.get(node.parentSlotKey)
+            : null;
+
+        await manager.update(OrganizationChartNode, savedNode.id, {
+          parentId: parentNode?.id ?? null
         });
       }
     });
   }
+}
+
+function getSiblingIndexFromSlot(slotKey: string) {
+  return slotKey.split("-").at(-1) ?? "1";
 }

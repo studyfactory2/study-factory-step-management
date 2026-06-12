@@ -66,26 +66,42 @@ WITH RECURSIVE active_chart AS (
 ),
 position_tree AS (
   SELECT
-    member_positions.id,
-    member_positions.parent_id,
-    member_positions.display_order,
-    member_positions.id::text AS slot_key,
+    roots.id,
+    roots.parent_id,
+    roots.display_order,
+    CONCAT('3-', roots.sibling_index) AS slot_key,
     3 AS floor
-  FROM member_positions
-  WHERE member_positions.parent_id IS NULL
-    AND member_positions.is_active = true
-    AND member_positions.is_login_visible = true
+  FROM (
+    SELECT
+      member_positions.*,
+      ROW_NUMBER() OVER (ORDER BY member_positions.display_order, member_positions.id) AS sibling_index
+    FROM member_positions
+    WHERE member_positions.parent_id IS NULL
+      AND member_positions.is_active = true
+      AND member_positions.is_login_visible = true
+  ) roots
   UNION ALL
   SELECT
     child.id,
     child.parent_id,
     child.display_order,
-    CONCAT(position_tree.slot_key, '-', child.id) AS slot_key,
+    CONCAT(
+      GREATEST(position_tree.floor - 1, 1),
+      '-',
+      REGEXP_REPLACE(position_tree.slot_key, '^[0-9]-', ''),
+      '-',
+      child.sibling_index
+    ) AS slot_key,
     GREATEST(position_tree.floor - 1, 1) AS floor
-  FROM member_positions child
+  FROM (
+    SELECT
+      member_positions.*,
+      ROW_NUMBER() OVER (PARTITION BY member_positions.parent_id ORDER BY member_positions.display_order, member_positions.id) AS sibling_index
+    FROM member_positions
+    WHERE member_positions.is_active = true
+      AND member_positions.is_login_visible = true
+  ) child
   JOIN position_tree ON position_tree.id = child.parent_id
-  WHERE child.is_active = true
-    AND child.is_login_visible = true
 )
 INSERT INTO organization_chart_nodes (
   chart_id,
