@@ -288,6 +288,14 @@ export function TaskCreateForm({
     });
   }
 
+  function handleDeleteDraft(id: number) {
+    setDrafts((currentDrafts) => {
+      const remainingDrafts = currentDrafts.filter((draft) => draft.id !== id);
+
+      return remainingDrafts.length > 0 ? remainingDrafts : [createEmptyDraft(1)];
+    });
+  }
+
   return (
     <section className="rounded-[22px] border border-[#D9D5D2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#DDD6D2]">
       {message && (
@@ -330,6 +338,7 @@ export function TaskCreateForm({
               isSubmitting={isSubmitting}
               key={draft.id}
               onAttachmentChange={handleFileChange}
+              onDelete={handleDeleteDraft}
               onEdit={handleEditDraft}
               onSave={handleSaveDraft}
               onSubmit={handleSubmitDraft}
@@ -484,6 +493,7 @@ function TaskDraftCard({
   isSaving,
   isSubmitting,
   onAttachmentChange,
+  onDelete,
   onEdit,
   onSave,
   onSubmit,
@@ -495,6 +505,7 @@ function TaskDraftCard({
   isSaving: boolean;
   isSubmitting: boolean;
   onAttachmentChange: (id: number, event: ChangeEvent<HTMLInputElement>) => void;
+  onDelete: (id: number) => void;
   onEdit: (id: number) => void;
   onSave: (id: number) => void;
   onSubmit: (draft: TaskDraftForm) => Promise<void>;
@@ -637,7 +648,15 @@ function TaskDraftCard({
         />
       </section>
 
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="grid grid-cols-4 gap-1.5">
+        <button
+          className="h-9 rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[10px] font-normal text-[#4F4542] transition hover:bg-[#F7F7F7] disabled:opacity-60"
+          disabled={isSaving || isSubmitting || isLoading}
+          onClick={() => onDelete(draft.id)}
+          type="button"
+        >
+          삭제
+        </button>
         <button
           className="h-9 rounded-[9px] border border-[#D8D1CE] bg-[#F3F1EF] px-2 text-[10px] font-normal text-[#6F6662] transition hover:bg-[#EBE7E4] disabled:opacity-60"
           disabled={!isLocked || isSaving || isSubmitting || isLoading}
