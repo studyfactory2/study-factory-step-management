@@ -168,6 +168,18 @@ export function TaskCreateForm({
     }));
   }
 
+  function handleAttachmentDelete(id: number, attachmentIndex: number) {
+    updateDraft(id, (draft) => {
+      const attachments = draft.attachments.filter((_, index) => index !== attachmentIndex);
+
+      return {
+        ...draft,
+        attachments,
+        attachmentNames: attachments.map((file) => file.name)
+      };
+    });
+  }
+
   function selectAssigneeForEditableDraft(memberId: number) {
     const member = sortedAssignees.find((candidate) => candidate.id === memberId);
 
@@ -338,6 +350,7 @@ export function TaskCreateForm({
               isSubmitting={isSubmitting}
               key={draft.id}
               onAttachmentChange={handleFileChange}
+              onAttachmentDelete={handleAttachmentDelete}
               onDelete={handleDeleteDraft}
               onEdit={handleEditDraft}
               onSave={handleSaveDraft}
@@ -493,6 +506,7 @@ function TaskDraftCard({
   isSaving,
   isSubmitting,
   onAttachmentChange,
+  onAttachmentDelete,
   onDelete,
   onEdit,
   onSave,
@@ -505,6 +519,7 @@ function TaskDraftCard({
   isSaving: boolean;
   isSubmitting: boolean;
   onAttachmentChange: (id: number, event: ChangeEvent<HTMLInputElement>) => void;
+  onAttachmentDelete: (id: number, attachmentIndex: number) => void;
   onDelete: (id: number) => void;
   onEdit: (id: number) => void;
   onSave: (id: number) => void;
@@ -633,10 +648,11 @@ function TaskDraftCard({
         />
         {draft.attachments.length > 0 && (
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {draft.attachments.map((attachment) => (
+            {draft.attachments.map((attachment, attachmentIndex) => (
               <AttachmentPreview
                 attachment={attachment}
                 key={`${attachment.name}-${attachment.lastModified}-${attachment.size}`}
+                onDelete={() => onAttachmentDelete(draft.id, attachmentIndex)}
                 onPreview={setPreviewImageUrl}
               />
             ))}
@@ -693,9 +709,11 @@ function TaskDraftCard({
 
 function AttachmentPreview({
   attachment,
+  onDelete,
   onPreview
 }: {
   attachment: File;
+  onDelete: () => void;
   onPreview: (imageUrl: string) => void;
 }) {
   const [previewUrl, setPreviewUrl] = useState("");
@@ -708,20 +726,30 @@ function AttachmentPreview({
   }, [attachment]);
 
   return (
-    <button
-      aria-label={`${attachment.name} 크게 보기`}
-      className="w-[58px] shrink-0 overflow-hidden rounded-[8px] border border-[#D8D1CE] bg-white p-1"
-      onClick={() => onPreview(previewUrl)}
-      type="button"
-    >
-      {previewUrl && (
-        <img
-          alt=""
-          className="aspect-square w-full rounded-[6px] object-cover"
-          src={previewUrl}
-        />
-      )}
-    </button>
+    <div className="relative w-[58px] shrink-0">
+      <button
+        aria-label={`${attachment.name} 첨부 삭제`}
+        className="absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[10px] font-normal leading-none text-[#333333] shadow-sm"
+        onClick={onDelete}
+        type="button"
+      >
+        x
+      </button>
+      <button
+        aria-label={`${attachment.name} 크게 보기`}
+        className="w-full overflow-hidden rounded-[8px] border border-[#D8D1CE] bg-white p-1"
+        onClick={() => onPreview(previewUrl)}
+        type="button"
+      >
+        {previewUrl && (
+          <img
+            alt=""
+            className="aspect-square w-full rounded-[6px] object-cover"
+            src={previewUrl}
+          />
+        )}
+      </button>
+    </div>
   );
 }
 
