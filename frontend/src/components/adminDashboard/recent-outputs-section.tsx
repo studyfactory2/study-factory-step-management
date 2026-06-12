@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Clipboard } from "lucide-react";
 import type { AdminDashboardRecentOutput, AdminDashboardSortOrder } from "@/api/admin";
 import type { TaskStatus } from "@/types/domain";
@@ -43,6 +44,24 @@ export function RecentOutputsSection({
     filterOutputsByScope(recentOutputs, selectedScope, currentMemberId),
     selectedStatuses
   );
+  const [isScopeOpen, setIsScopeOpen] = useState(false);
+  const scopeDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleOutsideClick(event: MouseEvent) {
+      if (!scopeDropdownRef.current?.contains(event.target as Node)) {
+        setIsScopeOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  function handleScopeSelect(value: RecentOutputScope) {
+    onScopeChange?.(value);
+    setIsScopeOpen(false);
+  }
 
   return (
     <section className="rounded-[18px] border border-[#D8D1CE] bg-[#FFFEFC] p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
@@ -72,24 +91,42 @@ export function RecentOutputsSection({
             );
           })}
         </div>
-        <label className="relative block shrink-0">
-          <select
+        <div className="relative shrink-0" ref={scopeDropdownRef}>
+          <button
             aria-label="최근 업무 범위"
-            className="h-[20px] w-[78px] appearance-none rounded-[6px] border border-[#D8D1CE] bg-white pl-1 pr-4 text-[8px] font-normal leading-none text-[#333333] outline-none"
-            onChange={(event) => onScopeChange?.(event.target.value as RecentOutputScope)}
-            value={selectedScope}
+            aria-expanded={isScopeOpen}
+            className="flex h-[20px] w-[78px] items-center justify-between rounded-[6px] border border-[#D8D1CE] bg-white pl-1.5 pr-1 text-left text-[8px] font-normal leading-none text-[#333333] outline-none"
+            onClick={() => setIsScopeOpen((current) => !current)}
+            type="button"
           >
-            {Object.entries(scopeLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            aria-hidden
-            className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#8E8581]"
-          />
-        </label>
+            <span className="truncate">{scopeLabels[selectedScope]}</span>
+            <ChevronDown
+              aria-hidden
+              className={`h-3 w-3 shrink-0 text-[#8E8581] transition ${isScopeOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          {isScopeOpen && (
+            <div className="absolute right-0 top-[24px] z-30 w-[96px] overflow-hidden rounded-[7px] border border-[#D8D1CE] bg-white py-1 shadow-[0_8px_18px_rgba(95,73,68,0.16)]">
+              {Object.entries(scopeLabels).map(([value, label]) => {
+                const scopeValue = value as RecentOutputScope;
+                const isSelected = selectedScope === scopeValue;
+
+                return (
+                  <button
+                    className={`flex h-7 w-full items-center px-2 text-left text-[8px] font-normal ${
+                      isSelected ? "bg-[#EAF3FF] text-[#2D70CB]" : "text-[#4F4542] hover:bg-[#F7F7F7]"
+                    }`}
+                    key={value}
+                    onClick={() => handleScopeSelect(scopeValue)}
+                    type="button"
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-[50px_minmax(0,1fr)_56px_56px] gap-1 px-2 pb-1 text-center text-[8px] font-normal text-[#7B716D]">
