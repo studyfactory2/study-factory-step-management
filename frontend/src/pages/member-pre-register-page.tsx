@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Camera,
+  ChevronDown,
   Check,
   ClipboardPenLine,
   Edit3,
@@ -27,6 +28,12 @@ type MemberPreRegisterPageProps = {
 
 type FlatPosition = PositionTreeNode & {
   depth: number;
+};
+
+type DropdownOption = {
+  depth?: number;
+  label: string;
+  value: string;
 };
 
 const regionOptions = ["부산", "대구", "서울", "광주"];
@@ -183,69 +190,52 @@ export function MemberPreRegisterPage({
             </StepField>
 
             <StepField label="지역" step="2">
-              <div className="relative">
-                <MapPin aria-hidden className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8B91]" />
-                <select
-                  className="h-10 w-full appearance-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-9 text-[13px] font-normal text-[#222222] outline-none"
-                  onChange={(event) => setRegion(event.target.value)}
-                  required
-                  value={region}
-                >
-                  {regionOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <CustomDropdown
+                icon={<MapPin aria-hidden className="h-4 w-4 text-[#7B8B91]" />}
+                onChange={setRegion}
+                options={regionOptions.map((option) => ({
+                  label: option,
+                  value: option
+                }))}
+                value={region}
+              />
             </StepField>
 
             <StepField helper="선택지: 자격증공장 / 수험생연구소" label="소속" step="3">
-              <select
-                className="h-10 w-full appearance-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none"
-                onChange={(event) => setOrganization(event.target.value)}
+              <CustomDropdown
+                onChange={setOrganization}
+                options={organizationOptions.map((option) => ({
+                  label: option,
+                  value: option
+                }))}
                 value={organization}
-              >
-                {organizationOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+              />
             </StepField>
 
             <StepField label="직위" step="4">
-              <select
-                className="h-10 w-full appearance-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none"
-                onChange={(event) => handlePositionChange(event.target.value)}
-                required
-                value={positionId}
-              >
-                <option value="">직위를 선택하세요</option>
-                {selectablePositions.map((position) => (
-                  <option key={position.id} value={position.id}>
-                    {"　".repeat(position.depth)}
-                    {position.name}
-                  </option>
-                ))}
-              </select>
+              <CustomDropdown
+                onChange={handlePositionChange}
+                options={selectablePositions.map((position) => ({
+                  depth: position.depth,
+                  label: position.name,
+                  value: String(position.id)
+                }))}
+                placeholder="직위를 선택하세요"
+                value={positionId ? String(positionId) : ""}
+              />
             </StepField>
 
             <StepField label="담당" step="5">
-              <select
-                className="h-10 w-full appearance-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none disabled:bg-[#F3F3F3] disabled:text-[#A69E9A]"
+              <CustomDropdown
                 disabled={!positionId || dutyOptions.length === 0}
-                onChange={(event) => setPositionDutyId(event.target.value ? Number(event.target.value) : "")}
-                required
-                value={positionDutyId}
-              >
-                <option value="">담당 업무를 선택해주세요</option>
-                {dutyOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => setPositionDutyId(value ? Number(value) : "")}
+                options={dutyOptions.map((option) => ({
+                  label: option.name,
+                  value: String(option.id)
+                }))}
+                placeholder="담당 업무를 선택해주세요"
+                value={positionDutyId ? String(positionDutyId) : ""}
+              />
             </StepField>
 
             <div className="grid grid-cols-2 gap-2 pt-1">
@@ -326,7 +316,7 @@ function StepField({
   step: string;
 }) {
   return (
-    <label className="grid grid-cols-[32px_58px_minmax(0,1fr)] items-start gap-2">
+    <div className="grid grid-cols-[32px_58px_minmax(0,1fr)] items-start gap-2">
       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FBE3E8] text-[13px] font-normal text-[#C24D68]">
         {step}
       </span>
@@ -337,7 +327,103 @@ function StepField({
           <span className="mt-1 block text-[10px] font-normal text-[#9A918D]">{helper}</span>
         ) : null}
       </span>
-    </label>
+    </div>
+  );
+}
+
+function CustomDropdown({
+  disabled = false,
+  icon,
+  onChange,
+  options,
+  placeholder = "선택하세요",
+  value
+}: {
+  disabled?: boolean;
+  icon?: ReactNode;
+  onChange: (value: string) => void;
+  options: DropdownOption[];
+  placeholder?: string;
+  value: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const selectedOption = options.find((option) => option.value === value);
+
+  useEffect(() => {
+    function handleDocumentClick(event: MouseEvent) {
+      if (!dropdownRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleDocumentClick);
+    return () => document.removeEventListener("mousedown", handleDocumentClick);
+  }, []);
+
+  function handleSelect(nextValue: string) {
+    onChange(nextValue);
+    setIsOpen(false);
+  }
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        aria-expanded={isOpen}
+        className={`flex h-10 w-full items-center gap-2 rounded-[10px] border px-3 text-left text-[13px] font-normal outline-none transition ${
+          disabled
+            ? "cursor-not-allowed border-[#E1DBD8] bg-[#F3F3F3] text-[#A69E9A]"
+            : isOpen
+              ? "border-[#9DC7ED] bg-[#F4FAFF] text-[#222222] shadow-[0_0_0_3px_rgba(157,199,237,0.22)]"
+              : "border-[#D8D1CE] bg-[#FFFEFC] text-[#222222] hover:border-[#B9B1AD]"
+        }`}
+        disabled={disabled}
+        onClick={() => setIsOpen((current) => !current)}
+        type="button"
+      >
+        {icon ? <span className="shrink-0">{icon}</span> : null}
+        <span className={`min-w-0 flex-1 truncate ${selectedOption ? "" : "text-[#A69E9A]"}`}>
+          {selectedOption?.label ?? placeholder}
+        </span>
+        <ChevronDown
+          aria-hidden
+          className={`h-4 w-4 shrink-0 text-[#7B716D] transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {isOpen ? (
+        <div className="absolute left-0 right-0 z-30 mt-1 max-h-44 overflow-y-auto rounded-[12px] border border-[#D8D1CE] bg-white p-1 shadow-[0_10px_24px_rgba(65,52,48,0.16)]">
+          {options.length === 0 ? (
+            <p className="px-3 py-2 text-[12px] font-normal text-[#A69E9A]">선택할 항목이 없습니다.</p>
+          ) : (
+            options.map((option) => {
+              const isSelected = option.value === value;
+
+              return (
+                <button
+                  className={`flex min-h-8 w-full items-center justify-between gap-2 rounded-[9px] px-2 py-1.5 text-left text-[12px] font-normal transition ${
+                    isSelected
+                      ? "bg-[#EAF3FF] text-[#2D70CB]"
+                      : "text-[#4F4542] hover:bg-[#F7F7F7]"
+                  }`}
+                  key={option.value}
+                  onClick={() => handleSelect(option.value)}
+                  type="button"
+                >
+                  <span
+                    className="min-w-0 truncate"
+                    style={{ paddingLeft: `${(option.depth ?? 0) * 12}px` }}
+                  >
+                    {option.label}
+                  </span>
+                  {isSelected ? <Check aria-hidden className="h-3.5 w-3.5 shrink-0" /> : null}
+                </button>
+              );
+            })
+          )}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
