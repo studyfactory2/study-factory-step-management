@@ -136,6 +136,7 @@ export class AdminService {
   ): Promise<AdminDashboardRecentOutputResponse[]> {
     const statuses = query.status?.length ? query.status : [TaskStatus.REVIEW_REQUESTED];
     const tasks = await this.taskRepository.findRecentWorkStatus({
+      category: query.category,
       limit: 10,
       sortOrder: query.sortOrder,
       statuses,
@@ -145,6 +146,7 @@ export class AdminService {
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
+      taskCategory: task.category,
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,

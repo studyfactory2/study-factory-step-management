@@ -11,6 +11,7 @@ import {
 } from "class-validator";
 import { Task } from "../entity/task.entity";
 import { TaskAssigneeScope } from "../enum/task-assignee-scope.enum";
+import { TaskCategory } from "../enum/task-category.enum";
 import { TaskStatus } from "../enum/task-status.enum";
 import { TaskAttachmentCreateRequest } from "./task-attachment-create.request";
 
@@ -20,6 +21,10 @@ export class TaskCreateRequest {
 
   @IsString({ message: "업무 설명은 문자열이어야 합니다." })
   description: string;
+
+  @IsDefined({ message: "업무 카테고리를 선택해주세요." })
+  @IsEnum(TaskCategory, { message: "유효하지 않은 업무 카테고리입니다." })
+  category: TaskCategory;
 
   @IsEnum(TaskAssigneeScope, { message: "유효하지 않은 담당자 지정 방식입니다." })
   assigneeScope: TaskAssigneeScope;
@@ -49,6 +54,7 @@ export class TaskCreateRequest {
     const task = new Task();
     task.title = this.title;
     task.description = this.description;
+    task.category = this.category;
     task.descriptionHighlightStart = null;
     task.descriptionHighlightEnd = null;
     task.descriptionHighlightExpiresAt = null;

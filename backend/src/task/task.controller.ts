@@ -20,6 +20,11 @@ export class TaskController {
     return this.taskService.getStatusSummary();
   }
 
+  @Get("category-summary")
+  async getCategorySummary(@Query() query: TaskRecentWorkStatusQueryRequest) {
+    return this.taskService.getCategorySummary(query);
+  }
+
   @UseGuards(JWTAuthGuard)
   @Get("recent-work-status")
   async findRecentWorkStatus(

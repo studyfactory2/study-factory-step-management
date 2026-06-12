@@ -1,0 +1,6 @@
+export enum TaskCategory {
+  DEVELOPMENT = "DEVELOPMENT",
+  OPERATION = "OPERATION",
+  MEMBER = "MEMBER",
+  ORDER = "ORDER"
+}

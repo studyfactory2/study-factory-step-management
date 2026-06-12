@@ -1,4 +1,5 @@
 import { MemberRole } from "../../member/enum/member-role.enum";
+import { TaskCategory } from "../../task/enum/task-category.enum";
 import { TaskStatus } from "../../task/enum/task-status.enum";
 
 export class AdminDashboardCurrentMemberResponse {
@@ -37,6 +38,7 @@ export class AdminBranchStaffCountResponse {
 export class AdminDashboardRecentOutputResponse {
   taskId: number;
   taskTitle: string;
+  taskCategory: TaskCategory;
   oneLineComment: string | null;
   taskStatus: TaskStatus;
   memberId: number;

@@ -13,12 +13,20 @@ export type TaskStatusSummary = {
   completedThisMonth: number;
 };
 
+export type TaskCategory = "DEVELOPMENT" | "OPERATION" | "MEMBER" | "ORDER";
+
+export type TaskCategorySummaryItem = {
+  category: TaskCategory;
+  count: number;
+};
+
 export type TaskAssigneeScope = "SINGLE" | "ALL";
 
 export type TaskCreateRequest = {
   attachments?: File[];
   title: string;
   description: string;
+  category: TaskCategory;
   assigneeScope: TaskAssigneeScope;
   assigneeId?: number;
   branch?: string;
@@ -32,6 +40,7 @@ export type TaskCreateResponse = {
 
 export type TaskDraftSaveRequest = {
   assigneeId: number;
+  category?: TaskCategory;
   description?: string;
   title: string;
 };
@@ -39,6 +48,7 @@ export type TaskDraftSaveRequest = {
 export type TaskDraft = {
   id: number;
   assigneeId: number;
+  category: TaskCategory;
   description: string;
   title: string;
   createdAt: string;
@@ -105,6 +115,7 @@ export type TaskDetail = {
   id: number;
   title: string;
   description: string;
+  category: TaskCategory;
   descriptionHighlightStart: number | null;
   descriptionHighlightEnd: number | null;
   descriptionHighlightExpiresAt: string | null;
@@ -122,6 +133,7 @@ export type TaskDetail = {
 export type TaskRecentWorkStatus = {
   taskId: number;
   taskTitle: string;
+  taskCategory: TaskCategory;
   oneLineComment: string | null;
   taskStatus: TaskStatus;
   memberId: number;
@@ -146,6 +158,29 @@ export async function getTaskStatusSummary(): Promise<TaskStatusSummary> {
   return response.json() as Promise<TaskStatusSummary>;
 }
 
+export async function getTaskCategorySummary(
+  filters: {
+    statuses?: TaskStatus[];
+  } = {}
+): Promise<TaskCategorySummaryItem[]> {
+  const params = new URLSearchParams();
+
+  filters.statuses?.forEach((status) => {
+    params.append("status", status);
+  });
+
+  const queryString = params.toString();
+  const response = await fetch(`${API_BASE_URL}/api/tasks/category-summary${queryString ? `?${queryString}` : ""}`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("업무 종류별 현황을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskCategorySummaryItem[]>;
+}
+
 type ApiErrorResponse = {
   message?: string | string[];
 };
@@ -158,6 +193,10 @@ export async function createTask(
   formData.append("title", request.title);
   formData.append("description", request.description);
   formData.append("assigneeScope", request.assigneeScope);
+
+  if (request.category) {
+    formData.append("category", request.category);
+  }
 
   if (request.assigneeId !== undefined) {
     formData.append("assigneeId", String(request.assigneeId));
@@ -421,6 +460,7 @@ export async function getTaskCommentActivities(
 export async function getTaskRecentWorkStatus(
   accessToken: string,
   filters: {
+    category?: TaskCategory;
     sortOrder?: "LATEST" | "OLDEST";
     statuses?: TaskStatus[];
   } = {}
@@ -433,6 +473,10 @@ export async function getTaskRecentWorkStatus(
 
   if (filters.sortOrder) {
     params.set("sortOrder", filters.sortOrder);
+  }
+
+  if (filters.category) {
+    params.set("category", filters.category);
   }
 
   const queryString = params.toString();
@@ -457,6 +501,7 @@ export async function getTaskRecentWorkStatus(
 export async function getTaskAllWorkStatus(
   accessToken: string,
   filters: {
+    category?: TaskCategory;
     sortOrder?: "LATEST" | "OLDEST";
     statuses?: TaskStatus[];
   } = {}
@@ -469,6 +514,10 @@ export async function getTaskAllWorkStatus(
 
   if (filters.sortOrder) {
     params.set("sortOrder", filters.sortOrder);
+  }
+
+  if (filters.category) {
+    params.set("category", filters.category);
   }
 
   const queryString = params.toString();

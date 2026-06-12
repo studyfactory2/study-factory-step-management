@@ -4,6 +4,7 @@ import { Between, Repository } from "typeorm";
 import { TaskAttachment } from "./entity/task-attachment.entity";
 import { TaskReadStatus } from "./entity/task-read-status.entity";
 import { Task } from "./entity/task.entity";
+import { TaskCategory } from "./enum/task-category.enum";
 import { TaskSortOrder } from "./enum/task-sort-order.enum";
 import { TaskStatus } from "./enum/task-status.enum";
 
@@ -13,7 +14,13 @@ export type TaskCountRow = {
   count: string;
 };
 
+export type TaskCategoryCountRow = {
+  category: TaskCategory;
+  count: string;
+};
+
 type FindRecentWorkStatusOptions = {
+  category?: TaskCategory;
   limit?: number;
   memberId?: number;
   sortOrder?: TaskSortOrder;
@@ -92,6 +99,23 @@ export class TaskRepository {
       .getRawMany<TaskCountRow>();
   }
 
+  async findActiveCountRowsByCategory(statuses?: TaskStatus[]): Promise<TaskCategoryCountRow[]> {
+    const queryBuilder = this.taskRepository
+      .createQueryBuilder("task")
+      .select("task.category", "category")
+      .addSelect("COUNT(task.id)", "count")
+      .where("task.isDraft = false");
+
+    if (statuses?.length) {
+      queryBuilder.andWhere("task.status IN (:...statuses)", { statuses });
+    }
+
+    return queryBuilder
+      .groupBy("task.category")
+      .orderBy("task.category", "ASC")
+      .getRawMany<TaskCategoryCountRow>();
+  }
+
   async findRecentWorkStatus(options: FindRecentWorkStatusOptions): Promise<Task[]> {
     const queryBuilder = this.taskRepository
       .createQueryBuilder("task")
@@ -115,6 +139,10 @@ export class TaskRepository {
       queryBuilder.andWhere("(task.assigneeId = :memberId OR task.createdBy = :memberId)", {
         memberId: options.memberId
       });
+    }
+
+    if (options.category) {
+      queryBuilder.andWhere("task.category = :category", { category: options.category });
     }
 
     if (options.sortOrder === TaskSortOrder.LATEST) {

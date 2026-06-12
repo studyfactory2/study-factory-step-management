@@ -1,3 +1,4 @@
+import type { TaskCategory } from "@/api/task";
 import type { MemberRole, TaskStatus } from "@/types/domain";
 import { handleUnauthorizedResponse } from "@/api/client";
 
@@ -34,6 +35,7 @@ export type AdminDashboardBranchGroup = {
 export type AdminDashboardRecentOutput = {
   taskId: number;
   taskTitle: string;
+  taskCategory: TaskCategory;
   oneLineComment: string | null;
   taskStatus: TaskStatus;
   memberId: number;
@@ -56,6 +58,7 @@ export type AdminDashboard = {
 export type AdminDashboardSortOrder = "LATEST" | "OLDEST";
 
 export type AdminDashboardFilters = {
+  category?: TaskCategory;
   sortOrder?: AdminDashboardSortOrder;
   statuses?: TaskStatus[];
 };
@@ -76,6 +79,10 @@ export async function getAdminDashboard(
 
   if (filters.sortOrder) {
     params.set("sortOrder", filters.sortOrder);
+  }
+
+  if (filters.category) {
+    params.set("category", filters.category);
   }
 
   const queryString = params.toString();

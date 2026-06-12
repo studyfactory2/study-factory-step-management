@@ -1,5 +1,6 @@
 import { MemberRole } from "../../member/enum/member-role.enum";
 import { TaskCommentResponse } from "../../task-comment/dto/task-comment.response";
+import { TaskCategory } from "../enum/task-category.enum";
 import { TaskStatus } from "../enum/task-status.enum";
 
 export class TaskDetailMemberResponse {
@@ -21,6 +22,7 @@ export class TaskDetailResponse {
   id: number;
   title: string;
   description: string;
+  category: TaskCategory;
   descriptionHighlightStart: number | null;
   descriptionHighlightEnd: number | null;
   descriptionHighlightExpiresAt: Date | null;

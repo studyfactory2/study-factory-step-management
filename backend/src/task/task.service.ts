@@ -11,7 +11,10 @@ import { TaskDetailMemberResponse, TaskDetailResponse } from "./dto/task-detail.
 import { TaskDraftResponse } from "./dto/task-draft.response";
 import { TaskDraftSaveRequest } from "./dto/task-draft-save.request";
 import { TaskRecentWorkStatusQueryRequest } from "./dto/task-recent-work-status-query.request";
-import { TaskRecentWorkStatusResponse } from "./dto/task-recent-work-status.response";
+import {
+  TaskCategorySummaryItemResponse,
+  TaskRecentWorkStatusResponse
+} from "./dto/task-recent-work-status.response";
 import { TaskStatusSummaryResponse } from "./dto/task-status-summary.response";
 import { TaskAttachment } from "./entity/task-attachment.entity";
 import { TaskComment } from "../task-comment/entity/task-comment.entity";
@@ -95,6 +98,17 @@ export class TaskService {
     };
   }
 
+  async getCategorySummary(
+    query: TaskRecentWorkStatusQueryRequest = {}
+  ): Promise<TaskCategorySummaryItemResponse[]> {
+    const rows = await this.taskRepository.findActiveCountRowsByCategory(query.status);
+
+    return rows.map((row) => ({
+      category: row.category,
+      count: Number(row.count)
+    }));
+  }
+
   private getStartOfWeek(date: Date): Date {
     const startOfWeek = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const day = startOfWeek.getDay();
@@ -141,12 +155,14 @@ export class TaskService {
       memberId,
       sortOrder: query.sortOrder,
       statuses,
+      category: query.category,
       viewerId: currentMember?.memberId
     });
 
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
+      taskCategory: task.category,
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,
@@ -177,12 +193,14 @@ export class TaskService {
       memberId,
       sortOrder: query.sortOrder,
       statuses,
+      category: query.category,
       viewerId: currentMember.memberId
     });
 
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
+      taskCategory: task.category,
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,
@@ -211,6 +229,7 @@ export class TaskService {
       id: task.id,
       title: task.title,
       description: task.description,
+      category: task.category,
       descriptionHighlightStart: this.isDescriptionHighlightActive(task)
         ? task.descriptionHighlightStart
         : null,
@@ -303,6 +322,7 @@ export class TaskService {
     const draft = await this.findDraftEntity(id, currentMember.memberId);
     draft.title = request.title;
     draft.description = request.description ?? "";
+    draft.category = request.category ?? draft.category;
     draft.assigneeId = request.assigneeId;
 
     const savedDraft = await this.taskRepository.save(draft);
@@ -383,6 +403,7 @@ export class TaskService {
       id: task.id,
       title: task.title,
       description: task.description,
+      category: task.category,
       assigneeId: task.assigneeId,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt

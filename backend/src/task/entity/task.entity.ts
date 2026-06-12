@@ -4,6 +4,7 @@ import { Member } from "../../member/entity/member.entity";
 import { TaskComment } from "../../task-comment/entity/task-comment.entity";
 import { TaskAttachment } from "./task-attachment.entity";
 import { TaskReadStatus } from "./task-read-status.entity";
+import { TaskCategory } from "../enum/task-category.enum";
 import { TaskStatus } from "../enum/task-status.enum";
 
 @Entity({ name: "tasks" })
@@ -13,6 +14,14 @@ export class Task extends BaseEntity {
 
   @Column({ type: "text" })
   description: string;
+
+  @Column({
+    type: "enum",
+    enumName: "task_category_enum",
+    enum: TaskCategory,
+    default: TaskCategory.OPERATION
+  })
+  category: TaskCategory;
 
   @Column({ name: "description_highlight_start", type: "int", nullable: true })
   descriptionHighlightStart: number | null;

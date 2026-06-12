@@ -187,12 +187,20 @@ CREATE TYPE task_status_enum AS ENUM (
   'COMPLETED'
 );
 
+CREATE TYPE task_category_enum AS ENUM (
+  'DEVELOPMENT',
+  'OPERATION',
+  'MEMBER',
+  'ORDER'
+);
+
 CREATE TABLE tasks (
   id SERIAL PRIMARY KEY,
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   title VARCHAR NOT NULL,
   description TEXT NOT NULL,
+  category task_category_enum NOT NULL DEFAULT 'OPERATION',
   description_highlight_start INTEGER,
   description_highlight_end INTEGER,
   description_highlight_expires_at TIMESTAMP,
@@ -212,6 +220,9 @@ CREATE TABLE tasks (
 
 CREATE INDEX idx_tasks_status_is_draft
   ON tasks (status, is_draft);
+
+CREATE INDEX idx_tasks_category_is_draft
+  ON tasks (category, is_draft);
 
 CREATE INDEX idx_tasks_completed_at
   ON tasks (completed_at);
