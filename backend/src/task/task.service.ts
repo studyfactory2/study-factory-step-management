@@ -11,8 +11,14 @@ import { TaskDetailMemberResponse, TaskDetailResponse } from "./dto/task-detail.
 import { TaskDraftResponse } from "./dto/task-draft.response";
 import { TaskDraftSaveRequest } from "./dto/task-draft-save.request";
 import { TaskRecentWorkStatusQueryRequest } from "./dto/task-recent-work-status-query.request";
-import { TaskRecentWorkStatusResponse } from "./dto/task-recent-work-status.response";
-import { TaskStatusSummaryResponse } from "./dto/task-status-summary.response";
+import {
+  TaskCategorySummaryItemResponse,
+  TaskRecentWorkStatusResponse
+} from "./dto/task-recent-work-status.response";
+import {
+  TaskStatusSummaryByBranchResponse,
+  TaskStatusSummaryResponse
+} from "./dto/task-status-summary.response";
 import { TaskAttachment } from "./entity/task-attachment.entity";
 import { TaskComment } from "../task-comment/entity/task-comment.entity";
 import { UploadFile } from "../upload/type/upload-file.type";
@@ -33,14 +39,16 @@ export class TaskService {
   ) {}
 
   async getStatusSummary(): Promise<TaskStatusSummaryResponse> {
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    const startOfThisWeek = this.getStartOfWeek(now);
-    const startOfLastWeek = new Date(startOfThisWeek);
-    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const ranges = this.getSummaryDateRanges();
+    const {
+      endOfMonth,
+      now,
+      startOfLastWeek,
+      startOfMonth,
+      startOfThisWeek,
+      startOfToday,
+      startOfTomorrow
+    } = ranges;
 
     const [
       registered,
@@ -95,6 +103,62 @@ export class TaskService {
     };
   }
 
+  async getStatusSummaryByBranch(): Promise<TaskStatusSummaryByBranchResponse[]> {
+    const rows = await this.taskRepository.findStatusSummaryRowsByAssigneeOrganization(
+      this.getSummaryDateRanges()
+    );
+
+    return rows.map((row) => {
+      const inProgressThisWeek = Number(row.inProgressThisWeek);
+      const inProgressLastWeek = Number(row.inProgressLastWeek);
+      const reviewRequestedThisWeek = Number(row.reviewRequestedThisWeek);
+      const reviewRequestedLastWeek = Number(row.reviewRequestedLastWeek);
+
+      return {
+        branch: row.branch ?? "미지정",
+        registered: Number(row.registered),
+        registeredToday: Number(row.registeredToday),
+        inProgress: Number(row.inProgress),
+        inProgressWeeklyChange: inProgressThisWeek - inProgressLastWeek,
+        reviewRequested: Number(row.reviewRequested),
+        reviewRequestedWeeklyChange: reviewRequestedThisWeek - reviewRequestedLastWeek,
+        completedThisMonth: Number(row.completedThisMonth)
+      };
+    });
+  }
+
+  private getSummaryDateRanges() {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const startOfThisWeek = this.getStartOfWeek(now);
+    const startOfLastWeek = new Date(startOfThisWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    return {
+      endOfMonth,
+      now,
+      startOfLastWeek,
+      startOfMonth,
+      startOfThisWeek,
+      startOfToday,
+      startOfTomorrow
+    };
+  }
+
+  async getCategorySummary(
+    query: TaskRecentWorkStatusQueryRequest = {}
+  ): Promise<TaskCategorySummaryItemResponse[]> {
+    const rows = await this.taskRepository.findActiveCountRowsByCategory(query.status);
+
+    return rows.map((row) => ({
+      category: row.category,
+      count: Number(row.count)
+    }));
+  }
+
   private getStartOfWeek(date: Date): Date {
     const startOfWeek = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const day = startOfWeek.getDay();
@@ -141,12 +205,14 @@ export class TaskService {
       memberId,
       sortOrder: query.sortOrder,
       statuses,
+      category: query.category,
       viewerId: currentMember?.memberId
     });
 
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
+      taskCategory: task.category,
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,
@@ -177,12 +243,14 @@ export class TaskService {
       memberId,
       sortOrder: query.sortOrder,
       statuses,
+      category: query.category,
       viewerId: currentMember.memberId
     });
 
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
+      taskCategory: task.category,
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
       memberId: task.assignee.id,
@@ -211,6 +279,8 @@ export class TaskService {
       id: task.id,
       title: task.title,
       description: task.description,
+      category: task.category,
+      oneLineComment: task.oneLineComment,
       descriptionHighlightStart: this.isDescriptionHighlightActive(task)
         ? task.descriptionHighlightStart
         : null,
@@ -303,6 +373,10 @@ export class TaskService {
     const draft = await this.findDraftEntity(id, currentMember.memberId);
     draft.title = request.title;
     draft.description = request.description ?? "";
+    draft.category = request.category ?? draft.category;
+    draft.oneLineComment = request.oneLineComment === undefined
+      ? draft.oneLineComment
+      : request.oneLineComment.trim() || null;
     draft.assigneeId = request.assigneeId;
 
     const savedDraft = await this.taskRepository.save(draft);
@@ -372,7 +446,7 @@ export class TaskService {
     return {
       id: member.id,
       name: this.getDisplayName(member),
-      branch: member.branch,
+      branch: member.branchInfo?.name ?? null,
       roleType: member.roleType,
       positionName: member.positionInfo?.name ?? null
     };
@@ -383,6 +457,8 @@ export class TaskService {
       id: task.id,
       title: task.title,
       description: task.description,
+      category: task.category,
+      oneLineComment: task.oneLineComment,
       assigneeId: task.assigneeId,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt
@@ -487,7 +563,7 @@ export class TaskService {
       return comment.updatedAt.getTime() > latest.updatedAt.getTime() ? comment : latest;
     }, null as Task["comments"][number] | null);
 
-    return latestComment?.oneLineComment ?? null;
+    return latestComment?.oneLineComment ?? task.oneLineComment ?? null;
   }
 
   private getDisplayName(member: Member): string {

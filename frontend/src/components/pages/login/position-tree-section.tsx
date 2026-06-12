@@ -17,13 +17,13 @@ export function PositionTreeSection({
   selectedPositionId
 }: PositionTreeSectionProps) {
   return (
-    <section className="mb-2.5 rounded-[17px] border border-[#EBCDD1] bg-white/86 px-1 py-2 shadow-soft backdrop-blur">
+    <section className="mb-3 rounded-[16px] border border-[#D9D2CF] bg-white px-1.5 py-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
       {isLoading ? (
-        <div className="rounded-[16px] border border-dashed border-[#EBCDD1] bg-[#FFF9FA] px-3 py-5 text-center text-xs font-bold text-[#9C7D79]">
+        <div className="rounded-[12px] border border-dashed border-[#D9D2CF] bg-[#FFFAFA] px-3 py-5 text-center text-xs font-bold text-[#9C7D79]">
           직위트리를 불러오는 중입니다.
         </div>
       ) : message ? (
-        <div className="rounded-[16px] border border-dashed border-[#EBCDD1] bg-[#FFF9FA] px-3 py-5 text-center text-xs font-bold text-[#9C7D79]">
+        <div className="rounded-[12px] border border-dashed border-[#D9D2CF] bg-[#FFFAFA] px-3 py-5 text-center text-xs font-bold text-[#9C7D79]">
           {message}
         </div>
       ) : (

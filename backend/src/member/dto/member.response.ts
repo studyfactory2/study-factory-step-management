@@ -5,6 +5,10 @@ export class MemberResponse {
   name: string;
   avatarUrl: string | null;
   branch: string | null;
+  organizationId: number | null;
+  organizationName: string | null;
+  branchId: number | null;
+  branchName: string | null;
   positionId: number | null;
   positionDutyId: number | null;
   roleType: MemberRole;

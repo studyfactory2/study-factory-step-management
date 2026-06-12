@@ -98,6 +98,31 @@ CREATE TABLE position_duties (
 CREATE UNIQUE INDEX idx_position_duties_position_id_duty
   ON position_duties (position_id, duty);
 
+CREATE TABLE organizations (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  name VARCHAR NOT NULL UNIQUE,
+  code VARCHAR NOT NULL UNIQUE,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE TABLE branches (
+  id SERIAL PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
+  organization_id INTEGER NOT NULL,
+  name VARCHAR NOT NULL,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  CONSTRAINT fk_branches_organization_id
+    FOREIGN KEY (organization_id)
+    REFERENCES organizations (id),
+  CONSTRAINT uq_branches_organization_name
+    UNIQUE (organization_id, name)
+);
+
 CREATE TABLE member (
   id SERIAL PRIMARY KEY,
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
@@ -106,11 +131,18 @@ CREATE TABLE member (
   display_name VARCHAR,
   password_hash VARCHAR NOT NULL,
   avatar_url VARCHAR,
-  branch VARCHAR,
+  organization_id INTEGER,
+  branch_id INTEGER,
   position_id INTEGER,
   position_duty_id INTEGER,
   role_type member_role_type_enum NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT true,
+  CONSTRAINT fk_member_organization_id
+    FOREIGN KEY (organization_id)
+    REFERENCES organizations (id),
+  CONSTRAINT fk_member_branch_id
+    FOREIGN KEY (branch_id)
+    REFERENCES branches (id),
   CONSTRAINT fk_member_position_id
     FOREIGN KEY (position_id)
     REFERENCES member_positions (id),
@@ -121,6 +153,12 @@ CREATE TABLE member (
 
 CREATE INDEX idx_member_position_id
   ON member (position_id);
+
+CREATE INDEX idx_member_organization_id
+  ON member (organization_id);
+
+CREATE INDEX idx_member_branch_id
+  ON member (branch_id);
 
 CREATE INDEX idx_member_position_duty_id
   ON member (position_duty_id);
@@ -138,8 +176,16 @@ CREATE TABLE member_pre_registration (
   role_type member_pre_registration_role_type_enum NOT NULL,
   duty member_pre_registration_duty_enum,
   branch VARCHAR,
+  organization_id INTEGER,
+  branch_id INTEGER,
   is_registered BOOLEAN NOT NULL DEFAULT false
 );
+
+CREATE INDEX idx_member_pre_registration_organization_id
+  ON member_pre_registration (organization_id);
+
+CREATE INDEX idx_member_pre_registration_branch_id
+  ON member_pre_registration (branch_id);
 
 CREATE UNIQUE INDEX idx_member_pre_registration_name_branch_affiliation_position_duty
   ON member_pre_registration (name, branch, affiliation, position, duty);
@@ -187,12 +233,21 @@ CREATE TYPE task_status_enum AS ENUM (
   'COMPLETED'
 );
 
+CREATE TYPE task_category_enum AS ENUM (
+  'DEVELOPMENT',
+  'OPERATION',
+  'MEMBER',
+  'ORDER'
+);
+
 CREATE TABLE tasks (
   id SERIAL PRIMARY KEY,
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   title VARCHAR NOT NULL,
   description TEXT NOT NULL,
+  category task_category_enum NOT NULL DEFAULT 'OPERATION',
+  one_line_comment VARCHAR,
   description_highlight_start INTEGER,
   description_highlight_end INTEGER,
   description_highlight_expires_at TIMESTAMP,
@@ -212,6 +267,9 @@ CREATE TABLE tasks (
 
 CREATE INDEX idx_tasks_status_is_draft
   ON tasks (status, is_draft);
+
+CREATE INDEX idx_tasks_category_is_draft
+  ON tasks (category, is_draft);
 
 CREATE INDEX idx_tasks_completed_at
   ON tasks (completed_at);

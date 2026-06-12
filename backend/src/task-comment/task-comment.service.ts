@@ -94,6 +94,7 @@ export class TaskCommentService {
   }
 
   private async updateTaskStatus(task: Task, status: TaskStatus): Promise<void> {
+    task.updatedAt = new Date();
     task.status = status;
 
     if (status === TaskStatus.REVIEW_REQUESTED) {

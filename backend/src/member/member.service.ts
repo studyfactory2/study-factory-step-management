@@ -53,9 +53,12 @@ export class MemberService {
     }
 
     const roleType = this.resolveRoleType(positionInfo);
+    const branchInfo = await this.memberRepository.findBranchByName(request.branch);
     const preRegistration = new MemberPreRegistration();
     preRegistration.name = request.name;
-    preRegistration.branch = request.branch;
+    preRegistration.branch = branchInfo?.name ?? request.branch;
+    preRegistration.organizationId = branchInfo?.organizationId ?? null;
+    preRegistration.branchId = branchInfo?.id ?? null;
     preRegistration.affiliation = null;
     preRegistration.position = null;
     preRegistration.roleType = roleType;
@@ -95,7 +98,7 @@ export class MemberService {
       throw new MemberPreRegistrationNotFoundException(request.name, request.branch);
     }
 
-    const { branch, positionId, positionDutyId } = preRegistration;
+    const { branch, branchId, organizationId, positionId, positionDutyId } = preRegistration;
     if (!branch || !positionId || !positionDutyId) {
       throw new MemberPreRegistrationNotFoundException(request.name, request.branch);
     }
@@ -127,8 +130,9 @@ export class MemberService {
     const displayName = await this.createDisplayName(request.name, branch);
     const member = request.toEntity(
       passwordHash,
-      branch,
       displayName,
+      organizationId,
+      branchId,
       position.id,
       positionDuty.id,
       roleType

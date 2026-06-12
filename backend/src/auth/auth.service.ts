@@ -51,7 +51,11 @@ export class AuthService {
       member: {
         id: member.id,
         name: member.displayName ?? member.name,
-        branch: member.branch,
+        branch: member.branchInfo?.name ?? null,
+        organizationId: member.organizationId,
+        organizationName: member.organization?.name ?? null,
+        branchId: member.branchId,
+        branchName: member.branchInfo?.name ?? null,
         roleType: member.roleType
       }
     };

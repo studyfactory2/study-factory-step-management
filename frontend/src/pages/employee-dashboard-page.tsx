@@ -138,6 +138,7 @@ export function EmployeeDashboardPage({
         assigneeId: request.assigneeId,
         assigneeScope: "SINGLE",
         attachments: request.attachments,
+        category: "OPERATION",
         description: request.description,
         title: request.title
       });

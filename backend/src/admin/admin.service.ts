@@ -47,7 +47,8 @@ export class AdminService {
         id: currentMember.id,
         name: this.getDisplayName(currentMember),
         roleType: currentMember.roleType,
-        branch: currentMember.branch
+        positionName: currentMember.positionInfo?.name ?? null,
+        branch: currentMember.branchInfo?.name ?? null
       },
       employees: this.toEmployeeResponses(employees, taskCountRows),
       branchGroups,
@@ -136,6 +137,7 @@ export class AdminService {
   ): Promise<AdminDashboardRecentOutputResponse[]> {
     const statuses = query.status?.length ? query.status : [TaskStatus.REVIEW_REQUESTED];
     const tasks = await this.taskRepository.findRecentWorkStatus({
+      category: query.category,
       limit: 10,
       sortOrder: query.sortOrder,
       statuses,
@@ -145,13 +147,20 @@ export class AdminService {
     return tasks.map((task) => ({
       taskId: task.id,
       taskTitle: task.title,
+      taskCategory: task.category,
       oneLineComment: this.findLatestCommentOneLineComment(task),
       taskStatus: task.status,
+      creatorId: task.creator.id,
+      creatorName: this.getDisplayName(task.creator),
+      creatorRole: task.creator.roleType,
+      creatorPositionName: task.creator.positionInfo?.name ?? null,
+      creatorOrganizationName: task.creator.organization?.name ?? null,
       memberId: task.assignee.id,
       memberName: this.getDisplayName(task.assignee),
       memberRole: task.assignee.roleType,
       memberPositionName: task.assignee.positionInfo?.name ?? null,
       startedAt: task.createdAt,
+      updatedAt: task.updatedAt,
       submittedAt: task.status === TaskStatus.REVIEW_REQUESTED ? task.reviewRequestedAt : null,
       attachmentPreviewUrls: task.attachments.map((attachment) => attachment.imageUrl),
       isNew: this.isNewTaskForMember(task, currentMemberId)
@@ -172,7 +181,7 @@ export class AdminService {
         name: this.getDisplayName(member),
         roleType: member.roleType,
         positionName: member.positionInfo?.name ?? null,
-        branch: member.branch,
+        branch: member.branchInfo?.name ?? null,
         highestTaskStatus: this.getHighestTaskStatus(taskCounts),
         taskCounts
       };
@@ -263,6 +272,6 @@ export class AdminService {
       return comment.updatedAt.getTime() > latest.updatedAt.getTime() ? comment : latest;
     }, null as Task["comments"][number] | null);
 
-    return latestComment?.oneLineComment ?? null;
+    return latestComment?.oneLineComment ?? task.oneLineComment ?? null;
   }
 }

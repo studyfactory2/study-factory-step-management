@@ -4,6 +4,7 @@ import { Between, Repository } from "typeorm";
 import { TaskAttachment } from "./entity/task-attachment.entity";
 import { TaskReadStatus } from "./entity/task-read-status.entity";
 import { Task } from "./entity/task.entity";
+import { TaskCategory } from "./enum/task-category.enum";
 import { TaskSortOrder } from "./enum/task-sort-order.enum";
 import { TaskStatus } from "./enum/task-status.enum";
 
@@ -13,7 +14,26 @@ export type TaskCountRow = {
   count: string;
 };
 
+export type TaskCategoryCountRow = {
+  category: TaskCategory;
+  count: string;
+};
+
+export type TaskStatusSummaryByBranchRow = {
+  branch: string | null;
+  registered: string;
+  registeredToday: string;
+  inProgress: string;
+  inProgressThisWeek: string;
+  inProgressLastWeek: string;
+  reviewRequested: string;
+  reviewRequestedThisWeek: string;
+  reviewRequestedLastWeek: string;
+  completedThisMonth: string;
+};
+
 type FindRecentWorkStatusOptions = {
+  category?: TaskCategory;
   limit?: number;
   memberId?: number;
   sortOrder?: TaskSortOrder;
@@ -79,6 +99,74 @@ export class TaskRepository {
     });
   }
 
+  async findStatusSummaryRowsByAssigneeOrganization({
+    endOfMonth,
+    now,
+    startOfLastWeek,
+    startOfMonth,
+    startOfThisWeek,
+    startOfToday,
+    startOfTomorrow
+  }: {
+    endOfMonth: Date;
+    now: Date;
+    startOfLastWeek: Date;
+    startOfMonth: Date;
+    startOfThisWeek: Date;
+    startOfToday: Date;
+    startOfTomorrow: Date;
+  }): Promise<TaskStatusSummaryByBranchRow[]> {
+    return this.taskRepository
+      .createQueryBuilder("task")
+      .innerJoin("task.assignee", "assignee")
+      .leftJoin("assignee.organization", "organization")
+      .select("organization.name", "branch")
+      .addSelect("COUNT(*) FILTER (WHERE task.status = :registered)", "registered")
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :registered AND task.createdAt >= :startOfToday AND task.createdAt < :startOfTomorrow)",
+        "registeredToday"
+      )
+      .addSelect("COUNT(*) FILTER (WHERE task.status = :inProgress)", "inProgress")
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :inProgress AND task.updatedAt >= :startOfThisWeek AND task.updatedAt < :now)",
+        "inProgressThisWeek"
+      )
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :inProgress AND task.updatedAt >= :startOfLastWeek AND task.updatedAt < :startOfThisWeek)",
+        "inProgressLastWeek"
+      )
+      .addSelect("COUNT(*) FILTER (WHERE task.status = :reviewRequested)", "reviewRequested")
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :reviewRequested AND task.updatedAt >= :startOfThisWeek AND task.updatedAt < :now)",
+        "reviewRequestedThisWeek"
+      )
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :reviewRequested AND task.updatedAt >= :startOfLastWeek AND task.updatedAt < :startOfThisWeek)",
+        "reviewRequestedLastWeek"
+      )
+      .addSelect(
+        "COUNT(*) FILTER (WHERE task.status = :completed AND task.completedAt >= :startOfMonth AND task.completedAt < :endOfMonth)",
+        "completedThisMonth"
+      )
+      .where("task.isDraft = false")
+      .groupBy("organization.name")
+      .orderBy("organization.name", "ASC", "NULLS LAST")
+      .setParameters({
+        completed: TaskStatus.COMPLETED,
+        endOfMonth,
+        inProgress: TaskStatus.IN_PROGRESS,
+        now,
+        registered: TaskStatus.REGISTERED,
+        reviewRequested: TaskStatus.REVIEW_REQUESTED,
+        startOfLastWeek,
+        startOfMonth,
+        startOfThisWeek,
+        startOfToday,
+        startOfTomorrow
+      })
+      .getRawMany<TaskStatusSummaryByBranchRow>();
+  }
+
   async findActiveCountRowsByAssigneeAndStatus(statuses: TaskStatus[]): Promise<TaskCountRow[]> {
     return this.taskRepository
       .createQueryBuilder("task")
@@ -92,11 +180,31 @@ export class TaskRepository {
       .getRawMany<TaskCountRow>();
   }
 
+  async findActiveCountRowsByCategory(statuses?: TaskStatus[]): Promise<TaskCategoryCountRow[]> {
+    const queryBuilder = this.taskRepository
+      .createQueryBuilder("task")
+      .select("task.category", "category")
+      .addSelect("COUNT(task.id)", "count")
+      .where("task.isDraft = false");
+
+    if (statuses?.length) {
+      queryBuilder.andWhere("task.status IN (:...statuses)", { statuses });
+    }
+
+    return queryBuilder
+      .groupBy("task.category")
+      .orderBy("task.category", "ASC")
+      .getRawMany<TaskCategoryCountRow>();
+  }
+
   async findRecentWorkStatus(options: FindRecentWorkStatusOptions): Promise<Task[]> {
     const queryBuilder = this.taskRepository
       .createQueryBuilder("task")
       .leftJoinAndSelect("task.assignee", "assignee")
       .leftJoinAndSelect("assignee.positionInfo", "assigneePosition")
+      .leftJoinAndSelect("task.creator", "creator")
+      .leftJoinAndSelect("creator.positionInfo", "creatorPosition")
+      .leftJoinAndSelect("creator.organization", "creatorOrganization")
       .leftJoinAndSelect("task.attachments", "attachments")
       .leftJoinAndSelect("task.comments", "comments")
       .where("task.status IN (:...statuses)", { statuses: options.statuses })
@@ -115,6 +223,10 @@ export class TaskRepository {
       queryBuilder.andWhere("(task.assigneeId = :memberId OR task.createdBy = :memberId)", {
         memberId: options.memberId
       });
+    }
+
+    if (options.category) {
+      queryBuilder.andWhere("task.category = :category", { category: options.category });
     }
 
     if (options.sortOrder === TaskSortOrder.LATEST) {

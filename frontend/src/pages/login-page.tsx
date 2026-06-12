@@ -1,17 +1,18 @@
 "use client";
 
 import { type FormEvent, useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
 import { login, type LoginResponse } from "@/api/auth";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
-import { getTaskStatusSummary, type TaskStatusSummary } from "@/api/task";
+import {
+  getTaskStatusSummaryByBranch,
+  type TaskStatusSummaryByBranch
+} from "@/api/task";
 import {
   clearRememberedLoginName,
   getRememberedLoginName,
   saveAuth,
   saveRememberedLoginName
 } from "@/lib/auth-storage";
-import { defaultSummary } from "@/components/pages/login/constants";
 import { LoginFormSection } from "@/components/pages/login/login-form-section";
 import { MemberRegisterDialog } from "@/components/pages/login/member-register-dialog";
 import { PositionTreeSection } from "@/components/pages/login/position-tree-section";
@@ -32,7 +33,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [positionTreeMessage, setPositionTreeMessage] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [taskSummary, setTaskSummary] = useState<TaskStatusSummary>(defaultSummary);
+  const [branchSummaries, setBranchSummaries] = useState<TaskStatusSummaryByBranch[]>([]);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   useEffect(() => {
@@ -45,9 +46,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }, []);
 
   useEffect(() => {
-    getTaskStatusSummary()
-      .then(setTaskSummary)
-      .catch(() => setTaskSummary(defaultSummary));
+    getTaskStatusSummaryByBranch()
+      .then(setBranchSummaries)
+      .catch(() => setBranchSummaries([]));
   }, []);
 
   useEffect(() => {
@@ -101,20 +102,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[360px] flex-col px-5 py-4 text-[#4B332E] ">
-      <div className="pointer-events-none fixed left-8 top-12 text-[#F0C957]">
-        <Sparkles aria-hidden className="h-7 w-7 fill-current" />
-      </div>
-      <div className="pointer-events-none fixed right-9 top-20 text-[#F1A9C0]">
-        <Sparkles aria-hidden className="h-6 w-6 fill-current" />
-      </div>
-
-      <header className="mb-3 pt-1 text-center">
-        <h1 className="whitespace-nowrap text-[23px] font-bold leading-tight tracking-normal text-muted-foreground">
-          자격증공장 업무전달현황
-        </h1>
-      </header>
-
+    <main className="login-pdf-font mx-auto flex min-h-dvh w-full max-w-[360px] flex-col bg-[#FFFEFC] px-4 py-5 text-[#3F2C28]">
       <PositionTreeSection
         isLoading={isPositionTreeLoading}
         message={positionTreeMessage}
@@ -122,7 +110,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         positions={positions}
         selectedPositionId={selectedPositionId}
       />
-      <TaskSummarySection taskSummary={taskSummary} />
+      <TaskSummarySection branchSummaries={branchSummaries} />
       <LoginFormSection
         isPasswordVisible={isPasswordVisible}
         isSubmitting={isSubmitting}

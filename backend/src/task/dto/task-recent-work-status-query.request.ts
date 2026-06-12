@@ -1,5 +1,6 @@
 import { Transform } from "class-transformer";
 import { IsArray, IsEnum, IsOptional } from "class-validator";
+import { TaskCategory } from "../enum/task-category.enum";
 import { TaskSortOrder } from "../enum/task-sort-order.enum";
 import { TaskStatus } from "../enum/task-status.enum";
 
@@ -19,4 +20,8 @@ export class TaskRecentWorkStatusQueryRequest {
   @IsOptional()
   @IsEnum(TaskSortOrder)
   sortOrder?: TaskSortOrder;
+
+  @IsOptional()
+  @IsEnum(TaskCategory)
+  category?: TaskCategory;
 }

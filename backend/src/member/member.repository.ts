@@ -3,6 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { In, Not, Repository } from "typeorm";
 import { Member } from "./entity/member.entity";
 import { MemberPreRegistration } from "./entity/member-pre-registration.entity";
+import { OrganizationBranch } from "./entity/organization-branch.entity";
+import { Organization } from "./entity/organization.entity";
 import { MemberRole } from "./enum/member-role.enum";
 
 export type BranchMemberCountRow = {
@@ -16,12 +18,18 @@ export class MemberRepository {
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
     @InjectRepository(MemberPreRegistration)
-    private readonly memberPreRegistrationRepository: Repository<MemberPreRegistration>
+    private readonly memberPreRegistrationRepository: Repository<MemberPreRegistration>,
+    @InjectRepository(Organization)
+    private readonly organizationRepository: Repository<Organization>,
+    @InjectRepository(OrganizationBranch)
+    private readonly branchRepository: Repository<OrganizationBranch>
   ) {}
 
   async findAll(): Promise<Member[]> {
     return this.memberRepository.find({
       relations: {
+        branchInfo: true,
+        organization: true,
         positionInfo: true,
         positionDuty: true
       }
@@ -31,6 +39,8 @@ export class MemberRepository {
   async findById(id: number): Promise<Member | null> {
     return this.memberRepository.findOne({
       relations: {
+        branchInfo: true,
+        organization: true,
         positionInfo: true,
         positionDuty: true
       },
@@ -41,6 +51,8 @@ export class MemberRepository {
   async findPreRegistrations(): Promise<MemberPreRegistration[]> {
     return this.memberPreRegistrationRepository.find({
       relations: {
+        branchInfo: true,
+        organization: true,
         positionInfo: true,
         positionDuty: true
       },
@@ -52,30 +64,33 @@ export class MemberRepository {
   }
 
   async findBranches(): Promise<string[]> {
-    const memberBranches = await this.memberRepository
-      .createQueryBuilder("member")
-      .select("DISTINCT member.branch", "branch")
-      .where("member.branch IS NOT NULL")
-      .andWhere("member.branch != ''")
-      .getRawMany<{ branch: string }>();
-    const preRegistrationBranches = await this.memberPreRegistrationRepository
-      .createQueryBuilder("preRegistration")
-      .select("DISTINCT preRegistration.branch", "branch")
-      .where("preRegistration.branch IS NOT NULL")
-      .andWhere("preRegistration.branch != ''")
-      .getRawMany<{ branch: string }>();
+    const branches = await this.branchRepository.find({
+      relations: {
+        organization: true
+      },
+      where: {
+        isActive: true,
+        organization: {
+          isActive: true
+        }
+      },
+      order: {
+        organization: {
+          displayOrder: "ASC"
+        },
+        displayOrder: "ASC",
+        name: "ASC"
+      }
+    });
 
-    return Array.from(
-      new Set([
-        ...memberBranches.map((row) => row.branch),
-        ...preRegistrationBranches.map((row) => row.branch)
-      ])
-    ).sort((first, second) => first.localeCompare(second, "ko"));
+    return Array.from(new Set(branches.map((branch) => branch.name)));
   }
 
   async findPreRegistrationById(id: number): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
       relations: {
+        branchInfo: true,
+        organization: true,
         positionInfo: true,
         positionDuty: true
       },
@@ -99,6 +114,8 @@ export class MemberRepository {
   async findActiveAssignableMembers(): Promise<Member[]> {
     return this.memberRepository.find({
       relations: {
+        branchInfo: true,
+        organization: true,
         positionInfo: true,
         positionDuty: true
       },
@@ -120,13 +137,15 @@ export class MemberRepository {
       .createQueryBuilder("member")
       .leftJoinAndSelect("member.positionInfo", "position")
       .leftJoinAndSelect("member.positionDuty", "positionDuty")
+      .leftJoinAndSelect("member.organization", "organization")
+      .leftJoinAndSelect("member.branchInfo", "branchInfo")
       .where("member.isActive = true")
       .andWhere("member.roleType NOT IN (:...roleTypes)", {
         roleTypes: [MemberRole.ADMIN]
       });
 
     if (branch) {
-      queryBuilder.andWhere("member.branch = :branch", { branch });
+      queryBuilder.andWhere("branchInfo.name = :branch", { branch });
     }
 
     if (positionId) {
@@ -144,6 +163,8 @@ export class MemberRepository {
       .createQueryBuilder("member")
       .leftJoinAndSelect("member.positionInfo", "position")
       .leftJoinAndSelect("member.positionDuty", "positionDuty")
+      .leftJoinAndSelect("member.organization", "organization")
+      .leftJoinAndSelect("member.branchInfo", "branchInfo")
       .where("member.isActive = true")
       .andWhere("position.name IN (:...positionNames)", { positionNames })
       .orderBy("position.displayOrder", "ASC")
@@ -155,17 +176,43 @@ export class MemberRepository {
     return this.memberRepository
       .createQueryBuilder("member")
       .leftJoin("member.positionInfo", "position")
-      .select("member.branch", "branch")
+      .leftJoin("member.organization", "organization")
+      .select("organization.name", "branch")
       .addSelect("COUNT(member.id)", "memberCount")
       .where("member.isActive = true")
       .andWhere("position.name IN (:...positionNames)", { positionNames })
-      .groupBy("member.branch")
-      .orderBy("member.branch", "ASC")
+      .groupBy("organization.name")
+      .orderBy("organization.name", "ASC")
       .getRawMany<BranchMemberCountRow>();
+  }
+
+  async findOrganizationByName(name: string): Promise<Organization | null> {
+    return this.organizationRepository.findOne({
+      where: {
+        isActive: true,
+        name
+      }
+    });
+  }
+
+  async findBranchByName(name: string): Promise<OrganizationBranch | null> {
+    return this.branchRepository.findOne({
+      relations: {
+        organization: true
+      },
+      where: {
+        isActive: true,
+        name
+      }
+    });
   }
 
   async findByNameAndRoleType(name: string, roleType: MemberRole): Promise<Member | null> {
     return this.memberRepository.findOne({
+      relations: {
+        branchInfo: true,
+        organization: true
+      },
       where: {
         name,
         roleType
@@ -179,6 +226,10 @@ export class MemberRepository {
     passwordHash: string
   ): Promise<Member | null> {
     return this.memberRepository.findOne({
+      relations: {
+        branchInfo: true,
+        organization: true
+      },
       where: {
         name,
         roleType,
@@ -189,6 +240,10 @@ export class MemberRepository {
 
   async findByNameAndPasswordHash(name: string, passwordHash: string): Promise<Member | null> {
     return this.memberRepository.findOne({
+      relations: {
+        branchInfo: true,
+        organization: true
+      },
       where: {
         name,
         passwordHash
@@ -197,12 +252,12 @@ export class MemberRepository {
   }
 
   async countByNameAndBranch(name: string, branch: string): Promise<number> {
-    return this.memberRepository.count({
-      where: {
-        name,
-        branch
-      }
-    });
+    return this.memberRepository
+      .createQueryBuilder("member")
+      .leftJoin("member.branchInfo", "branchInfo")
+      .where("member.name = :name", { name })
+      .andWhere("branchInfo.name = :branch", { branch })
+      .getCount();
   }
 
   async save(member: Member): Promise<Member> {
@@ -214,6 +269,10 @@ export class MemberRepository {
     branch: string
   ): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
+      relations: {
+        branchInfo: true,
+        organization: true
+      },
       order: {
         createdAt: "DESC"
       },
@@ -232,12 +291,13 @@ export class MemberRepository {
   async countActiveMembersByBranchAndRoleTypes(roleTypes: MemberRole[]): Promise<BranchMemberCountRow[]> {
     return this.memberRepository
       .createQueryBuilder("member")
-      .select("member.branch", "branch")
+      .leftJoin("member.organization", "organization")
+      .select("organization.name", "branch")
       .addSelect("COUNT(member.id)", "memberCount")
       .where("member.isActive = true")
       .andWhere("member.roleType IN (:...roleTypes)", { roleTypes })
-      .groupBy("member.branch")
-      .orderBy("member.branch", "ASC")
+      .groupBy("organization.name")
+      .orderBy("organization.name", "ASC")
       .getRawMany<BranchMemberCountRow>();
   }
 }

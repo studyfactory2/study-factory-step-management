@@ -6,6 +6,8 @@ import { MemberAffiliation } from "../enum/member-affiliation.enum";
 import { MemberDuty } from "../enum/member-duty.enum";
 import { MemberPosition } from "../enum/member-position.enum";
 import { MemberRole } from "../enum/member-role.enum";
+import { OrganizationBranch } from "./organization-branch.entity";
+import { Organization } from "./organization.entity";
 
 @Index(["name", "branch", "affiliation", "position", "duty"], { unique: true })
 @Entity({ name: "member_pre_registration" })
@@ -60,6 +62,20 @@ export class MemberPreRegistration extends BaseEntity {
 
   @Column({ type: "varchar", nullable: true })
   branch: string | null;
+
+  @Column({ name: "organization_id", type: "int", nullable: true })
+  organizationId: number | null;
+
+  @ManyToOne(() => Organization, { nullable: true })
+  @JoinColumn({ name: "organization_id" })
+  organization: Organization | null;
+
+  @Column({ name: "branch_id", type: "int", nullable: true })
+  branchId: number | null;
+
+  @ManyToOne(() => OrganizationBranch, { nullable: true })
+  @JoinColumn({ name: "branch_id" })
+  branchInfo: OrganizationBranch | null;
 
   @Column({ name: "is_registered", default: false })
   isRegistered: boolean;

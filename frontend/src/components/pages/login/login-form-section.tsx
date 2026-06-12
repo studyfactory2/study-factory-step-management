@@ -2,14 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
-import {
-  Eye,
-  EyeOff,
-  Lock,
-  Sparkles,
-  UserPlus,
-  UserRound
-} from "lucide-react";
+import { Eye, EyeOff, Lock, UserPlus, UserRound } from "lucide-react";
 
 type LoginFormSectionProps = {
   isPasswordVisible: boolean;
@@ -160,37 +153,32 @@ export function LoginFormSection({
   }
 
   return (
-    <section className="mt-0.5 rounded-[24px] border border-[#EBCDD1] bg-white/90 p-3 shadow-soft backdrop-blur ">
+    <section className="rounded-[16px] border border-[#D9D2CF] bg-white p-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
       <form className="space-y-2.5" onSubmit={onSubmit}>
-        <div className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-2">
-          <span className="text-[15px] font-black text-[#4B332E]">이름</span>
-          <label className="flex min-h-[34px] w-full min-w-0 items-center gap-2 rounded-[13px] border border-[#EBCDD1] bg-white px-3 shadow-sm">
-            <UserRound aria-hidden className="h-4 w-4 text-[#F188A4]" />
+        <label className="flex min-h-[46px] w-full min-w-0 items-center gap-2 rounded-[8px] border border-[#D9D2CF] bg-white px-3">
+          <UserRound aria-hidden className="h-5 w-5 text-[#7B716D]" />
             <input
-              className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:text-[#C9ABA6]"
+              className="min-w-0 flex-1 bg-transparent text-[14px] font-bold outline-none placeholder:text-[#B9B0AD]"
               onChange={(event) => onNameChange(event.target.value)}
               placeholder="이름을 입력하세요"
               type="text"
               value={name}
             />
-          </label>
-        </div>
+        </label>
 
-        <div className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-2">
-          <span className="text-[15px] font-black text-[#4B332E]">비밀번호</span>
-          <label className="flex min-h-[34px] w-full min-w-0 items-center gap-2 rounded-[13px] border border-[#EBCDD1] bg-white px-3 shadow-sm">
-            <Lock aria-hidden className="h-4 w-4 text-[#F188A4]" />
+        <label className="flex min-h-[46px] w-full min-w-0 items-center gap-2 rounded-[8px] border border-[#D9D2CF] bg-white px-3">
+          <Lock aria-hidden className="h-5 w-5 text-[#7B716D]" />
             <input
-              className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:text-[#C9ABA6]"
+              className="min-w-0 flex-1 bg-transparent text-[14px] font-bold outline-none placeholder:text-[#B9B0AD]"
               maxLength={4}
               onChange={(event) => onPasswordChange(event.target.value)}
-              placeholder="4자리"
+              placeholder="비밀번호 (4자리)"
               type={isPasswordVisible ? "text" : "password"}
               value={password}
             />
             <button
               aria-label={isPasswordVisible ? "비밀번호 숨기기" : "비밀번호 보기"}
-              className="-mr-1 flex h-7 w-7 shrink-0 items-center justify-center text-[#BFA4A0] transition hover:text-[#F188A4]"
+              className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center text-[#7B716D] transition hover:text-[#E30613]"
               onClick={onTogglePasswordVisible}
               type="button"
             >
@@ -200,21 +188,20 @@ export function LoginFormSection({
                 <EyeOff aria-hidden className="h-4 w-4" />
               )}
             </button>
-          </label>
-        </div>
+        </label>
 
-        <div className="flex items-center justify-between gap-3 px-1 text-sm font-bold text-[#9C7D79]">
+        <div className="flex items-center justify-between gap-3 px-1 text-[13px] font-bold text-[#4F4542]">
           <label className="flex items-center gap-2">
             <input
               checked={rememberName}
-              className="h-5 w-5 rounded border-[#EBCDD1] accent-[#F188A4]"
+              className="h-4.5 w-4.5 rounded border-[#D9D2CF] accent-[#E30613]"
               onChange={(event) => onRememberNameChange(event.target.checked)}
               type="checkbox"
             />
             이름 기억하기
           </label>
           <button
-            className="text-[#9C7D79] transition hover:text-[#F188A4]"
+            className="text-[#4F4542] transition hover:text-[#E30613]"
             onClick={onOpenRegister}
             type="button"
           >
@@ -223,30 +210,29 @@ export function LoginFormSection({
         </div>
 
         {message && (
-          <p className="rounded-[16px] bg-[#FFF3F5] px-4 py-2.5 text-center text-sm font-black text-[#E97999]">
+          <p className="rounded-[10px] bg-[#FFF3F3] px-4 py-2.5 text-center text-sm font-black text-[#E30613]">
             {message}
           </p>
         )}
 
         <button
-          className="flex min-h-[44px] w-full items-center justify-center rounded-[15px] bg-[#F188A4] px-4 py-2 text-base font-black text-white shadow-soft transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex min-h-[42px] w-full items-center justify-center rounded-[7px] bg-[#E30613] px-4 py-2 text-[15px] font-black text-white shadow-[0_3px_8px_rgba(227,6,19,0.2)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
           disabled={isSubmitting}
           type="submit"
         >
           {isSubmitting ? "로그인 중" : "로그인"}
         </button>
 
-        <div className="flex items-center justify-center gap-2 rounded-full bg-[#FFF2F6] px-3 py-2.5 text-center text-[12px] font-black text-[#4B332E]">
-          <Sparkles aria-hidden className="h-3.5 w-3.5 shrink-0 text-[#F188A4]" />
+        <div className="border-y border-[#D9D2CF] py-2.5 text-center text-[13px] font-black text-[#4F4542]">
           당신은 우리 회사의 자랑스러운 인재!
         </div>
 
         <button
-          className="flex min-h-[38px] w-full items-center justify-center gap-2 rounded-[15px] bg-[#FFF7F8] px-4 py-2 text-sm font-black text-[#E97999] transition hover:bg-[#FFF0F2]"
+          className="flex min-h-[36px] w-full items-center justify-center gap-2 rounded-[8px] bg-white px-4 py-2 text-[13px] font-black text-[#4F4542] transition hover:bg-[#FFF3F3]"
           onClick={handleInstallClick}
           type="button"
         >
-          <UserPlus aria-hidden className="h-4 w-4" />
+          <UserPlus aria-hidden className="h-4 w-4 text-[#E30613]" />
           홈화면에 추가하기
         </button>
         {installMessage && (
