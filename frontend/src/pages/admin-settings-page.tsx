@@ -19,6 +19,7 @@ import {
 
 type AdminSettingsPageProps = {
   onBack?: () => void;
+  onOrgChartOpen?: () => void;
   onPreRegisterOpen?: () => void;
 };
 
@@ -57,6 +58,7 @@ const managementMenus = [
 
 export function AdminSettingsPage({
   onBack,
+  onOrgChartOpen,
   onPreRegisterOpen
 }: AdminSettingsPageProps) {
   if (!onBack) {
@@ -111,6 +113,7 @@ export function AdminSettingsPage({
 
         <button
           className="grid w-full grid-cols-[5px_minmax(0,1fr)_24px] overflow-hidden rounded-[16px] border border-[#D8D1CE] bg-white text-left shadow-[0_2px_10px_rgba(95,73,68,0.08)]"
+          onClick={onOrgChartOpen}
           type="button"
         >
           <span className="bg-[#FFD6DC]" />
