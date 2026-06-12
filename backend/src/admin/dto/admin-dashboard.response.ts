@@ -47,6 +47,7 @@ export class AdminDashboardRecentOutputResponse {
   creatorRole: MemberRole;
   creatorPositionName: string | null;
   creatorOrganizationName: string | null;
+  lastActorId: number;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;

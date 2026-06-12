@@ -155,6 +155,7 @@ export class AdminService {
       creatorRole: task.creator.roleType,
       creatorPositionName: task.creator.positionInfo?.name ?? null,
       creatorOrganizationName: task.creator.organization?.name ?? null,
+      lastActorId: this.findLatestActorId(task),
       memberId: task.assignee.id,
       memberName: this.getDisplayName(task.assignee),
       memberRole: task.assignee.roleType,
@@ -264,14 +265,22 @@ export class AdminService {
   }
 
   private findLatestCommentOneLineComment(task: Task): string | null {
-    const latestComment = task.comments?.reduce((latest, comment) => {
+    const latestComment = this.findLatestComment(task);
+
+    return latestComment?.oneLineComment ?? task.oneLineComment ?? null;
+  }
+
+  private findLatestActorId(task: Task): number {
+    return this.findLatestComment(task)?.createdBy ?? task.createdBy;
+  }
+
+  private findLatestComment(task: Task): Task["comments"][number] | null {
+    return task.comments?.reduce((latest, comment) => {
       if (!latest) {
         return comment;
       }
 
       return comment.updatedAt.getTime() > latest.updatedAt.getTime() ? comment : latest;
     }, null as Task["comments"][number] | null);
-
-    return latestComment?.oneLineComment ?? task.oneLineComment ?? null;
   }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Clipboard } from "lucide-react";
+import { Check, ChevronDown, Clipboard } from "lucide-react";
 import type { AdminDashboardRecentOutput, AdminDashboardSortOrder } from "@/api/admin";
 import type { TaskStatus } from "@/types/domain";
 
@@ -143,43 +143,64 @@ export function RecentOutputsSection({
           </div>
         )}
 
-        {filteredOutputs.map((output) => (
-          <button
-            className="grid min-h-[52px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
-            key={output.taskId}
-            onClick={() => onDetailOpen(output.taskId)}
-            type="button"
-          >
-            <span className={getStatusBarClassName(output.taskStatus)} />
-            <span className="flex min-w-0 flex-col items-start justify-center pl-2.5 pr-1 text-left font-normal leading-none">
-              <span className="line-clamp-1 break-keep text-[9px] text-[#4F4542]">
-                {output.creatorName ?? output.memberName}
+        {filteredOutputs.map((output) => {
+          const direction = getOutputDirection(output);
+          const isCreatorReceiver = direction === "TO_CREATOR";
+          const isMemberReceiver = direction === "TO_MEMBER";
+
+          return (
+            <button
+              className="grid min-h-[52px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
+              key={output.taskId}
+              onClick={() => onDetailOpen(output.taskId)}
+              type="button"
+            >
+              <span className={getStatusBarClassName(output.taskStatus)} />
+              <span className="flex min-w-0 flex-col items-start justify-center pl-2.5 pr-1 text-left font-normal leading-none">
+                <span className={`line-clamp-1 break-keep text-[9px] ${isCreatorReceiver ? "text-[#2D70CB]" : "text-[#4F4542]"}`}>
+                  {output.creatorName ?? output.memberName}
+                </span>
+                <span className="mt-0.5 line-clamp-1 break-keep text-[7px] text-[#7B716D]">
+                  {output.creatorOrganizationName ?? "미지정"}
+                </span>
+                <span className="mt-0.5 whitespace-nowrap text-[6px] text-[#9A918D]">
+                  {formatCompactDateTime(output.updatedAt ?? output.startedAt)}
+                </span>
               </span>
-              <span className="mt-0.5 line-clamp-1 break-keep text-[7px] text-[#7B716D]">
-                {output.creatorOrganizationName ?? "미지정"}
+              <span className="flex min-w-0 items-center pl-5 pr-1.5">
+                <span className="truncate text-[10px] font-normal leading-3 text-[#222222]">
+                  {output.taskTitle}
+                </span>
               </span>
-              <span className="mt-0.5 whitespace-nowrap text-[6px] text-[#9A918D]">
-                {formatCompactDateTime(output.updatedAt ?? output.startedAt)}
+              <span className="flex items-center justify-center px-0">
+                <span className={`flex h-[18px] w-[50px] items-center justify-center gap-0.5 rounded-full text-[7px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
+                  {direction === "TO_CREATOR" && <span aria-hidden>←</span>}
+                  <span>{getStatusLabel(output.taskStatus)}</span>
+                  {direction === "TO_MEMBER" && <span aria-hidden>→</span>}
+                  {output.taskStatus === "COMPLETED" && <Check aria-hidden className="h-2.5 w-2.5 stroke-[2.5]" />}
+                </span>
               </span>
-            </span>
-            <span className="flex min-w-0 items-center pl-5 pr-1.5">
-              <span className="line-clamp-2 text-[10px] font-normal leading-3 text-[#222222]">
-                {output.taskTitle}
+              <span className="flex min-w-0 items-center justify-center px-0 text-center text-[9px] font-normal leading-3">
+                <span className={`line-clamp-2 break-keep ${isMemberReceiver ? "text-[#2D70CB]" : "text-[#4F4542]"}`}>
+                  {output.memberName}
+                </span>
               </span>
-            </span>
-            <span className="flex items-center justify-center px-0">
-              <span className={`flex h-[18px] w-[50px] items-center justify-center rounded-full text-[7px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
-                {getStatusLabel(output.taskStatus)}
-              </span>
-            </span>
-            <span className="flex min-w-0 items-center justify-center px-0 text-center text-[9px] font-normal leading-3 text-[#4F4542]">
-              <span className="line-clamp-2 break-keep">{output.memberName}</span>
-            </span>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </section>
   );
+}
+
+function getOutputDirection(output: AdminDashboardRecentOutput) {
+  const lastActorId = output.lastActorId ?? output.creatorId;
+
+  if (lastActorId === output.memberId) {
+    return "TO_CREATOR";
+  }
+
+  return "TO_MEMBER";
 }
 
 function filterOutputsByScope(

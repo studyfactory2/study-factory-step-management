@@ -146,6 +146,12 @@ export type TaskRecentWorkStatus = {
   taskCategory: TaskCategory;
   oneLineComment: string | null;
   taskStatus: TaskStatus;
+  creatorId: number;
+  creatorName: string;
+  creatorRole: MemberRole;
+  creatorPositionName: string | null;
+  creatorOrganizationName: string | null;
+  lastActorId: number;
   memberId: number;
   memberName: string;
   memberRole: MemberRole;

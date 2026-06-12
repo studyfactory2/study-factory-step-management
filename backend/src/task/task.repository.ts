@@ -207,6 +207,7 @@ export class TaskRepository {
       .leftJoinAndSelect("creator.organization", "creatorOrganization")
       .leftJoinAndSelect("task.attachments", "attachments")
       .leftJoinAndSelect("task.comments", "comments")
+      .leftJoinAndSelect("comments.creator", "commentCreator")
       .where("task.status IN (:...statuses)", { statuses: options.statuses })
       .andWhere("task.isDraft = false");
 
