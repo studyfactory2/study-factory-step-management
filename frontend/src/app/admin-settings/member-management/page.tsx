@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AdminSettingsPage } from "@/pages/admin-settings-page";
+import { MemberManagementPage } from "@/pages/member-management-page";
 import {
   getStoredAuth,
   isAdminRole,
   type StoredMember
 } from "@/lib/auth-storage";
 
-export default function AdminSettingsRoutePage() {
+export default function MemberManagementRoutePage() {
   const router = useRouter();
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -35,12 +35,5 @@ export default function AdminSettingsRoutePage() {
     return null;
   }
 
-  return (
-    <AdminSettingsPage
-      onBack={() => router.push("/admin-dashboard")}
-      onMemberManagementOpen={() => router.push("/admin-settings/member-management")}
-      onOrgChartOpen={() => router.push("/admin-settings/org-chart")}
-      onPreRegisterOpen={() => router.push("/admin-settings/member-pre-register")}
-    />
-  );
+  return <MemberManagementPage onBack={() => router.push("/admin-settings")} />;
 }

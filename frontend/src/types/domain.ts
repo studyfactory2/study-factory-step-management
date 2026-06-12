@@ -24,12 +24,24 @@ export type Member = {
   displayName: string | null;
   avatarUrl: string | null;
   branch: string | null;
+  branchName?: string | null;
+  organization?: {
+    id: number;
+    name: string;
+  } | null;
+  organizationId?: number | null;
+  organizationName?: string | null;
   positionId: number | null;
   positionInfo?: {
     id: number;
     name: string;
   } | null;
   positionDutyId: number | null;
+  positionDuty?: {
+    duty: MemberDuty | null;
+    id: number;
+    name: string | null;
+  } | null;
   roleType: MemberRole;
   isActive: boolean;
   createdAt: string;

@@ -20,6 +20,7 @@ import {
 
 type AdminSettingsPageProps = {
   onBack?: () => void;
+  onMemberManagementOpen?: () => void;
   onOrgChartOpen?: () => void;
   onPreRegisterOpen?: () => void;
 };
@@ -32,7 +33,7 @@ const managementMenus = [
     tone: "border-[#B8D8F5] bg-[#EAF3FF] text-[#2D70CB]"
   },
   {
-    action: null,
+    action: "memberManagement",
     icon: UsersRound,
     label: "사원관리",
     tone: "border-[#B8D8F5] bg-[#F4FAFF] text-[#2D70CB]"
@@ -65,6 +66,7 @@ const managementMenus = [
 
 export function AdminSettingsPage({
   onBack,
+  onMemberManagementOpen,
   onOrgChartOpen,
   onPreRegisterOpen
 }: AdminSettingsPageProps) {
@@ -106,7 +108,13 @@ export function AdminSettingsPage({
                 <button
                   className={`flex h-[52px] items-center justify-center gap-2 rounded-[12px] border text-[13px] font-normal shadow-sm ${menu.tone}`}
                   key={menu.label}
-                  onClick={menu.action === "preRegister" ? onPreRegisterOpen : undefined}
+                  onClick={
+                    menu.action === "preRegister"
+                      ? onPreRegisterOpen
+                      : menu.action === "memberManagement"
+                        ? onMemberManagementOpen
+                        : undefined
+                  }
                   type="button"
                 >
                   <Icon aria-hidden className="h-5 w-5 shrink-0" />
