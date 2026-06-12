@@ -181,7 +181,7 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
             </div>
           ) : chart?.nodes.length ? (
             <div className="mt-3 overflow-x-auto pb-1">
-              <div className="flex min-w-max justify-center gap-3">
+              <div className="flex min-w-max justify-center gap-2">
                 {chart.nodes.map((node) => (
                   <OrgNodePreview key={node.id} node={node} />
                 ))}
@@ -452,13 +452,13 @@ function OrgNodePreview({ node }: { node: OrganizationChartNode }) {
     <div className="relative flex flex-col items-center text-center">
       <OrgPersonCard node={node} />
       {children.length > 0 ? (
-        <div className="relative mt-3 min-w-max">
-          <span className="absolute left-1/2 top-[-0.75rem] h-3 w-px -translate-x-1/2 bg-[#B9B1AD]" />
+        <div className="relative mt-2 min-w-max">
+          <span className="absolute left-1/2 top-[-0.55rem] h-2.5 w-px -translate-x-1/2 bg-[#B9B1AD]" />
           <span className="absolute left-[18%] right-[18%] top-0 h-px bg-[#B9B1AD]" />
-          <div className={`grid gap-2 pt-3 ${children.length === 1 ? "grid-cols-1" : children.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+          <div className={`grid gap-1.5 pt-2.5 ${children.length === 1 ? "grid-cols-1" : children.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
             {children.map((child) => (
               <div className="relative flex justify-center" key={child.id}>
-                <span className="absolute left-1/2 top-[-0.75rem] h-3 w-px -translate-x-1/2 bg-[#B9B1AD]" />
+                <span className="absolute left-1/2 top-[-0.55rem] h-2.5 w-px -translate-x-1/2 bg-[#B9B1AD]" />
                 <OrgNodePreview node={child} />
               </div>
             ))}
@@ -480,19 +480,19 @@ function OrgPersonCard({
     <button
       className={`inline-grid items-center gap-1 rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] text-left font-normal shadow-sm ${
         compact
-          ? "grid-cols-1 px-1 py-1 text-[9px]"
-          : "grid-cols-[28px_minmax(0,1fr)_12px] px-2 py-2 text-[11px]"
-      } ${compact ? "w-[42px]" : "w-[118px]"}`}
+          ? "grid-cols-1 px-1 py-1 text-[8px]"
+          : "grid-cols-[22px_minmax(0,1fr)_10px] px-1.5 py-1.5 text-[9px]"
+      } ${compact ? "w-[36px]" : "w-[92px]"}`}
       type="button"
     >
-      <span className="flex h-7 w-7 items-center justify-center rounded-[7px] border border-[#D8D1CE] bg-[#F7F7F7]">
-        <Camera aria-hidden className="h-4 w-4 text-[#777777]" />
+      <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[6px] border border-[#D8D1CE] bg-[#F7F7F7]">
+        <Camera aria-hidden className="h-3.5 w-3.5 text-[#777777]" />
       </span>
       <span className="min-w-0">
         <span className="block truncate">직급: {node.positionName ?? node.displayName ?? "-"}</span>
         <span className="block truncate">이름: {node.memberName ?? "-"}</span>
       </span>
-      {!compact ? <ChevronDown aria-hidden className="h-3 w-3 text-[#6F6662]" /> : null}
+      {!compact ? <ChevronDown aria-hidden className="h-2.5 w-2.5 text-[#6F6662]" /> : null}
     </button>
   );
 }
