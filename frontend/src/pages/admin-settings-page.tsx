@@ -20,6 +20,7 @@ import {
 
 type AdminSettingsPageProps = {
   onBack?: () => void;
+  onDepartmentPositionOpen?: () => void;
   onMemberManagementOpen?: () => void;
   onOrgChartOpen?: () => void;
   onPreRegisterOpen?: () => void;
@@ -39,7 +40,7 @@ const managementMenus = [
     tone: "border-[#B8D8F5] bg-[#F4FAFF] text-[#2D70CB]"
   },
   {
-    action: null,
+    action: "departmentPosition",
     icon: Tag,
     label: "부서/직급관리",
     tone: "border-[#F0C5C5] bg-[#FFF1F1] text-[#D95858]"
@@ -66,6 +67,7 @@ const managementMenus = [
 
 export function AdminSettingsPage({
   onBack,
+  onDepartmentPositionOpen,
   onMemberManagementOpen,
   onOrgChartOpen,
   onPreRegisterOpen
@@ -113,6 +115,8 @@ export function AdminSettingsPage({
                       ? onPreRegisterOpen
                       : menu.action === "memberManagement"
                         ? onMemberManagementOpen
+                        : menu.action === "departmentPosition"
+                          ? onDepartmentPositionOpen
                         : undefined
                   }
                   type="button"
