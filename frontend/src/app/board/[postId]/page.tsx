@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-  ClipboardList,
   Eye,
   Heart,
   MessageCircle,
@@ -90,7 +89,6 @@ export default function BoardPostDetailPage() {
             ) : (
               <Pencil aria-hidden className="h-6 w-6 -translate-y-0.5 text-[#E3A12A]" />
             )}
-            게시글 상세
           </h1>
           <button
             className="absolute right-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-normal leading-6 text-[#333333] shadow-sm"
@@ -152,10 +150,6 @@ export default function BoardPostDetailPage() {
             </section>
 
             <section className="rounded-[14px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-              <h3 className="mb-2 flex items-center gap-1.5 text-[16px] font-normal text-[#111111]">
-                <ClipboardList aria-hidden className="h-4 w-4 text-[#4F4542]" />
-                본문 내용
-              </h3>
               <p className="whitespace-pre-wrap break-keep text-[14px] font-normal leading-6 text-[#333333]">
                 {post.content}
               </p>

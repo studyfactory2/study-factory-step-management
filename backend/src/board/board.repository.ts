@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BoardPost } from "./entity/board-post.entity";
+import { BoardView } from "./entity/board-view.entity";
 import { BoardPostType } from "./enum/board-post-type.enum";
 
 type BoardPostRawRow = {
@@ -29,7 +30,9 @@ type BoardPostRawRow = {
 export class BoardRepository {
   constructor(
     @InjectRepository(BoardPost)
-    private readonly boardPostRepository: Repository<BoardPost>
+    private readonly boardPostRepository: Repository<BoardPost>,
+    @InjectRepository(BoardView)
+    private readonly boardViewRepository: Repository<BoardView>
   ) {}
 
   async findActivePosts(type?: BoardPostType): Promise<BoardPostRawRow[]> {
@@ -110,5 +113,31 @@ export class BoardRepository {
       .orderBy("attachment.displayOrder", "ASC")
       .addOrderBy("comment.createdAt", "ASC")
       .getOne();
+  }
+
+  async createViewIfNotRecent(postId: number, memberId: number, viewedAfter: Date): Promise<void> {
+    await this.boardViewRepository.manager.transaction(async (manager) => {
+      await manager.query("SELECT pg_advisory_xact_lock($1, $2)", [postId, memberId]);
+
+      const viewCount = await manager
+        .getRepository(BoardView)
+        .createQueryBuilder("view")
+        .where("view.postId = :postId", { postId })
+        .andWhere("view.memberId = :memberId", { memberId })
+        .andWhere("view.lastViewedAt >= :viewedAfter", { viewedAfter })
+        .getCount();
+
+      if (viewCount > 0) {
+        return;
+      }
+
+      await manager.getRepository(BoardView).save(
+        manager.getRepository(BoardView).create({
+          postId,
+          memberId,
+          lastViewedAt: new Date()
+        })
+      );
+    });
   }
 }

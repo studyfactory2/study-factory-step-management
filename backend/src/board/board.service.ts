@@ -4,6 +4,8 @@ import { BoardPostDetailResponse, BoardPostListResponse } from "./dto/board-post
 import { BoardPostType } from "./enum/board-post-type.enum";
 import { BoardVisibility } from "./enum/board-visibility.enum";
 
+const BOARD_VIEW_DEDUPLICATION_WINDOW_MS = 5000;
+
 @Injectable()
 export class BoardService {
   constructor(private readonly boardRepository: BoardRepository) {}
@@ -35,12 +37,17 @@ export class BoardService {
     }));
   }
 
-  async findPostDetail(id: number): Promise<BoardPostDetailResponse> {
-    const post = await this.boardRepository.findActivePostById(id);
+  async findPostDetail(id: number, viewerId: number): Promise<BoardPostDetailResponse> {
+    const activePost = await this.boardRepository.findActivePostById(id);
 
-    if (!post) {
+    if (!activePost) {
       throw new NotFoundException("게시글을 찾을 수 없습니다.");
     }
+
+    const recentViewThreshold = new Date(Date.now() - BOARD_VIEW_DEDUPLICATION_WINDOW_MS);
+    await this.boardRepository.createViewIfNotRecent(id, viewerId, recentViewThreshold);
+
+    const post = await this.boardRepository.findActivePostById(id) ?? activePost;
 
     return {
       id: post.id,

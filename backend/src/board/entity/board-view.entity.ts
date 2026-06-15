@@ -1,10 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, Unique } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { BaseEntity } from "../../common/entity/base.entity";
 import { Member } from "../../member/entity/member.entity";
 import { BoardPost } from "./board-post.entity";
 
 @Entity({ name: "board_views" })
-@Unique("uq_board_views_post_member", ["postId", "memberId"])
 export class BoardView extends BaseEntity {
   @Column({ name: "post_id" })
   postId: number;

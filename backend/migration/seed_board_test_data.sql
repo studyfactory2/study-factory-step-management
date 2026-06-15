@@ -247,8 +247,4 @@ SELECT
   now() - ((seed_posts.rn + active_members.rn) || ' minutes')::interval
 FROM seed_posts
 JOIN active_members
-  ON active_members.rn <= ((seed_posts.rn % 12) + 8)
-ON CONFLICT (post_id, member_id) DO UPDATE
-SET
-  last_viewed_at = EXCLUDED.last_viewed_at,
-  "updatedAt" = now();
+  ON active_members.rn <= ((seed_posts.rn % 12) + 8);
