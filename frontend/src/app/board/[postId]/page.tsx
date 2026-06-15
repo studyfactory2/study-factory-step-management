@@ -102,7 +102,9 @@ export default function BoardPostDetailPage() {
 
   const backPath = "/board";
   const dashboardPath = isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard";
+  const canManageAllBoardContent = isAdminRole(currentMember.roleType);
   const isOwnPost = post?.author.id === currentMember.id;
+  const canDeletePost = Boolean(isOwnPost || canManageAllBoardContent);
 
   async function handleLikeClick() {
     if (!accessToken || !post) {
@@ -337,7 +339,7 @@ export default function BoardPostDetailPage() {
                 <span className="text-[11px] font-normal text-[#7B716D]">{formatBoardDate(post.createdAt)}</span>
               </div>
 
-              {isOwnPost ? (
+              {isOwnPost || canDeletePost ? (
                 <div className="mb-2 flex justify-end gap-1.5">
                   {isEditing ? (
                     <>
@@ -360,22 +362,26 @@ export default function BoardPostDetailPage() {
                     </>
                   ) : (
                     <>
-                      <button
-                        className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
-                        disabled={isPostSubmitting}
-                        onClick={handleEditClick}
-                        type="button"
-                      >
-                        수정
-                      </button>
-                      <button
-                        className="rounded-[10px] border border-[#E7C7C7] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
-                        disabled={isPostSubmitting}
-                        onClick={() => setDeleteTarget({ type: "post" })}
-                        type="button"
-                      >
-                        삭제
-                      </button>
+                      {isOwnPost ? (
+                        <button
+                          className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
+                          disabled={isPostSubmitting}
+                          onClick={handleEditClick}
+                          type="button"
+                        >
+                          수정
+                        </button>
+                      ) : null}
+                      {canDeletePost ? (
+                        <button
+                          className="rounded-[10px] border border-[#E7C7C7] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
+                          disabled={isPostSubmitting}
+                          onClick={() => setDeleteTarget({ type: "post" })}
+                          type="button"
+                        >
+                          삭제
+                        </button>
+                      ) : null}
                     </>
                   )}
                 </div>
@@ -541,16 +547,18 @@ export default function BoardPostDetailPage() {
                       ) : (
                         <>
                           <p className="whitespace-pre-wrap break-keep text-[13px] font-normal leading-5 text-[#333333]">{comment.content}</p>
-                          {comment.author.id === currentMember.id ? (
+                          {comment.author.id === currentMember.id || canManageAllBoardContent ? (
                             <div className="mt-2 flex justify-end gap-1.5">
-                              <button
-                                className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
-                                disabled={isCommentSubmitting}
-                                onClick={() => handleCommentEditClick(comment.id, comment.content)}
-                                type="button"
-                              >
-                                수정
-                              </button>
+                              {comment.author.id === currentMember.id ? (
+                                <button
+                                  className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
+                                  disabled={isCommentSubmitting}
+                                  onClick={() => handleCommentEditClick(comment.id, comment.content)}
+                                  type="button"
+                                >
+                                  수정
+                                </button>
+                              ) : null}
                               <button
                                 className="rounded-[10px] border border-[#E7C7C7] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
                                 disabled={isCommentSubmitting}

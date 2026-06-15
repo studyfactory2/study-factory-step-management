@@ -1,4 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { CurrentMember } from "../auth/type/current-member.type";
+import { MemberRole } from "../member/enum/member-role.enum";
 import { UploadFile } from "../upload/type/upload-file.type";
 import { UploadService } from "../upload/upload.service";
 import { BoardRepository } from "./board.repository";
@@ -139,14 +141,14 @@ export class BoardService {
     return this.toCommentResponse(loadedComment);
   }
 
-  async deleteComment(postId: number, commentId: number, memberId: number): Promise<void> {
+  async deleteComment(postId: number, commentId: number, currentMember: CurrentMember): Promise<void> {
     const comment = await this.boardRepository.findActiveCommentById(commentId);
 
     if (!comment || comment.postId !== postId) {
       throw new NotFoundException("댓글을 찾을 수 없습니다.");
     }
 
-    this.validateCommentOwner(comment, memberId);
+    this.validateCommentDeletionPermission(comment, currentMember);
     comment.isActive = false;
     await this.boardRepository.saveComment(comment);
   }
@@ -191,14 +193,14 @@ export class BoardService {
     return this.toPostDetailResponse(updatedPost, memberId);
   }
 
-  async deletePost(postId: number, memberId: number): Promise<void> {
+  async deletePost(postId: number, currentMember: CurrentMember): Promise<void> {
     const post = await this.boardRepository.findActivePostById(postId);
 
     if (!post) {
       throw new NotFoundException("게시글을 찾을 수 없습니다.");
     }
 
-    this.validatePostOwner(post, memberId);
+    this.validatePostDeletionPermission(post, currentMember);
     post.isActive = false;
     await this.boardRepository.savePost(post);
   }
@@ -317,10 +319,30 @@ export class BoardService {
     }
   }
 
+  private validatePostDeletionPermission(post: BoardPost, currentMember: CurrentMember): void {
+    if (post.createdBy === currentMember.memberId || this.isAdminRole(currentMember.role)) {
+      return;
+    }
+
+    throw new ForbiddenException("작성자 또는 관리자만 삭제할 수 있습니다.");
+  }
+
   private validateCommentOwner(comment: BoardComment, memberId: number): void {
     if (comment.createdBy !== memberId) {
       throw new ForbiddenException("작성자만 수정하거나 삭제할 수 있습니다.");
     }
+  }
+
+  private validateCommentDeletionPermission(comment: BoardComment, currentMember: CurrentMember): void {
+    if (comment.createdBy === currentMember.memberId || this.isAdminRole(currentMember.role)) {
+      return;
+    }
+
+    throw new ForbiddenException("작성자 또는 관리자만 삭제할 수 있습니다.");
+  }
+
+  private isAdminRole(role: MemberRole): boolean {
+    return role === MemberRole.ADMIN || role === MemberRole.CEO;
   }
 
   private toCommentResponse(comment: BoardComment): BoardPostCommentResponse {

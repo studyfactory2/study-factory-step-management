@@ -59,7 +59,7 @@ export class BoardController {
     @Param("id", ParseIntPipe) id: number,
     @CurrentMember() currentMember: CurrentMemberType
   ) {
-    await this.boardService.deletePost(id, currentMember.memberId);
+    await this.boardService.deletePost(id, currentMember);
   }
 
   @Post("posts/:id/comments")
@@ -87,7 +87,7 @@ export class BoardController {
     @Param("commentId", ParseIntPipe) commentId: number,
     @CurrentMember() currentMember: CurrentMemberType
   ) {
-    await this.boardService.deleteComment(postId, commentId, currentMember.memberId);
+    await this.boardService.deleteComment(postId, commentId, currentMember);
   }
 
   @UseInterceptors(FilesInterceptor("attachments", 5))
