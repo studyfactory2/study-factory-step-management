@@ -3,6 +3,7 @@ import { UploadFile } from "../upload/type/upload-file.type";
 import { UploadService } from "../upload/upload.service";
 import { BoardRepository } from "./board.repository";
 import { BoardCommentCreateRequest } from "./dto/board-comment-create.request";
+import { BoardCommentUpdateRequest } from "./dto/board-comment-update.request";
 import { BoardPostCreateRequest } from "./dto/board-post-create.request";
 import { BoardPostUpdateRequest } from "./dto/board-post-update.request";
 import {
@@ -111,6 +112,43 @@ export class BoardService {
     }
 
     return this.toCommentResponse(loadedComment);
+  }
+
+  async updateComment(
+    postId: number,
+    commentId: number,
+    request: BoardCommentUpdateRequest,
+    memberId: number
+  ): Promise<BoardPostCommentResponse> {
+    const comment = await this.boardRepository.findActiveCommentById(commentId);
+
+    if (!comment || comment.postId !== postId) {
+      throw new NotFoundException("댓글을 찾을 수 없습니다.");
+    }
+
+    this.validateCommentOwner(comment, memberId);
+    comment.content = request.content.trim();
+
+    const savedComment = await this.boardRepository.saveComment(comment);
+    const loadedComment = await this.boardRepository.findActiveCommentById(savedComment.id);
+
+    if (!loadedComment) {
+      throw new NotFoundException("댓글을 찾을 수 없습니다.");
+    }
+
+    return this.toCommentResponse(loadedComment);
+  }
+
+  async deleteComment(postId: number, commentId: number, memberId: number): Promise<void> {
+    const comment = await this.boardRepository.findActiveCommentById(commentId);
+
+    if (!comment || comment.postId !== postId) {
+      throw new NotFoundException("댓글을 찾을 수 없습니다.");
+    }
+
+    this.validateCommentOwner(comment, memberId);
+    comment.isActive = false;
+    await this.boardRepository.saveComment(comment);
   }
 
   async updatePost(
@@ -275,6 +313,12 @@ export class BoardService {
 
   private validatePostOwner(post: BoardPost, memberId: number): void {
     if (post.createdBy !== memberId) {
+      throw new ForbiddenException("작성자만 수정하거나 삭제할 수 있습니다.");
+    }
+  }
+
+  private validateCommentOwner(comment: BoardComment, memberId: number): void {
+    if (comment.createdBy !== memberId) {
       throw new ForbiddenException("작성자만 수정하거나 삭제할 수 있습니다.");
     }
   }

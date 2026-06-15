@@ -87,6 +87,10 @@ export type BoardCommentCreateRequest = {
   content: string;
 };
 
+export type BoardCommentUpdateRequest = {
+  content: string;
+};
+
 export async function getBoardCategories(accessToken: string): Promise<BoardPostCategory[]> {
   const response = await fetch(`${API_BASE_URL}/api/board/categories`, {
     cache: "no-store",
@@ -202,6 +206,51 @@ export async function deleteBoardPost(accessToken: string, postId: number): Prom
 
   if (!response.ok) {
     throw new Error("게시글을 삭제하지 못했습니다.");
+  }
+}
+
+export async function updateBoardComment(
+  accessToken: string,
+  postId: number,
+  commentId: number,
+  request: BoardCommentUpdateRequest
+): Promise<BoardPostComment> {
+  const response = await fetch(`${API_BASE_URL}/api/board/posts/${postId}/comments/${commentId}`, {
+    method: "PATCH",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("댓글을 수정하지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostComment>;
+}
+
+export async function deleteBoardComment(
+  accessToken: string,
+  postId: number,
+  commentId: number
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/board/posts/${postId}/comments/${commentId}`, {
+    method: "DELETE",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("댓글을 삭제하지 못했습니다.");
   }
 }
 

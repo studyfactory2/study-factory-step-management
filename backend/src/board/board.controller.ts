@@ -6,6 +6,7 @@ import { CurrentMember as CurrentMemberType } from "../auth/type/current-member.
 import { UploadFile } from "../upload/type/upload-file.type";
 import { BoardService } from "./board.service";
 import { BoardCommentCreateRequest } from "./dto/board-comment-create.request";
+import { BoardCommentUpdateRequest } from "./dto/board-comment-update.request";
 import { BoardPostCreateRequest } from "./dto/board-post-create.request";
 import { BoardPostListQueryRequest } from "./dto/board-post-list-query.request";
 import { BoardPostUpdateRequest } from "./dto/board-post-update.request";
@@ -68,6 +69,25 @@ export class BoardController {
     @CurrentMember() currentMember: CurrentMemberType
   ) {
     return this.boardService.createComment(id, request, currentMember.memberId);
+  }
+
+  @Patch("posts/:postId/comments/:commentId")
+  async updateComment(
+    @Param("postId", ParseIntPipe) postId: number,
+    @Param("commentId", ParseIntPipe) commentId: number,
+    @Body() request: BoardCommentUpdateRequest,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.boardService.updateComment(postId, commentId, request, currentMember.memberId);
+  }
+
+  @Delete("posts/:postId/comments/:commentId")
+  async deleteComment(
+    @Param("postId", ParseIntPipe) postId: number,
+    @Param("commentId", ParseIntPipe) commentId: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    await this.boardService.deleteComment(postId, commentId, currentMember.memberId);
   }
 
   @UseInterceptors(FilesInterceptor("attachments", 5))

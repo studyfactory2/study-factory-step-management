@@ -12,9 +12,11 @@ import {
 } from "lucide-react";
 import {
   createBoardComment,
+  deleteBoardComment,
   deleteBoardPost,
   getBoardPostDetail,
   toggleBoardPostLike,
+  updateBoardComment,
   updateBoardPost,
   type BoardPostCategory,
   type BoardPostDetail
@@ -34,6 +36,15 @@ const categoryStyles = {
   purple: "bg-[#E9DDFF] text-[#7556D8]"
 } as const;
 
+type DeleteTarget =
+  | {
+      type: "post";
+    }
+  | {
+      commentId: number;
+      type: "comment";
+    };
+
 export default function BoardPostDetailPage() {
   const params = useParams<{ postId: string }>();
   const router = useRouter();
@@ -45,6 +56,9 @@ export default function BoardPostDetailPage() {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editOneLineComment, setEditOneLineComment] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
   const [isPostSubmitting, setIsPostSubmitting] = useState(false);
@@ -185,12 +199,8 @@ export default function BoardPostDetailPage() {
     }
   }
 
-  async function handleDeleteClick() {
+  async function handlePostDeleteConfirm() {
     if (!accessToken || !post || isPostSubmitting) {
-      return;
-    }
-
-    if (!window.confirm("게시글을 삭제하시겠습니까?")) {
       return;
     }
 
@@ -203,6 +213,79 @@ export default function BoardPostDetailPage() {
       setMessage(error instanceof Error ? error.message : "게시글을 삭제하지 못했습니다.");
       setIsPostSubmitting(false);
     }
+  }
+
+  function handleCommentEditClick(commentId: number, content: string) {
+    setEditingCommentId(commentId);
+    setEditCommentContent(content);
+    setMessage("");
+  }
+
+  async function handleCommentUpdateSubmit(commentId: number) {
+    if (!accessToken || !post || isCommentSubmitting) {
+      return;
+    }
+
+    const trimmedContent = editCommentContent.trim();
+
+    if (!trimmedContent) {
+      setMessage("댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      setMessage("");
+      setIsCommentSubmitting(true);
+      const updatedComment = await updateBoardComment(accessToken, post.id, commentId, {
+        content: trimmedContent
+      });
+
+      setPost({
+        ...post,
+        comments: post.comments.map((comment) => (comment.id === commentId ? updatedComment : comment))
+      });
+      setEditingCommentId(null);
+      setEditCommentContent("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "댓글을 수정하지 못했습니다.");
+    } finally {
+      setIsCommentSubmitting(false);
+    }
+  }
+
+  async function handleCommentDeleteConfirm(commentId: number) {
+    if (!accessToken || !post || isCommentSubmitting) {
+      return;
+    }
+
+    try {
+      setMessage("");
+      setIsCommentSubmitting(true);
+      await deleteBoardComment(accessToken, post.id, commentId);
+      setPost({
+        ...post,
+        comments: post.comments.filter((comment) => comment.id !== commentId),
+        commentCount: Math.max(0, post.commentCount - 1)
+      });
+      setDeleteTarget(null);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "댓글을 삭제하지 못했습니다.");
+    } finally {
+      setIsCommentSubmitting(false);
+    }
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    if (deleteTarget.type === "post") {
+      await handlePostDeleteConfirm();
+      return;
+    }
+
+    await handleCommentDeleteConfirm(deleteTarget.commentId);
   }
 
   return (
@@ -288,7 +371,7 @@ export default function BoardPostDetailPage() {
                       <button
                         className="rounded-[10px] border border-[#E7C7C7] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
                         disabled={isPostSubmitting}
-                        onClick={() => void handleDeleteClick()}
+                        onClick={() => setDeleteTarget({ type: "post" })}
                         type="button"
                       >
                         삭제
@@ -419,7 +502,67 @@ export default function BoardPostDetailPage() {
                         <span className="text-[#1171E8]">{comment.author.displayName ?? comment.author.name}</span>
                         <span>{formatBoardDate(comment.createdAt)}</span>
                       </div>
-                      <p className="whitespace-pre-wrap break-keep text-[13px] font-normal leading-5 text-[#333333]">{comment.content}</p>
+                      {editingCommentId === comment.id ? (
+                        <div className="space-y-2">
+                          <input
+                            className="h-9 w-full rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-[13px] font-normal text-[#333333] outline-none placeholder:text-[#9B9592]"
+                            maxLength={500}
+                            onChange={(event) => setEditCommentContent(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+                                event.preventDefault();
+                                void handleCommentUpdateSubmit(comment.id);
+                              }
+                            }}
+                            value={editCommentContent}
+                          />
+                          <div className="flex justify-end gap-1.5">
+                            <button
+                              className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
+                              disabled={isCommentSubmitting}
+                              onClick={() => {
+                                setEditingCommentId(null);
+                                setEditCommentContent("");
+                              }}
+                              type="button"
+                            >
+                              취소
+                            </button>
+                            <button
+                              className="rounded-[10px] border border-[#B8CDD9] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#2D70CB] shadow-sm disabled:opacity-50"
+                              disabled={isCommentSubmitting}
+                              onClick={() => void handleCommentUpdateSubmit(comment.id)}
+                              type="button"
+                            >
+                              저장
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="whitespace-pre-wrap break-keep text-[13px] font-normal leading-5 text-[#333333]">{comment.content}</p>
+                          {comment.author.id === currentMember.id ? (
+                            <div className="mt-2 flex justify-end gap-1.5">
+                              <button
+                                className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
+                                disabled={isCommentSubmitting}
+                                onClick={() => handleCommentEditClick(comment.id, comment.content)}
+                                type="button"
+                              >
+                                수정
+                              </button>
+                              <button
+                                className="rounded-[10px] border border-[#E7C7C7] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
+                                disabled={isCommentSubmitting}
+                                onClick={() => setDeleteTarget({ commentId: comment.id, type: "comment" })}
+                                type="button"
+                              >
+                                삭제
+                              </button>
+                            </div>
+                          ) : null}
+                        </>
+                      )}
                     </article>
                   ))}
                 </div>
@@ -456,6 +599,36 @@ export default function BoardPostDetailPage() {
           </div>
         ) : null}
       </div>
+
+      {deleteTarget ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 px-4">
+          <section className="w-full max-w-[320px] rounded-[16px] border border-[#D8D1CE] bg-white p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.16)]">
+            <h2 className="text-[18px] font-normal text-[#111111]">
+              {deleteTarget.type === "post" ? "게시글을 삭제할까요?" : "댓글을 삭제할까요?"}
+            </h2>
+            <p className="mt-2 text-[13px] font-normal leading-5 text-[#6F6662]">
+              삭제하면 목록에서 더 이상 보이지 않습니다.
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                className="h-10 rounded-[12px] border border-[#D8D1CE] bg-white text-[13px] font-normal text-[#333333] shadow-sm"
+                onClick={() => setDeleteTarget(null)}
+                type="button"
+              >
+                취소
+              </button>
+              <button
+                className="h-10 rounded-[12px] border border-[#E7C7C7] bg-white text-[13px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
+                disabled={isPostSubmitting || isCommentSubmitting}
+                onClick={() => void handleDeleteConfirm()}
+                type="button"
+              >
+                삭제
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }
