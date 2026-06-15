@@ -1,4 +1,5 @@
 import { IsEnum, IsOptional, IsString, MaxLength } from "class-validator";
+import { BoardPostType } from "../enum/board-post-type.enum";
 import { BoardVisibility } from "../enum/board-visibility.enum";
 
 export class BoardPostCreateRequest {
@@ -18,6 +19,10 @@ export class BoardPostCreateRequest {
   @IsEnum(BoardVisibility)
   @IsOptional()
   visibility?: BoardVisibility;
+
+  @IsEnum(BoardPostType)
+  @IsOptional()
+  postType?: BoardPostType;
 
   @IsOptional()
   categoryIds?: string | string[];

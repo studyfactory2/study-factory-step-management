@@ -8,6 +8,7 @@ import {
   FilePenLine,
   Globe2,
   ImagePlus,
+  Megaphone,
   MessageCircle,
   Pencil,
   Tag,
@@ -18,9 +19,10 @@ import {
   createBoardPost,
   getBoardCategories,
   type BoardPostCategory,
+  type BoardPostType,
   type BoardVisibility
 } from "@/api/board";
-import { getStoredAuth, type StoredMember } from "@/lib/auth-storage";
+import { getStoredAuth, isAdminRole, type StoredMember } from "@/lib/auth-storage";
 
 const categoryStyles = {
   pink: "bg-[#FFE4EC] text-[#EC4D7B] border-[#F7B7C9]",
@@ -37,6 +39,7 @@ export default function BoardPostCreatePage() {
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [categories, setCategories] = useState<BoardPostCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [selectedPostType, setSelectedPostType] = useState<BoardPostType>("EMPLOYEE");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [oneLineComment, setOneLineComment] = useState("");
@@ -86,8 +89,27 @@ export default function BoardPostCreatePage() {
 
   const organizationLabel = currentMember.organizationName ?? currentMember.branch ?? "소속 미정";
   const positionLabel = currentMember.positionName ?? (currentMember.name === "김태환" ? "개발자" : "사원");
+  const canCreateNotice = isAdminRole(currentMember.roleType);
+  const isNoticeSelected = selectedPostType === "NOTICE";
+
+  function handleNoticeClick() {
+    if (!canCreateNotice) {
+      return;
+    }
+
+    setSelectedPostType((currentType) => {
+      const nextType = currentType === "NOTICE" ? "EMPLOYEE" : "NOTICE";
+
+      if (nextType === "NOTICE") {
+        setSelectedCategoryIds([]);
+      }
+
+      return nextType;
+    });
+  }
 
   function handleCategoryClick(categoryId: number) {
+    setSelectedPostType("EMPLOYEE");
     setSelectedCategoryIds((currentIds) => {
       if (currentIds.includes(categoryId)) {
         return currentIds.filter((id) => id !== categoryId);
@@ -124,7 +146,7 @@ export default function BoardPostCreatePage() {
       return;
     }
 
-    if (selectedCategoryIds.length === 0) {
+    if (!isNoticeSelected && selectedCategoryIds.length === 0) {
       setMessage("카테고리를 1개 이상 선택해주세요.");
       return;
     }
@@ -136,6 +158,7 @@ export default function BoardPostCreatePage() {
         categoryIds: selectedCategoryIds,
         content: content.trim(),
         oneLineComment: oneLineComment.trim() || undefined,
+        postType: selectedPostType,
         title: title.trim(),
         visibility
       });
@@ -160,8 +183,12 @@ export default function BoardPostCreatePage() {
             ← 뒤로가기
           </button>
           <h1 className="flex items-center justify-center gap-1.5 text-[24px] font-normal leading-tight text-[#111111]">
-            <Pencil aria-hidden className="h-7 w-7 -translate-y-0.5 text-[#E3A12A]" />
-            사원게시물 작성
+            {isNoticeSelected ? (
+              <Megaphone aria-hidden className="h-7 w-8 -translate-y-0.5 scale-y-125 text-[#F04D6E]" />
+            ) : (
+              <Pencil aria-hidden className="h-7 w-7 -translate-y-0.5 text-[#E3A12A]" />
+            )}
+            {isNoticeSelected ? "공지사항 작성" : "사원게시물 작성"}
           </h1>
         </header>
 
@@ -196,32 +223,56 @@ export default function BoardPostCreatePage() {
               <Tag aria-hidden className="h-5 w-5 text-[#E3A12A]" />
               카테고리 선택
             </h2>
-            <span className="text-[12px] font-normal text-[#7B716D]">(최대 2개)</span>
+            <span className="text-[12px] font-normal text-[#7B716D]">{isNoticeSelected ? "(공지사항)" : "(최대 2개)"}</span>
           </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {categories.map((category) => {
-              const isSelected = selectedCategoryIds.includes(category.id);
+          <div className="space-y-1.5">
+            {canCreateNotice ? (
+              <button
+                className={`flex h-9 w-full min-w-0 items-center justify-start gap-1.5 rounded-[10px] border px-2 text-[12px] font-normal leading-3 ${
+                  isNoticeSelected
+                    ? "border-[#F7B7C9] bg-[#FFE4EC] text-[#EC4D7B]"
+                    : "border-[#D8D1CE] bg-white text-[#6F6662]"
+                }`}
+                onClick={handleNoticeClick}
+                type="button"
+              >
+                <span className="flex h-3 w-3 shrink-0 items-center justify-center rounded-[3px] border border-[#9B9592] bg-white text-[8px] text-[#4F4542]">
+                  {isNoticeSelected ? <Check aria-hidden className="h-2.5 w-2.5" /> : null}
+                </span>
+                <span className="inline-flex min-w-0 items-center gap-1 truncate">
+                  <Megaphone aria-hidden className="h-4 w-4 shrink-0 scale-y-125" />
+                  공지사항
+                </span>
+              </button>
+            ) : null}
 
-              return (
-                <button
-                  className={`flex h-9 min-w-0 items-center justify-start gap-1.5 rounded-[10px] border px-2 text-[12px] font-normal leading-3 ${
-                    isSelected ? getCategoryClassName(category) : "border-[#D8D1CE] bg-white text-[#6F6662]"
-                  }`}
-                  key={category.id}
-                  onClick={() => handleCategoryClick(category.id)}
-                  type="button"
-                >
-                  <span className="flex h-3 w-3 shrink-0 items-center justify-center rounded-[3px] border border-[#9B9592] bg-white text-[8px] text-[#4F4542]">
-                    {isSelected ? <Check aria-hidden className="h-2.5 w-2.5" /> : null}
-                  </span>
-                  <span className="max-w-full truncate">
-                    <span aria-hidden>{category.icon}</span>
-                    {" "}
-                    {category.name}
-                  </span>
-                </button>
-              );
-            })}
+            {!isNoticeSelected ? (
+              <div className="grid grid-cols-2 gap-1.5">
+                {categories.map((category) => {
+                  const isSelected = selectedCategoryIds.includes(category.id);
+
+                  return (
+                    <button
+                      className={`flex h-9 min-w-0 items-center justify-start gap-1.5 rounded-[10px] border px-2 text-[12px] font-normal leading-3 ${
+                        isSelected ? getCategoryClassName(category) : "border-[#D8D1CE] bg-white text-[#6F6662]"
+                      }`}
+                      key={category.id}
+                      onClick={() => handleCategoryClick(category.id)}
+                      type="button"
+                    >
+                      <span className="flex h-3 w-3 shrink-0 items-center justify-center rounded-[3px] border border-[#9B9592] bg-white text-[8px] text-[#4F4542]">
+                        {isSelected ? <Check aria-hidden className="h-2.5 w-2.5" /> : null}
+                      </span>
+                      <span className="max-w-full truncate">
+                        <span aria-hidden>{category.icon}</span>
+                        {" "}
+                        {category.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
         </section>
 

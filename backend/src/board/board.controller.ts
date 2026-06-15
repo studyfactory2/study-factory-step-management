@@ -97,6 +97,6 @@ export class BoardController {
     @CurrentMember() currentMember: CurrentMemberType,
     @UploadedFiles() files: UploadFile[] = []
   ) {
-    return this.boardService.createPost(request, currentMember.memberId, files);
+    return this.boardService.createPost(request, currentMember, files);
   }
 }

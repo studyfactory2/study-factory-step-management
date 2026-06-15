@@ -45,23 +45,28 @@ export class BoardService {
 
   async createPost(
     request: BoardPostCreateRequest,
-    creatorId: number,
+    currentMember: CurrentMember,
     files: UploadFile[] = []
   ): Promise<BoardPostCreateResponse> {
+    const postType = request.postType ?? BoardPostType.EMPLOYEE;
+
+    if (postType === BoardPostType.NOTICE && !this.isAdminRole(currentMember.role)) {
+      throw new ForbiddenException("공지사항은 관리자 또는 CEO만 작성할 수 있습니다.");
+    }
+
     const post = new BoardPost();
     post.title = request.title.trim();
     post.content = request.content.trim();
     post.oneLineComment = request.oneLineComment?.trim() || null;
-    post.postType = BoardPostType.EMPLOYEE;
+    post.postType = postType;
     post.visibility = request.visibility ?? BoardVisibility.ALL;
-    post.createdBy = creatorId;
-    post.isPinned = false;
+    post.createdBy = currentMember.memberId;
+    post.isPinned = postType === BoardPostType.NOTICE;
     post.isActive = true;
 
     const savedPost = await this.boardRepository.savePost(post);
-    const categories = await this.boardRepository.findActiveCategoriesByIds(
-      this.parseCategoryIds(request.categoryIds).slice(0, 2)
-    );
+    const categoryIds = postType === BoardPostType.NOTICE ? [] : this.parseCategoryIds(request.categoryIds).slice(0, 2);
+    const categories = await this.boardRepository.findActiveCategoriesByIds(categoryIds);
 
     await this.boardRepository.savePostCategories(
       categories.map((category) => {
