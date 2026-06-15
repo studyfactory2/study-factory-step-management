@@ -209,9 +209,9 @@ export function EmployeeListSection({
   return (
     <section className="space-y-2.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-[17px] font-black text-[#3F2C28]">함께 프로젝트 중</h2>
+        <h2 className="text-[16px] font-normal text-[#222222]">함께 프로젝트 중</h2>
       </div>
-      <div className="rounded-[22px] border border-[#F1CFD5] bg-[#FFFEFC]/95 p-2.5 shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
+      <div className="rounded-[18px] border border-[#D8D1CE] bg-white p-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
         <div className="grid grid-cols-5 gap-1.5">
           {favoriteSlots.map((employee, index) => (
             employee ? (
@@ -332,7 +332,7 @@ function EmployeeCard({
 
   return (
     <article
-      className={`relative min-h-[104px] cursor-grab rounded-[12px] border border-[#F1CFD5] bg-white px-1.5 py-2.5 text-center shadow-[0_3px_0_#F3D1D8] transition active:cursor-grabbing ${
+      className={`relative min-h-[104px] cursor-grab rounded-[12px] border border-[#D8D1CE] bg-white px-1.5 py-2.5 text-center shadow-[0_3px_0_#E7E0DD] transition active:cursor-grabbing ${
         isDragging ? "opacity-[0.06] grayscale brightness-125" : ""
       }`}
       draggable={draggable}
@@ -344,26 +344,26 @@ function EmployeeCard({
     >
       {dropIndicatorSide && !isDragging && (
         <span
-          className={`pointer-events-none absolute bottom-2 top-2 z-10 w-1 rounded-full bg-primary/30 shadow-[0_0_18px_rgba(241,136,164,0.65)] ${
+          className={`pointer-events-none absolute bottom-2 top-2 z-10 w-1 rounded-full bg-[#2D70CB]/30 shadow-[0_0_18px_rgba(45,112,203,0.45)] ${
             dropIndicatorSide === "left" ? "-left-1.5" : "-right-1.5"
           }`}
         />
       )}
       <button
         aria-label={`${employee.name} 삭제`}
-        className="absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full border border-[#F1CFD5] bg-[#FFF8F9] text-[8px] font-black leading-none text-primary"
+        className="absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full border border-[#D8D1CE] bg-[#F7F7F7] text-[8px] font-black leading-none text-[#2D70CB]"
         onClick={onRemove}
         type="button"
       >
         ×
       </button>
-      <span className="block truncate pl-3.5 text-[7px] font-black leading-tight text-[#8F7470]">
+      <span className="block truncate pl-3.5 text-[7px] font-black leading-tight text-[#7B716D]">
         {employee.positionName ?? "직원"}
       </span>
-      <p className="mt-1.5 truncate text-[10px] font-black leading-tight text-[#3F2C28]">{employee.name}</p>
-      <div className="my-1.5 border-t border-[#F1CFD5]" />
+      <p className="mt-1.5 truncate text-[10px] font-black leading-tight text-[#222222]">{employee.name}</p>
+      <div className="my-1.5 border-t border-[#D8D1CE]" />
       <button
-        className={`mx-auto h-5 w-full rounded-full border border-[#F1CFD5] text-[7px] font-black ${getStatusClassName(visibleStatus)}`}
+        className={`mx-auto h-5 w-full rounded-full border border-[#D8D1CE] text-[7px] font-black ${getStatusClassName(visibleStatus)}`}
         onClick={handleStatusClick}
         type="button"
       >
@@ -372,7 +372,7 @@ function EmployeeCard({
       <p className={`mt-1 text-[10px] font-black leading-none ${getStatusTextClassName(visibleStatus)}`}>
         {visibleStatusCount}건
       </p>
-      <button className="mt-1.5 h-5 w-full rounded-full border border-[#F0B9C8] bg-white text-[7px] font-black text-primary">
+      <button className="mt-1.5 h-5 w-full rounded-full border border-[#C7CDD4] bg-white text-[7px] font-black text-[#2D70CB]">
         상세
       </button>
     </article>
@@ -390,16 +390,16 @@ function EmptySlot({
 }) {
   return (
     <button
-      className="flex min-h-[104px] flex-col items-center justify-center rounded-[12px] border border-dashed border-[#F1CFD5] bg-[#FFF8F9] px-1.5 py-2.5 text-center transition hover:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex min-h-[104px] flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#F7F7F7] px-1.5 py-2.5 text-center transition hover:border-[#2D70CB] disabled:cursor-not-allowed disabled:opacity-60"
       disabled={disabled}
       onClick={onSelect}
       type="button"
     >
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-black text-[#F188A4] shadow-sm">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-black text-[#2D70CB] shadow-sm">
         +
       </span>
-      <p className="mt-1.5 text-[8px] font-black text-[#9C7D79]">{slotNumber}번</p>
-      <p className="mt-0.5 text-[7px] font-bold text-[#B79A94]">미선택</p>
+      <p className="mt-1.5 text-[8px] font-black text-[#7B716D]">{slotNumber}번</p>
+      <p className="mt-0.5 text-[7px] font-bold text-[#9A918D]">미선택</p>
     </button>
   );
 }
@@ -456,13 +456,13 @@ function FavoriteMemberAddModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/25 px-4">
-      <div className="w-full max-w-[390px] rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC] p-7 shadow-[0_18px_40px_rgba(63,44,40,0.18)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#222222]/25 px-4">
+      <div className="w-full max-w-[390px] rounded-[28px] border border-[#D8D1CE] bg-[#FFFEFC] p-7 shadow-[0_18px_40px_rgba(63,44,40,0.18)]">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-2xl font-black text-[#3F2C28]">직원 선택</h3>
+          <h3 className="text-2xl font-black text-[#222222]">직원 선택</h3>
           <button
             aria-label="닫기"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#F1CFD5] bg-[#FFF8F9] text-sm font-black text-primary"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#D8D1CE] bg-[#F7F7F7] text-sm font-black text-[#2D70CB]"
             onClick={onClose}
             type="button"
           >
@@ -471,7 +471,7 @@ function FavoriteMemberAddModal({
         </div>
         <div className="mt-6 grid gap-4">
           <select
-            className="h-12 rounded-[14px] border border-[#F1CFD5] bg-[#FFF8F6] px-4 text-sm font-bold text-[#9B7A75] outline-none"
+            className="h-12 rounded-[14px] border border-[#D8D1CE] bg-[#FFF8F6] px-4 text-sm font-bold text-[#9B7A75] outline-none"
             onChange={(event) => handleBranchChange(event.target.value)}
             value={selectedBranch}
           >
@@ -483,7 +483,7 @@ function FavoriteMemberAddModal({
             ))}
           </select>
           <select
-            className="h-12 rounded-[14px] border border-[#F1CFD5] bg-[#FFF8F6] px-4 text-sm font-bold text-[#9B7A75] outline-none"
+            className="h-12 rounded-[14px] border border-[#D8D1CE] bg-[#FFF8F6] px-4 text-sm font-bold text-[#9B7A75] outline-none"
             onChange={(event) => handlePositionChange(event.target.value)}
             value={selectedPosition}
           >
@@ -495,7 +495,7 @@ function FavoriteMemberAddModal({
             ))}
           </select>
           <select
-            className="h-12 rounded-[14px] border border-[#F1CFD5] bg-[#FFF8F6] px-4 text-sm font-bold text-[#9B7A75] outline-none"
+            className="h-12 rounded-[14px] border border-[#D8D1CE] bg-[#FFF8F6] px-4 text-sm font-bold text-[#9B7A75] outline-none"
             onChange={(event) => setSelectedMemberId(event.target.value)}
             value={selectedMemberId}
           >
@@ -508,20 +508,20 @@ function FavoriteMemberAddModal({
           </select>
         </div>
         {candidates.length === 0 && (
-          <p className="mt-5 rounded-[16px] border border-dashed border-[#F1CFD5] bg-[#FFF8F9] px-4 py-5 text-sm font-bold text-[#9C7D79]">
+          <p className="mt-5 rounded-[16px] border border-dashed border-[#D8D1CE] bg-[#F7F7F7] px-4 py-5 text-sm font-bold text-[#7B716D]">
             추가할 직원이 없습니다.
           </p>
         )}
         <div className="mt-7 flex justify-end gap-3">
           <button
-            className="h-11 rounded-full border border-[#F1CFD5] bg-white px-6 text-sm font-black text-[#9C7D79]"
+            className="h-11 rounded-full border border-[#D8D1CE] bg-white px-6 text-sm font-black text-[#7B716D]"
             onClick={onClose}
             type="button"
           >
             취소
           </button>
           <button
-            className="h-11 rounded-full bg-primary px-5 text-sm font-black text-white disabled:opacity-60"
+            className="h-11 rounded-full bg-[#2D70CB] px-5 text-sm font-black text-white disabled:opacity-60"
             disabled={!selectedMemberId || isUpdating}
             onClick={handleSubmit}
             type="button"
@@ -548,7 +548,7 @@ function getShortStatusLabel(status: VisibleTaskStatus) {
 
 function getStatusClassName(status: VisibleTaskStatus) {
   if (status === "REGISTERED") {
-    return "bg-[#FBE6EA] text-primary";
+    return "bg-[#FBE6EA] text-[#2D70CB]";
   }
 
   if (status === "IN_PROGRESS") {
@@ -560,7 +560,7 @@ function getStatusClassName(status: VisibleTaskStatus) {
 
 function getStatusTextClassName(status: VisibleTaskStatus) {
   if (status === "REGISTERED") {
-    return "text-primary";
+    return "text-[#2D70CB]";
   }
 
   if (status === "IN_PROGRESS") {
