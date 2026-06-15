@@ -7,11 +7,11 @@ export class Organization extends BaseEntity {
   @Column({ unique: true })
   name: string;
 
-  @Column({ type: "varchar", unique: true })
-  code: string;
-
   @Column({ name: "display_order", default: 0 })
   displayOrder: number;
+
+  @Column({ name: "color_index", type: "int", nullable: true })
+  colorIndex: number | null;
 
   @Column({ name: "is_active", default: true })
   isActive: boolean;

@@ -103,8 +103,8 @@ CREATE TABLE organizations (
   "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
   "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
   name VARCHAR NOT NULL UNIQUE,
-  code VARCHAR NOT NULL UNIQUE,
   display_order INTEGER NOT NULL DEFAULT 0,
+  color_index INTEGER,
   is_active BOOLEAN NOT NULL DEFAULT true
 );
 
@@ -131,6 +131,10 @@ CREATE TABLE member (
   display_name VARCHAR,
   password_hash VARCHAR NOT NULL,
   avatar_url VARCHAR,
+  age INTEGER,
+  joined_at DATE,
+  phone_number VARCHAR,
+  duty_text VARCHAR,
   organization_id INTEGER,
   branch_id INTEGER,
   position_id INTEGER,
@@ -175,10 +179,28 @@ CREATE TABLE member_pre_registration (
   position member_pre_registration_position_enum,
   role_type member_pre_registration_role_type_enum NOT NULL,
   duty member_pre_registration_duty_enum,
+  age INTEGER,
+  joined_at DATE,
+  phone_number VARCHAR,
+  duty_text VARCHAR,
   branch VARCHAR,
+  position_id INTEGER,
+  position_duty_id INTEGER,
   organization_id INTEGER,
   branch_id INTEGER,
-  is_registered BOOLEAN NOT NULL DEFAULT false
+  is_registered BOOLEAN NOT NULL DEFAULT false,
+  CONSTRAINT fk_member_pre_registration_position_id
+    FOREIGN KEY (position_id)
+    REFERENCES member_positions (id),
+  CONSTRAINT fk_member_pre_registration_position_duty_id
+    FOREIGN KEY (position_duty_id)
+    REFERENCES position_duties (id),
+  CONSTRAINT fk_member_pre_registration_organization_id
+    FOREIGN KEY (organization_id)
+    REFERENCES organizations (id),
+  CONSTRAINT fk_member_pre_registration_branch_id
+    FOREIGN KEY (branch_id)
+    REFERENCES branches (id)
 );
 
 CREATE INDEX idx_member_pre_registration_organization_id

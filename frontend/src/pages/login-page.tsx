@@ -2,6 +2,10 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 import { login, type LoginResponse } from "@/api/auth";
+import {
+  getActiveOrganizationChart,
+  organizationChartNodesToPositionTree
+} from "@/api/organization-chart";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import {
   getTaskStatusSummaryByBranch,
@@ -53,7 +57,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   useEffect(() => {
     setIsPositionTreeLoading(true);
-    getPositionTree()
+    getActiveOrganizationChart()
+      .then((chart) => organizationChartNodesToPositionTree(chart.nodes))
+      .catch(() => getPositionTree())
       .then((positionTree) => {
         setPositions(positionTree);
         setSelectedPositionId(positionTree[0]?.id ?? null);

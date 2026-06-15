@@ -86,6 +86,27 @@ export class MemberRepository {
     return Array.from(new Set(branches.map((branch) => branch.name)));
   }
 
+  async findOrganizations(): Promise<Organization[]> {
+    return this.organizationRepository.find({
+      where: {
+        isActive: true
+      },
+      order: {
+        displayOrder: "ASC",
+        name: "ASC"
+      }
+    });
+  }
+
+  async findAllOrganizations(): Promise<Organization[]> {
+    return this.organizationRepository.find({
+      order: {
+        displayOrder: "ASC",
+        id: "ASC"
+      }
+    });
+  }
+
   async findPreRegistrationById(id: number): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
       relations: {
@@ -262,6 +283,10 @@ export class MemberRepository {
 
   async save(member: Member): Promise<Member> {
     return this.memberRepository.save(member);
+  }
+
+  async saveOrganizations(organizations: Organization[]): Promise<Organization[]> {
+    return this.organizationRepository.save(organizations);
   }
 
   async findPendingPreRegistrationByNameAndBranch(

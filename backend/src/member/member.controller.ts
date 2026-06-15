@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
 import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";
+import { OrganizationUpdateRequest } from "./dto/organization-update.request";
 import { MemberService } from "./member.service";
 
 @Controller("members")
@@ -19,6 +20,17 @@ export class MemberController {
     return this.memberService.findBranches();
   }
 
+  @Get("organizations")
+  async findOrganizations() {
+    return this.memberService.findOrganizations();
+  }
+
+  @Patch("organizations")
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
+  async updateOrganizations(@Body() request: OrganizationUpdateRequest) {
+    return this.memberService.updateOrganizations(request);
+  }
+
   @Post("pre-registrations")
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
   async preRegister(@Body() request: MemberPreRegisterRequest) {
@@ -29,6 +41,15 @@ export class MemberController {
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
   async findPreRegistrations() {
     return this.memberService.findPreRegistrations();
+  }
+
+  @Patch("pre-registrations/:id")
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
+  async updatePreRegistration(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() request: MemberPreRegisterRequest
+  ) {
+    return this.memberService.updatePreRegistration(id, request);
   }
 
   @Delete("pre-registrations/:id")

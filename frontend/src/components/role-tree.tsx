@@ -72,6 +72,7 @@ function PositionNode({
   selectedPositionId: number | null;
 }) {
   const children = position.children ?? [];
+  const hasDepartmentLabels = children.some((child) => child.organizationName);
 
   return (
     <div className="relative flex flex-col items-center">
@@ -96,7 +97,8 @@ function PositionNode({
           />
           <div
             className={cn(
-              "grid justify-items-center gap-1 pt-2.5",
+              "grid justify-items-center gap-1",
+              hasDepartmentLabels ? "pt-5" : "pt-2.5",
               children.length === 1 && "grid-cols-1",
               children.length === 2 && "grid-cols-2",
               children.length === 3 && "grid-cols-3",
@@ -105,7 +107,17 @@ function PositionNode({
           >
             {children.map((child, childIndex) => (
               <div className="relative" key={child.id}>
-                <span className="absolute left-1/2 top-[-0.65rem] h-[0.7rem] w-0.5 -translate-x-1/2 rounded-full bg-[#E5C5CB]" />
+                <span
+                  className={cn(
+                    "absolute left-1/2 w-0.5 -translate-x-1/2 rounded-full bg-[#E5C5CB]",
+                    hasDepartmentLabels ? "top-[-1.25rem] h-[1.3rem]" : "top-[-0.65rem] h-[0.7rem]"
+                  )}
+                />
+                {child.organizationName ? (
+                  <span className="absolute left-1/2 top-[-1.55rem] z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#C8D9E7] bg-[#F3FAFF] px-1.5 py-0.5 text-[7px] font-bold leading-none text-[#416A83] shadow-sm">
+                    {child.organizationName}
+                  </span>
+                ) : null}
                 <PositionNode
                   index={childIndex + index + 1}
                   onSelectPosition={onSelectPosition}

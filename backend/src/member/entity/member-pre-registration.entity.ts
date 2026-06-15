@@ -15,6 +15,18 @@ export class MemberPreRegistration extends BaseEntity {
   @Column()
   name: string;
 
+  @Column({ type: "int", nullable: true })
+  age: number | null;
+
+  @Column({ name: "joined_at", type: "date", nullable: true })
+  joinedAt: string | null;
+
+  @Column({ name: "phone_number", type: "varchar", nullable: true })
+  phoneNumber: string | null;
+
+  @Column({ name: "duty_text", type: "varchar", nullable: true })
+  dutyText: string | null;
+
   @Column({
     type: "enum",
     enumName: "member_pre_registration_affiliation_enum",

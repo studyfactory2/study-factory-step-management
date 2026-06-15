@@ -29,6 +29,10 @@ export class MemberRegisterRequest {
     member.positionDutyId = positionDutyId;
     member.passwordHash = passwordHash;
     member.avatarUrl = null;
+    member.age = null;
+    member.joinedAt = null;
+    member.phoneNumber = null;
+    member.dutyText = null;
     member.organizationId = organizationId;
     member.branchId = branchId;
     member.isActive = true;

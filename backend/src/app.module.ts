@@ -14,6 +14,9 @@ import { MemberPreRegistration } from "./member/entity/member-pre-registration.e
 import { OrganizationBranch } from "./member/entity/organization-branch.entity";
 import { Organization } from "./member/entity/organization.entity";
 import { MemberModule } from "./member/member.module";
+import { OrganizationChartNode } from "./organization-chart/entity/organization-chart-node.entity";
+import { OrganizationChart } from "./organization-chart/entity/organization-chart.entity";
+import { OrganizationChartModule } from "./organization-chart/organization-chart.module";
 import { PositionDuty } from "./position/entity/position-duty.entity";
 import { Position } from "./position/entity/position.entity";
 import { PositionModule } from "./position/position.module";
@@ -42,6 +45,8 @@ import { TaskModule } from "./task/task.module";
           MemberPreRegistration,
           Organization,
           OrganizationBranch,
+          OrganizationChart,
+          OrganizationChartNode,
           RefreshToken,
           Position,
           PositionDuty,
@@ -58,6 +63,7 @@ import { TaskModule } from "./task/task.module";
     AuthModule,
     FavoriteMemberModule,
     MemberModule,
+    OrganizationChartModule,
     PositionModule,
     TaskCommentModule,
     TaskModule
