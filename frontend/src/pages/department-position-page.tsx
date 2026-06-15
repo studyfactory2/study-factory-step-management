@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type DragEvent, useEffect, useMemo, useState } from "react";
 import {
   type LucideIcon,
   Building2,
@@ -36,6 +36,13 @@ type DepartmentPositionPageProps = {
 
 type FlatPosition = PositionTreeNode & {
   depth: number;
+};
+
+type DropPlacement = "before" | "inside" | "after";
+
+type PositionDropPreview = {
+  placement: DropPlacement;
+  targetId: number;
 };
 
 type DepartmentOption = OrganizationOption & {
@@ -82,7 +89,7 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
   } | null>(null);
   const [message, setMessage] = useState("");
   const [draggedPositionId, setDraggedPositionId] = useState<number | null>(null);
-  const [dragOverPositionId, setDragOverPositionId] = useState<number | null>(null);
+  const [positionDropPreview, setPositionDropPreview] = useState<PositionDropPreview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingDepartments, setIsSavingDepartments] = useState(false);
   const [isSavingPositions, setIsSavingPositions] = useState(false);
@@ -291,30 +298,23 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
     }
   }
 
-  function handlePositionDrop(targetPositionId: number) {
+  function handlePositionDrop(targetPositionId: number, placement: DropPlacement) {
     if (!draggedPositionId || draggedPositionId === targetPositionId) {
       setDraggedPositionId(null);
-      setDragOverPositionId(null);
+      setPositionDropPreview(null);
       return;
     }
 
     if (isPositionDescendant(targetPositionId, draggedPositionId, positions)) {
       setMessage("자기 하위 직급 아래로는 이동할 수 없습니다.");
       setDraggedPositionId(null);
-      setDragOverPositionId(null);
+      setPositionDropPreview(null);
       return;
     }
 
-    setPositions((current) => current.map((position) => (
-      position.id === draggedPositionId
-        ? {
-          ...position,
-          parentId: targetPositionId
-        }
-        : position
-    )));
+    setPositions((current) => movePositionDraft(current, draggedPositionId, targetPositionId, placement));
     setDraggedPositionId(null);
-    setDragOverPositionId(null);
+    setPositionDropPreview(null);
     setMessage("직급 상하관계가 변경되었습니다. 저장하기를 눌러 반영해주세요.");
   }
 
@@ -464,18 +464,21 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
             ) : null}
             {!isLoading && visiblePositions.map((position, index) => (
               <PositionRow
-                dragOverPositionId={dragOverPositionId}
                 draggedPositionId={draggedPositionId}
+                dropPreview={positionDropPreview}
                 index={index}
                 key={position.id}
                 onCancelEdit={() => setPositionEditDraft(null)}
                 onDragEnd={() => {
                   setDraggedPositionId(null);
-                  setDragOverPositionId(null);
+                  setPositionDropPreview(null);
                 }}
-                onDragEnter={() => setDragOverPositionId(position.id)}
+                onDragOver={(placement) => setPositionDropPreview({
+                  placement,
+                  targetId: position.id
+                })}
                 onDragStart={() => setDraggedPositionId(position.id)}
-                onDrop={() => handlePositionDrop(position.id)}
+                onDrop={(placement) => handlePositionDrop(position.id, placement)}
                 onDelete={() => handleDeletePosition(position.id)}
                 disabled={isSavingPositions}
                 onEdit={() => handleStartPositionEdit(position)}
@@ -597,11 +600,11 @@ function EditActions({
 function PositionRow({
   disabled,
   draggedPositionId,
-  dragOverPositionId,
+  dropPreview,
   index,
   onCancelEdit,
   onDragEnd,
-  onDragEnter,
+  onDragOver,
   onDragStart,
   onDrop,
   onDelete,
@@ -613,13 +616,13 @@ function PositionRow({
 }: {
   disabled: boolean;
   draggedPositionId: number | null;
-  dragOverPositionId: number | null;
+  dropPreview: PositionDropPreview | null;
   index: number;
   onCancelEdit: () => void;
   onDragEnd: () => void;
-  onDragEnter: () => void;
+  onDragOver: (placement: DropPlacement) => void;
   onDragStart: () => void;
-  onDrop: () => void;
+  onDrop: (placement: DropPlacement) => void;
   onDelete: () => void;
   onEdit: () => void;
   onEditDraftChange: (name: string) => void;
@@ -632,31 +635,33 @@ function PositionRow({
   const meta = getPositionMeta(positionName, index);
   const PositionIcon = meta.icon;
   const isDragged = draggedPositionId === position.id;
-  const isDragTarget = dragOverPositionId === position.id && draggedPositionId !== position.id;
+  const isDragTarget = dropPreview?.targetId === position.id && draggedPositionId !== position.id;
+  const dropPlacement = isDragTarget ? dropPreview.placement : null;
 
   return (
     <div
-      className={`grid grid-cols-[22px_minmax(0,1fr)] items-center gap-1 ${isDragged ? "opacity-50" : ""}`}
+      className={`relative grid grid-cols-[22px_minmax(0,1fr)] items-center gap-1 ${
+        isDragged ? "opacity-50" : ""
+      }`}
       draggable={!disabled && !isEditing}
       onDragEnd={onDragEnd}
-      onDragEnter={(event) => {
+      onDragOver={(event) => {
         event.preventDefault();
-        onDragEnter();
+        onDragOver(resolveDropPlacement(event));
       }}
-      onDragOver={(event) => event.preventDefault()}
       onDragStart={(event) => {
         event.dataTransfer.effectAllowed = "move";
         onDragStart();
       }}
       onDrop={(event) => {
         event.preventDefault();
-        onDrop();
+        onDrop(resolveDropPlacement(event));
       }}
     >
       <GripVertical aria-hidden className="h-5 w-5 cursor-grab text-[#6F6662]" />
       <div
         className={`grid h-[40px] grid-cols-[34px_minmax(0,1fr)_54px_76px] items-center rounded-[12px] border px-2 ${
-          isDragTarget ? "ring-2 ring-[#2D70CB]/30" : ""
+          dropPlacement === "inside" ? "ring-2 ring-[#2D70CB]/40" : ""
         } ${meta.className}`}
         style={{ marginLeft: `${Math.min(position.depth, 2) * 14}px` }}
       >
@@ -687,6 +692,35 @@ function PositionRow({
           />
         )}
       </div>
+      {dropPlacement === "before" ? <DropLine label="위에 넣기" /> : null}
+      {dropPlacement === "after" ? <DropLine label="아래에 넣기" position="bottom" /> : null}
+      {dropPlacement === "inside" ? (
+        <span className="pointer-events-none absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[#9FCBFF] bg-white px-2 py-0.5 text-[10px] font-normal text-[#2D70CB] shadow-sm">
+          하위로 넣기
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function DropLine({
+  label,
+  position = "top"
+}: {
+  label: string;
+  position?: "top" | "bottom";
+}) {
+  return (
+    <div
+      className={`pointer-events-none absolute left-7 right-1 z-20 flex items-center gap-1 ${
+        position === "top" ? "-top-1" : "-bottom-1"
+      }`}
+    >
+      <span className="h-2 w-2 rounded-full bg-[#2D70CB]" />
+      <span className="h-[2px] flex-1 rounded-full bg-[#2D70CB]" />
+      <span className="rounded-full border border-[#9FCBFF] bg-white px-2 py-0.5 text-[10px] font-normal text-[#2D70CB] shadow-sm">
+        {label}
+      </span>
     </div>
   );
 }
@@ -804,6 +838,101 @@ function resolveDepartmentColorIndex(name: string, index: number) {
 
 function isTemporaryDepartmentId(id: number) {
   return id > 1_000_000_000_000;
+}
+
+function resolveDropPlacement(event: DragEvent<HTMLElement>): DropPlacement {
+  const bounds = event.currentTarget.getBoundingClientRect();
+  const offsetY = event.clientY - bounds.top;
+  const third = bounds.height / 3;
+
+  if (offsetY < third) {
+    return "before";
+  }
+
+  if (offsetY > third * 2) {
+    return "after";
+  }
+
+  return "inside";
+}
+
+function movePositionDraft(
+  positions: FlatPosition[],
+  draggedPositionId: number,
+  targetPositionId: number,
+  placement: DropPlacement
+) {
+  const targetPosition = positions.find((position) => position.id === targetPositionId);
+  if (!targetPosition || isPositionDescendant(targetPositionId, draggedPositionId, positions)) {
+    return positions;
+  }
+
+  const nextParentId = placement === "inside" ? targetPositionId : targetPosition.parentId ?? null;
+  const movedPositions = positions.map((position) => (
+    position.id === draggedPositionId
+      ? {
+        ...position,
+        parentId: nextParentId
+      }
+      : position
+  ));
+  const draggedSubtreeIds = getPositionSubtreeIds(draggedPositionId, movedPositions);
+  const visibleOrder = buildVisiblePositionTree(movedPositions);
+  const movingRows = visibleOrder.filter((position) => draggedSubtreeIds.has(position.id));
+  const remainingRows = visibleOrder.filter((position) => !draggedSubtreeIds.has(position.id));
+  const targetIndex = remainingRows.findIndex((position) => position.id === targetPositionId);
+
+  if (targetIndex < 0 || movingRows.length === 0) {
+    return movedPositions;
+  }
+
+  const targetSubtreeIds = getPositionSubtreeIds(targetPositionId, movedPositions);
+  const insertionIndex = placement === "before"
+    ? targetIndex
+    : placement === "inside"
+      ? targetIndex + 1
+      : findLastSubtreeIndex(remainingRows, targetSubtreeIds) + 1;
+  const nextOrder = [
+    ...remainingRows.slice(0, insertionIndex),
+    ...movingRows,
+    ...remainingRows.slice(insertionIndex)
+  ];
+  const displayOrderById = new Map(nextOrder.map((position, index) => [position.id, index]));
+
+  return movedPositions.map((position) => ({
+    ...position,
+    displayOrder: displayOrderById.get(position.id) ?? position.displayOrder
+  }));
+}
+
+function getPositionSubtreeIds(positionId: number, positions: FlatPosition[]) {
+  const subtreeIds = new Set<number>([positionId]);
+  let hasAddedChild = true;
+
+  while (hasAddedChild) {
+    hasAddedChild = false;
+
+    for (const position of positions) {
+      if (position.parentId && subtreeIds.has(position.parentId) && !subtreeIds.has(position.id)) {
+        subtreeIds.add(position.id);
+        hasAddedChild = true;
+      }
+    }
+  }
+
+  return subtreeIds;
+}
+
+function findLastSubtreeIndex(positions: FlatPosition[], subtreeIds: Set<number>) {
+  let lastIndex = -1;
+
+  positions.forEach((position, index) => {
+    if (subtreeIds.has(position.id)) {
+      lastIndex = index;
+    }
+  });
+
+  return lastIndex;
 }
 
 function buildVisiblePositionTree(positions: FlatPosition[]): FlatPosition[] {
