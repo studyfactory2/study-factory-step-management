@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import {
   createBoardComment,
+  deleteBoardPost,
   getBoardPostDetail,
   toggleBoardPostLike,
+  updateBoardPost,
   type BoardPostCategory,
   type BoardPostDetail
 } from "@/api/board";
@@ -40,7 +42,12 @@ export default function BoardPostDetailPage() {
   const [accessToken, setAccessToken] = useState("");
   const [post, setPost] = useState<BoardPostDetail | null>(null);
   const [commentContent, setCommentContent] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editOneLineComment, setEditOneLineComment] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
   const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
+  const [isPostSubmitting, setIsPostSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -81,6 +88,7 @@ export default function BoardPostDetailPage() {
 
   const backPath = "/board";
   const dashboardPath = isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard";
+  const isOwnPost = post?.author.id === currentMember.id;
 
   async function handleLikeClick() {
     if (!accessToken || !post) {
@@ -128,6 +136,72 @@ export default function BoardPostDetailPage() {
       setMessage(error instanceof Error ? error.message : "댓글을 등록하지 못했습니다.");
     } finally {
       setIsCommentSubmitting(false);
+    }
+  }
+
+  function handleEditClick() {
+    if (!post) {
+      return;
+    }
+
+    setEditTitle(post.title);
+    setEditContent(post.content);
+    setEditOneLineComment(post.oneLineComment ?? "");
+    setIsEditing(true);
+    setMessage("");
+  }
+
+  async function handlePostUpdateSubmit() {
+    if (!accessToken || !post || isPostSubmitting) {
+      return;
+    }
+
+    if (!editTitle.trim()) {
+      setMessage("제목을 입력해주세요.");
+      return;
+    }
+
+    if (!editContent.trim()) {
+      setMessage("본문 내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      setMessage("");
+      setIsPostSubmitting(true);
+      const updatedPost = await updateBoardPost(accessToken, post.id, {
+        content: editContent.trim(),
+        oneLineComment: editOneLineComment.trim() || undefined,
+        title: editTitle.trim(),
+        visibility: post.visibility
+      });
+
+      setPost(updatedPost);
+      setIsEditing(false);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "게시글을 수정하지 못했습니다.");
+    } finally {
+      setIsPostSubmitting(false);
+    }
+  }
+
+  async function handleDeleteClick() {
+    if (!accessToken || !post || isPostSubmitting) {
+      return;
+    }
+
+    if (!window.confirm("게시글을 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      setMessage("");
+      setIsPostSubmitting(true);
+      await deleteBoardPost(accessToken, post.id);
+      router.push(backPath);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "게시글을 삭제하지 못했습니다.");
+      setIsPostSubmitting(false);
     }
   }
 
@@ -180,7 +254,60 @@ export default function BoardPostDetailPage() {
                 <span className="text-[11px] font-normal text-[#7B716D]">{formatBoardDate(post.createdAt)}</span>
               </div>
 
-              <h2 className="break-keep text-[21px] font-normal leading-7 text-[#111111]">{post.title}</h2>
+              {isOwnPost ? (
+                <div className="mb-2 flex justify-end gap-1.5">
+                  {isEditing ? (
+                    <>
+                      <button
+                        className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
+                        disabled={isPostSubmitting}
+                        onClick={() => setIsEditing(false)}
+                        type="button"
+                      >
+                        취소
+                      </button>
+                      <button
+                        className="rounded-[10px] border border-[#B8CDD9] bg-[#EAF7FF] px-2.5 py-0.5 text-[12px] font-normal text-[#2D70CB] disabled:opacity-50"
+                        disabled={isPostSubmitting}
+                        onClick={() => void handlePostUpdateSubmit()}
+                        type="button"
+                      >
+                        저장
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
+                        disabled={isPostSubmitting}
+                        onClick={handleEditClick}
+                        type="button"
+                      >
+                        수정
+                      </button>
+                      <button
+                        className="rounded-[10px] border border-[#E7C7C7] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
+                        disabled={isPostSubmitting}
+                        onClick={() => void handleDeleteClick()}
+                        type="button"
+                      >
+                        삭제
+                      </button>
+                    </>
+                  )}
+                </div>
+              ) : null}
+
+              {isEditing ? (
+                <input
+                  className="h-10 w-full rounded-[12px] border border-[#D8D1CE] bg-white px-3 text-[16px] font-normal text-[#111111] outline-none placeholder:text-[#9B9592]"
+                  maxLength={40}
+                  onChange={(event) => setEditTitle(event.target.value)}
+                  value={editTitle}
+                />
+              ) : (
+                <h2 className="break-keep text-[21px] font-normal leading-7 text-[#111111]">{post.title}</h2>
+              )}
 
               <div className="mt-2 flex items-center gap-2 text-[12px] font-normal text-[#7B716D]">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#DFF0FF] text-[17px] text-[#1171E8]">
@@ -209,13 +336,36 @@ export default function BoardPostDetailPage() {
             </section>
 
             <section className="rounded-[14px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-              <p className="whitespace-pre-wrap break-keep text-[14px] font-normal leading-6 text-[#333333]">
-                {post.content}
-              </p>
-              <div className="mt-3 rounded-[12px] bg-[#F7F7F7] px-3 py-2 text-[12px] font-normal text-[#6F6662]">
-                <MessageCircle aria-hidden className="mr-1 inline h-3.5 w-3.5 text-[#4F4542]" />
-                {post.oneLineComment ?? "한줄 코멘트가 없습니다."}
-              </div>
+              {isEditing ? (
+                <>
+                  <textarea
+                    className="min-h-[150px] w-full resize-none rounded-[12px] border border-[#D8D1CE] bg-white px-3 py-2 text-[14px] font-normal leading-6 text-[#333333] outline-none placeholder:text-[#9B9592]"
+                    maxLength={500}
+                    onChange={(event) => setEditContent(event.target.value)}
+                    value={editContent}
+                  />
+                  <div className="mt-3 flex items-center rounded-[12px] border border-[#D8D1CE] bg-white px-3 py-2">
+                    <MessageCircle aria-hidden className="mr-1 h-3.5 w-3.5 shrink-0 text-[#4F4542]" />
+                    <input
+                      className="min-w-0 flex-1 bg-transparent text-[12px] font-normal text-[#6F6662] outline-none placeholder:text-[#9B9592]"
+                      maxLength={80}
+                      onChange={(event) => setEditOneLineComment(event.target.value)}
+                      placeholder="간단한 한줄 코멘트를 작성해주세요."
+                      value={editOneLineComment}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="whitespace-pre-wrap break-keep text-[14px] font-normal leading-6 text-[#333333]">
+                    {post.content}
+                  </p>
+                  <div className="mt-3 rounded-[12px] bg-[#F7F7F7] px-3 py-2 text-[12px] font-normal text-[#6F6662]">
+                    <MessageCircle aria-hidden className="mr-1 inline h-3.5 w-3.5 text-[#4F4542]" />
+                    {post.oneLineComment ?? "한줄 코멘트가 없습니다."}
+                  </div>
+                </>
+              )}
             </section>
 
             {post.attachments.length ? (
@@ -294,7 +444,7 @@ export default function BoardPostDetailPage() {
                   value={commentContent}
                 />
                 <button
-                  className="h-10 shrink-0 rounded-[12px] border border-[#B8CDD9] bg-[#EAF7FF] px-3 text-[13px] font-normal text-[#2D70CB] disabled:opacity-50"
+                  className="h-10 shrink-0 rounded-[12px] border border-[#D8D1CE] bg-white px-3 text-[13px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
                   disabled={isCommentSubmitting}
                   onClick={() => void handleCommentSubmit()}
                   type="button"

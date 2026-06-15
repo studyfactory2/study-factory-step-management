@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { CurrentMember } from "../auth/decorator/current-member.decorator";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
@@ -8,6 +8,7 @@ import { BoardService } from "./board.service";
 import { BoardCommentCreateRequest } from "./dto/board-comment-create.request";
 import { BoardPostCreateRequest } from "./dto/board-post-create.request";
 import { BoardPostListQueryRequest } from "./dto/board-post-list-query.request";
+import { BoardPostUpdateRequest } from "./dto/board-post-update.request";
 
 @UseGuards(JWTAuthGuard)
 @Controller("board")
@@ -41,6 +42,23 @@ export class BoardController {
     @CurrentMember() currentMember: CurrentMemberType
   ) {
     return this.boardService.toggleLike(id, currentMember.memberId);
+  }
+
+  @Patch("posts/:id")
+  async updatePost(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() request: BoardPostUpdateRequest,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.boardService.updatePost(id, request, currentMember.memberId);
+  }
+
+  @Delete("posts/:id")
+  async deletePost(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    await this.boardService.deletePost(id, currentMember.memberId);
   }
 
   @Post("posts/:id/comments")

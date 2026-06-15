@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { UploadFile } from "../upload/type/upload-file.type";
 import { UploadService } from "../upload/upload.service";
 import { BoardRepository } from "./board.repository";
 import { BoardCommentCreateRequest } from "./dto/board-comment-create.request";
 import { BoardPostCreateRequest } from "./dto/board-post-create.request";
+import { BoardPostUpdateRequest } from "./dto/board-post-update.request";
 import {
   BoardPostCommentResponse,
   BoardPostCategoryResponse,
@@ -112,6 +113,58 @@ export class BoardService {
     return this.toCommentResponse(loadedComment);
   }
 
+  async updatePost(
+    postId: number,
+    request: BoardPostUpdateRequest,
+    memberId: number
+  ): Promise<BoardPostDetailResponse> {
+    const post = await this.boardRepository.findActivePostById(postId);
+
+    if (!post) {
+      throw new NotFoundException("게시글을 찾을 수 없습니다.");
+    }
+
+    this.validatePostOwner(post, memberId);
+
+    if (request.title !== undefined) {
+      post.title = request.title.trim();
+    }
+
+    if (request.content !== undefined) {
+      post.content = request.content.trim();
+    }
+
+    if (request.oneLineComment !== undefined) {
+      post.oneLineComment = request.oneLineComment.trim() || null;
+    }
+
+    if (request.visibility !== undefined) {
+      post.visibility = request.visibility;
+    }
+
+    await this.boardRepository.savePost(post);
+
+    const updatedPost = await this.boardRepository.findActivePostById(postId);
+
+    if (!updatedPost) {
+      throw new NotFoundException("게시글을 찾을 수 없습니다.");
+    }
+
+    return this.toPostDetailResponse(updatedPost, memberId);
+  }
+
+  async deletePost(postId: number, memberId: number): Promise<void> {
+    const post = await this.boardRepository.findActivePostById(postId);
+
+    if (!post) {
+      throw new NotFoundException("게시글을 찾을 수 없습니다.");
+    }
+
+    this.validatePostOwner(post, memberId);
+    post.isActive = false;
+    await this.boardRepository.savePost(post);
+  }
+
   async findPosts(viewerId: number, type?: BoardPostType): Promise<BoardPostListResponse[]> {
     const posts = await this.boardRepository.findActivePosts(viewerId, type);
 
@@ -152,6 +205,35 @@ export class BoardService {
 
     const post = await this.boardRepository.findActivePostById(id) ?? activePost;
 
+    return this.toPostDetailResponse(post, viewerId);
+  }
+
+  async toggleLike(id: number, viewerId: number): Promise<BoardPostLikeToggleResponse> {
+    const post = await this.boardRepository.findActivePostById(id);
+
+    if (!post) {
+      throw new NotFoundException("게시글을 찾을 수 없습니다.");
+    }
+
+    const like = await this.boardRepository.findLike(id, viewerId);
+
+    if (like) {
+      await this.boardRepository.deleteLike(like);
+      return {
+        likedByMe: false,
+        likeCount: await this.boardRepository.countLikes(id)
+      };
+    }
+
+    await this.boardRepository.createLike(id, viewerId);
+
+    return {
+      likedByMe: true,
+      likeCount: await this.boardRepository.countLikes(id)
+    };
+  }
+
+  private toPostDetailResponse(post: BoardPost, viewerId: number): BoardPostDetailResponse {
     return {
       id: post.id,
       title: post.title,
@@ -191,29 +273,10 @@ export class BoardService {
     };
   }
 
-  async toggleLike(id: number, viewerId: number): Promise<BoardPostLikeToggleResponse> {
-    const post = await this.boardRepository.findActivePostById(id);
-
-    if (!post) {
-      throw new NotFoundException("게시글을 찾을 수 없습니다.");
+  private validatePostOwner(post: BoardPost, memberId: number): void {
+    if (post.createdBy !== memberId) {
+      throw new ForbiddenException("작성자만 수정하거나 삭제할 수 있습니다.");
     }
-
-    const like = await this.boardRepository.findLike(id, viewerId);
-
-    if (like) {
-      await this.boardRepository.deleteLike(like);
-      return {
-        likedByMe: false,
-        likeCount: await this.boardRepository.countLikes(id)
-      };
-    }
-
-    await this.boardRepository.createLike(id, viewerId);
-
-    return {
-      likedByMe: true,
-      likeCount: await this.boardRepository.countLikes(id)
-    };
   }
 
   private toCommentResponse(comment: BoardComment): BoardPostCommentResponse {

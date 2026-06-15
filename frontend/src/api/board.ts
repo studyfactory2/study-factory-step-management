@@ -76,6 +76,13 @@ export type BoardPostCreateResponse = {
   postId: number;
 };
 
+export type BoardPostUpdateRequest = {
+  content: string;
+  oneLineComment?: string;
+  title: string;
+  visibility: BoardVisibility;
+};
+
 export type BoardCommentCreateRequest = {
   content: string;
 };
@@ -156,6 +163,46 @@ export async function toggleBoardPostLike(
   }
 
   return response.json() as Promise<BoardPostLikeToggleResponse>;
+}
+
+export async function updateBoardPost(
+  accessToken: string,
+  postId: number,
+  request: BoardPostUpdateRequest
+): Promise<BoardPostDetail> {
+  const response = await fetch(`${API_BASE_URL}/api/board/posts/${postId}`, {
+    method: "PATCH",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("게시글을 수정하지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostDetail>;
+}
+
+export async function deleteBoardPost(accessToken: string, postId: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/board/posts/${postId}`, {
+    method: "DELETE",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("게시글을 삭제하지 못했습니다.");
+  }
 }
 
 export async function createBoardPost(
