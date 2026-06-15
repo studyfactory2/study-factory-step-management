@@ -31,6 +31,7 @@ export type BoardPost = {
   author: BoardPostAuthor;
   categories: BoardPostCategory[];
   likeCount: number;
+  likedByMe: boolean;
   commentCount: number;
   viewCount: number;
   createdAt: string;
@@ -55,6 +56,11 @@ export type BoardPostComment = {
 export type BoardPostDetail = BoardPost & {
   attachments: BoardPostAttachment[];
   comments: BoardPostComment[];
+};
+
+export type BoardPostLikeToggleResponse = {
+  likedByMe: boolean;
+  likeCount: number;
 };
 
 export async function getBoardPosts(accessToken: string, type?: BoardPostType): Promise<BoardPost[]> {
@@ -95,4 +101,25 @@ export async function getBoardPostDetail(accessToken: string, postId: number): P
   }
 
   return response.json() as Promise<BoardPostDetail>;
+}
+
+export async function toggleBoardPostLike(
+  accessToken: string,
+  postId: number
+): Promise<BoardPostLikeToggleResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/board/posts/${postId}/like`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("좋아요를 변경하지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostLikeToggleResponse>;
 }

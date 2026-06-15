@@ -27,10 +27,16 @@ export type BoardPostListResponse = {
   author: BoardPostAuthorResponse;
   categories: BoardPostCategoryResponse[];
   likeCount: number;
+  likedByMe: boolean;
   commentCount: number;
   viewCount: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type BoardPostLikeToggleResponse = {
+  likedByMe: boolean;
+  likeCount: number;
 };
 
 export type BoardPostAttachmentResponse = {

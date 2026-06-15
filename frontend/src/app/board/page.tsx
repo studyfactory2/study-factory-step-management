@@ -17,7 +17,7 @@ import {
   isAdminRole,
   type StoredMember
 } from "@/lib/auth-storage";
-import { getBoardPosts, type BoardPost, type BoardPostCategory } from "@/api/board";
+import { getBoardPosts, toggleBoardPostLike, type BoardPost, type BoardPostCategory } from "@/api/board";
 
 type BoardTab = "NOTICE" | "EMPLOYEE";
 
@@ -91,6 +91,7 @@ export default function BoardRoutePage() {
   const [activeTab, setActiveTab] = useState<BoardTab>("EMPLOYEE");
   const [noticePosts, setNoticePosts] = useState<BoardPost[]>([]);
   const [employeePosts, setEmployeePosts] = useState<BoardPost[]>([]);
+  const [accessToken, setAccessToken] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -103,6 +104,7 @@ export default function BoardRoutePage() {
     }
 
     setCurrentMember(auth.currentMember);
+    setAccessToken(auth.accessToken);
     setIsReady(true);
 
     async function loadBoardPosts() {
@@ -131,6 +133,30 @@ export default function BoardRoutePage() {
 
   const backPath = isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard";
   const visibleNoticePosts = noticePosts.slice(0, 2);
+
+  async function handleLikeClick(postId: number) {
+    if (!accessToken) {
+      return;
+    }
+
+    try {
+      const response = await toggleBoardPostLike(accessToken, postId);
+      const updatePost = (post: BoardPost) => (
+        post.id === postId
+          ? {
+              ...post,
+              likeCount: response.likeCount,
+              likedByMe: response.likedByMe
+            }
+          : post
+      );
+
+      setNoticePosts((posts) => posts.map(updatePost));
+      setEmployeePosts((posts) => posts.map(updatePost));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "좋아요를 변경하지 못했습니다.");
+    }
+  }
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
@@ -262,11 +288,17 @@ export default function BoardRoutePage() {
               const categoryClassName = getCategoryClassName(category);
 
               return (
-                <button
+                <article
                   className="grid w-full grid-cols-[42px_1fr] gap-2 py-3 text-left first:pt-1 last:pb-1"
                   key={post.id}
                   onClick={() => router.push(`/board/${post.id}`)}
-                  type="button"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      router.push(`/board/${post.id}`);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-full text-[19px] font-normal ${getAvatarClassName(post.author.id)}`}>
                     {getAuthorName(post).slice(0, 1)}
@@ -292,10 +324,20 @@ export default function BoardRoutePage() {
                         {post.oneLineComment ?? post.content}
                       </p>
                       <div className="flex shrink-0 items-center gap-2 text-[12px] font-normal text-[#6F6662]">
-                        <span className="inline-flex items-center gap-0.5">
-                          <Heart aria-hidden className="h-3.5 w-3.5 fill-[#FF5A88] text-[#FF5A88]" />
+                        <button
+                          className="inline-flex items-center gap-0.5"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handleLikeClick(post.id);
+                          }}
+                          type="button"
+                        >
+                          <Heart
+                            aria-hidden
+                            className={`h-3.5 w-3.5 text-[#FF5A88] ${post.likedByMe ? "fill-[#FF5A88]" : "fill-none"}`}
+                          />
                           {post.likeCount}
-                        </span>
+                        </button>
                         <span className="inline-flex items-center gap-0.5">
                           <MessageCircle aria-hidden className="h-3.5 w-3.5 text-[#222222]" />
                           {post.commentCount}
@@ -307,7 +349,7 @@ export default function BoardRoutePage() {
                       </div>
                     </div>
                   </div>
-                </button>
+                </article>
               );
             })}
           </div>

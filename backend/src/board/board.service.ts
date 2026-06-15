@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { BoardRepository } from "./board.repository";
-import { BoardPostDetailResponse, BoardPostListResponse } from "./dto/board-post-list.response";
+import { BoardPostDetailResponse, BoardPostLikeToggleResponse, BoardPostListResponse } from "./dto/board-post-list.response";
 import { BoardPostType } from "./enum/board-post-type.enum";
 import { BoardVisibility } from "./enum/board-visibility.enum";
 
@@ -10,8 +10,8 @@ const BOARD_VIEW_DEDUPLICATION_WINDOW_MS = 5000;
 export class BoardService {
   constructor(private readonly boardRepository: BoardRepository) {}
 
-  async findPosts(type?: BoardPostType): Promise<BoardPostListResponse[]> {
-    const posts = await this.boardRepository.findActivePosts(type);
+  async findPosts(viewerId: number, type?: BoardPostType): Promise<BoardPostListResponse[]> {
+    const posts = await this.boardRepository.findActivePosts(viewerId, type);
 
     return posts.map((post) => ({
       id: Number(post.id),
@@ -30,6 +30,7 @@ export class BoardService {
       },
       categories: parseCategories(post.categories),
       likeCount: Number(post.likeCount),
+      likedByMe: Boolean(post.likedByMe),
       commentCount: Number(post.commentCount),
       viewCount: Number(post.viewCount),
       createdAt: post.createdAt.toISOString(),
@@ -92,10 +93,36 @@ export class BoardService {
         updatedAt: comment.updatedAt.toISOString()
       })),
       likeCount: post.likes.length,
+      likedByMe: post.likes.some((like) => like.memberId === viewerId),
       commentCount: post.comments.length,
       viewCount: post.views.length,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString()
+    };
+  }
+
+  async toggleLike(id: number, viewerId: number): Promise<BoardPostLikeToggleResponse> {
+    const post = await this.boardRepository.findActivePostById(id);
+
+    if (!post) {
+      throw new NotFoundException("게시글을 찾을 수 없습니다.");
+    }
+
+    const like = await this.boardRepository.findLike(id, viewerId);
+
+    if (like) {
+      await this.boardRepository.deleteLike(like);
+      return {
+        likedByMe: false,
+        likeCount: await this.boardRepository.countLikes(id)
+      };
+    }
+
+    await this.boardRepository.createLike(id, viewerId);
+
+    return {
+      likedByMe: true,
+      likeCount: await this.boardRepository.countLikes(id)
     };
   }
 }

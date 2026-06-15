@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { CurrentMember } from "../auth/decorator/current-member.decorator";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { CurrentMember as CurrentMemberType } from "../auth/type/current-member.type";
@@ -11,8 +11,11 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Get("posts")
-  async findPosts(@Query() query: BoardPostListQueryRequest) {
-    return this.boardService.findPosts(query.type);
+  async findPosts(
+    @Query() query: BoardPostListQueryRequest,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.boardService.findPosts(currentMember.memberId, query.type);
   }
 
   @Get("posts/:id")
@@ -21,5 +24,13 @@ export class BoardController {
     @CurrentMember() currentMember: CurrentMemberType
   ) {
     return this.boardService.findPostDetail(id, currentMember.memberId);
+  }
+
+  @Post("posts/:id/like")
+  async toggleLike(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.boardService.toggleLike(id, currentMember.memberId);
   }
 }

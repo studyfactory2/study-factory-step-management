@@ -10,7 +10,12 @@ import {
   Pin,
   Tag
 } from "lucide-react";
-import { getBoardPostDetail, type BoardPostCategory, type BoardPostDetail } from "@/api/board";
+import {
+  getBoardPostDetail,
+  toggleBoardPostLike,
+  type BoardPostCategory,
+  type BoardPostDetail
+} from "@/api/board";
 import {
   getStoredAuth,
   isAdminRole,
@@ -31,6 +36,7 @@ export default function BoardPostDetailPage() {
   const router = useRouter();
   const postIdParam = params?.postId;
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
+  const [accessToken, setAccessToken] = useState("");
   const [post, setPost] = useState<BoardPostDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -50,6 +56,7 @@ export default function BoardPostDetailPage() {
     }
 
     setCurrentMember(auth.currentMember);
+    setAccessToken(auth.accessToken);
 
     async function loadDetail() {
       try {
@@ -71,6 +78,23 @@ export default function BoardPostDetailPage() {
 
   const backPath = "/board";
   const dashboardPath = isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard";
+
+  async function handleLikeClick() {
+    if (!accessToken || !post) {
+      return;
+    }
+
+    try {
+      const response = await toggleBoardPostLike(accessToken, post.id);
+      setPost({
+        ...post,
+        likeCount: response.likeCount,
+        likedByMe: response.likedByMe
+      });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "좋아요를 변경하지 못했습니다.");
+    }
+  }
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
@@ -180,10 +204,17 @@ export default function BoardPostDetailPage() {
 
             <section className="rounded-[14px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
               <div className="mb-3 flex items-center justify-around rounded-[12px] bg-[#F9F7F5] px-2 py-2 text-[13px] font-normal text-[#6F6662]">
-                <span className="inline-flex items-center gap-1">
-                  <Heart aria-hidden className="h-4 w-4 fill-[#FF5A88] text-[#FF5A88]" />
+                <button
+                  className="inline-flex items-center gap-1"
+                  onClick={() => void handleLikeClick()}
+                  type="button"
+                >
+                  <Heart
+                    aria-hidden
+                    className={`h-4 w-4 text-[#FF5A88] ${post.likedByMe ? "fill-[#FF5A88]" : "fill-none"}`}
+                  />
                   {post.likeCount}
-                </span>
+                </button>
                 <span className="inline-flex items-center gap-1">
                   <MessageCircle aria-hidden className="h-4 w-4 text-[#222222]" />
                   {post.commentCount}

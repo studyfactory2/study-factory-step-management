@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { BoardLike } from "./entity/board-like.entity";
 import { BoardPost } from "./entity/board-post.entity";
 import { BoardView } from "./entity/board-view.entity";
 import { BoardPostType } from "./enum/board-post-type.enum";
@@ -22,6 +23,7 @@ type BoardPostRawRow = {
   likeCount: string;
   commentCount: string;
   viewCount: string;
+  likedByMe: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -31,11 +33,13 @@ export class BoardRepository {
   constructor(
     @InjectRepository(BoardPost)
     private readonly boardPostRepository: Repository<BoardPost>,
+    @InjectRepository(BoardLike)
+    private readonly boardLikeRepository: Repository<BoardLike>,
     @InjectRepository(BoardView)
     private readonly boardViewRepository: Repository<BoardView>
   ) {}
 
-  async findActivePosts(type?: BoardPostType): Promise<BoardPostRawRow[]> {
+  async findActivePosts(viewerId: number, type?: BoardPostType): Promise<BoardPostRawRow[]> {
     const queryBuilder = this.boardPostRepository
       .createQueryBuilder("post")
       .leftJoin("post.creator", "creator")
@@ -45,6 +49,7 @@ export class BoardRepository {
       .leftJoin("postCategory.category", "category", "category.isActive = true")
       .leftJoin("post.comments", "comment", "comment.isActive = true")
       .leftJoin("post.likes", "like")
+      .leftJoin("post.likes", "viewerLike", "viewerLike.memberId = :viewerId", { viewerId })
       .leftJoin("post.views", "view")
       .select("post.id", "id")
       .addSelect("post.title", "title")
@@ -61,6 +66,7 @@ export class BoardRepository {
       .addSelect("COUNT(DISTINCT comment.id)", "commentCount")
       .addSelect("COUNT(DISTINCT like.id)", "likeCount")
       .addSelect("COUNT(DISTINCT view.id)", "viewCount")
+      .addSelect("COUNT(DISTINCT viewerLike.id) > 0", "likedByMe")
       .addSelect("post.createdAt", "createdAt")
       .addSelect("post.updatedAt", "updatedAt")
       .addSelect(
@@ -113,6 +119,36 @@ export class BoardRepository {
       .orderBy("attachment.displayOrder", "ASC")
       .addOrderBy("comment.createdAt", "ASC")
       .getOne();
+  }
+
+  async findLike(postId: number, memberId: number): Promise<BoardLike | null> {
+    return this.boardLikeRepository.findOne({
+      where: {
+        postId,
+        memberId
+      }
+    });
+  }
+
+  async createLike(postId: number, memberId: number): Promise<void> {
+    await this.boardLikeRepository.save(
+      this.boardLikeRepository.create({
+        postId,
+        memberId
+      })
+    );
+  }
+
+  async deleteLike(like: BoardLike): Promise<void> {
+    await this.boardLikeRepository.remove(like);
+  }
+
+  async countLikes(postId: number): Promise<number> {
+    return this.boardLikeRepository.count({
+      where: {
+        postId
+      }
+    });
   }
 
   async createViewIfNotRecent(postId: number, memberId: number, viewedAfter: Date): Promise<void> {
