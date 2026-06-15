@@ -89,6 +89,7 @@ export default function BoardRoutePage() {
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [activeTab, setActiveTab] = useState<BoardTab>("EMPLOYEE");
+  const [fullView, setFullView] = useState<BoardTab | null>(null);
   const [noticePosts, setNoticePosts] = useState<BoardPost[]>([]);
   const [employeePosts, setEmployeePosts] = useState<BoardPost[]>([]);
   const [accessToken, setAccessToken] = useState("");
@@ -132,7 +133,20 @@ export default function BoardRoutePage() {
   }
 
   const backPath = isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard";
-  const visibleNoticePosts = noticePosts.slice(0, 2);
+  const visibleNoticePosts = fullView === "NOTICE" ? noticePosts : noticePosts.slice(0, 2);
+  const visibleEmployeePosts = fullView === "EMPLOYEE" ? employeePosts : employeePosts.slice(0, 8);
+  const shouldShowNoticeSection = fullView === null || fullView === "NOTICE";
+  const shouldShowEmployeeSection = fullView === null || fullView === "EMPLOYEE";
+
+  function handleViewChange(tab: BoardTab) {
+    setActiveTab(tab);
+    setFullView(tab);
+  }
+
+  function handleFullViewClick(tab: BoardTab) {
+    setActiveTab(tab);
+    setFullView((currentView) => (currentView === tab ? null : tab));
+  }
 
   async function handleLikeClick(postId: number) {
     if (!accessToken) {
@@ -183,7 +197,7 @@ export default function BoardRoutePage() {
                 ? "border-[#FF5A88] text-[#E93566]"
                 : "border-transparent text-[#8A817E]"
             }`}
-            onClick={() => setActiveTab("NOTICE")}
+            onClick={() => handleViewChange("NOTICE")}
             type="button"
           >
             <Megaphone aria-hidden className="h-5 w-6 scale-y-125" />
@@ -195,7 +209,7 @@ export default function BoardRoutePage() {
                 ? "border-[#2D7FEA] text-[#1171E8]"
                 : "border-transparent text-[#8A817E]"
             }`}
-            onClick={() => setActiveTab("EMPLOYEE")}
+            onClick={() => handleViewChange("EMPLOYEE")}
             type="button"
           >
             <Pencil aria-hidden className="h-5 w-5" />
@@ -209,6 +223,7 @@ export default function BoardRoutePage() {
           </div>
         ) : null}
 
+        {shouldShowNoticeSection ? (
         <section className="mb-4 rounded-[14px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-[21px] font-normal text-[#111111]">
@@ -217,13 +232,14 @@ export default function BoardRoutePage() {
             </h2>
             <button
               className="h-7 rounded-[9px] border border-[#D8D1CE] bg-white px-2.5 text-[12px] font-normal text-[#222222]"
+              onClick={() => handleFullViewClick("NOTICE")}
               type="button"
             >
-              전체보기
+              {fullView === "NOTICE" ? "접기" : "전체보기"}
             </button>
           </div>
 
-          <div className="divide-y divide-[#ECE7E4]">
+          <div className={`${fullView === "NOTICE" ? "max-h-[640px] overflow-y-auto pr-1" : ""} divide-y divide-[#ECE7E4]`}>
             {isLoading && visibleNoticePosts.length === 0 ? (
               <p className="py-3 text-center text-[12px] font-normal text-[#7B716D]">공지사항을 불러오는 중입니다.</p>
             ) : null}
@@ -261,7 +277,9 @@ export default function BoardRoutePage() {
             ))}
           </div>
         </section>
+        ) : null}
 
+        {shouldShowEmployeeSection ? (
         <section className="rounded-[14px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-[21px] font-normal text-[#111111]">
@@ -270,9 +288,10 @@ export default function BoardRoutePage() {
             </h2>
             <button
               className="h-7 rounded-[9px] border border-[#D8D1CE] bg-white px-2.5 text-[12px] font-normal text-[#222222]"
+              onClick={() => handleFullViewClick("EMPLOYEE")}
               type="button"
             >
-              전체보기
+              {fullView === "EMPLOYEE" ? "접기" : "전체보기"}
             </button>
           </div>
 
@@ -283,7 +302,7 @@ export default function BoardRoutePage() {
             {!isLoading && employeePosts.length === 0 ? (
               <p className="py-8 text-center text-[12px] font-normal text-[#7B716D]">등록된 사원게시물이 없습니다.</p>
             ) : null}
-            {employeePosts.map((post) => {
+            {visibleEmployeePosts.map((post) => {
               const category = post.categories[0] ?? null;
               const categoryClassName = getCategoryClassName(category);
 
@@ -354,6 +373,7 @@ export default function BoardRoutePage() {
             })}
           </div>
         </section>
+        ) : null}
       </div>
 
       <button
