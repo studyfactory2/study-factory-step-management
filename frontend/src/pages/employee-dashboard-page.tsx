@@ -255,13 +255,16 @@ export function EmployeeDashboardPage({
           onSubmit={handleCreateTask}
         />
         <RecentOutputsSection
+          currentMemberId={currentMember.id}
           onAllTasksOpen={onAllTasksOpen}
           onDetailOpen={onTaskDetailOpen}
           onSortOrderToggle={handleRecentTaskSortToggle}
           onStatusToggle={handleRecentTaskStatusToggle}
           recentOutputs={recentOutputs}
+          selectedScope="MINE"
           selectedSortOrder={recentTaskSortOrder}
           selectedStatuses={recentTaskStatuses}
+          showScopeSelector={false}
         />
         <DashboardLogout onLogout={onLogout} />
       </div>
