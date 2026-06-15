@@ -38,6 +38,7 @@ import {
 
 type AdminDashboardPageProps = {
   accessToken: string;
+  onBoardOpen: () => void;
   onSettingsOpen: () => void;
   onTaskCreateOpen: () => void;
   onLogout: () => void;
@@ -73,6 +74,7 @@ type ConfirmDialogState = {
 
 export function AdminDashboardPage({
   accessToken,
+  onBoardOpen,
   onSettingsOpen,
   onTaskCreateOpen,
   onLogout,
@@ -242,7 +244,7 @@ export function AdminDashboardPage({
         </section>
 
         <MessageBanner message={message} />
-        <InProgressCategorySection categorySummary={categorySummary} />
+        <InProgressCategorySection categorySummary={categorySummary} onBoardOpen={onBoardOpen} />
         <RecentOutputsSection
           currentMemberId={dashboard.currentMember.id}
           onDetailOpen={onTaskDetailOpen}
