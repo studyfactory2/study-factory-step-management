@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AdminModule } from "./admin/admin.module";
 import { AuthModule } from "./auth/auth.module";
+import { BoardModule } from "./board/board.module";
 import { RefreshToken } from "./auth/entity/refresh-token.entity";
 import { BoardCategory } from "./board/entity/board-category.entity";
 import { BoardComment } from "./board/entity/board-comment.entity";
@@ -75,6 +76,7 @@ import { TaskModule } from "./task/task.module";
     }),
     AdminModule,
     AuthModule,
+    BoardModule,
     FavoriteMemberModule,
     MemberModule,
     OrganizationChartModule,

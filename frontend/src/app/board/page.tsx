@@ -17,184 +17,81 @@ import {
   isAdminRole,
   type StoredMember
 } from "@/lib/auth-storage";
+import { getBoardPosts, type BoardPost, type BoardPostCategory } from "@/api/board";
 
 type BoardTab = "NOTICE" | "EMPLOYEE";
 
-type NoticePost = {
-  id: number;
-  category: string;
-  title: string;
-  author: string;
-  position: string;
-  time: string;
-};
-
-type EmployeePost = {
-  id: number;
-  initial: string;
-  initialClassName: string;
-  author: string;
-  position: string;
-  department: string;
-  time: string;
-  category: keyof typeof categoryStyles;
-  title: string;
-  comment: string;
-  likeCount: number;
-  commentCount: number;
-  viewCount: number;
-};
-
-const noticePosts: NoticePost[] = [
-  {
-    id: 1,
-    category: "공지",
-    title: "[필독] 2026년 상반기 종합 워크샵 일정 안내",
-    author: "김지원",
-    position: "대표",
-    time: "금요일 오전 09:12"
-  },
-  {
-    id: 2,
-    category: "공지",
-    title: "사내 식당 메뉴 개편 안내 (6월 15일부터)",
-    author: "박나라",
-    position: "팀장",
-    time: "목요일 오후 03:45"
-  }
-];
-
 const categoryStyles = {
-  lunch: {
-    label: "점심후기",
-    icon: "🍜",
+  pink: {
     className: "bg-[#FFE4EC] text-[#EC4D7B]"
   },
-  free: {
-    label: "자유",
-    icon: "🌱",
+  green: {
     className: "bg-[#DFF6E8] text-[#228C50]"
   },
-  tip: {
-    label: "꿀팁",
-    icon: "💡",
+  yellow: {
     className: "bg-[#FFF0C7] text-[#D28A00]"
   },
-  congrats: {
-    label: "축하",
-    icon: "🎂",
-    className: "bg-[#FFE4EA] text-[#F04D6E]"
-  },
-  exercise: {
-    label: "운동",
-    icon: "🏃",
+  blue: {
     className: "bg-[#DFF0FF] text-[#1676D2]"
   },
-  meetup: {
-    label: "모임",
-    icon: "🏔️",
-    className: "bg-[#E8F4FF] text-[#2C8B55]"
+  orange: {
+    className: "bg-[#FFE8C7] text-[#B76500]"
+  },
+  purple: {
+    className: "bg-[#E9DDFF] text-[#7556D8]"
   }
 } as const;
 
-const employeePosts: EmployeePost[] = [
-  {
-    id: 1,
-    initial: "지",
-    initialClassName: "bg-[#FFD9E6] text-[#D82459]",
-    author: "박지원",
-    position: "사원",
-    department: "개발팀",
-    time: "금요일 오후 01:30",
-    category: "lunch",
-    title: "지원 회원님이 라면이 맵대요",
-    comment: "매운맛 좋아하는 분 들어와요!",
-    likeCount: 12,
-    commentCount: 5,
-    viewCount: 47
-  },
-  {
-    id: 2,
-    initial: "민",
-    initialClassName: "bg-[#CFEFFF] text-[#1373C8]",
-    author: "김민수",
-    position: "주임",
-    department: "디자인팀",
-    time: "목요일 오후 06:22",
-    category: "free",
-    title: "사무실 근처 새로 생긴 카페 추천드려요",
-    comment: "점심시간 조용한 곳 찾으시는 분 강추 :)",
-    likeCount: 24,
-    commentCount: 11,
-    viewCount: 89
-  },
-  {
-    id: 3,
-    initial: "수",
-    initialClassName: "bg-[#FFE7B8] text-[#C56A00]",
-    author: "이수영",
-    position: "대리",
-    department: "마케팅팀",
-    time: "목요일 오전 11:05",
-    category: "congrats",
-    title: "팀장님 승진 축하드립니다",
-    comment: "다 같이 한마디씩 남겨요",
-    likeCount: 18,
-    commentCount: 7,
-    viewCount: 62
-  },
-  {
-    id: 4,
-    initial: "현",
-    initialClassName: "bg-[#CFF7DF] text-[#168B4E]",
-    author: "조현우",
-    position: "사원",
-    department: "영업팀",
-    time: "수요일 오후 05:40",
-    category: "exercise",
-    title: "주말 등산 같이 가실 분 모집해요",
-    comment: "초보도 환영! 가벼운 코스로 가요",
-    likeCount: 9,
-    commentCount: 14,
-    viewCount: 52
-  },
-  {
-    id: 5,
-    initial: "은",
-    initialClassName: "bg-[#E6D8FF] text-[#7556D8]",
-    author: "한은지",
-    position: "사원",
-    department: "인사팀",
-    time: "수요일 오후 02:15",
-    category: "meetup",
-    title: "사내 그림 동호회 신규 회원 모집합니다",
-    comment: "그림 좋아하시는 분 누구나 환영해요",
-    likeCount: 15,
-    commentCount: 8,
-    viewCount: 73
-  },
-  {
-    id: 6,
-    initial: "재",
-    initialClassName: "bg-[#D8F0FF] text-[#0E6DC4]",
-    author: "윤재호",
-    position: "주임",
-    department: "개발팀",
-    time: "화요일 오후 04:50",
-    category: "tip",
-    title: "회사 근처 맛집 BEST 5 정리해봤어요",
-    comment: "점심 메뉴 고민 끝!",
-    likeCount: 31,
-    commentCount: 19,
-    viewCount: 124
-  }
+const avatarClassNames = [
+  "bg-[#FFD9E6] text-[#D82459]",
+  "bg-[#CFEFFF] text-[#1373C8]",
+  "bg-[#FFE7B8] text-[#C56A00]",
+  "bg-[#CFF7DF] text-[#168B4E]",
+  "bg-[#E6D8FF] text-[#7556D8]",
+  "bg-[#D8F0FF] text-[#0E6DC4]"
 ];
+
+function getAuthorName(post: BoardPost) {
+  return post.author.displayName ?? post.author.name;
+}
+
+function getAvatarClassName(authorId: number) {
+  return avatarClassNames[authorId % avatarClassNames.length];
+}
+
+function getCategoryClassName(category: BoardPostCategory | null) {
+  const key = category?.colorClassName as keyof typeof categoryStyles | undefined;
+
+  if (key && categoryStyles[key]) {
+    return categoryStyles[key].className;
+  }
+
+  return "bg-[#F1ECE9] text-[#6F6662]";
+}
+
+function formatBoardDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const weekday = new Intl.DateTimeFormat("ko-KR", { weekday: "long" }).format(date);
+  const period = date.getHours() < 12 ? "오전" : "오후";
+  const hour = date.getHours() % 12 || 12;
+  const minute = String(date.getMinutes()).padStart(2, "0");
+
+  return `${weekday} ${period} ${String(hour).padStart(2, "0")}:${minute}`;
+}
 
 export default function BoardRoutePage() {
   const router = useRouter();
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [activeTab, setActiveTab] = useState<BoardTab>("EMPLOYEE");
+  const [noticePosts, setNoticePosts] = useState<BoardPost[]>([]);
+  const [employeePosts, setEmployeePosts] = useState<BoardPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -207,6 +104,25 @@ export default function BoardRoutePage() {
 
     setCurrentMember(auth.currentMember);
     setIsReady(true);
+
+    async function loadBoardPosts() {
+      try {
+        setIsLoading(true);
+        const [noticeResponse, employeeResponse] = await Promise.all([
+          getBoardPosts(auth.accessToken, "NOTICE"),
+          getBoardPosts(auth.accessToken, "EMPLOYEE")
+        ]);
+
+        setNoticePosts(noticeResponse);
+        setEmployeePosts(employeeResponse);
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "게시판 데이터를 불러오지 못했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    void loadBoardPosts();
   }, [router]);
 
   if (!isReady || !currentMember) {
@@ -214,6 +130,7 @@ export default function BoardRoutePage() {
   }
 
   const backPath = isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard";
+  const visibleNoticePosts = noticePosts.slice(0, 2);
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
@@ -281,10 +198,16 @@ export default function BoardRoutePage() {
           </div>
 
           <div className="divide-y divide-[#ECE7E4]">
-            {noticePosts.map((post, index) => (
+            {isLoading && visibleNoticePosts.length === 0 ? (
+              <p className="py-3 text-center text-[12px] font-normal text-[#7B716D]">공지사항을 불러오는 중입니다.</p>
+            ) : null}
+            {!isLoading && visibleNoticePosts.length === 0 ? (
+              <p className="py-3 text-center text-[12px] font-normal text-[#7B716D]">등록된 공지사항이 없습니다.</p>
+            ) : null}
+            {visibleNoticePosts.map((post, index) => (
               <article className="flex gap-2 py-2 first:pt-0 last:pb-0" key={post.id}>
                 <div className="mt-0.5 flex w-7 justify-center">
-                  {index === 0 ? (
+                  {post.isPinned || index === 0 ? (
                     <Pin aria-hidden className="h-5 w-5 rotate-[-20deg] text-[#F04D6E]" />
                   ) : (
                     <span className="h-14 w-[3px] rounded-full bg-[#FF6A95]" />
@@ -293,14 +216,14 @@ export default function BoardRoutePage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="shrink-0 whitespace-nowrap rounded-full bg-[#FFE4EC] px-2 py-0.5 text-[12px] font-normal leading-none text-[#E93566]">
-                      {post.category}
+                      공지
                     </span>
                     <h3 className="truncate text-[15px] font-normal text-[#111111]">{post.title}</h3>
                   </div>
                   <p className="mt-1 truncate text-[12px] font-normal text-[#7B716D]">
-                    <span className="text-[#1171E8]">{post.author} {post.position}</span>
+                    <span className="text-[#1171E8]">{getAuthorName(post)} {post.author.positionName ?? ""}</span>
                     <span className="px-1.5">·</span>
-                    {post.time}
+                    {formatBoardDate(post.createdAt)}
                   </p>
                 </div>
               </article>
@@ -322,32 +245,41 @@ export default function BoardRoutePage() {
             </button>
           </div>
 
-          <div className="divide-y divide-[#ECE7E4]">
+          <div className="max-h-[640px] divide-y divide-[#ECE7E4] overflow-y-auto pr-1">
+            {isLoading && employeePosts.length === 0 ? (
+              <p className="py-8 text-center text-[12px] font-normal text-[#7B716D]">사원게시물을 불러오는 중입니다.</p>
+            ) : null}
+            {!isLoading && employeePosts.length === 0 ? (
+              <p className="py-8 text-center text-[12px] font-normal text-[#7B716D]">등록된 사원게시물이 없습니다.</p>
+            ) : null}
             {employeePosts.map((post) => {
-              const category = categoryStyles[post.category];
+              const category = post.categories[0] ?? null;
+              const categoryClassName = getCategoryClassName(category);
 
               return (
                 <article className="grid grid-cols-[42px_1fr] gap-2 py-3 first:pt-1 last:pb-1" key={post.id}>
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full text-[19px] font-normal ${post.initialClassName}`}>
-                    {post.initial}
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full text-[19px] font-normal ${getAvatarClassName(post.author.id)}`}>
+                    {getAuthorName(post).slice(0, 1)}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-[12px] font-normal text-[#7B716D]">
-                      <span className="text-[14px] text-[#1171E8]">{post.author} {post.position}</span>
+                      <span className="text-[14px] text-[#1171E8]">{getAuthorName(post)} {post.author.positionName ?? ""}</span>
                       <span className="px-1.5">·</span>
-                      {post.department}
+                      {post.author.organizationName ?? "소속 미정"}
                       <span className="px-1.5">·</span>
-                      {post.time}
+                      {formatBoardDate(post.createdAt)}
                     </p>
-                    <div className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-normal ${category.className}`}>
-                      <span aria-hidden>{category.icon}</span>
-                      {category.label}
-                    </div>
+                    {category ? (
+                      <div className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-normal ${categoryClassName}`}>
+                        <span aria-hidden>{category.icon}</span>
+                        {category.name}
+                      </div>
+                    ) : null}
                     <h3 className="mt-1 truncate text-[15px] font-normal text-[#111111]">{post.title}</h3>
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <p className="min-w-0 truncate text-[12px] font-normal text-[#7B716D]">
                         <MessageCircle aria-hidden className="mr-1 inline h-3.5 w-3.5 text-[#4F4542]" />
-                        {post.comment}
+                        {post.oneLineComment ?? post.content}
                       </p>
                       <div className="flex shrink-0 items-center gap-2 text-[12px] font-normal text-[#6F6662]">
                         <span className="inline-flex items-center gap-0.5">
