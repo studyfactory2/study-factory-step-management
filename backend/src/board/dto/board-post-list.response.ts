@@ -39,6 +39,10 @@ export type BoardPostLikeToggleResponse = {
   likeCount: number;
 };
 
+export type BoardPostCreateResponse = {
+  postId: number;
+};
+
 export type BoardPostAttachmentResponse = {
   id: number;
   imageUrl: string;

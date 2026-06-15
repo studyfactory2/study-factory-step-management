@@ -1,8 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { BoardCategory } from "./entity/board-category.entity";
 import { BoardLike } from "./entity/board-like.entity";
 import { BoardPost } from "./entity/board-post.entity";
+import { BoardPostAttachment } from "./entity/board-post-attachment.entity";
+import { BoardPostCategory } from "./entity/board-post-category.entity";
 import { BoardView } from "./entity/board-view.entity";
 import { BoardPostType } from "./enum/board-post-type.enum";
 
@@ -31,8 +34,14 @@ type BoardPostRawRow = {
 @Injectable()
 export class BoardRepository {
   constructor(
+    @InjectRepository(BoardCategory)
+    private readonly boardCategoryRepository: Repository<BoardCategory>,
     @InjectRepository(BoardPost)
     private readonly boardPostRepository: Repository<BoardPost>,
+    @InjectRepository(BoardPostAttachment)
+    private readonly boardPostAttachmentRepository: Repository<BoardPostAttachment>,
+    @InjectRepository(BoardPostCategory)
+    private readonly boardPostCategoryRepository: Repository<BoardPostCategory>,
     @InjectRepository(BoardLike)
     private readonly boardLikeRepository: Repository<BoardLike>,
     @InjectRepository(BoardView)
@@ -97,6 +106,52 @@ export class BoardRepository {
     }
 
     return queryBuilder.getRawMany<BoardPostRawRow>();
+  }
+
+  async findActiveCategories(): Promise<BoardCategory[]> {
+    return this.boardCategoryRepository.find({
+      where: {
+        isActive: true
+      },
+      order: {
+        displayOrder: "ASC",
+        id: "ASC"
+      }
+    });
+  }
+
+  async findActiveCategoriesByIds(ids: number[]): Promise<BoardCategory[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    return this.boardCategoryRepository
+      .createQueryBuilder("category")
+      .where("category.isActive = true")
+      .andWhere("category.id IN (:...ids)", { ids })
+      .orderBy("category.displayOrder", "ASC")
+      .addOrderBy("category.id", "ASC")
+      .getMany();
+  }
+
+  async savePost(post: BoardPost): Promise<BoardPost> {
+    return this.boardPostRepository.save(post);
+  }
+
+  async savePostCategories(postCategories: BoardPostCategory[]): Promise<void> {
+    if (postCategories.length === 0) {
+      return;
+    }
+
+    await this.boardPostCategoryRepository.save(postCategories);
+  }
+
+  async saveAttachments(attachments: BoardPostAttachment[]): Promise<void> {
+    if (attachments.length === 0) {
+      return;
+    }
+
+    await this.boardPostAttachmentRepository.save(attachments);
   }
 
   async findActivePostById(id: number): Promise<BoardPost | null> {

@@ -359,7 +359,7 @@ export default function BoardRoutePage() {
       <button
         aria-label="게시글 작성"
         className="fixed bottom-6 left-1/2 flex h-14 w-14 translate-x-[128px] items-center justify-center rounded-full bg-[#FF4F85] text-white shadow-[0_8px_18px_rgba(255,79,133,0.35)] max-[420px]:left-auto max-[420px]:right-5 max-[420px]:translate-x-0"
-        onClick={() => setMessage("게시글 작성 화면은 다음 단계에서 연결할게요.")}
+        onClick={() => router.push("/board/new")}
         type="button"
       >
         <Plus aria-hidden className="h-8 w-8" />

@@ -1,6 +1,18 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { UploadFile } from "../upload/type/upload-file.type";
+import { UploadService } from "../upload/upload.service";
 import { BoardRepository } from "./board.repository";
-import { BoardPostDetailResponse, BoardPostLikeToggleResponse, BoardPostListResponse } from "./dto/board-post-list.response";
+import { BoardPostCreateRequest } from "./dto/board-post-create.request";
+import {
+  BoardPostCategoryResponse,
+  BoardPostCreateResponse,
+  BoardPostDetailResponse,
+  BoardPostLikeToggleResponse,
+  BoardPostListResponse
+} from "./dto/board-post-list.response";
+import { BoardPostAttachment } from "./entity/board-post-attachment.entity";
+import { BoardPostCategory } from "./entity/board-post-category.entity";
+import { BoardPost } from "./entity/board-post.entity";
 import { BoardPostType } from "./enum/board-post-type.enum";
 import { BoardVisibility } from "./enum/board-visibility.enum";
 
@@ -8,7 +20,67 @@ const BOARD_VIEW_DEDUPLICATION_WINDOW_MS = 5000;
 
 @Injectable()
 export class BoardService {
-  constructor(private readonly boardRepository: BoardRepository) {}
+  constructor(
+    private readonly boardRepository: BoardRepository,
+    private readonly uploadService: UploadService
+  ) {}
+
+  async findCategories(): Promise<BoardPostCategoryResponse[]> {
+    const categories = await this.boardRepository.findActiveCategories();
+
+    return categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      icon: category.icon,
+      colorClassName: category.colorClassName
+    }));
+  }
+
+  async createPost(
+    request: BoardPostCreateRequest,
+    creatorId: number,
+    files: UploadFile[] = []
+  ): Promise<BoardPostCreateResponse> {
+    const post = new BoardPost();
+    post.title = request.title.trim();
+    post.content = request.content.trim();
+    post.oneLineComment = request.oneLineComment?.trim() || null;
+    post.postType = BoardPostType.EMPLOYEE;
+    post.visibility = request.visibility ?? BoardVisibility.ALL;
+    post.createdBy = creatorId;
+    post.isPinned = false;
+    post.isActive = true;
+
+    const savedPost = await this.boardRepository.savePost(post);
+    const categories = await this.boardRepository.findActiveCategoriesByIds(
+      this.parseCategoryIds(request.categoryIds).slice(0, 2)
+    );
+
+    await this.boardRepository.savePostCategories(
+      categories.map((category) => {
+        const postCategory = new BoardPostCategory();
+        postCategory.postId = savedPost.id;
+        postCategory.categoryId = category.id;
+        return postCategory;
+      })
+    );
+
+    const storedFiles = await this.uploadService.saveImages(files.slice(0, 5));
+    await this.boardRepository.saveAttachments(
+      storedFiles.map((file, index) => {
+        const attachment = new BoardPostAttachment();
+        attachment.postId = savedPost.id;
+        attachment.imageUrl = file.imageUrl;
+        attachment.originalName = file.originalName;
+        attachment.displayOrder = index;
+        return attachment;
+      })
+    );
+
+    return {
+      postId: savedPost.id
+    };
+  }
 
   async findPosts(viewerId: number, type?: BoardPostType): Promise<BoardPostListResponse[]> {
     const posts = await this.boardRepository.findActivePosts(viewerId, type);
@@ -124,6 +196,19 @@ export class BoardService {
       likedByMe: true,
       likeCount: await this.boardRepository.countLikes(id)
     };
+  }
+
+  private parseCategoryIds(categoryIds: string | string[] | undefined): number[] {
+    const rawCategoryIds = Array.isArray(categoryIds) ? categoryIds : categoryIds ? [categoryIds] : [];
+
+    return Array.from(
+      new Set(
+        rawCategoryIds
+          .flatMap((value) => String(value).split(","))
+          .map((value) => Number(value))
+          .filter((value) => Number.isInteger(value) && value > 0)
+      )
+    );
   }
 }
 

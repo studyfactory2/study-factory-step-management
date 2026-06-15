@@ -11,6 +11,7 @@ export class AuthLoginResponse {
     organizationName: string | null;
     branchId: number | null;
     branchName: string | null;
+    positionName: string | null;
     roleType: MemberRole;
   };
 }

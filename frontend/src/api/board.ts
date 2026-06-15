@@ -63,6 +63,36 @@ export type BoardPostLikeToggleResponse = {
   likeCount: number;
 };
 
+export type BoardPostCreateRequest = {
+  attachments?: File[];
+  categoryIds: number[];
+  content: string;
+  oneLineComment?: string;
+  title: string;
+  visibility: BoardVisibility;
+};
+
+export type BoardPostCreateResponse = {
+  postId: number;
+};
+
+export async function getBoardCategories(accessToken: string): Promise<BoardPostCategory[]> {
+  const response = await fetch(`${API_BASE_URL}/api/board/categories`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("게시판 카테고리를 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostCategory[]>;
+}
+
 export async function getBoardPosts(accessToken: string, type?: BoardPostType): Promise<BoardPost[]> {
   const params = new URLSearchParams();
 
@@ -122,4 +152,43 @@ export async function toggleBoardPostLike(
   }
 
   return response.json() as Promise<BoardPostLikeToggleResponse>;
+}
+
+export async function createBoardPost(
+  accessToken: string,
+  request: BoardPostCreateRequest
+): Promise<BoardPostCreateResponse> {
+  const formData = new FormData();
+  formData.append("title", request.title);
+  formData.append("content", request.content);
+  formData.append("visibility", request.visibility);
+
+  if (request.oneLineComment) {
+    formData.append("oneLineComment", request.oneLineComment);
+  }
+
+  request.categoryIds.forEach((categoryId) => {
+    formData.append("categoryIds", String(categoryId));
+  });
+
+  request.attachments?.forEach((attachment) => {
+    formData.append("attachments", attachment);
+  });
+
+  const response = await fetch(`${API_BASE_URL}/api/board/posts`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: formData
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("게시글을 등록하지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostCreateResponse>;
 }

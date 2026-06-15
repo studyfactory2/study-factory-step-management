@@ -1,14 +1,22 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FilesInterceptor } from "@nestjs/platform-express";
 import { CurrentMember } from "../auth/decorator/current-member.decorator";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { CurrentMember as CurrentMemberType } from "../auth/type/current-member.type";
+import { UploadFile } from "../upload/type/upload-file.type";
 import { BoardService } from "./board.service";
+import { BoardPostCreateRequest } from "./dto/board-post-create.request";
 import { BoardPostListQueryRequest } from "./dto/board-post-list-query.request";
 
 @UseGuards(JWTAuthGuard)
 @Controller("board")
 export class BoardController {
   constructor(private readonly boardService: BoardService) {}
+
+  @Get("categories")
+  async findCategories() {
+    return this.boardService.findCategories();
+  }
 
   @Get("posts")
   async findPosts(
@@ -32,5 +40,15 @@ export class BoardController {
     @CurrentMember() currentMember: CurrentMemberType
   ) {
     return this.boardService.toggleLike(id, currentMember.memberId);
+  }
+
+  @UseInterceptors(FilesInterceptor("attachments", 5))
+  @Post("posts")
+  async createPost(
+    @Body() request: BoardPostCreateRequest,
+    @CurrentMember() currentMember: CurrentMemberType,
+    @UploadedFiles() files: UploadFile[] = []
+  ) {
+    return this.boardService.createPost(request, currentMember.memberId, files);
   }
 }
