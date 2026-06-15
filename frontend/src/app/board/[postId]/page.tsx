@@ -11,6 +11,7 @@ import {
   Tag
 } from "lucide-react";
 import {
+  createBoardComment,
   getBoardPostDetail,
   toggleBoardPostLike,
   type BoardPostCategory,
@@ -38,6 +39,8 @@ export default function BoardPostDetailPage() {
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [accessToken, setAccessToken] = useState("");
   const [post, setPost] = useState<BoardPostDetail | null>(null);
+  const [commentContent, setCommentContent] = useState("");
+  const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -93,6 +96,38 @@ export default function BoardPostDetailPage() {
       });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "좋아요를 변경하지 못했습니다.");
+    }
+  }
+
+  async function handleCommentSubmit() {
+    if (!accessToken || !post || isCommentSubmitting) {
+      return;
+    }
+
+    const trimmedContent = commentContent.trim();
+
+    if (!trimmedContent) {
+      setMessage("댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      setMessage("");
+      setIsCommentSubmitting(true);
+      const createdComment = await createBoardComment(accessToken, post.id, {
+        content: trimmedContent
+      });
+
+      setPost({
+        ...post,
+        comments: [...post.comments, createdComment],
+        commentCount: post.commentCount + 1
+      });
+      setCommentContent("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "댓글을 등록하지 못했습니다.");
+    } finally {
+      setIsCommentSubmitting(false);
     }
   }
 
@@ -243,6 +278,30 @@ export default function BoardPostDetailPage() {
                   아직 댓글이 없습니다.
                 </p>
               )}
+
+              <div className="mt-3 flex items-center gap-2">
+                <input
+                  className="h-10 min-w-0 flex-1 rounded-[12px] border border-[#D8D1CE] bg-white px-3 text-[13px] font-normal text-[#111111] outline-none placeholder:text-[#9B9592]"
+                  maxLength={500}
+                  onChange={(event) => setCommentContent(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+                      event.preventDefault();
+                      void handleCommentSubmit();
+                    }
+                  }}
+                  placeholder="댓글을 입력해주세요."
+                  value={commentContent}
+                />
+                <button
+                  className="h-10 shrink-0 rounded-[12px] border border-[#B8CDD9] bg-[#EAF7FF] px-3 text-[13px] font-normal text-[#2D70CB] disabled:opacity-50"
+                  disabled={isCommentSubmitting}
+                  onClick={() => void handleCommentSubmit()}
+                  type="button"
+                >
+                  등록
+                </button>
+              </div>
             </section>
           </div>
         ) : null}

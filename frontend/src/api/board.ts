@@ -76,6 +76,10 @@ export type BoardPostCreateResponse = {
   postId: number;
 };
 
+export type BoardCommentCreateRequest = {
+  content: string;
+};
+
 export async function getBoardCategories(accessToken: string): Promise<BoardPostCategory[]> {
   const response = await fetch(`${API_BASE_URL}/api/board/categories`, {
     cache: "no-store",
@@ -191,4 +195,28 @@ export async function createBoardPost(
   }
 
   return response.json() as Promise<BoardPostCreateResponse>;
+}
+
+export async function createBoardComment(
+  accessToken: string,
+  postId: number,
+  request: BoardCommentCreateRequest
+): Promise<BoardPostComment> {
+  const response = await fetch(`${API_BASE_URL}/api/board/posts/${postId}/comments`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("댓글을 등록하지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostComment>;
 }

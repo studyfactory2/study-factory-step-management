@@ -5,6 +5,7 @@ import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { CurrentMember as CurrentMemberType } from "../auth/type/current-member.type";
 import { UploadFile } from "../upload/type/upload-file.type";
 import { BoardService } from "./board.service";
+import { BoardCommentCreateRequest } from "./dto/board-comment-create.request";
 import { BoardPostCreateRequest } from "./dto/board-post-create.request";
 import { BoardPostListQueryRequest } from "./dto/board-post-list-query.request";
 
@@ -40,6 +41,15 @@ export class BoardController {
     @CurrentMember() currentMember: CurrentMemberType
   ) {
     return this.boardService.toggleLike(id, currentMember.memberId);
+  }
+
+  @Post("posts/:id/comments")
+  async createComment(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() request: BoardCommentCreateRequest,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.boardService.createComment(id, request, currentMember.memberId);
   }
 
   @UseInterceptors(FilesInterceptor("attachments", 5))

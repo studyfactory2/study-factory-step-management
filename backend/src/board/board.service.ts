@@ -2,14 +2,17 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { UploadFile } from "../upload/type/upload-file.type";
 import { UploadService } from "../upload/upload.service";
 import { BoardRepository } from "./board.repository";
+import { BoardCommentCreateRequest } from "./dto/board-comment-create.request";
 import { BoardPostCreateRequest } from "./dto/board-post-create.request";
 import {
+  BoardPostCommentResponse,
   BoardPostCategoryResponse,
   BoardPostCreateResponse,
   BoardPostDetailResponse,
   BoardPostLikeToggleResponse,
   BoardPostListResponse
 } from "./dto/board-post-list.response";
+import { BoardComment } from "./entity/board-comment.entity";
 import { BoardPostAttachment } from "./entity/board-post-attachment.entity";
 import { BoardPostCategory } from "./entity/board-post-category.entity";
 import { BoardPost } from "./entity/board-post.entity";
@@ -82,6 +85,33 @@ export class BoardService {
     };
   }
 
+  async createComment(
+    postId: number,
+    request: BoardCommentCreateRequest,
+    creatorId: number
+  ): Promise<BoardPostCommentResponse> {
+    const post = await this.boardRepository.findActivePostById(postId);
+
+    if (!post) {
+      throw new NotFoundException("게시글을 찾을 수 없습니다.");
+    }
+
+    const comment = new BoardComment();
+    comment.postId = postId;
+    comment.createdBy = creatorId;
+    comment.content = request.content.trim();
+    comment.isActive = true;
+
+    const savedComment = await this.boardRepository.saveComment(comment);
+    const loadedComment = await this.boardRepository.findActiveCommentById(savedComment.id);
+
+    if (!loadedComment) {
+      throw new NotFoundException("댓글을 찾을 수 없습니다.");
+    }
+
+    return this.toCommentResponse(loadedComment);
+  }
+
   async findPosts(viewerId: number, type?: BoardPostType): Promise<BoardPostListResponse[]> {
     const posts = await this.boardRepository.findActivePosts(viewerId, type);
 
@@ -151,19 +181,7 @@ export class BoardService {
         originalName: attachment.originalName,
         displayOrder: attachment.displayOrder
       })),
-      comments: post.comments.map((comment) => ({
-        id: comment.id,
-        content: comment.content,
-        author: {
-          id: comment.creator.id,
-          name: comment.creator.name,
-          displayName: comment.creator.displayName,
-          positionName: comment.creator.positionInfo?.name ?? null,
-          organizationName: comment.creator.organization?.name ?? null
-        },
-        createdAt: comment.createdAt.toISOString(),
-        updatedAt: comment.updatedAt.toISOString()
-      })),
+      comments: post.comments.map((comment) => this.toCommentResponse(comment)),
       likeCount: post.likes.length,
       likedByMe: post.likes.some((like) => like.memberId === viewerId),
       commentCount: post.comments.length,
@@ -195,6 +213,22 @@ export class BoardService {
     return {
       likedByMe: true,
       likeCount: await this.boardRepository.countLikes(id)
+    };
+  }
+
+  private toCommentResponse(comment: BoardComment): BoardPostCommentResponse {
+    return {
+      id: comment.id,
+      content: comment.content,
+      author: {
+        id: comment.creator.id,
+        name: comment.creator.name,
+        displayName: comment.creator.displayName,
+        positionName: comment.creator.positionInfo?.name ?? null,
+        organizationName: comment.creator.organization?.name ?? null
+      },
+      createdAt: comment.createdAt.toISOString(),
+      updatedAt: comment.updatedAt.toISOString()
     };
   }
 

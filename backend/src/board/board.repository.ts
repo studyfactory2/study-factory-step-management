@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BoardCategory } from "./entity/board-category.entity";
+import { BoardComment } from "./entity/board-comment.entity";
 import { BoardLike } from "./entity/board-like.entity";
 import { BoardPost } from "./entity/board-post.entity";
 import { BoardPostAttachment } from "./entity/board-post-attachment.entity";
@@ -36,6 +37,8 @@ export class BoardRepository {
   constructor(
     @InjectRepository(BoardCategory)
     private readonly boardCategoryRepository: Repository<BoardCategory>,
+    @InjectRepository(BoardComment)
+    private readonly boardCommentRepository: Repository<BoardComment>,
     @InjectRepository(BoardPost)
     private readonly boardPostRepository: Repository<BoardPost>,
     @InjectRepository(BoardPostAttachment)
@@ -152,6 +155,21 @@ export class BoardRepository {
     }
 
     await this.boardPostAttachmentRepository.save(attachments);
+  }
+
+  async saveComment(comment: BoardComment): Promise<BoardComment> {
+    return this.boardCommentRepository.save(comment);
+  }
+
+  async findActiveCommentById(id: number): Promise<BoardComment | null> {
+    return this.boardCommentRepository
+      .createQueryBuilder("comment")
+      .leftJoinAndSelect("comment.creator", "creator")
+      .leftJoinAndSelect("creator.positionInfo", "position")
+      .leftJoinAndSelect("creator.organization", "organization")
+      .where("comment.id = :id", { id })
+      .andWhere("comment.isActive = true")
+      .getOne();
   }
 
   async findActivePostById(id: number): Promise<BoardPost | null> {
