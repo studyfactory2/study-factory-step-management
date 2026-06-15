@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Building2, Crown, RefreshCw, Save, Tag } from "lucide-react";
+import { RefreshCw, Save, Tag } from "lucide-react";
 import { getOrganizations, updateOrganizations } from "@/api/member";
 import {
   createPosition,
@@ -11,24 +11,18 @@ import {
   updatePositionTree
 } from "@/api/position";
 import {
-  AddControl,
-  EditActions,
-  EmptyState,
-  ManagementCard,
-  PositionRow,
-  RowActions
-} from "@/components/pages/departmentPosition/components";
-import { colorSwatches } from "@/components/pages/departmentPosition/constants";
-import {
   type DepartmentOption,
   type DropPlacement,
   type FlatPosition,
   type PositionDropPreview
 } from "@/components/pages/departmentPosition/types";
 import {
+  DepartmentManagementSection,
+  PositionManagementSection
+} from "@/components/pages/departmentPosition/sections";
+import {
   buildVisiblePositionTree,
   flattenPositions,
-  getDepartmentMeta,
   isPositionDescendant,
   isTemporaryDepartmentId,
   movePositionDraft,
@@ -333,143 +327,48 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
           </div>
         ) : null}
 
-        <ManagementCard
-          count={departments.length}
-          icon={<Building2 aria-hidden className="h-6 w-6 text-[#4F6F82]" />}
-          title="부서 관리"
-        >
-          <div className="space-y-2">
-            {isLoading ? (
-              <EmptyState label="부서를 불러오는 중입니다." />
-            ) : null}
-            {!isLoading && departments.map((department, index) => {
-              const isEditing = departmentEditDraft?.id === department.id;
-              const displayName = isEditing ? departmentEditDraft.name : department.name;
-              const displayColorIndex = isEditing ? departmentEditDraft.colorIndex : department.colorIndex;
-              const meta = getDepartmentMeta(displayName, index, displayColorIndex);
-              const DepartmentIcon = meta.icon;
+        <DepartmentManagementSection
+          departmentColorIndex={departmentColorIndex}
+          departmentEditDraft={departmentEditDraft}
+          departmentName={departmentName}
+          departments={departments}
+          isLoading={isLoading}
+          isSavingDepartments={isSavingDepartments}
+          onAddDepartment={handleAddDepartment}
+          onDepartmentColorChange={setDepartmentColorIndex}
+          onDepartmentNameChange={setDepartmentName}
+          onDeleteDepartment={handleDeleteDepartment}
+          onSaveDepartmentEdit={handleSaveDepartmentEdit}
+          onStartDepartmentEdit={handleStartDepartmentEdit}
+          setDepartmentEditDraft={setDepartmentEditDraft}
+        />
 
-              return (
-                <div
-                  className={`grid grid-cols-[36px_minmax(0,1fr)_104px] items-center rounded-[13px] border px-2 ${
-                    isEditing ? "min-h-[72px] py-2" : "h-[46px]"
-                  } ${meta.className}`}
-                  key={department.id}
-                >
-                  <span className="flex h-8 w-8 items-center justify-center">
-                    <DepartmentIcon aria-hidden className="h-6 w-6" />
-                  </span>
-                  {isEditing ? (
-                    <input
-                      className="min-w-0 rounded-[8px] border border-[#D8D1CE] bg-white px-2 py-1 text-[13px] font-normal outline-none"
-                      onChange={(event) => setDepartmentEditDraft((current) => current ? {
-                        ...current,
-                        name: event.target.value
-                      } : current)}
-                      value={departmentEditDraft.name}
-                    />
-                  ) : (
-                    <span className="truncate text-[15px] font-normal text-[#222222]">{department.name}</span>
-                  )}
-                  {isEditing ? (
-                    <EditActions
-                      onCancel={() => setDepartmentEditDraft(null)}
-                      onSave={handleSaveDepartmentEdit}
-                    />
-                  ) : (
-                    <RowActions
-                      disabled={isSavingDepartments}
-                      onDelete={() => handleDeleteDepartment(department.id)}
-                      onEdit={() => handleStartDepartmentEdit(department, index)}
-                    />
-                  )}
-                  {isEditing ? (
-                    <div className="col-span-3 mt-1 flex justify-center gap-2">
-                      {colorSwatches.map((swatch, colorIndex) => {
-                        const isSelected = departmentEditDraft.colorIndex === colorIndex;
-
-                        return (
-                          <button
-                            aria-label={`부서 색상 ${colorIndex + 1} 선택`}
-                            aria-pressed={isSelected}
-                            className={`h-4 w-4 rounded-full border shadow-sm ${swatch.dotClassName} ${
-                              isSelected ? "border-[#222222] ring-2 ring-[#222222]/20" : "border-black/10"
-                            }`}
-                            key={swatch.dotClassName}
-                            onClick={() => setDepartmentEditDraft((current) => current ? {
-                              ...current,
-                              colorIndex
-                            } : current)}
-                            type="button"
-                          />
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-
-          <AddControl
-            disabled={isSavingDepartments}
-            onAdd={handleAddDepartment}
-            onChange={setDepartmentName}
-            onColorSelect={setDepartmentColorIndex}
-            placeholder="새 부서 이름 입력"
-            selectedColorIndex={departmentColorIndex}
-            value={departmentName}
-          />
-        </ManagementCard>
-
-        <ManagementCard
-          count={visiblePositions.length}
-          icon={<Crown aria-hidden className="h-6 w-6 fill-[#FFE184] text-[#8E6B22]" />}
-          title="직급 관리"
-        >
-          <div className="max-h-[340px] space-y-1.5 overflow-y-auto pr-1">
-            {isLoading ? (
-              <EmptyState label="직급을 불러오는 중입니다." />
-            ) : null}
-            {!isLoading && visiblePositions.map((position, index) => (
-              <PositionRow
-                draggedPositionId={draggedPositionId}
-                dropPreview={positionDropPreview}
-                index={index}
-                key={position.id}
-                onCancelEdit={() => setPositionEditDraft(null)}
-                onDragEnd={() => {
-                  setDraggedPositionId(null);
-                  setPositionDropPreview(null);
-                }}
-                onDragOver={(placement) => setPositionDropPreview({
-                  placement,
-                  targetId: position.id
-                })}
-                onDragStart={() => setDraggedPositionId(position.id)}
-                onDrop={(placement) => handlePositionDrop(position.id, placement)}
-                onDelete={() => handleDeletePosition(position.id)}
-                disabled={isSavingPositions}
-                onEdit={() => handleStartPositionEdit(position)}
-                onEditDraftChange={(name) => setPositionEditDraft((current) => current ? {
-                  ...current,
-                  name
-                } : current)}
-                onSaveEdit={handleSavePositionEdit}
-                position={position}
-                positionEditDraft={positionEditDraft?.id === position.id ? positionEditDraft : null}
-              />
-            ))}
-          </div>
-
-          <AddControl
-            disabled={isSavingPositions}
-            onAdd={handleAddPosition}
-            onChange={setPositionName}
-            placeholder="새 직급 이름 입력"
-            value={positionName}
-          />
-        </ManagementCard>
+        <PositionManagementSection
+          draggedPositionId={draggedPositionId}
+          isLoading={isLoading}
+          isSavingPositions={isSavingPositions}
+          onAddPosition={handleAddPosition}
+          onCancelPositionEdit={() => setPositionEditDraft(null)}
+          onDeletePosition={handleDeletePosition}
+          onDragEnd={() => {
+            setDraggedPositionId(null);
+            setPositionDropPreview(null);
+          }}
+          onDragOver={(positionId, placement) => setPositionDropPreview({
+            placement,
+            targetId: positionId
+          })}
+          onDragStart={setDraggedPositionId}
+          onDrop={handlePositionDrop}
+          onPositionNameChange={setPositionName}
+          onSavePositionEdit={handleSavePositionEdit}
+          onStartPositionEdit={handleStartPositionEdit}
+          positionDropPreview={positionDropPreview}
+          positionEditDraft={positionEditDraft}
+          positionName={positionName}
+          setPositionEditDraft={setPositionEditDraft}
+          visiblePositions={visiblePositions}
+        />
 
         <div className="grid grid-cols-[1fr_1.25fr] gap-2 pb-4">
           <button
