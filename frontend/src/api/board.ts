@@ -37,6 +37,26 @@ export type BoardPost = {
   updatedAt: string;
 };
 
+export type BoardPostAttachment = {
+  id: number;
+  imageUrl: string;
+  originalName: string | null;
+  displayOrder: number;
+};
+
+export type BoardPostComment = {
+  id: number;
+  content: string;
+  author: BoardPostAuthor;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BoardPostDetail = BoardPost & {
+  attachments: BoardPostAttachment[];
+  comments: BoardPostComment[];
+};
+
 export async function getBoardPosts(accessToken: string, type?: BoardPostType): Promise<BoardPost[]> {
   const params = new URLSearchParams();
 
@@ -58,4 +78,21 @@ export async function getBoardPosts(accessToken: string, type?: BoardPostType): 
   }
 
   return response.json() as Promise<BoardPost[]>;
+}
+
+export async function getBoardPostDetail(accessToken: string, postId: number): Promise<BoardPostDetail> {
+  const response = await fetch(`${API_BASE_URL}/api/board/posts/${postId}`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("게시글 상세를 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostDetail>;
 }

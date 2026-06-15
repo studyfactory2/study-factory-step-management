@@ -32,3 +32,23 @@ export type BoardPostListResponse = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type BoardPostAttachmentResponse = {
+  id: number;
+  imageUrl: string;
+  originalName: string | null;
+  displayOrder: number;
+};
+
+export type BoardPostCommentResponse = {
+  id: number;
+  content: string;
+  author: BoardPostAuthorResponse;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BoardPostDetailResponse = BoardPostListResponse & {
+  attachments: BoardPostAttachmentResponse[];
+  comments: BoardPostCommentResponse[];
+};

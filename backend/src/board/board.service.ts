@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { BoardRepository } from "./board.repository";
-import { BoardPostListResponse } from "./dto/board-post-list.response";
+import { BoardPostDetailResponse, BoardPostListResponse } from "./dto/board-post-list.response";
 import { BoardPostType } from "./enum/board-post-type.enum";
 import { BoardVisibility } from "./enum/board-visibility.enum";
 
@@ -33,6 +33,63 @@ export class BoardService {
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString()
     }));
+  }
+
+  async findPostDetail(id: number): Promise<BoardPostDetailResponse> {
+    const post = await this.boardRepository.findActivePostById(id);
+
+    if (!post) {
+      throw new NotFoundException("게시글을 찾을 수 없습니다.");
+    }
+
+    return {
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      oneLineComment: post.oneLineComment,
+      postType: post.postType,
+      visibility: post.visibility,
+      isPinned: post.isPinned,
+      author: {
+        id: post.creator.id,
+        name: post.creator.name,
+        displayName: post.creator.displayName,
+        positionName: post.creator.positionInfo?.name ?? null,
+        organizationName: post.creator.organization?.name ?? null
+      },
+      categories: post.postCategories
+        .filter((postCategory) => postCategory.category?.isActive)
+        .map((postCategory) => ({
+          id: postCategory.category.id,
+          name: postCategory.category.name,
+          icon: postCategory.category.icon,
+          colorClassName: postCategory.category.colorClassName
+        })),
+      attachments: post.attachments.map((attachment) => ({
+        id: attachment.id,
+        imageUrl: attachment.imageUrl,
+        originalName: attachment.originalName,
+        displayOrder: attachment.displayOrder
+      })),
+      comments: post.comments.map((comment) => ({
+        id: comment.id,
+        content: comment.content,
+        author: {
+          id: comment.creator.id,
+          name: comment.creator.name,
+          displayName: comment.creator.displayName,
+          positionName: comment.creator.positionInfo?.name ?? null,
+          organizationName: comment.creator.organization?.name ?? null
+        },
+        createdAt: comment.createdAt.toISOString(),
+        updatedAt: comment.updatedAt.toISOString()
+      })),
+      likeCount: post.likes.length,
+      commentCount: post.comments.length,
+      viewCount: post.views.length,
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString()
+    };
   }
 }
 

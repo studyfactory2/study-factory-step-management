@@ -205,7 +205,12 @@ export default function BoardRoutePage() {
               <p className="py-3 text-center text-[12px] font-normal text-[#7B716D]">등록된 공지사항이 없습니다.</p>
             ) : null}
             {visibleNoticePosts.map((post, index) => (
-              <article className="flex gap-2 py-2 first:pt-0 last:pb-0" key={post.id}>
+              <button
+                className="grid w-full grid-cols-[36px_1fr] gap-2 py-2 text-left first:pt-0 last:pb-0"
+                key={post.id}
+                onClick={() => router.push(`/board/${post.id}`)}
+                type="button"
+              >
                 <div className="mt-0.5 flex w-7 justify-center">
                   {post.isPinned || index === 0 ? (
                     <Pin aria-hidden className="h-5 w-5 rotate-[-20deg] text-[#F04D6E]" />
@@ -226,7 +231,7 @@ export default function BoardRoutePage() {
                     {formatBoardDate(post.createdAt)}
                   </p>
                 </div>
-              </article>
+              </button>
             ))}
           </div>
         </section>
@@ -257,7 +262,12 @@ export default function BoardRoutePage() {
               const categoryClassName = getCategoryClassName(category);
 
               return (
-                <article className="grid grid-cols-[42px_1fr] gap-2 py-3 first:pt-1 last:pb-1" key={post.id}>
+                <button
+                  className="grid w-full grid-cols-[42px_1fr] gap-2 py-3 text-left first:pt-1 last:pb-1"
+                  key={post.id}
+                  onClick={() => router.push(`/board/${post.id}`)}
+                  type="button"
+                >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-full text-[19px] font-normal ${getAvatarClassName(post.author.id)}`}>
                     {getAuthorName(post).slice(0, 1)}
                   </div>
@@ -297,7 +307,7 @@ export default function BoardRoutePage() {
                       </div>
                     </div>
                   </div>
-                </article>
+                </button>
               );
             })}
           </div>

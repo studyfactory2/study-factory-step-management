@@ -89,4 +89,26 @@ export class BoardRepository {
 
     return queryBuilder.getRawMany<BoardPostRawRow>();
   }
+
+  async findActivePostById(id: number): Promise<BoardPost | null> {
+    return this.boardPostRepository
+      .createQueryBuilder("post")
+      .leftJoinAndSelect("post.creator", "creator")
+      .leftJoinAndSelect("creator.positionInfo", "position")
+      .leftJoinAndSelect("creator.organization", "organization")
+      .leftJoinAndSelect("post.postCategories", "postCategory")
+      .leftJoinAndSelect("postCategory.category", "category")
+      .leftJoinAndSelect("post.attachments", "attachment")
+      .leftJoinAndSelect("post.comments", "comment", "comment.isActive = true")
+      .leftJoinAndSelect("comment.creator", "commentCreator")
+      .leftJoinAndSelect("commentCreator.positionInfo", "commentPosition")
+      .leftJoinAndSelect("commentCreator.organization", "commentOrganization")
+      .leftJoinAndSelect("post.likes", "like")
+      .leftJoinAndSelect("post.views", "view")
+      .where("post.id = :id", { id })
+      .andWhere("post.isActive = true")
+      .orderBy("attachment.displayOrder", "ASC")
+      .addOrderBy("comment.createdAt", "ASC")
+      .getOne();
+  }
 }
