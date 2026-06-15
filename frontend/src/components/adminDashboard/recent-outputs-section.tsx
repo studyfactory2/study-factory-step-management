@@ -16,6 +16,7 @@ type RecentOutputsSectionProps = {
   selectedSortOrder?: AdminDashboardSortOrder;
   selectedScope?: RecentOutputScope;
   selectedStatuses?: TaskStatus[];
+  showScopeSelector?: boolean;
 };
 
 const scopeLabels: Record<RecentOutputScope, string> = {
@@ -38,7 +39,8 @@ export function RecentOutputsSection({
   onStatusToggle,
   recentOutputs,
   selectedScope = "ALL",
-  selectedStatuses = []
+  selectedStatuses = [],
+  showScopeSelector = true
 }: RecentOutputsSectionProps) {
   const filteredOutputs = filterOutputsByStatus(
     filterOutputsByScope(recentOutputs, selectedScope, currentMemberId),
@@ -91,42 +93,44 @@ export function RecentOutputsSection({
             );
           })}
         </div>
-        <div className="relative shrink-0" ref={scopeDropdownRef}>
-          <button
-            aria-label="최근 업무 범위"
-            aria-expanded={isScopeOpen}
-            className="flex h-[20px] w-[78px] items-center justify-between rounded-[6px] border border-[#D8D1CE] bg-white pl-1.5 pr-1 text-left text-[8px] font-normal leading-none text-[#333333] outline-none"
-            onClick={() => setIsScopeOpen((current) => !current)}
-            type="button"
-          >
-            <span className="truncate">{scopeLabels[selectedScope]}</span>
-            <ChevronDown
-              aria-hidden
-              className={`h-3 w-3 shrink-0 text-[#8E8581] transition ${isScopeOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-          {isScopeOpen && (
-            <div className="absolute right-0 top-[24px] z-30 w-[96px] overflow-hidden rounded-[7px] border border-[#D8D1CE] bg-white py-1 shadow-[0_8px_18px_rgba(95,73,68,0.16)]">
-              {Object.entries(scopeLabels).map(([value, label]) => {
-                const scopeValue = value as RecentOutputScope;
-                const isSelected = selectedScope === scopeValue;
+        {showScopeSelector ? (
+          <div className="relative shrink-0" ref={scopeDropdownRef}>
+            <button
+              aria-label="최근 업무 범위"
+              aria-expanded={isScopeOpen}
+              className="flex h-[20px] w-[78px] items-center justify-between rounded-[6px] border border-[#D8D1CE] bg-white pl-1.5 pr-1 text-left text-[8px] font-normal leading-none text-[#333333] outline-none"
+              onClick={() => setIsScopeOpen((current) => !current)}
+              type="button"
+            >
+              <span className="truncate">{scopeLabels[selectedScope]}</span>
+              <ChevronDown
+                aria-hidden
+                className={`h-3 w-3 shrink-0 text-[#8E8581] transition ${isScopeOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {isScopeOpen && (
+              <div className="absolute right-0 top-[24px] z-30 w-[96px] overflow-hidden rounded-[7px] border border-[#D8D1CE] bg-white py-1 shadow-[0_8px_18px_rgba(95,73,68,0.16)]">
+                {Object.entries(scopeLabels).map(([value, label]) => {
+                  const scopeValue = value as RecentOutputScope;
+                  const isSelected = selectedScope === scopeValue;
 
-                return (
-                  <button
-                    className={`flex h-7 w-full items-center px-2 text-left text-[8px] font-normal ${
-                      isSelected ? "bg-[#EAF3FF] text-[#2D70CB]" : "text-[#4F4542] hover:bg-[#F7F7F7]"
-                    }`}
-                    key={value}
-                    onClick={() => handleScopeSelect(scopeValue)}
-                    type="button"
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  return (
+                    <button
+                      className={`flex h-7 w-full items-center px-2 text-left text-[8px] font-normal ${
+                        isSelected ? "bg-[#EAF3FF] text-[#2D70CB]" : "text-[#4F4542] hover:bg-[#F7F7F7]"
+                      }`}
+                      key={value}
+                      onClick={() => handleScopeSelect(scopeValue)}
+                      type="button"
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-[50px_minmax(0,1fr)_56px_56px] gap-1 px-2 pb-1 text-center text-[8px] font-normal text-[#7B716D]">

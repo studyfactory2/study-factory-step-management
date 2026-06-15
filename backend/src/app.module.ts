@@ -3,7 +3,15 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AdminModule } from "./admin/admin.module";
 import { AuthModule } from "./auth/auth.module";
+import { BoardModule } from "./board/board.module";
 import { RefreshToken } from "./auth/entity/refresh-token.entity";
+import { BoardCategory } from "./board/entity/board-category.entity";
+import { BoardComment } from "./board/entity/board-comment.entity";
+import { BoardLike } from "./board/entity/board-like.entity";
+import { BoardPostAttachment } from "./board/entity/board-post-attachment.entity";
+import { BoardPostCategory } from "./board/entity/board-post-category.entity";
+import { BoardPost } from "./board/entity/board-post.entity";
+import { BoardView } from "./board/entity/board-view.entity";
 import { appConfig } from "./config/app.config";
 import { databaseConfig } from "./config/database.config";
 import { FavoriteMember } from "./favorite-member/entity/favorite-member.entity";
@@ -40,6 +48,13 @@ import { TaskModule } from "./task/task.module";
         type: "postgres",
         url: configService.getOrThrow<string>("database.url"),
         entities: [
+          BoardCategory,
+          BoardComment,
+          BoardLike,
+          BoardPost,
+          BoardPostAttachment,
+          BoardPostCategory,
+          BoardView,
           FavoriteMember,
           Member,
           MemberPreRegistration,
@@ -61,6 +76,7 @@ import { TaskModule } from "./task/task.module";
     }),
     AdminModule,
     AuthModule,
+    BoardModule,
     FavoriteMemberModule,
     MemberModule,
     OrganizationChartModule,

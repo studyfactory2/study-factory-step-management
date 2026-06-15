@@ -14,6 +14,8 @@ export type LoginResponse = {
     id: number;
     name: string;
     branch: string | null;
+    organizationName?: string | null;
+    positionName?: string | null;
     roleType: MemberRole;
   };
 };

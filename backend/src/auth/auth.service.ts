@@ -56,6 +56,7 @@ export class AuthService {
         organizationName: member.organization?.name ?? null,
         branchId: member.branchId,
         branchName: member.branchInfo?.name ?? null,
+        positionName: member.positionInfo?.name ?? null,
         roleType: member.roleType
       }
     };

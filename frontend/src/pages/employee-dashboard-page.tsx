@@ -1,67 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { PencilLine, Settings } from "lucide-react";
 import type {
-  AdminDashboardEmployee,
   AdminDashboardRecentOutput,
   AdminDashboardSortOrder
 } from "@/api/admin";
 import {
-  addFavoriteMember,
-  deleteFavoriteMember,
-  getFavoriteMemberCandidates,
-  getFavoriteMembers,
-  reorderFavoriteMembers
-} from "@/api/favorite-member";
-import { getMembers } from "@/api/member";
-import {
-  createTask,
-  getTaskRecentWorkStatus
+  getTaskCategorySummary,
+  getTaskRecentWorkStatus,
+  type TaskCategorySummaryItem
 } from "@/api/task";
-import { DashboardHeader } from "@/components/adminDashboard/dashboard-header";
 import { DashboardLogout } from "@/components/adminDashboard/dashboard-logout";
-import { EmployeeListSection } from "@/components/adminDashboard/employee-list-section";
-import { GreetingCard } from "@/components/adminDashboard/greeting-card";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import { RecentOutputsSection } from "@/components/adminDashboard/recent-outputs-section";
-import { TaskCreateForm, type TaskCreateDraftSubmit } from "@/components/adminDashboard/task-create-form";
-import { isAssignableMember } from "@/components/adminDashboard/utils";
+import { InProgressCategorySection } from "@/components/pages/adminDashboard/in-progress-category-section";
 import type { StoredMember } from "@/lib/auth-storage";
-import type { Member, TaskStatus } from "@/types/domain";
-import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
+import type { TaskStatus } from "@/types/domain";
 
 type EmployeeDashboardPageProps = {
   accessToken: string;
   currentMember: StoredMember;
   onAllTasksOpen: () => void;
+  onBoardOpen: () => void;
   onLogout: () => void;
+  onTaskCreateOpen: () => void;
   onTaskDetailOpen: (taskId: number) => void;
 };
-
-type ConfirmDialogState = {
-  memberId: number;
-  memberName: string;
-} | null;
 
 export function EmployeeDashboardPage({
   accessToken,
   currentMember,
   onAllTasksOpen,
+  onBoardOpen,
   onLogout,
+  onTaskCreateOpen,
   onTaskDetailOpen
 }: Partial<EmployeeDashboardPageProps>) {
-  const [favoriteMembers, setFavoriteMembers] = useState<AdminDashboardEmployee[]>([]);
-  const [favoriteCandidates, setFavoriteCandidates] = useState<AdminDashboardEmployee[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
+  const [categorySummary, setCategorySummary] = useState<TaskCategorySummaryItem[]>([]);
   const [recentOutputs, setRecentOutputs] = useState<AdminDashboardRecentOutput[]>([]);
   const [recentTaskStatuses, setRecentTaskStatuses] = useState<TaskStatus[]>(["REVIEW_REQUESTED"]);
   const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder>("LATEST");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isFavoriteUpdating, setIsFavoriteUpdating] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -70,19 +51,17 @@ export function EmployeeDashboardPage({
       }
 
       try {
-        const [favorites, candidates, memberResponse, recentOutputResponse] = await Promise.all([
-          getFavoriteMembers(accessToken),
-          getFavoriteMemberCandidates(accessToken),
-          getMembers(),
+        const [categorySummaryResponse, recentOutputResponse] = await Promise.all([
+          getTaskCategorySummary({
+            statuses: ["IN_PROGRESS"]
+          }),
           getTaskRecentWorkStatus(accessToken, {
             sortOrder: recentTaskSortOrder,
             statuses: recentTaskStatuses
           })
         ]);
 
-        setFavoriteMembers(favorites);
-        setFavoriteCandidates(candidates);
-        setMembers(memberResponse.filter(isAssignableMember));
+        setCategorySummary(categorySummaryResponse);
         setRecentOutputs(recentOutputResponse);
         setMessage("");
       } catch (error) {
@@ -94,18 +73,6 @@ export function EmployeeDashboardPage({
 
     void loadDashboard();
   }, [accessToken, recentTaskSortOrder, recentTaskStatuses]);
-
-  async function refreshRecentOutputs() {
-    if (!accessToken) {
-      return;
-    }
-
-    const recentOutputResponse = await getTaskRecentWorkStatus(accessToken, {
-      sortOrder: recentTaskSortOrder,
-      statuses: recentTaskStatuses
-    });
-    setRecentOutputs(recentOutputResponse);
-  }
 
   function handleRecentTaskStatusToggle(status: TaskStatus) {
     setRecentTaskStatuses((currentStatuses) => {
@@ -125,156 +92,72 @@ export function EmployeeDashboardPage({
     setRecentTaskSortOrder((currentSortOrder) => (currentSortOrder === "LATEST" ? "OLDEST" : "LATEST"));
   }
 
-  async function handleCreateTask(request: TaskCreateDraftSubmit) {
-    if (!accessToken) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    setMessage("");
-
-    try {
-      await createTask(accessToken, {
-        assigneeId: request.assigneeId,
-        assigneeScope: "SINGLE",
-        attachments: request.attachments,
-        category: request.category,
-        description: request.description,
-        oneLineComment: request.oneLineComment,
-        title: request.title
-      });
-      setMessage("업무가 등록되었습니다.");
-      await refreshRecentOutputs();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "업무를 등록하지 못했습니다.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function handleAddFavoriteMember(memberId: number) {
-    setIsFavoriteUpdating(true);
-    setMessage("");
-
-    try {
-      if (!accessToken) {
-        return;
-      }
-
-      const employees = await addFavoriteMember(accessToken, memberId);
-      setFavoriteMembers(employees);
-      setMessage("함께 프로젝트 중 직원이 추가되었습니다.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "함께 프로젝트 중 직원을 추가하지 못했습니다.");
-    } finally {
-      setIsFavoriteUpdating(false);
-    }
-  }
-
-  async function handleDeleteFavoriteMember(memberId: number) {
-    setIsFavoriteUpdating(true);
-    setMessage("");
-
-    try {
-      if (!accessToken) {
-        return;
-      }
-
-      const employees = await deleteFavoriteMember(accessToken, memberId);
-      setFavoriteMembers(employees);
-      setMessage("함께 프로젝트 중 직원이 삭제되었습니다.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "함께 프로젝트 중 직원을 삭제하지 못했습니다.");
-    } finally {
-      setIsFavoriteUpdating(false);
-      setConfirmDialog(null);
-    }
-  }
-
-  async function handleReorderFavoriteMembers(memberIds: number[]) {
-    setIsFavoriteUpdating(true);
-    setMessage("");
-
-    try {
-      if (!accessToken) {
-        return;
-      }
-
-      const employees = await reorderFavoriteMembers(accessToken, memberIds);
-      setFavoriteMembers(employees);
-      setMessage("함께 프로젝트 중 직원 순서가 변경되었습니다.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "함께 프로젝트 중 직원 순서를 변경하지 못했습니다.");
-    } finally {
-      setIsFavoriteUpdating(false);
-    }
-  }
-
-  if (!accessToken || !currentMember || !onAllTasksOpen || !onLogout || !onTaskDetailOpen) {
+  if (
+    !accessToken
+    || !currentMember
+    || !onAllTasksOpen
+    || !onBoardOpen
+    || !onLogout
+    || !onTaskCreateOpen
+    || !onTaskDetailOpen
+  ) {
     return null;
   }
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-background px-3 py-4 text-foreground">
-      <div className="pointer-events-none fixed left-10 top-20 text-[#F0C957]">
-        <Sparkles aria-hidden className="h-9 w-9 fill-current" />
-      </div>
-      <div className="pointer-events-none fixed right-12 top-28 text-[#F1A9C0]">
-        <Sparkles aria-hidden className="h-8 w-8 fill-current" />
-      </div>
-
-      <div className="relative mx-auto w-full max-w-[360px] space-y-5">
-        <DashboardHeader
-          isCentered
-          roleType={currentMember.roleType}
-          title="내 업무현황"
-        />
-        <GreetingCard memberName={currentMember.name} />
+    <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
+      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+        <section className="rounded-[20px] border border-[#D8D1CE] bg-white px-3 py-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
+          <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-2">
+            <button
+              aria-label="설정"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm"
+              onClick={() => setMessage("직원 설정 기능은 준비 중입니다.")}
+              type="button"
+            >
+              <Settings aria-hidden className="h-4.5 w-4.5" />
+            </button>
+            <div className="min-w-0 text-center">
+              <p className="truncate text-[15px] font-normal text-[#222222]">
+                안녕하세요 {currentMember.name}님
+              </p>
+              <p className="mt-1 text-[11px] font-normal text-[#7B716D]">오늘도 즐거운 하루 되세요</p>
+            </div>
+            <button
+              className="flex h-8 items-center justify-center rounded-[8px] border border-[#C7CDD4] bg-[#EAF3FF] px-1 text-[8px] font-normal text-[#2D70CB] shadow-[0_1px_4px_rgba(45,112,203,0.08)]"
+              onClick={onTaskCreateOpen}
+              type="button"
+            >
+              <span className="mr-1 inline-flex">
+                <PencilLine aria-hidden className="h-2.5 w-2.5" />
+              </span>
+              새 업무 등록
+            </button>
+          </div>
+        </section>
         <MessageBanner message={message} />
         {isLoading ? (
-          <section className="rounded-[28px] border border-[#F1CFD5] bg-[#FFFEFC]/95 p-5 text-center text-sm font-black text-[#9C7D79] shadow-[0_10px_22px_rgba(239,126,158,0.12)]">
+          <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-5 text-center text-[13px] font-normal text-[#7B716D] shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
             직원 대시보드를 불러오는 중입니다.
           </section>
         ) : (
-          <EmployeeListSection
-            candidates={favoriteCandidates}
-            employees={favoriteMembers}
-            isUpdating={isFavoriteUpdating}
-            maxFavoriteCount={5}
-            onAddFavoriteMember={handleAddFavoriteMember}
-            onDeleteFavoriteMember={(memberId, memberName) => setConfirmDialog({ memberId, memberName })}
-            onReorderFavoriteMembers={handleReorderFavoriteMembers}
-          />
+          <InProgressCategorySection categorySummary={categorySummary} onBoardOpen={onBoardOpen} />
         )}
-        <TaskCreateForm
-          accessToken={accessToken}
-          assignees={members}
-          isLoading={isLoading}
-          isSubmitting={isSubmitting}
-          onPublished={refreshRecentOutputs}
-          onSubmit={handleCreateTask}
-        />
         <RecentOutputsSection
+          currentMemberId={currentMember.id}
           onAllTasksOpen={onAllTasksOpen}
           onDetailOpen={onTaskDetailOpen}
           onSortOrderToggle={handleRecentTaskSortToggle}
           onStatusToggle={handleRecentTaskStatusToggle}
           recentOutputs={recentOutputs}
+          selectedScope="MINE"
           selectedSortOrder={recentTaskSortOrder}
           selectedStatuses={recentTaskStatuses}
+          showScopeSelector={false}
         />
         <DashboardLogout onLogout={onLogout} />
       </div>
 
-      {confirmDialog && (
-        <ConfirmDialog
-          confirmLabel="삭제"
-          description={`${confirmDialog.memberName} 님을 목록에서 삭제할까요?`}
-          onCancel={() => setConfirmDialog(null)}
-          onConfirm={() => handleDeleteFavoriteMember(confirmDialog.memberId)}
-          title="함께 프로젝트 중 직원 삭제"
-        />
-      )}
     </main>
   );
 }

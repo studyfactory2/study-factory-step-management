@@ -1,4 +1,4 @@
-import { Bell, ClipboardList } from "lucide-react";
+import { Bell, ClipboardList, Newspaper } from "lucide-react";
 import { type AdminDashboard } from "@/api/admin";
 import { type TaskCategorySummaryItem } from "@/api/task";
 import { roleLabels } from "@/components/adminDashboard/constants";
@@ -18,9 +18,11 @@ const categoryColorClassNames = {
 } as const;
 
 export function InProgressCategorySection({
-  categorySummary
+  categorySummary,
+  onBoardOpen
 }: {
   categorySummary: TaskCategorySummaryItem[];
+  onBoardOpen: () => void;
 }) {
   const summaryMap = new Map(categorySummary.map((item) => [item.category, item.count]));
 
@@ -37,19 +39,18 @@ export function InProgressCategorySection({
           </span>
           <button
             aria-label="내 알림"
-            className="flex h-6 min-w-6 items-center justify-center gap-0.5 rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[8px] font-normal text-[#4F4542]"
+            className="flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542]"
             type="button"
           >
             <Bell aria-hidden className="h-3 w-3 text-[#E30613]" />
-            나
           </button>
           <button
-            aria-label="직원 알림"
-            className="flex h-6 min-w-6 items-center justify-center gap-0.5 rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[8px] font-normal text-[#4F4542]"
+            aria-label="게시판으로 이동"
+            className="flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542]"
+            onClick={onBoardOpen}
             type="button"
           >
-            <Bell aria-hidden className="h-3 w-3 text-[#2D70CB]" />
-            직원
+            <Newspaper aria-hidden className="h-3.5 w-3.5 text-[#2D70CB]" />
           </button>
         </div>
       </div>
@@ -73,4 +74,3 @@ export function InProgressCategorySection({
 export function getPositionName(positionName: string | null, roleType: AdminDashboard["currentMember"]["roleType"]) {
   return positionName ?? roleLabels[roleType];
 }
-
