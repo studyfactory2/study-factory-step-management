@@ -218,19 +218,19 @@ export default function BoardRoutePage() {
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
       <div className="mx-auto w-full max-w-[380px] pb-20">
-        <header className="relative mb-4 pt-2 text-center">
+        <header className="relative mb-3 pt-1 text-center">
           <button
-            className="absolute left-0 top-0 flex h-9 items-center rounded-[12px] border border-[#D8D1CE] bg-white px-3 text-[13px] font-normal text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-normal leading-6 text-[#333333] shadow-sm"
             onClick={() => router.push(backPath)}
             type="button"
           >
             ← 뒤로가기
           </button>
-          <h1 className="flex items-center justify-center gap-2 text-[28px] font-normal leading-tight text-[#111111]">
-            <ClipboardList aria-hidden className="h-8 w-8 text-[#D48B26]" />
+          <h1 className="flex items-center justify-center gap-1.5 text-[24px] font-normal leading-tight text-[#111111]">
+            <ClipboardList aria-hidden className="h-7 w-7 -translate-y-0.5 text-[#D48B26]" />
             사내게시판
           </h1>
-          <p className="mt-1 text-[18px] font-normal text-[#77716E]">함께 만드는 우리 회사 💕</p>
+          <p className="mt-0.5 text-[15px] font-normal text-[#77716E]">함께 만드는 우리 회사 💕</p>
         </header>
 
         <nav className="mb-4 grid grid-cols-2 gap-7 px-7">
@@ -243,7 +243,7 @@ export default function BoardRoutePage() {
             onClick={() => setActiveTab("NOTICE")}
             type="button"
           >
-            <Megaphone aria-hidden className="h-5 w-5" />
+            <Megaphone aria-hidden className="h-5 w-6 scale-y-125" />
             공지사항
           </button>
           <button
@@ -269,11 +269,11 @@ export default function BoardRoutePage() {
         <section className="mb-4 rounded-[14px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-[21px] font-normal text-[#111111]">
-              <Megaphone aria-hidden className="h-6 w-6 text-[#F04D6E]" />
+              <Megaphone aria-hidden className="h-6 w-7 scale-y-125 text-[#F04D6E]" />
               공지사항
             </h2>
             <button
-              className="h-8 rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-[13px] font-normal text-[#222222]"
+              className="h-7 rounded-[9px] border border-[#D8D1CE] bg-white px-2.5 text-[12px] font-normal text-[#222222]"
               type="button"
             >
               전체보기
@@ -292,7 +292,7 @@ export default function BoardRoutePage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-[#FFE4EC] px-2 py-0.5 text-[12px] font-normal text-[#E93566]">
+                    <span className="shrink-0 whitespace-nowrap rounded-full bg-[#FFE4EC] px-2 py-0.5 text-[12px] font-normal leading-none text-[#E93566]">
                       {post.category}
                     </span>
                     <h3 className="truncate text-[15px] font-normal text-[#111111]">{post.title}</h3>
@@ -315,7 +315,7 @@ export default function BoardRoutePage() {
               사원게시물
             </h2>
             <button
-              className="h-8 rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-[13px] font-normal text-[#222222]"
+              className="h-7 rounded-[9px] border border-[#D8D1CE] bg-white px-2.5 text-[12px] font-normal text-[#222222]"
               type="button"
             >
               전체보기
