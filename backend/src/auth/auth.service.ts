@@ -2,6 +2,7 @@ import * as jwt from "jsonwebtoken";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createHash } from "crypto";
+import { RedisCacheService } from "../cache/redis-cache.service";
 import { AuthLoginRequest } from "./dto/auth-login.request";
 import { AuthLoginResponse } from "./dto/auth-login.response";
 import { AuthTokenType } from "./enum/auth-token-type.enum";
@@ -12,17 +13,23 @@ import { MemberRepository } from "../member/member.repository";
 import { RefreshTokenRepository } from "./refresh-token.repository";
 import { JwtPayload } from "./type/jwt-payload.type";
 import { RefreshToken } from "./entity/refresh-token.entity";
+import { REFRESH_TOKEN_CACHE_KEYS } from "./refresh-token-cache";
 
 @Injectable()
 export class AuthService {
   private readonly jwtSecretKey: string;
+  private readonly refreshTokenTtlSeconds: number;
 
   constructor(
     private readonly memberRepository: MemberRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly cacheService: RedisCacheService
   ) {
     this.jwtSecretKey = this.configService.getOrThrow<string>("jwt.secretKey");
+    this.refreshTokenTtlSeconds = this.parseExpiresInSeconds(
+      this.configService.getOrThrow<string>("jwt.refreshExpiresIn")
+    );
   }
 
   async login(loginRequest: AuthLoginRequest): Promise<AuthLoginResponse> {
@@ -46,9 +53,9 @@ export class AuthService {
       throw new InvalidTokenException();
     }
 
-    const savedRefreshToken = await this.refreshTokenRepository.findByToken(refreshToken);
+    const cachedMemberId = await this.findRefreshTokenMemberId(refreshToken);
 
-    if (!savedRefreshToken || savedRefreshToken.memberId !== payload.userId) {
+    if (cachedMemberId !== payload.userId) {
       throw new InvalidTokenException();
     }
 
@@ -95,7 +102,34 @@ export class AuthService {
     refreshToken.memberId = memberId;
     refreshToken.token = token;
 
-    await this.refreshTokenRepository.upsertByMemberId(refreshToken);
+    const previousToken = await this.cacheService.getString(REFRESH_TOKEN_CACHE_KEYS.memberToken(memberId));
+    const keysToDelete = previousToken
+      ? [REFRESH_TOKEN_CACHE_KEYS.tokenMember(previousToken)]
+      : [];
+
+    if (keysToDelete.length > 0) {
+      await this.cacheService.delete(keysToDelete);
+    }
+
+    const [savedMemberToken, savedTokenMember] = await Promise.all([
+      this.cacheService.setString(
+        REFRESH_TOKEN_CACHE_KEYS.memberToken(memberId),
+        token,
+        this.refreshTokenTtlSeconds
+      ),
+      this.cacheService.setString(
+        REFRESH_TOKEN_CACHE_KEYS.tokenMember(token),
+        String(memberId),
+        this.refreshTokenTtlSeconds
+      )
+    ]);
+
+    if (!savedMemberToken || !savedTokenMember) {
+      await this.refreshTokenRepository.upsertByMemberId(refreshToken);
+      return;
+    }
+
+    void this.refreshTokenRepository.upsertByMemberId(refreshToken).catch(() => undefined);
   }
 
   private async issueAuthResponse(member: Member): Promise<AuthLoginResponse> {
@@ -128,5 +162,50 @@ export class AuthService {
 
   private createPasswordHash(password: string): string {
     return createHash("sha256").update(password).digest("hex");
+  }
+
+  private async findRefreshTokenMemberId(refreshToken: string): Promise<number | null> {
+    const cachedMemberId = await this.cacheService.getString(REFRESH_TOKEN_CACHE_KEYS.tokenMember(refreshToken));
+    if (cachedMemberId) {
+      return Number(cachedMemberId);
+    }
+
+    const savedRefreshToken = await this.refreshTokenRepository.findByToken(refreshToken);
+    if (!savedRefreshToken) {
+      return null;
+    }
+
+    await Promise.all([
+      this.cacheService.setString(
+        REFRESH_TOKEN_CACHE_KEYS.memberToken(savedRefreshToken.memberId),
+        savedRefreshToken.token,
+        this.refreshTokenTtlSeconds
+      ),
+      this.cacheService.setString(
+        REFRESH_TOKEN_CACHE_KEYS.tokenMember(savedRefreshToken.token),
+        String(savedRefreshToken.memberId),
+        this.refreshTokenTtlSeconds
+      )
+    ]);
+
+    return savedRefreshToken.memberId;
+  }
+
+  private parseExpiresInSeconds(expiresIn: string): number {
+    const match = expiresIn.trim().match(/^(\d+)([smhd])?$/);
+    if (!match) {
+      return 60 * 60 * 24 * 14;
+    }
+
+    const amount = Number(match[1]);
+    const unit = match[2] ?? "s";
+    const multipliers: Record<string, number> = {
+      s: 1,
+      m: 60,
+      h: 60 * 60,
+      d: 60 * 60 * 24
+    };
+
+    return amount * multipliers[unit];
   }
 }

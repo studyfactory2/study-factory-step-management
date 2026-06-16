@@ -54,6 +54,31 @@ export class RedisCacheService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  async getString(key: string): Promise<string | null> {
+    if (!this.client || !this.isReady) {
+      return null;
+    }
+
+    try {
+      return this.client.get(key);
+    } catch {
+      return null;
+    }
+  }
+
+  async setString(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+    if (!this.client || !this.isReady) {
+      return false;
+    }
+
+    try {
+      await this.client.set(key, value, { EX: ttlSeconds });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async setJson(key: string, value: unknown, ttlSeconds: number): Promise<void> {
     if (!this.client || !this.isReady) {
       return;
