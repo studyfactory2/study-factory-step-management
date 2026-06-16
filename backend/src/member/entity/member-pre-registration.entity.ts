@@ -9,7 +9,7 @@ import { MemberRole } from "../enum/member-role.enum";
 import { OrganizationBranch } from "./organization-branch.entity";
 import { Organization } from "./organization.entity";
 
-@Index(["name", "branch", "affiliation", "position", "duty"], { unique: true })
+@Index(["name", "residenceCity", "residenceDistrict", "positionId", "positionDutyId"], { unique: true })
 @Entity({ name: "member_pre_registration" })
 export class MemberPreRegistration extends BaseEntity {
   @Column()
@@ -26,6 +26,12 @@ export class MemberPreRegistration extends BaseEntity {
 
   @Column({ name: "duty_text", type: "varchar", nullable: true })
   dutyText: string | null;
+
+  @Column({ name: "residence_city", type: "varchar", nullable: true })
+  residenceCity: string | null;
+
+  @Column({ name: "residence_district", type: "varchar", nullable: true })
+  residenceDistrict: string | null;
 
   @Column({
     type: "enum",

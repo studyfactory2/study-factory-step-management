@@ -161,10 +161,11 @@ export function AdminDashboardPage({
   }
 
   async function handlePreRegister(request: {
-    branch: string;
     name: string;
     positionDutyId: number;
     positionId: number;
+    residenceCity: string;
+    residenceDistrict: string;
   }) {
     setMessage("");
     setIsPreRegisterSubmitting(true);

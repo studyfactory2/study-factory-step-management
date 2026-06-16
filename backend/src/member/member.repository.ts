@@ -272,13 +272,12 @@ export class MemberRepository {
     });
   }
 
-  async countByNameAndBranch(name: string, branch: string): Promise<number> {
-    return this.memberRepository
-      .createQueryBuilder("member")
-      .leftJoin("member.branchInfo", "branchInfo")
-      .where("member.name = :name", { name })
-      .andWhere("branchInfo.name = :branch", { branch })
-      .getCount();
+  async countByName(name: string): Promise<number> {
+    return this.memberRepository.count({
+      where: {
+        name
+      }
+    });
   }
 
   async save(member: Member): Promise<Member> {
@@ -289,10 +288,7 @@ export class MemberRepository {
     return this.organizationRepository.save(organizations);
   }
 
-  async findPendingPreRegistrationByNameAndBranch(
-    name: string,
-    branch: string
-  ): Promise<MemberPreRegistration | null> {
+  async findPendingPreRegistrationByName(name: string): Promise<MemberPreRegistration | null> {
     return this.memberPreRegistrationRepository.findOne({
       relations: {
         branchInfo: true,
@@ -302,7 +298,6 @@ export class MemberRepository {
         createdAt: "DESC"
       },
       where: {
-        branch,
         name,
         isRegistered: false
       }

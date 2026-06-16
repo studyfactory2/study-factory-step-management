@@ -10,10 +10,11 @@ type MemberPreRegisterPanelProps = {
   onClose: () => void;
   onDelete?: (id: number, name: string) => void;
   onSubmit: (request: {
-    branch: string;
     name: string;
     positionDutyId: number;
     positionId: number;
+    residenceCity: string;
+    residenceDistrict: string;
   }) => Promise<void>;
 };
 
@@ -27,7 +28,8 @@ export function MemberPreRegisterPanel({
   onSubmit
 }: MemberPreRegisterPanelProps) {
   const [name, setName] = useState("");
-  const [branch, setBranch] = useState("");
+  const [residenceCity, setResidenceCity] = useState("");
+  const [residenceDistrict, setResidenceDistrict] = useState("");
   const [positions, setPositions] = useState<PositionTreeNode[]>([]);
   const [positionId, setPositionId] = useState<number | "">("");
   const [positionDutyId, setPositionDutyId] = useState<number | "">("");
@@ -48,13 +50,15 @@ export function MemberPreRegisterPanel({
     }
 
     await onSubmit({
-      branch,
       name,
       positionDutyId,
-      positionId
+      positionId,
+      residenceCity,
+      residenceDistrict
     });
     setName("");
-    setBranch("");
+    setResidenceCity("");
+    setResidenceDistrict("");
     setPositionId("");
     setPositionDutyId("");
   }
@@ -99,10 +103,17 @@ export function MemberPreRegisterPanel({
         />
         <input
           className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium outline-none placeholder:text-[#B79A94]"
-          onChange={(event) => setBranch(event.target.value)}
-          placeholder="지점"
+          onChange={(event) => setResidenceCity(event.target.value)}
+          placeholder="거주지 시/도"
           required
-          value={branch}
+          value={residenceCity}
+        />
+        <input
+          className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium outline-none placeholder:text-[#B79A94]"
+          onChange={(event) => setResidenceDistrict(event.target.value)}
+          placeholder="거주지 시/군/구"
+          required
+          value={residenceDistrict}
         />
         <select
           className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium text-[#B79A94] outline-none"
@@ -175,7 +186,7 @@ export function MemberPreRegisterPanel({
                     </span>
                   </div>
                   <p className="mt-1 text-xs font-bold text-[#9B7A75]">
-                    {preRegistration.branch} · {preRegistration.positionDuty?.name ?? preRegistration.positionDuty?.duty ?? "역할 미지정"}
+                    {[preRegistration.residenceCity, preRegistration.residenceDistrict].filter(Boolean).join(" ") || "거주지 미지정"} · {preRegistration.positionDuty?.name ?? preRegistration.positionDuty?.duty ?? "역할 미지정"}
                   </p>
                 </div>
                 <button

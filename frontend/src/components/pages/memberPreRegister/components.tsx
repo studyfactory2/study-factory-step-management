@@ -6,6 +6,7 @@ import {
   formatPhoneInput,
   formatPhoneNumber,
   formatPlainDate,
+  formatResidence,
   getOrganizationGroupMeta,
   getPositionBadgeMeta,
   organizationOptions,
@@ -361,7 +362,7 @@ function PendingPreRegistrationRow({
             {preRegistration.age ? `${preRegistration.age}세` : "나이 미입력"} · {formatPlainDate(preRegistration.joinedAt)}
           </p>
           <p className="mt-0.5 break-keep text-[11px] font-normal leading-4 text-[#7B716D]">
-            {preRegistration.branch ?? "지역 미지정"} · {formatPhoneNumber(preRegistration.phoneNumber)}
+            {formatResidence(preRegistration)} · {formatPhoneNumber(preRegistration.phoneNumber)}
           </p>
           <p className="mt-0.5 break-keep text-[11px] font-normal leading-4 text-[#7B716D]">
             {dutyName}

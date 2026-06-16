@@ -61,6 +61,10 @@ export function getMemberPositionName(member: Member) {
 }
 
 export function getMemberBranchName(member: Member) {
+  if (member.residenceCity || member.residenceDistrict) {
+    return [member.residenceCity, member.residenceDistrict].filter(Boolean).join(" ");
+  }
+
   return member.branchName
     ?? member.branchInfo?.name
     ?? member.branch
@@ -209,4 +213,3 @@ export function formatPhoneNumber(value: string | null) {
 
   return value;
 }
-

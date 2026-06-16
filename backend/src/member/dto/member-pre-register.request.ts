@@ -19,8 +19,11 @@ export class MemberPreRegisterRequest {
   @IsString({ message: "전화번호는 문자열이어야 합니다." })
   phoneNumber?: string;
 
-  @IsString({ message: "지점은 문자열이어야 합니다." })
-  branch: string;
+  @IsString({ message: "거주지 시/도는 문자열이어야 합니다." })
+  residenceCity: string;
+
+  @IsString({ message: "거주지 시/군/구는 문자열이어야 합니다." })
+  residenceDistrict: string;
 
   @IsOptional()
   @IsString({ message: "소속은 문자열이어야 합니다." })

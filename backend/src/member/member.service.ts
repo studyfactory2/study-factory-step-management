@@ -103,7 +103,6 @@ export class MemberService {
     }
 
     const roleType = this.resolveRoleType(positionInfo);
-    const branchInfo = await this.memberRepository.findBranchByName(request.branch);
     const organizationInfo = request.organization
       ? await this.memberRepository.findOrganizationByName(request.organization)
       : null;
@@ -113,9 +112,11 @@ export class MemberService {
     preRegistration.joinedAt = request.joinedAt ?? null;
     preRegistration.phoneNumber = request.phoneNumber ?? null;
     preRegistration.dutyText = request.dutyText ?? null;
-    preRegistration.branch = branchInfo?.name ?? request.branch;
-    preRegistration.organizationId = organizationInfo?.id ?? branchInfo?.organizationId ?? null;
-    preRegistration.branchId = branchInfo?.id ?? null;
+    preRegistration.residenceCity = request.residenceCity;
+    preRegistration.residenceDistrict = request.residenceDistrict;
+    preRegistration.branch = null;
+    preRegistration.organizationId = organizationInfo?.id ?? null;
+    preRegistration.branchId = null;
     preRegistration.affiliation = null;
     preRegistration.position = null;
     preRegistration.roleType = roleType;
@@ -158,7 +159,6 @@ export class MemberService {
     }
 
     const roleType = this.resolveRoleType(positionInfo);
-    const branchInfo = await this.memberRepository.findBranchByName(request.branch);
     const organizationInfo = request.organization
       ? await this.memberRepository.findOrganizationByName(request.organization)
       : null;
@@ -168,9 +168,11 @@ export class MemberService {
     preRegistration.joinedAt = request.joinedAt ?? null;
     preRegistration.phoneNumber = request.phoneNumber ?? null;
     preRegistration.dutyText = request.dutyText ?? null;
-    preRegistration.branch = branchInfo?.name ?? request.branch;
-    preRegistration.organizationId = organizationInfo?.id ?? branchInfo?.organizationId ?? null;
-    preRegistration.branchId = branchInfo?.id ?? null;
+    preRegistration.residenceCity = request.residenceCity;
+    preRegistration.residenceDistrict = request.residenceDistrict;
+    preRegistration.branch = null;
+    preRegistration.organizationId = organizationInfo?.id ?? null;
+    preRegistration.branchId = null;
     preRegistration.affiliation = null;
     preRegistration.position = null;
     preRegistration.roleType = roleType;
@@ -196,18 +198,15 @@ export class MemberService {
   }
 
   async register(request: MemberRegisterRequest): Promise<Member> {
-    const preRegistration = await this.memberRepository.findPendingPreRegistrationByNameAndBranch(
-      request.name,
-      request.branch
-    );
+    const preRegistration = await this.memberRepository.findPendingPreRegistrationByName(request.name);
 
     if (!preRegistration) {
-      throw new MemberPreRegistrationNotFoundException(request.name, request.branch);
+      throw new MemberPreRegistrationNotFoundException(request.name);
     }
 
-    const { branch, branchId, organizationId, positionId, positionDutyId } = preRegistration;
-    if (!branch || !positionId) {
-      throw new MemberPreRegistrationNotFoundException(request.name, request.branch);
+    const { organizationId, positionId, positionDutyId } = preRegistration;
+    if (!positionId) {
+      throw new MemberPreRegistrationNotFoundException(request.name);
     }
 
     const passwordHash = this.createPasswordHash(request.password);
@@ -236,12 +235,12 @@ export class MemberService {
     }
 
     const roleType = this.resolveRoleType(position);
-    const displayName = await this.createDisplayName(request.name, branch);
+    const displayName = await this.createDisplayName(request.name);
     const member = request.toEntity(
       passwordHash,
       displayName,
       organizationId,
-      branchId,
+      null,
       position.id,
       positionDuty?.id ?? null,
       roleType
@@ -250,6 +249,8 @@ export class MemberService {
     member.joinedAt = preRegistration.joinedAt;
     member.phoneNumber = preRegistration.phoneNumber;
     member.dutyText = preRegistration.dutyText;
+    member.residenceCity = preRegistration.residenceCity;
+    member.residenceDistrict = preRegistration.residenceDistrict;
 
     preRegistration.isRegistered = true;
     await this.memberRepository.savePreRegistration(preRegistration);
@@ -261,14 +262,14 @@ export class MemberService {
     return createHash("sha256").update(password).digest("hex");
   }
 
-  private async createDisplayName(name: string, branch: string): Promise<string> {
-    const sameBranchMemberCount = await this.memberRepository.countByNameAndBranch(name, branch);
+  private async createDisplayName(name: string): Promise<string> {
+    const sameNameMemberCount = await this.memberRepository.countByName(name);
 
-    if (sameBranchMemberCount === 0) {
+    if (sameNameMemberCount === 0) {
       return name;
     }
 
-    return `${name}${sameBranchMemberCount + 1}`;
+    return `${name}${sameNameMemberCount + 1}`;
   }
 
   private resolveRoleType(position: { isAdmin: boolean; name: string }): MemberRole {
