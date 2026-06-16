@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PencilLine, Settings } from "lucide-react";
 import {
   getAdminDashboard,
@@ -39,6 +39,7 @@ import {
   getPositionName,
   InProgressCategorySection
 } from "@/components/pages/adminDashboard/in-progress-category-section";
+import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 
 type AdminDashboardPageProps = {
   accessToken: string;
@@ -100,6 +101,12 @@ export function AdminDashboardPage({
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
   const [isPreRegistrationLoading, setIsPreRegistrationLoading] = useState(false);
   const [isPreRegisterSubmitting, setIsPreRegisterSubmitting] = useState(false);
+
+  const handleRealtimeNotification = useCallback(() => {
+    setNotificationUnreadCount((currentCount) => currentCount + 1);
+  }, []);
+
+  useRealtimeNotifications(accessToken, handleRealtimeNotification);
 
   useEffect(() => {
     async function loadDashboard() {

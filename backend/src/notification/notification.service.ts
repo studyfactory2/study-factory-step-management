@@ -4,11 +4,15 @@ import { Task } from "../task/entity/task.entity";
 import { NotificationResponse, NotificationUnreadCountResponse } from "./dto/notification.response";
 import { Notification } from "./entity/notification.entity";
 import { NotificationType } from "./enum/notification-type.enum";
+import { NotificationGateway } from "./notification.gateway";
 import { NotificationRepository } from "./notification.repository";
 
 @Injectable()
 export class NotificationService {
-  constructor(private readonly notificationRepository: NotificationRepository) {}
+  constructor(
+    private readonly notificationRepository: NotificationRepository,
+    private readonly notificationGateway: NotificationGateway
+  ) {}
 
   async createTaskAssignedNotifications(tasks: Task[], actorId: number): Promise<void> {
     const notifications = tasks
@@ -20,7 +24,8 @@ export class NotificationService {
         type: NotificationType.TASK_ASSIGNED
       }));
 
-    await this.notificationRepository.saveAll(notifications);
+    const savedNotifications = await this.notificationRepository.saveAll(notifications);
+    this.emitRealtimeNotifications(savedNotifications);
   }
 
   async createTaskCommentNotifications(
@@ -38,7 +43,8 @@ export class NotificationService {
       type: NotificationType.TASK_COMMENTED
     }));
 
-    await this.notificationRepository.saveAll(notifications);
+    const savedNotifications = await this.notificationRepository.saveAll(notifications);
+    this.emitRealtimeNotifications(savedNotifications);
   }
 
   async findMyNotifications(currentMember: CurrentMember): Promise<NotificationResponse[]> {
@@ -84,6 +90,19 @@ export class NotificationService {
 
   private truncateCommentPreview(content: string): string {
     return content.trim().slice(0, 80);
+  }
+
+  private emitRealtimeNotifications(notifications: Notification[]): void {
+    notifications.forEach((notification) => {
+      this.notificationGateway.notifyMember(notification.recipientId, {
+        actorId: notification.actorId,
+        commentPreview: notification.commentPreview,
+        id: notification.id,
+        taskId: notification.taskId,
+        type: notification.type,
+        unreadIncrement: notification.isRead ? 0 : 1
+      });
+    });
   }
 
   private toResponse(notification: Notification): NotificationResponse {

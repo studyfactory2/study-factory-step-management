@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PencilLine, Settings } from "lucide-react";
 import type {
   AdminDashboardRecentOutput,
@@ -19,6 +19,7 @@ import { DashboardLogout } from "@/components/adminDashboard/dashboard-logout";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import { RecentOutputsSection } from "@/components/adminDashboard/recent-outputs-section";
 import { InProgressCategorySection } from "@/components/pages/adminDashboard/in-progress-category-section";
+import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 import type { StoredMember } from "@/lib/auth-storage";
 import type { TaskStatus } from "@/types/domain";
 
@@ -50,6 +51,12 @@ export function EmployeeDashboardPage({
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleRealtimeNotification = useCallback(() => {
+    setNotificationUnreadCount((currentCount) => currentCount + 1);
+  }, []);
+
+  useRealtimeNotifications(accessToken, handleRealtimeNotification);
 
   useEffect(() => {
     async function loadDashboard() {
