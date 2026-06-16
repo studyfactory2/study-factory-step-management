@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AuthTokenRefreshProvider } from "@/components/auth-token-refresh-provider";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { PwaServiceWorkerRegister } from "@/components/pwa-service-worker-register";
 import "./globals.css";
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
+        <AuthTokenRefreshProvider />
         <PwaServiceWorkerRegister />
         <PullToRefresh />
         {children}

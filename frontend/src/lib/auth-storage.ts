@@ -12,6 +12,7 @@ export type StoredMember = {
 
 export type StoredAuth = {
   accessToken: string;
+  refreshToken: string;
   currentMember: StoredMember | null;
 };
 
@@ -21,12 +22,14 @@ export function getStoredAuth(): StoredAuth {
   if (typeof window === "undefined") {
     return {
       accessToken: "",
+      refreshToken: "",
       currentMember: null
     };
   }
 
   return {
     accessToken: localStorage.getItem("accessToken") ?? "",
+    refreshToken: localStorage.getItem("refreshToken") ?? "",
     currentMember: parseStoredMember(localStorage.getItem("currentMember"))
   };
 }

@@ -42,3 +42,22 @@ export async function login(request: LoginRequest): Promise<LoginResponse> {
 
   return response.json() as Promise<LoginResponse>;
 }
+
+export async function refreshAuth(refreshToken: string): Promise<LoginResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ refreshToken })
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "로그인 갱신에 실패했습니다.");
+  }
+
+  return response.json() as Promise<LoginResponse>;
+}
