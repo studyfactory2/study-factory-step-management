@@ -171,7 +171,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       } else {
         clearRememberedLoginName();
       }
-      setMessage(`${response.member.name}님, 로그인되었습니다.`);
       onLogin?.(response);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "로그인에 실패했습니다.");
