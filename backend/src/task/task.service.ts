@@ -414,6 +414,11 @@ export class TaskService {
     };
   }
 
+  async deleteDraft(id: number, currentMember: CurrentMember): Promise<void> {
+    await this.findDraftEntity(id, currentMember.memberId);
+    await this.taskRepository.deleteDraftByIdAndCreator(id, currentMember.memberId);
+  }
+
   private async findDraftEntity(id: number, createdBy: number): Promise<Task> {
     const draft = await this.taskRepository.findDraftByIdAndCreator(id, createdBy);
 

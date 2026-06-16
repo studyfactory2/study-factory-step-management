@@ -428,6 +428,23 @@ export async function publishTaskDraft(
   return response.json() as Promise<TaskCreateResponse>;
 }
 
+export async function deleteTaskDraft(accessToken: string, draftId: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/tasks/drafts/${draftId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "임시저장 업무를 삭제하지 못했습니다.");
+  }
+}
+
 export async function createTaskComment(
   accessToken: string,
   taskId: number,
