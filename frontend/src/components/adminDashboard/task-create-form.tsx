@@ -278,9 +278,20 @@ export function TaskCreateForm({
   }
 
   async function handleSubmitDraft(draft: TaskDraftForm) {
-    if (!draft.assigneeId || !draft.title.trim() || !draft.description.trim()) {
+    const hasDescription = draft.description.trim().length > 0;
+    const hasAttachment = draft.attachments.length > 0;
+
+    if (!draft.assigneeId || !draft.title.trim()) {
       onAlert({
-        description: "직원, 업무 제목, 상세 설명을 모두 입력해주세요.",
+        description: "직원과 업무 제목을 입력해주세요.",
+        title: "입력 확인"
+      });
+      return;
+    }
+
+    if (!hasDescription && !hasAttachment) {
+      onAlert({
+        description: "업무 내용 또는 사진 중 하나는 입력해주세요.",
         title: "입력 확인"
       });
       return;

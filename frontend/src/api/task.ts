@@ -96,7 +96,7 @@ export type TaskAssigneeScope = "SINGLE" | "ALL";
 export type TaskCreateRequest = {
   attachments?: File[];
   title: string;
-  description: string;
+  description?: string;
   category: TaskCategory;
   oneLineComment?: string;
   assigneeScope: TaskAssigneeScope;
@@ -414,7 +414,7 @@ export async function createTask(
 ): Promise<TaskCreateResponse> {
   const formData = new FormData();
   formData.append("title", request.title);
-  formData.append("description", request.description);
+  formData.append("description", request.description ?? "");
   formData.append("assigneeScope", request.assigneeScope);
 
   if (request.category) {

@@ -19,8 +19,9 @@ export class TaskCreateRequest {
   @IsString({ message: "업무 제목은 문자열이어야 합니다." })
   title: string;
 
+  @IsOptional()
   @IsString({ message: "업무 설명은 문자열이어야 합니다." })
-  description: string;
+  description?: string;
 
   @IsDefined({ message: "업무 카테고리를 선택해주세요." })
   @IsEnum(TaskCategory, { message: "유효하지 않은 업무 카테고리입니다." })
@@ -57,7 +58,7 @@ export class TaskCreateRequest {
   toEntity(assigneeId: number, createdBy: number): Task {
     const task = new Task();
     task.title = this.title;
-    task.description = this.description;
+    task.description = this.description?.trim() ?? "";
     task.category = this.category;
     task.oneLineComment = this.oneLineComment?.trim() || null;
     task.descriptionHighlightStart = null;
