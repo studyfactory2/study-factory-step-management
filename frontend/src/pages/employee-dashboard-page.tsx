@@ -23,7 +23,11 @@ import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 import type { StoredMember } from "@/lib/auth-storage";
 import type { TaskStatus } from "@/types/domain";
 
-const inProgressTaskStatuses: TaskStatus[] = ["IN_PROGRESS"];
+const activeTaskStatuses: TaskStatus[] = [
+  "REGISTERED",
+  "IN_PROGRESS",
+  "REVIEW_REQUESTED"
+];
 
 type EmployeeDashboardPageProps = {
   accessToken: string;
@@ -67,14 +71,14 @@ export function EmployeeDashboardPage({
 
       try {
         const cachedCategorySummary = readTaskCategorySummaryCache({
-          statuses: inProgressTaskStatuses
+          statuses: activeTaskStatuses
         });
         if (cachedCategorySummary) {
           setCategorySummary(cachedCategorySummary);
         }
 
         void getTaskCategorySummary({
-          statuses: inProgressTaskStatuses
+          statuses: activeTaskStatuses
         })
           .then(setCategorySummary)
           .catch(() => undefined);

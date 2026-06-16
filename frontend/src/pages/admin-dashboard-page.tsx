@@ -71,7 +71,11 @@ const allRecentTaskStatuses: TaskStatus[] = [
   "COMPLETED"
 ];
 
-const inProgressTaskStatuses: TaskStatus[] = ["IN_PROGRESS"];
+const activeTaskStatuses: TaskStatus[] = [
+  "REGISTERED",
+  "IN_PROGRESS",
+  "REVIEW_REQUESTED"
+];
 
 type ConfirmDialogState = {
   confirmLabel?: string;
@@ -113,14 +117,14 @@ export function AdminDashboardPage({
     async function loadDashboard() {
       try {
         const cachedCategorySummary = readTaskCategorySummaryCache({
-          statuses: inProgressTaskStatuses
+          statuses: activeTaskStatuses
         });
         if (cachedCategorySummary) {
           setCategorySummary(cachedCategorySummary);
         }
 
         void getTaskCategorySummary({
-          statuses: inProgressTaskStatuses
+          statuses: activeTaskStatuses
         })
           .then(setCategorySummary)
           .catch(() => undefined);
