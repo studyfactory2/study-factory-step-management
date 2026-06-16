@@ -8,6 +8,7 @@ import { BoardService } from "./board.service";
 import { BoardCommentCreateRequest } from "./dto/board-comment-create.request";
 import { BoardCommentUpdateRequest } from "./dto/board-comment-update.request";
 import { BoardPostCreateRequest } from "./dto/board-post-create.request";
+import { BoardPostDraftSaveRequest } from "./dto/board-post-draft-save.request";
 import { BoardPostListQueryRequest } from "./dto/board-post-list-query.request";
 import { BoardPostUpdateRequest } from "./dto/board-post-update.request";
 
@@ -27,6 +28,48 @@ export class BoardController {
     @CurrentMember() currentMember: CurrentMemberType
   ) {
     return this.boardService.findPosts(currentMember.memberId, query.type);
+  }
+
+  @Get("post-drafts/latest")
+  async findLatestDraft(@CurrentMember() currentMember: CurrentMemberType) {
+    return this.boardService.findLatestDraft(currentMember);
+  }
+
+  @UseInterceptors(FilesInterceptor("attachments", 5))
+  @Post("post-drafts")
+  async saveDraft(
+    @Body() request: BoardPostDraftSaveRequest,
+    @CurrentMember() currentMember: CurrentMemberType,
+    @UploadedFiles() files: UploadFile[] = []
+  ) {
+    return this.boardService.saveDraft(request, currentMember, files);
+  }
+
+  @UseInterceptors(FilesInterceptor("attachments", 5))
+  @Patch("post-drafts/:id")
+  async updateDraft(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() request: BoardPostDraftSaveRequest,
+    @CurrentMember() currentMember: CurrentMemberType,
+    @UploadedFiles() files: UploadFile[] = []
+  ) {
+    return this.boardService.saveDraft(request, currentMember, files, id);
+  }
+
+  @Delete("post-drafts/:id")
+  async deleteDraft(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    await this.boardService.deleteDraft(id, currentMember);
+  }
+
+  @Post("post-drafts/:id/publish")
+  async publishDraft(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.boardService.publishDraft(id, currentMember);
   }
 
   @Get("posts/:id")

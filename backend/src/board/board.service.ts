@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { UploadFile } from "../upload/type/upload-file.type";
@@ -7,11 +7,13 @@ import { BoardRepository } from "./board.repository";
 import { BoardCommentCreateRequest } from "./dto/board-comment-create.request";
 import { BoardCommentUpdateRequest } from "./dto/board-comment-update.request";
 import { BoardPostCreateRequest } from "./dto/board-post-create.request";
+import { BoardPostDraftSaveRequest } from "./dto/board-post-draft-save.request";
 import { BoardPostUpdateRequest } from "./dto/board-post-update.request";
 import {
   BoardPostCommentResponse,
   BoardPostCategoryResponse,
   BoardPostCreateResponse,
+  BoardPostDraftResponse,
   BoardPostDetailResponse,
   BoardPostLikeToggleResponse,
   BoardPostListResponse
@@ -19,6 +21,9 @@ import {
 import { BoardComment } from "./entity/board-comment.entity";
 import { BoardPostAttachment } from "./entity/board-post-attachment.entity";
 import { BoardPostCategory } from "./entity/board-post-category.entity";
+import { BoardPostDraft } from "./entity/board-post-draft.entity";
+import { BoardPostDraftAttachment } from "./entity/board-post-draft-attachment.entity";
+import { BoardPostDraftCategory } from "./entity/board-post-draft-category.entity";
 import { BoardPost } from "./entity/board-post.entity";
 import { BoardPostType } from "./enum/board-post-type.enum";
 import { BoardVisibility } from "./enum/board-visibility.enum";
@@ -88,6 +93,137 @@ export class BoardService {
         return attachment;
       })
     );
+
+    return {
+      postId: savedPost.id
+    };
+  }
+
+  async findLatestDraft(currentMember: CurrentMember): Promise<BoardPostDraftResponse | null> {
+    const draft = await this.boardRepository.findLatestDraftByCreator(currentMember.memberId);
+    return draft ? this.toDraftResponse(draft) : null;
+  }
+
+  async saveDraft(
+    request: BoardPostDraftSaveRequest,
+    currentMember: CurrentMember,
+    files: UploadFile[] = [],
+    draftId?: number
+  ): Promise<BoardPostDraftResponse> {
+    const postType = request.postType ?? BoardPostType.EMPLOYEE;
+
+    if (postType === BoardPostType.NOTICE && !this.isAdminRole(currentMember.role)) {
+      throw new ForbiddenException("공지사항은 관리자 또는 CEO만 작성할 수 있습니다.");
+    }
+
+    const draft = draftId
+      ? await this.boardRepository.findDraftById(draftId, currentMember.memberId)
+      : new BoardPostDraft();
+
+    if (!draft) {
+      throw new NotFoundException("임시저장 게시글을 찾을 수 없습니다.");
+    }
+
+    draft.title = request.title?.trim() ?? "";
+    draft.content = request.content?.trim() ?? "";
+    draft.oneLineComment = request.oneLineComment?.trim() || null;
+    draft.postType = postType;
+    draft.visibility = request.visibility ?? BoardVisibility.ALL;
+    draft.createdBy = currentMember.memberId;
+
+    const savedDraft = await this.boardRepository.saveDraft(draft);
+    const categoryIds = postType === BoardPostType.NOTICE ? [] : this.parseCategoryIds(request.categoryIds).slice(0, 2);
+    const categories = await this.boardRepository.findActiveCategoriesByIds(categoryIds);
+
+    await this.boardRepository.deleteDraftCategoriesByDraftId(savedDraft.id);
+    await this.boardRepository.saveDraftCategories(
+      categories.map((category) => {
+        const draftCategory = new BoardPostDraftCategory();
+        draftCategory.draftId = savedDraft.id;
+        draftCategory.categoryId = category.id;
+        return draftCategory;
+      })
+    );
+
+    const keepAttachmentIds = this.parseCategoryIds(request.keepAttachmentIds);
+    await this.boardRepository.deleteDraftAttachmentsExcept(savedDraft.id, keepAttachmentIds);
+    const keptAttachments = await this.boardRepository.findDraftAttachmentsByIds(savedDraft.id, keepAttachmentIds);
+    const remainingSlotCount = Math.max(0, 5 - keptAttachments.length);
+    const storedFiles = await this.uploadService.saveImages(files.slice(0, remainingSlotCount));
+
+    await this.boardRepository.saveDraftAttachments(
+      storedFiles.map((file, index) => {
+        const attachment = new BoardPostDraftAttachment();
+        attachment.draftId = savedDraft.id;
+        attachment.imageUrl = file.imageUrl;
+        attachment.originalName = file.originalName;
+        attachment.displayOrder = keptAttachments.length + index;
+        return attachment;
+      })
+    );
+
+    const updatedDraft = await this.boardRepository.findDraftById(savedDraft.id, currentMember.memberId);
+
+    if (!updatedDraft) {
+      throw new NotFoundException("임시저장 게시글을 찾을 수 없습니다.");
+    }
+
+    return this.toDraftResponse(updatedDraft);
+  }
+
+  async deleteDraft(id: number, currentMember: CurrentMember): Promise<void> {
+    await this.boardRepository.deleteDraftById(id, currentMember.memberId);
+  }
+
+  async publishDraft(id: number, currentMember: CurrentMember): Promise<BoardPostCreateResponse> {
+    const draft = await this.boardRepository.findDraftById(id, currentMember.memberId);
+
+    if (!draft) {
+      throw new NotFoundException("임시저장 게시글을 찾을 수 없습니다.");
+    }
+
+    if (!draft.title.trim()) {
+      throw new BadRequestException("제목을 입력해주세요.");
+    }
+
+    if (!draft.content.trim()) {
+      throw new BadRequestException("본문 내용을 입력해주세요.");
+    }
+
+    if (draft.postType === BoardPostType.EMPLOYEE && draft.draftCategories.length === 0) {
+      throw new BadRequestException("카테고리를 1개 이상 선택해주세요.");
+    }
+
+    const post = new BoardPost();
+    post.title = draft.title.trim();
+    post.content = draft.content.trim();
+    post.oneLineComment = draft.oneLineComment?.trim() || null;
+    post.postType = draft.postType;
+    post.visibility = draft.visibility;
+    post.createdBy = currentMember.memberId;
+    post.isPinned = draft.postType === BoardPostType.NOTICE;
+    post.isActive = true;
+
+    const savedPost = await this.boardRepository.savePost(post);
+    await this.boardRepository.savePostCategories(
+      draft.draftCategories.map((draftCategory) => {
+        const postCategory = new BoardPostCategory();
+        postCategory.postId = savedPost.id;
+        postCategory.categoryId = draftCategory.categoryId;
+        return postCategory;
+      })
+    );
+    await this.boardRepository.saveAttachments(
+      draft.attachments.map((draftAttachment) => {
+        const attachment = new BoardPostAttachment();
+        attachment.postId = savedPost.id;
+        attachment.imageUrl = draftAttachment.imageUrl;
+        attachment.originalName = draftAttachment.originalName;
+        attachment.displayOrder = draftAttachment.displayOrder;
+        return attachment;
+      })
+    );
+    await this.boardRepository.deleteDraftById(draft.id, currentMember.memberId);
 
     return {
       postId: savedPost.id
@@ -315,6 +451,28 @@ export class BoardService {
       viewCount: post.views.length,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString()
+    };
+  }
+
+  private toDraftResponse(draft: BoardPostDraft): BoardPostDraftResponse {
+    return {
+      id: draft.id,
+      title: draft.title,
+      content: draft.content,
+      oneLineComment: draft.oneLineComment,
+      postType: draft.postType,
+      visibility: draft.visibility,
+      categoryIds: draft.draftCategories
+        .filter((draftCategory) => draftCategory.category?.isActive)
+        .map((draftCategory) => draftCategory.categoryId),
+      attachments: draft.attachments.map((attachment) => ({
+        id: attachment.id,
+        imageUrl: attachment.imageUrl,
+        originalName: attachment.originalName,
+        displayOrder: attachment.displayOrder
+      })),
+      createdAt: draft.createdAt.toISOString(),
+      updatedAt: draft.updatedAt.toISOString()
     };
   }
 

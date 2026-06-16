@@ -1,12 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { BoardCategory } from "./entity/board-category.entity";
 import { BoardComment } from "./entity/board-comment.entity";
 import { BoardLike } from "./entity/board-like.entity";
 import { BoardPost } from "./entity/board-post.entity";
 import { BoardPostAttachment } from "./entity/board-post-attachment.entity";
 import { BoardPostCategory } from "./entity/board-post-category.entity";
+import { BoardPostDraft } from "./entity/board-post-draft.entity";
+import { BoardPostDraftAttachment } from "./entity/board-post-draft-attachment.entity";
+import { BoardPostDraftCategory } from "./entity/board-post-draft-category.entity";
 import { BoardView } from "./entity/board-view.entity";
 import { BoardPostType } from "./enum/board-post-type.enum";
 
@@ -45,6 +48,12 @@ export class BoardRepository {
     private readonly boardPostAttachmentRepository: Repository<BoardPostAttachment>,
     @InjectRepository(BoardPostCategory)
     private readonly boardPostCategoryRepository: Repository<BoardPostCategory>,
+    @InjectRepository(BoardPostDraft)
+    private readonly boardPostDraftRepository: Repository<BoardPostDraft>,
+    @InjectRepository(BoardPostDraftAttachment)
+    private readonly boardPostDraftAttachmentRepository: Repository<BoardPostDraftAttachment>,
+    @InjectRepository(BoardPostDraftCategory)
+    private readonly boardPostDraftCategoryRepository: Repository<BoardPostDraftCategory>,
     @InjectRepository(BoardLike)
     private readonly boardLikeRepository: Repository<BoardLike>,
     @InjectRepository(BoardView)
@@ -139,6 +148,92 @@ export class BoardRepository {
 
   async savePost(post: BoardPost): Promise<BoardPost> {
     return this.boardPostRepository.save(post);
+  }
+
+  async saveDraft(draft: BoardPostDraft): Promise<BoardPostDraft> {
+    return this.boardPostDraftRepository.save(draft);
+  }
+
+  async saveDraftCategories(draftCategories: BoardPostDraftCategory[]): Promise<void> {
+    if (draftCategories.length === 0) {
+      return;
+    }
+
+    await this.boardPostDraftCategoryRepository.save(draftCategories);
+  }
+
+  async saveDraftAttachments(attachments: BoardPostDraftAttachment[]): Promise<void> {
+    if (attachments.length === 0) {
+      return;
+    }
+
+    await this.boardPostDraftAttachmentRepository.save(attachments);
+  }
+
+  async deleteDraftCategoriesByDraftId(draftId: number): Promise<void> {
+    await this.boardPostDraftCategoryRepository.delete({ draftId });
+  }
+
+  async deleteDraftAttachmentsExcept(draftId: number, keepAttachmentIds: number[]): Promise<void> {
+    const queryBuilder = this.boardPostDraftAttachmentRepository
+      .createQueryBuilder()
+      .delete()
+      .from(BoardPostDraftAttachment)
+      .where("draft_id = :draftId", { draftId });
+
+    if (keepAttachmentIds.length > 0) {
+      queryBuilder.andWhere("id NOT IN (:...keepAttachmentIds)", { keepAttachmentIds });
+    }
+
+    await queryBuilder.execute();
+  }
+
+  async deleteDraftById(id: number, creatorId: number): Promise<void> {
+    await this.boardPostDraftRepository.delete({
+      id,
+      createdBy: creatorId
+    });
+  }
+
+  async findLatestDraftByCreator(creatorId: number): Promise<BoardPostDraft | null> {
+    return this.boardPostDraftRepository
+      .createQueryBuilder("draft")
+      .leftJoinAndSelect("draft.draftCategories", "draftCategory")
+      .leftJoinAndSelect("draftCategory.category", "category")
+      .leftJoinAndSelect("draft.attachments", "attachment")
+      .where("draft.createdBy = :creatorId", { creatorId })
+      .orderBy("draft.updatedAt", "DESC")
+      .addOrderBy("attachment.displayOrder", "ASC")
+      .getOne();
+  }
+
+  async findDraftById(id: number, creatorId: number): Promise<BoardPostDraft | null> {
+    return this.boardPostDraftRepository
+      .createQueryBuilder("draft")
+      .leftJoinAndSelect("draft.draftCategories", "draftCategory")
+      .leftJoinAndSelect("draftCategory.category", "category")
+      .leftJoinAndSelect("draft.attachments", "attachment")
+      .where("draft.id = :id", { id })
+      .andWhere("draft.createdBy = :creatorId", { creatorId })
+      .orderBy("attachment.displayOrder", "ASC")
+      .getOne();
+  }
+
+  async findDraftAttachmentsByIds(draftId: number, attachmentIds: number[]): Promise<BoardPostDraftAttachment[]> {
+    if (attachmentIds.length === 0) {
+      return [];
+    }
+
+    return this.boardPostDraftAttachmentRepository.find({
+      where: {
+        draftId,
+        id: In(attachmentIds)
+      },
+      order: {
+        displayOrder: "ASC",
+        id: "ASC"
+      }
+    });
   }
 
   async savePostCategories(postCategories: BoardPostCategory[]): Promise<void> {

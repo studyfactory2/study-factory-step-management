@@ -10,6 +10,9 @@ import { BoardComment } from "./board/entity/board-comment.entity";
 import { BoardLike } from "./board/entity/board-like.entity";
 import { BoardPostAttachment } from "./board/entity/board-post-attachment.entity";
 import { BoardPostCategory } from "./board/entity/board-post-category.entity";
+import { BoardPostDraft } from "./board/entity/board-post-draft.entity";
+import { BoardPostDraftAttachment } from "./board/entity/board-post-draft-attachment.entity";
+import { BoardPostDraftCategory } from "./board/entity/board-post-draft-category.entity";
 import { BoardPost } from "./board/entity/board-post.entity";
 import { BoardView } from "./board/entity/board-view.entity";
 import { appConfig } from "./config/app.config";
@@ -56,6 +59,9 @@ import { TaskModule } from "./task/task.module";
           BoardPost,
           BoardPostAttachment,
           BoardPostCategory,
+          BoardPostDraft,
+          BoardPostDraftAttachment,
+          BoardPostDraftCategory,
           BoardView,
           FavoriteMember,
           Member,

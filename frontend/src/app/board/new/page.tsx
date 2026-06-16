@@ -17,7 +17,12 @@ import {
 } from "lucide-react";
 import {
   createBoardPost,
+  deleteBoardPostDraft,
   getBoardCategories,
+  getLatestBoardPostDraft,
+  publishBoardPostDraft,
+  saveBoardPostDraft,
+  type BoardPostAttachment,
   type BoardPostCategory,
   type BoardPostType,
   type BoardVisibility
@@ -50,6 +55,10 @@ export default function BoardPostCreatePage() {
   const [oneLineComment, setOneLineComment] = useState("");
   const [visibility, setVisibility] = useState<BoardVisibility>("ALL");
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [savedAttachments, setSavedAttachments] = useState<BoardPostAttachment[]>([]);
+  const [draftId, setDraftId] = useState<number | null>(null);
+  const [isDraftLoading, setIsDraftLoading] = useState(true);
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [attachmentDeleteTarget, setAttachmentDeleteTarget] = useState<AttachmentDeleteTarget>(null);
@@ -79,15 +88,35 @@ export default function BoardPostCreatePage() {
     setCurrentMember(auth.currentMember);
     resetForm();
 
-    async function loadCategories() {
+    async function loadInitialData() {
       try {
-        setCategories(await getBoardCategories(auth.accessToken));
+        const [categoryResponse, draftResponse] = await Promise.all([
+          getBoardCategories(auth.accessToken),
+          getLatestBoardPostDraft(auth.accessToken)
+        ]);
+
+        setCategories(categoryResponse);
+
+        if (draftResponse) {
+          setDraftId(draftResponse.id);
+          setTitle(draftResponse.title);
+          setContent(draftResponse.content);
+          setOneLineComment(draftResponse.oneLineComment ?? "");
+          setSelectedPostType(draftResponse.postType);
+          setSelectedCategoryIds(draftResponse.categoryIds);
+          setVisibility(draftResponse.visibility);
+          setSavedAttachments(draftResponse.attachments);
+        } else {
+          resetForm();
+        }
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "카테고리를 불러오지 못했습니다.");
+        setMessage(error instanceof Error ? error.message : "게시글 작성 정보를 불러오지 못했습니다.");
+      } finally {
+        setIsDraftLoading(false);
       }
     }
 
-    void loadCategories();
+    void loadInitialData();
   }, [router]);
 
   if (!currentMember) {
@@ -131,7 +160,7 @@ export default function BoardPostCreatePage() {
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []).slice(0, 5 - attachments.length);
+    const files = Array.from(event.target.files ?? []).slice(0, 5 - savedAttachments.length - attachments.length);
     setAttachments((currentFiles) => [...currentFiles, ...files].slice(0, 5));
     event.target.value = "";
   }
@@ -140,11 +169,17 @@ export default function BoardPostCreatePage() {
     setAttachments((currentFiles) => currentFiles.filter((_, fileIndex) => fileIndex !== index));
   }
 
+  function handleSavedAttachmentRemove(index: number) {
+    setSavedAttachments((currentAttachments) => currentAttachments.filter((_, attachmentIndex) => attachmentIndex !== index));
+  }
+
   function resetForm() {
     setAttachments([]);
     setContent("");
+    setDraftId(null);
     setMessage("");
     setOneLineComment("");
+    setSavedAttachments([]);
     setSelectedCategoryIds([]);
     setSelectedPostType("EMPLOYEE");
     setTitle("");
@@ -164,13 +199,82 @@ export default function BoardPostCreatePage() {
     });
   }
 
+  function handleSavedAttachmentDeleteRequest(index: number) {
+    const attachment = savedAttachments[index];
+
+    if (!attachment) {
+      return;
+    }
+
+    setAttachmentDeleteTarget({
+      index: -(index + 1),
+      name: attachment.originalName ?? "저장된 사진"
+    });
+  }
+
   function handleAttachmentDeleteConfirm() {
     if (!attachmentDeleteTarget) {
       return;
     }
 
-    handleAttachmentRemove(attachmentDeleteTarget.index);
+    if (attachmentDeleteTarget.index < 0) {
+      handleSavedAttachmentRemove(Math.abs(attachmentDeleteTarget.index) - 1);
+    } else {
+      handleAttachmentRemove(attachmentDeleteTarget.index);
+    }
+
     setAttachmentDeleteTarget(null);
+  }
+
+  function createDraftRequest() {
+    return {
+      attachments,
+      categoryIds: isNoticeSelected ? [] : selectedCategoryIds,
+      content: content.trim(),
+      keepAttachmentIds: savedAttachments.map((attachment) => attachment.id),
+      oneLineComment: oneLineComment.trim() || undefined,
+      postType: selectedPostType,
+      title: title.trim(),
+      visibility
+    };
+  }
+
+  async function handleDraftSave() {
+    setMessage("");
+
+    try {
+      setIsDraftSaving(true);
+      const savedDraft = await saveBoardPostDraft(accessToken, createDraftRequest(), draftId ?? undefined);
+      setDraftId(savedDraft.id);
+      setTitle(savedDraft.title);
+      setContent(savedDraft.content);
+      setOneLineComment(savedDraft.oneLineComment ?? "");
+      setSelectedPostType(savedDraft.postType);
+      setSelectedCategoryIds(savedDraft.categoryIds);
+      setVisibility(savedDraft.visibility);
+      setSavedAttachments(savedDraft.attachments);
+      setAttachments([]);
+      setMessage("게시글이 임시저장되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "게시글을 임시저장하지 못했습니다.");
+    } finally {
+      setIsDraftSaving(false);
+    }
+  }
+
+  async function handleDraftDelete() {
+    if (!draftId) {
+      resetForm();
+      return;
+    }
+
+    try {
+      await deleteBoardPostDraft(accessToken, draftId);
+      resetForm();
+      setMessage("임시저장 게시글을 삭제했습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "임시저장 게시글을 삭제하지 못했습니다.");
+    }
   }
 
   async function handleSubmit() {
@@ -193,15 +297,22 @@ export default function BoardPostCreatePage() {
 
     try {
       setIsSubmitting(true);
-      const response = await createBoardPost(accessToken, {
-        attachments,
-        categoryIds: selectedCategoryIds,
-        content: content.trim(),
-        oneLineComment: oneLineComment.trim() || undefined,
-        postType: selectedPostType,
-        title: title.trim(),
-        visibility
-      });
+      let response;
+
+      if (draftId) {
+        const savedDraft = await saveBoardPostDraft(accessToken, createDraftRequest(), draftId);
+        response = await publishBoardPostDraft(accessToken, savedDraft.id);
+      } else {
+        response = await createBoardPost(accessToken, {
+          attachments,
+          categoryIds: selectedCategoryIds,
+          content: content.trim(),
+          oneLineComment: oneLineComment.trim() || undefined,
+          postType: selectedPostType,
+          title: title.trim(),
+          visibility
+        });
+      }
 
       router.push(`/board/${response.postId}`);
     } catch (error) {
@@ -235,6 +346,12 @@ export default function BoardPostCreatePage() {
         {message ? (
           <div className="mb-3 rounded-[12px] border border-[#D8D1CE] bg-white px-3 py-2 text-center text-[12px] font-normal text-[#B94C4C]">
             {message}
+          </div>
+        ) : null}
+
+        {isDraftLoading ? (
+          <div className="mb-3 rounded-[12px] border border-[#D8D1CE] bg-white px-3 py-2 text-center text-[12px] font-normal text-[#7B716D]">
+            임시저장 게시글을 불러오는 중입니다.
           </div>
         ) : null}
 
@@ -359,6 +476,23 @@ export default function BoardPostCreatePage() {
             <span className="text-[12px] font-normal text-[#7B716D]">(선택, 최대 5장)</span>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
+            {savedAttachments.map((attachment, index) => (
+              <div className="relative h-24 w-24 shrink-0" key={attachment.id}>
+                <img
+                  alt={attachment.originalName ?? "임시저장 첨부 이미지"}
+                  className="h-full w-full rounded-[12px] border border-[#E4DCD9] object-cover"
+                  src={attachment.imageUrl}
+                />
+                <button
+                  aria-label="첨부 삭제"
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#333333] shadow"
+                  onClick={() => handleSavedAttachmentDeleteRequest(index)}
+                  type="button"
+                >
+                  <X aria-hidden className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
             {attachmentPreviews.map((preview, index) => (
               <div className="relative h-24 w-24 shrink-0" key={`${preview.name}-${index}`}>
                 <img
@@ -376,7 +510,7 @@ export default function BoardPostCreatePage() {
                 </button>
               </div>
             ))}
-            {attachments.length < 5 ? (
+            {savedAttachments.length + attachments.length < 5 ? (
               <label className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center rounded-[12px] border border-dashed border-[#BDB5B1] bg-white text-[14px] font-normal text-[#7B716D]">
                 <ImagePlus aria-hidden className="mb-1 h-5 w-5" />
                 + 사진
@@ -436,16 +570,24 @@ export default function BoardPostCreatePage() {
           </div>
         </section>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <button
-            className="h-12 rounded-[12px] border border-[#D8D1CE] bg-white text-[18px] font-normal text-[#4F4542]"
-            onClick={() => router.push("/board")}
+            className="h-12 rounded-[12px] border border-[#D8D1CE] bg-white text-[14px] font-normal text-[#4F4542] disabled:opacity-60"
+            disabled={isDraftSaving || isSubmitting}
+            onClick={() => void handleDraftSave()}
             type="button"
           >
-            × 취소
+            {isDraftSaving ? "저장 중" : "임시저장"}
           </button>
           <button
-            className="h-12 rounded-[12px] border border-[#8FBDF0] bg-[#EAF4FF] text-[18px] font-normal text-[#1171E8] disabled:opacity-60"
+            className="h-12 rounded-[12px] border border-[#D8D1CE] bg-white text-[14px] font-normal text-[#4F4542]"
+            onClick={() => void handleDraftDelete()}
+            type="button"
+          >
+            삭제
+          </button>
+          <button
+            className="h-12 rounded-[12px] border border-[#8FBDF0] bg-[#EAF4FF] text-[14px] font-normal text-[#1171E8] disabled:opacity-60"
             disabled={isSubmitting}
             onClick={() => void handleSubmit()}
             type="button"

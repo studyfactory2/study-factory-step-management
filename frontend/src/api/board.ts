@@ -58,6 +58,19 @@ export type BoardPostDetail = BoardPost & {
   comments: BoardPostComment[];
 };
 
+export type BoardPostDraft = {
+  id: number;
+  title: string;
+  content: string;
+  oneLineComment: string | null;
+  postType: BoardPostType;
+  visibility: BoardVisibility;
+  categoryIds: number[];
+  attachments: BoardPostAttachment[];
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type BoardPostLikeToggleResponse = {
   likedByMe: boolean;
   likeCount: number;
@@ -75,6 +88,17 @@ export type BoardPostCreateRequest = {
 
 export type BoardPostCreateResponse = {
   postId: number;
+};
+
+export type BoardPostDraftSaveRequest = {
+  attachments?: File[];
+  categoryIds: number[];
+  content: string;
+  keepAttachmentIds?: number[];
+  oneLineComment?: string;
+  postType?: BoardPostType;
+  title: string;
+  visibility: BoardVisibility;
 };
 
 export type BoardPostUpdateRequest = {
@@ -147,6 +171,23 @@ export async function getBoardPostDetail(accessToken: string, postId: number): P
   }
 
   return response.json() as Promise<BoardPostDetail>;
+}
+
+export async function getLatestBoardPostDraft(accessToken: string): Promise<BoardPostDraft | null> {
+  const response = await fetch(`${API_BASE_URL}/api/board/post-drafts/latest`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("임시저장 게시글을 불러오지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostDraft | null>;
 }
 
 export async function toggleBoardPostLike(
@@ -293,6 +334,93 @@ export async function createBoardPost(
   }
 
   return response.json() as Promise<BoardPostCreateResponse>;
+}
+
+export async function saveBoardPostDraft(
+  accessToken: string,
+  request: BoardPostDraftSaveRequest,
+  draftId?: number
+): Promise<BoardPostDraft> {
+  const formData = createBoardDraftFormData(request);
+  const response = await fetch(`${API_BASE_URL}/api/board/post-drafts${draftId ? `/${draftId}` : ""}`, {
+    method: draftId ? "PATCH" : "POST",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: formData
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("게시글을 임시저장하지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostDraft>;
+}
+
+export async function deleteBoardPostDraft(accessToken: string, draftId: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/board/post-drafts/${draftId}`, {
+    method: "DELETE",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("임시저장 게시글을 삭제하지 못했습니다.");
+  }
+}
+
+export async function publishBoardPostDraft(
+  accessToken: string,
+  draftId: number
+): Promise<BoardPostCreateResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/board/post-drafts/${draftId}/publish`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  handleUnauthorizedResponse(response);
+
+  if (!response.ok) {
+    throw new Error("임시저장 게시글을 등록하지 못했습니다.");
+  }
+
+  return response.json() as Promise<BoardPostCreateResponse>;
+}
+
+function createBoardDraftFormData(request: BoardPostDraftSaveRequest) {
+  const formData = new FormData();
+  formData.append("title", request.title);
+  formData.append("content", request.content);
+  formData.append("visibility", request.visibility);
+  formData.append("postType", request.postType ?? "EMPLOYEE");
+
+  if (request.oneLineComment) {
+    formData.append("oneLineComment", request.oneLineComment);
+  }
+
+  request.categoryIds.forEach((categoryId) => {
+    formData.append("categoryIds", String(categoryId));
+  });
+
+  request.keepAttachmentIds?.forEach((attachmentId) => {
+    formData.append("keepAttachmentIds", String(attachmentId));
+  });
+
+  request.attachments?.forEach((attachment) => {
+    formData.append("attachments", attachment);
+  });
+
+  return formData;
 }
 
 export async function createBoardComment(
