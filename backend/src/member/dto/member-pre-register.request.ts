@@ -22,4 +22,12 @@ export class MemberPreRegisterRequest {
 
   @IsString({ message: "담당업무는 문자열이어야 합니다." })
   dutyText: string;
+
+  @IsOptional()
+  @IsString({ message: "거주지 시/도는 문자열이어야 합니다." })
+  residenceCity?: string;
+
+  @IsOptional()
+  @IsString({ message: "거주지 시/군/구는 문자열이어야 합니다." })
+  residenceDistrict?: string;
 }

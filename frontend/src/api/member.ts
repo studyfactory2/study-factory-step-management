@@ -137,13 +137,19 @@ export async function preRegisterMember(
   accessToken: string,
   request: MemberPreRegisterRequest
 ): Promise<void> {
+  const requestBody = {
+    residenceCity: "미입력",
+    residenceDistrict: "미입력",
+    ...request
+  };
+
   const response = await fetch(`${API_BASE_URL}/api/members/pre-registrations`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(request)
+    body: JSON.stringify(requestBody)
   });
 
   if (!response.ok) {
@@ -160,13 +166,19 @@ export async function updateMemberPreRegistration(
   id: number,
   request: MemberPreRegisterRequest
 ): Promise<void> {
+  const requestBody = {
+    residenceCity: "미입력",
+    residenceDistrict: "미입력",
+    ...request
+  };
+
   const response = await fetch(`${API_BASE_URL}/api/members/pre-registrations/${id}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(request)
+    body: JSON.stringify(requestBody)
   });
 
   if (!response.ok) {
