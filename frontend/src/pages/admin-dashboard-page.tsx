@@ -26,7 +26,6 @@ import {
   DashboardActionSection,
   type MemberManagementView
 } from "@/components/adminDashboard/dashboard-action-section";
-import { DashboardLogout } from "@/components/adminDashboard/dashboard-logout";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import { MemberPreRegisterPanel } from "@/components/adminDashboard/member-pre-register-panel";
 import { PositionTreeManagementPanel } from "@/components/adminDashboard/position-tree-management-panel";
@@ -83,7 +82,6 @@ export function AdminDashboardPage({
   onBoardOpen,
   onSettingsOpen,
   onTaskCreateOpen,
-  onLogout,
   onNotificationOpen,
   onTaskDetailOpen
 }: AdminDashboardPageProps) {
@@ -312,7 +310,6 @@ export function AdminDashboardPage({
           onSelectMemberPreRegister={handleSelectMemberPreRegister}
           onSelectPositionTree={handleSelectPositionTree}
         />
-        <DashboardLogout onLogout={onLogout} />
       </div>
       {confirmDialog && (
         <ConfirmDialog

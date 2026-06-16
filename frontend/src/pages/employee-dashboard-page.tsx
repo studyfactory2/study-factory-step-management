@@ -15,7 +15,6 @@ import {
   getTaskRecentWorkStatus,
   type TaskCategorySummaryItem
 } from "@/api/task";
-import { DashboardLogout } from "@/components/adminDashboard/dashboard-logout";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import { RecentOutputsSection } from "@/components/adminDashboard/recent-outputs-section";
 import { InProgressCategorySection } from "@/components/pages/adminDashboard/in-progress-category-section";
@@ -40,7 +39,6 @@ export function EmployeeDashboardPage({
   onAllTasksOpen,
   onBoardOpen,
   onNotificationOpen,
-  onLogout,
   onTaskCreateOpen,
   onTaskDetailOpen
 }: Partial<EmployeeDashboardPageProps>) {
@@ -129,7 +127,6 @@ export function EmployeeDashboardPage({
     || !onAllTasksOpen
     || !onBoardOpen
     || !onNotificationOpen
-    || !onLogout
     || !onTaskCreateOpen
     || !onTaskDetailOpen
   ) {
@@ -192,7 +189,6 @@ export function EmployeeDashboardPage({
           selectedStatuses={recentTaskStatuses}
           showScopeSelector={false}
         />
-        <DashboardLogout onLogout={onLogout} />
       </div>
 
     </main>
