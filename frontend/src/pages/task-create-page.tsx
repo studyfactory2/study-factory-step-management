@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import { Pencil } from "lucide-react";
 import { createTask } from "@/api/task";
 import { getMembers } from "@/api/member";
-import { TaskCreateForm, type TaskCreateDraftSubmit } from "@/components/adminDashboard/task-create-form";
+import {
+  TaskCreateForm,
+  type TaskCreateAlert,
+  type TaskCreateDraftSubmit
+} from "@/components/adminDashboard/task-create-form";
 import { isAssignableMember } from "@/components/adminDashboard/utils";
-import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 import type { Member } from "@/types/domain";
 
@@ -18,11 +21,10 @@ type TaskCreatePageProps = {
 
 export function TaskCreatePage({
   accessToken,
-  onBack,
-  onCreated
+  onBack
 }: TaskCreatePageProps) {
   const [members, setMembers] = useState<Member[]>([]);
-  const [message, setMessage] = useState("");
+  const [alertDialog, setAlertDialog] = useState<TaskCreateAlert | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
@@ -33,7 +35,10 @@ export function TaskCreatePage({
         const memberResponse = await getMembers();
         setMembers(memberResponse.filter(isAssignableMember));
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "직원 목록을 불러오지 못했습니다.");
+        setAlertDialog({
+          description: error instanceof Error ? error.message : "직원 목록을 불러오지 못했습니다.",
+          title: "직원 목록 오류"
+        });
       } finally {
         setIsLoading(false);
       }
@@ -43,7 +48,6 @@ export function TaskCreatePage({
   }, []);
 
   async function handleCreateTask(request: TaskCreateDraftSubmit) {
-    setMessage("");
     setIsSubmitting(true);
 
     try {
@@ -58,7 +62,10 @@ export function TaskCreatePage({
       });
       setIsSuccessDialogOpen(true);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "업무를 등록하지 못했습니다.");
+      setAlertDialog({
+        description: error instanceof Error ? error.message : "업무를 등록하지 못했습니다.",
+        title: "업무 등록 실패"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -66,7 +73,6 @@ export function TaskCreatePage({
 
   function handleSuccessConfirm() {
     setIsSuccessDialogOpen(false);
-    onCreated();
   }
 
   return (
@@ -90,12 +96,12 @@ export function TaskCreatePage({
           </p>
         </header>
 
-        <MessageBanner message={message} />
         <TaskCreateForm
           accessToken={accessToken}
           assignees={members}
           isLoading={isLoading}
           isSubmitting={isSubmitting}
+          onAlert={setAlertDialog}
           onPublished={async () => setIsSuccessDialogOpen(true)}
           onSubmit={handleCreateTask}
         />
@@ -108,6 +114,16 @@ export function TaskCreatePage({
           onCancel={handleSuccessConfirm}
           onConfirm={handleSuccessConfirm}
           title="업무 등록 완료"
+        />
+      )}
+      {alertDialog && (
+        <ConfirmDialog
+          cancelLabel={null}
+          confirmLabel="확인"
+          description={alertDialog.description}
+          onCancel={() => setAlertDialog(null)}
+          onConfirm={() => setAlertDialog(null)}
+          title={alertDialog.title}
         />
       )}
     </main>

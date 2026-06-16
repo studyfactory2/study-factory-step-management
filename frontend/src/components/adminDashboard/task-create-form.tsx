@@ -24,11 +24,17 @@ export type TaskCreateDraftSubmit = {
   title: string;
 };
 
+export type TaskCreateAlert = {
+  description: string;
+  title: string;
+};
+
 type TaskCreateFormProps = {
   accessToken: string;
   assignees: Member[];
   isLoading: boolean;
   isSubmitting: boolean;
+  onAlert: (alert: TaskCreateAlert) => void;
   onPublished: () => Promise<void>;
   onSubmit: (request: TaskCreateDraftSubmit) => Promise<void>;
 };
@@ -71,11 +77,11 @@ export function TaskCreateForm({
   assignees,
   isLoading,
   isSubmitting,
+  onAlert,
   onPublished,
   onSubmit
 }: TaskCreateFormProps) {
   const [drafts, setDrafts] = useState<TaskDraftForm[]>([createEmptyDraft(1)]);
-  const [message, setMessage] = useState("");
   const [positions, setPositions] = useState<PositionTreeNode[]>([]);
   const [isDraftLoading, setIsDraftLoading] = useState(true);
   const [isPositionLoading, setIsPositionLoading] = useState(true);
@@ -133,28 +139,34 @@ export function TaskCreateForm({
         }));
         setDrafts(draftForms.length > 0 ? draftForms : [createEmptyDraft(1)]);
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "임시저장 업무를 불러오지 못했습니다.");
+        onAlert({
+          description: error instanceof Error ? error.message : "임시저장 업무를 불러오지 못했습니다.",
+          title: "임시저장 업무 오류"
+        });
       } finally {
         setIsDraftLoading(false);
       }
     }
 
     void loadDrafts();
-  }, [accessToken]);
+  }, [accessToken, onAlert]);
 
   useEffect(() => {
     async function loadPositions() {
       try {
         setPositions(await getPositionTree());
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "직위트리를 불러오지 못했습니다.");
+        onAlert({
+          description: error instanceof Error ? error.message : "직위트리를 불러오지 못했습니다.",
+          title: "직위트리 오류"
+        });
       } finally {
         setIsPositionLoading(false);
       }
     }
 
     void loadPositions();
-  }, []);
+  }, [onAlert]);
 
   function updateDraft(id: number, updater: (draft: TaskDraftForm) => TaskDraftForm) {
     setDrafts((currentDrafts) =>
@@ -205,11 +217,13 @@ export function TaskCreateForm({
   }
 
   async function handleSaveDraft(id: number) {
-    setMessage("");
     const targetDraft = drafts.find((draft) => draft.id === id);
 
     if (!targetDraft?.assigneeId || !targetDraft.title.trim()) {
-      setMessage("직원과 업무 제목을 입력해주세요.");
+      onAlert({
+        description: "직원과 업무 제목을 입력해주세요.",
+        title: "입력 확인"
+      });
       return;
     }
 
@@ -245,24 +259,30 @@ export function TaskCreateForm({
         );
         return savedDrafts;
       });
-      setMessage("업무가 임시저장되었습니다.");
+      onAlert({
+        description: "업무가 임시저장되었습니다.",
+        title: "임시저장 완료"
+      });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "업무를 임시저장하지 못했습니다.");
+      onAlert({
+        description: error instanceof Error ? error.message : "업무를 임시저장하지 못했습니다.",
+        title: "임시저장 실패"
+      });
     } finally {
       setSavingDraftId(null);
     }
   }
 
   function handleEditDraft(id: number) {
-    setMessage("");
     updateDraft(id, (draft) => ({ ...draft, isSaved: false }));
   }
 
   async function handleSubmitDraft(draft: TaskDraftForm) {
-    setMessage("");
-
     if (!draft.assigneeId || !draft.title.trim() || !draft.description.trim()) {
-      setMessage("직원, 업무 제목, 상세 설명을 모두 입력해주세요.");
+      onAlert({
+        description: "직원, 업무 제목, 상세 설명을 모두 입력해주세요.",
+        title: "입력 확인"
+      });
       return;
     }
 
@@ -289,7 +309,7 @@ export function TaskCreateForm({
 
     setDrafts((currentDrafts) => {
       const remainingDrafts = currentDrafts.filter((currentDraft) => currentDraft.id !== draft.id);
-      return remainingDrafts;
+      return remainingDrafts.length > 0 ? remainingDrafts : [createEmptyDraft(1)];
     });
   }
 
@@ -308,8 +328,6 @@ export function TaskCreateForm({
       return;
     }
 
-    setMessage("");
-
     try {
       if (deleteTargetDraft.draftId) {
         await deleteTaskDraft(accessToken, deleteTargetDraft.draftId);
@@ -320,9 +338,15 @@ export function TaskCreateForm({
 
         return remainingDrafts.length > 0 ? remainingDrafts : [createEmptyDraft(1)];
       });
-      setMessage("임시저장 업무가 삭제되었습니다.");
+      onAlert({
+        description: "임시저장 업무가 삭제되었습니다.",
+        title: "임시저장 삭제"
+      });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "임시저장 업무를 삭제하지 못했습니다.");
+      onAlert({
+        description: error instanceof Error ? error.message : "임시저장 업무를 삭제하지 못했습니다.",
+        title: "임시저장 삭제 실패"
+      });
     } finally {
       setDeleteTargetDraft(null);
     }
@@ -340,12 +364,6 @@ export function TaskCreateForm({
 
   return (
     <section className="rounded-[22px] border border-[#D9D5D2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#DDD6D2]">
-      {message && (
-        <p className="mb-3 rounded-[12px] bg-[#FFF2F2] px-3 py-2 text-[13px] font-normal text-[#D83A42]">
-          {message}
-        </p>
-      )}
-
       <AssigneePicker
         isLoading={isLoading}
         isPositionLoading={isPositionLoading}
