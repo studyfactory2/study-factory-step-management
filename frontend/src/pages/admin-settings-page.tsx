@@ -91,7 +91,7 @@ export function AdminSettingsPage({
             <Settings aria-hidden className="h-7 w-7 text-[#222222]" />
             설정
           </h1>
-          <div className="mt-3 inline-flex h-8 items-center gap-1 rounded-[10px] border border-[#F0C5C5] bg-[#FFF1F1] px-3 text-[12px] font-normal text-[#D95858]">
+          <div className="absolute right-0 top-0 inline-flex h-7 items-center gap-1 rounded-[9px] border border-[#F0C5C5] bg-[#FFF1F1] px-2.5 text-[11px] font-normal text-[#D95858] shadow-sm">
             <Lock aria-hidden className="h-3.5 w-3.5" />
             관리자 전용
           </div>
