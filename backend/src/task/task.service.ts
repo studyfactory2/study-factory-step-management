@@ -288,6 +288,7 @@ export class TaskService {
 
     if (currentMember) {
       await this.taskRepository.markTaskViewed(id, currentMember.memberId);
+      await this.notificationService.markTaskNotificationsAsRead(id, currentMember);
     }
 
     return {

@@ -59,6 +59,10 @@ export class NotificationService {
     };
   }
 
+  async markTaskNotificationsAsRead(taskId: number, currentMember: CurrentMember): Promise<void> {
+    await this.notificationRepository.markTaskNotificationsAsRead(currentMember.memberId, taskId);
+  }
+
   private createNotification(request: {
     actorId: number;
     commentPreview?: string | null;

@@ -50,4 +50,22 @@ export class NotificationRepository {
       .andWhere("is_read = false")
       .execute();
   }
+
+  async markTaskNotificationsAsRead(
+    recipientId: number,
+    taskId: number,
+    readAt = new Date()
+  ): Promise<void> {
+    await this.notificationRepository
+      .createQueryBuilder()
+      .update(Notification)
+      .set({
+        isRead: true,
+        readAt
+      })
+      .where("recipient_id = :recipientId", { recipientId })
+      .andWhere("task_id = :taskId", { taskId })
+      .andWhere("is_read = false")
+      .execute();
+  }
 }
