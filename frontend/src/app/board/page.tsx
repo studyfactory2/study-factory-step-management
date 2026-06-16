@@ -186,6 +186,7 @@ export default function BoardRoutePage() {
           <h1 className="flex items-center justify-center gap-1.5 text-[24px] font-normal leading-tight text-[#111111]">
             <ClipboardList aria-hidden className="h-7 w-7 -translate-y-0.5 text-[#D48B26]" />
             사내게시판
+            <ClipboardList aria-hidden className="h-7 w-7 opacity-0" />
           </h1>
           <p className="mt-0.5 text-[15px] font-normal text-[#77716E]">함께 만드는 우리 회사 💕</p>
         </header>
