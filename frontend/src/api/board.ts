@@ -68,6 +68,7 @@ export type BoardPostCreateRequest = {
   categoryIds: number[];
   content: string;
   oneLineComment?: string;
+  postType?: BoardPostType;
   title: string;
   visibility: BoardVisibility;
 };
@@ -262,6 +263,7 @@ export async function createBoardPost(
   formData.append("title", request.title);
   formData.append("content", request.content);
   formData.append("visibility", request.visibility);
+  formData.append("postType", request.postType ?? "EMPLOYEE");
 
   if (request.oneLineComment) {
     formData.append("oneLineComment", request.oneLineComment);

@@ -191,7 +191,7 @@ export function AdminSettingsPage({
           </h2>
           <InfoRow label="버전:" value="v1.0.0" />
           <InfoRow label="개발사:" value="수험생 연구소" />
-          <InfoRow label="문의:" value="support@example.com" />
+          <InfoRow label="문의:" value="051)757-5134" />
           <div className="mt-3 flex items-center justify-center gap-4 border-t border-dashed border-[#D8D1CE] pt-3 text-[12px] font-normal text-[#6F6662]">
             <button type="button">이용약관</button>
             <span>/</span>

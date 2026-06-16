@@ -1,4 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { CurrentMember } from "../auth/type/current-member.type";
+import { MemberRole } from "../member/enum/member-role.enum";
 import { UploadFile } from "../upload/type/upload-file.type";
 import { UploadService } from "../upload/upload.service";
 import { BoardRepository } from "./board.repository";
@@ -43,23 +45,28 @@ export class BoardService {
 
   async createPost(
     request: BoardPostCreateRequest,
-    creatorId: number,
+    currentMember: CurrentMember,
     files: UploadFile[] = []
   ): Promise<BoardPostCreateResponse> {
+    const postType = request.postType ?? BoardPostType.EMPLOYEE;
+
+    if (postType === BoardPostType.NOTICE && !this.isAdminRole(currentMember.role)) {
+      throw new ForbiddenException("공지사항은 관리자 또는 CEO만 작성할 수 있습니다.");
+    }
+
     const post = new BoardPost();
     post.title = request.title.trim();
     post.content = request.content.trim();
     post.oneLineComment = request.oneLineComment?.trim() || null;
-    post.postType = BoardPostType.EMPLOYEE;
+    post.postType = postType;
     post.visibility = request.visibility ?? BoardVisibility.ALL;
-    post.createdBy = creatorId;
-    post.isPinned = false;
+    post.createdBy = currentMember.memberId;
+    post.isPinned = postType === BoardPostType.NOTICE;
     post.isActive = true;
 
     const savedPost = await this.boardRepository.savePost(post);
-    const categories = await this.boardRepository.findActiveCategoriesByIds(
-      this.parseCategoryIds(request.categoryIds).slice(0, 2)
-    );
+    const categoryIds = postType === BoardPostType.NOTICE ? [] : this.parseCategoryIds(request.categoryIds).slice(0, 2);
+    const categories = await this.boardRepository.findActiveCategoriesByIds(categoryIds);
 
     await this.boardRepository.savePostCategories(
       categories.map((category) => {
@@ -139,14 +146,14 @@ export class BoardService {
     return this.toCommentResponse(loadedComment);
   }
 
-  async deleteComment(postId: number, commentId: number, memberId: number): Promise<void> {
+  async deleteComment(postId: number, commentId: number, currentMember: CurrentMember): Promise<void> {
     const comment = await this.boardRepository.findActiveCommentById(commentId);
 
     if (!comment || comment.postId !== postId) {
       throw new NotFoundException("댓글을 찾을 수 없습니다.");
     }
 
-    this.validateCommentOwner(comment, memberId);
+    this.validateCommentDeletionPermission(comment, currentMember);
     comment.isActive = false;
     await this.boardRepository.saveComment(comment);
   }
@@ -191,14 +198,14 @@ export class BoardService {
     return this.toPostDetailResponse(updatedPost, memberId);
   }
 
-  async deletePost(postId: number, memberId: number): Promise<void> {
+  async deletePost(postId: number, currentMember: CurrentMember): Promise<void> {
     const post = await this.boardRepository.findActivePostById(postId);
 
     if (!post) {
       throw new NotFoundException("게시글을 찾을 수 없습니다.");
     }
 
-    this.validatePostOwner(post, memberId);
+    this.validatePostDeletionPermission(post, currentMember);
     post.isActive = false;
     await this.boardRepository.savePost(post);
   }
@@ -317,10 +324,30 @@ export class BoardService {
     }
   }
 
+  private validatePostDeletionPermission(post: BoardPost, currentMember: CurrentMember): void {
+    if (post.createdBy === currentMember.memberId || this.isAdminRole(currentMember.role)) {
+      return;
+    }
+
+    throw new ForbiddenException("작성자 또는 관리자만 삭제할 수 있습니다.");
+  }
+
   private validateCommentOwner(comment: BoardComment, memberId: number): void {
     if (comment.createdBy !== memberId) {
       throw new ForbiddenException("작성자만 수정하거나 삭제할 수 있습니다.");
     }
+  }
+
+  private validateCommentDeletionPermission(comment: BoardComment, currentMember: CurrentMember): void {
+    if (comment.createdBy === currentMember.memberId || this.isAdminRole(currentMember.role)) {
+      return;
+    }
+
+    throw new ForbiddenException("작성자 또는 관리자만 삭제할 수 있습니다.");
+  }
+
+  private isAdminRole(role: MemberRole): boolean {
+    return role === MemberRole.ADMIN || role === MemberRole.CEO;
   }
 
   private toCommentResponse(comment: BoardComment): BoardPostCommentResponse {
