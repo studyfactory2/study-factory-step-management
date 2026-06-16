@@ -22,14 +22,14 @@ export function StepField({
 }) {
   return (
     <div className="grid grid-cols-[32px_58px_minmax(0,1fr)] items-start gap-2">
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FBE3E8] text-[13px] font-normal text-[#C24D68]">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FBE3E8] text-[15px] font-normal text-[#C24D68]">
         {step}
       </span>
-      <span className="pt-2 text-[13px] font-normal text-[#4F4542]">{label}</span>
+      <span className="pt-2 text-[15px] font-normal text-[#4F4542]">{label}</span>
       <span className="min-w-0">
         {children}
         {helper ? (
-          <span className="mt-1 block text-[10px] font-normal text-[#9A918D]">{helper}</span>
+          <span className="mt-1 block text-[12px] font-normal text-[#9A918D]">{helper}</span>
         ) : null}
       </span>
     </div>
@@ -75,7 +75,7 @@ export function CustomDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         aria-expanded={isOpen}
-        className={`flex h-10 w-full items-center gap-2 rounded-[10px] border px-3 text-left text-[13px] font-normal outline-none transition ${
+        className={`flex h-10 w-full items-center gap-2 rounded-[10px] border px-3 text-left text-[15px] font-normal outline-none transition ${
           disabled
             ? "cursor-not-allowed border-[#E1DBD8] bg-[#F3F3F3] text-[#A69E9A]"
             : isOpen
@@ -99,14 +99,14 @@ export function CustomDropdown({
       {isOpen ? (
         <div className="absolute left-0 right-0 z-30 mt-1 max-h-44 overflow-y-auto rounded-[12px] border border-[#D8D1CE] bg-white p-1 shadow-[0_10px_24px_rgba(65,52,48,0.16)]">
           {options.length === 0 ? (
-            <p className="px-3 py-2 text-[12px] font-normal text-[#A69E9A]">선택할 항목이 없습니다.</p>
+            <p className="px-3 py-2 text-[14px] font-normal text-[#A69E9A]">선택할 항목이 없습니다.</p>
           ) : (
             options.map((option) => {
               const isSelected = option.value === value;
 
               return (
                 <button
-                  className={`flex min-h-8 w-full items-center justify-between gap-2 rounded-[9px] px-2 py-1.5 text-left text-[12px] font-normal transition ${
+                  className={`flex min-h-8 w-full items-center justify-between gap-2 rounded-[9px] px-2 py-1.5 text-left text-[14px] font-normal transition ${
                     isSelected
                       ? "bg-[#EAF3FF] text-[#2D70CB]"
                       : "text-[#4F4542] hover:bg-[#F7F7F7]"
@@ -164,12 +164,12 @@ export function PendingPreRegistrationGroup({
 
   return (
     <section className={`rounded-[14px] border p-2.5 shadow-sm ${organizationMeta.cardClassName}`}>
-      <h3 className="flex items-center gap-2 px-1 text-[14px] font-normal text-[#222222]">
+      <h3 className="flex items-center gap-2 px-1 text-[16px] font-normal text-[#222222]">
         <span className={`flex h-7 w-7 items-center justify-center rounded-full ${organizationMeta.iconClassName}`}>
           <OrganizationIcon aria-hidden className="h-4 w-4" />
         </span>
         {organizationName}
-        <span className={`rounded-full px-2 py-0.5 text-[10px] ${organizationMeta.countClassName}`}>
+        <span className={`rounded-full px-2 py-0.5 text-[12px] ${organizationMeta.countClassName}`}>
           {preRegistrations.length}명
         </span>
       </h3>
@@ -236,16 +236,16 @@ function PendingPreRegistrationRow({
     return (
       <article className="rounded-[11px] border border-[#B9D7EF] bg-[#F7FBFF] px-2 py-2">
         <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-1.5">
-          <span className="pt-2 text-center text-[12px] font-normal text-[#416A83]">{index}.</span>
+          <span className="pt-2 text-center text-[14px] font-normal text-[#416A83]">{index}.</span>
           <div className="min-w-0 space-y-2">
             <input
-              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[14px] font-normal outline-none"
               onChange={(event) => onEditDraftChange({ name: event.target.value })}
               placeholder="이름"
               value={editDraft.name}
             />
             <input
-              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[14px] font-normal outline-none"
               onChange={(event) => onEditDraftChange({ joinedAt: event.target.value })}
               type="date"
               value={editDraft.joinedAt}
@@ -272,21 +272,21 @@ function PendingPreRegistrationRow({
               />
             </div>
             <input
-              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[14px] font-normal outline-none"
               onChange={(event) => onEditDraftChange({ dutyText: event.target.value })}
               placeholder="담당업무"
               value={editDraft.dutyText}
             />
             <div className="flex justify-end gap-1.5">
               <button
-                className="h-8 rounded-[8px] border border-[#D8D1CE] bg-white px-3 text-[11px] font-normal text-[#4F4542]"
+                className="h-8 rounded-[8px] border border-[#D8D1CE] bg-white px-3 text-[13px] font-normal text-[#4F4542]"
                 onClick={onCancelEdit}
                 type="button"
               >
                 취소
               </button>
               <button
-                className="flex h-8 items-center justify-center gap-1 rounded-[8px] border border-[#B9D7EF] bg-[#D8ECFF] px-3 text-[11px] font-normal text-[#416A83] disabled:opacity-60"
+                className="flex h-8 items-center justify-center gap-1 rounded-[8px] border border-[#B9D7EF] bg-[#D8ECFF] px-3 text-[13px] font-normal text-[#416A83] disabled:opacity-60"
                 disabled={isUpdating}
                 onClick={onSaveEdit}
                 type="button"
@@ -304,19 +304,19 @@ function PendingPreRegistrationRow({
   return (
     <article className="rounded-[11px] border border-[#E6DFDC] bg-white px-2 py-2">
       <div className="grid grid-cols-[18px_minmax(0,1fr)_50px] items-start gap-1.5">
-        <span className="pt-0.5 text-center text-[12px] font-normal text-[#7B716D]">{index}.</span>
+        <span className="pt-0.5 text-center text-[14px] font-normal text-[#7B716D]">{index}.</span>
         <div className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-            <strong className="break-keep text-[13px] font-normal leading-4 text-[#222222]">{preRegistration.name}</strong>
-            <span className={`flex shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[9px] font-normal ${positionBadge.className}`}>
+            <strong className="break-keep text-[15px] font-normal leading-4 text-[#222222]">{preRegistration.name}</strong>
+            <span className={`flex shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[11px] font-normal ${positionBadge.className}`}>
               <PositionIcon aria-hidden className="h-2.5 w-2.5" />
               {positionName}
             </span>
           </div>
-          <p className="mt-1 break-keep text-[11px] font-normal leading-4 text-[#4F4542]">
+          <p className="mt-1 break-keep text-[13px] font-normal leading-4 text-[#4F4542]">
             {formatPlainDate(preRegistration.joinedAt)}
           </p>
-          <p className="mt-0.5 break-keep text-[11px] font-normal leading-4 text-[#7B716D]">
+          <p className="mt-0.5 break-keep text-[13px] font-normal leading-4 text-[#7B716D]">
             {dutyName}
           </p>
         </div>

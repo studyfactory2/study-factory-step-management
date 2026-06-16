@@ -84,7 +84,7 @@ export function DepartmentManagementSection({
               </span>
               {isEditing ? (
                 <input
-                  className="min-w-0 rounded-[8px] border border-[#D8D1CE] bg-white px-2 py-1 text-[13px] font-normal outline-none"
+                  className="min-w-0 rounded-[8px] border border-[#D8D1CE] bg-white px-2 py-1 text-[15px] font-normal outline-none"
                   onChange={(event) => setDepartmentEditDraft((current) => current ? {
                     ...current,
                     name: event.target.value
@@ -92,7 +92,7 @@ export function DepartmentManagementSection({
                   value={departmentEditDraft.name}
                 />
               ) : (
-                <span className="truncate text-[15px] font-normal text-[#222222]">{department.name}</span>
+                <span className="truncate text-[17px] font-normal text-[#222222]">{department.name}</span>
               )}
               {isEditing ? (
                 <EditActions

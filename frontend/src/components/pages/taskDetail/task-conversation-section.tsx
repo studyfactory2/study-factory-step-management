@@ -93,13 +93,13 @@ function AuthorBadge({
 
   return (
     <aside className="w-[50px] shrink-0 text-center">
-      <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-[20px] font-normal ${toneClassName.avatar}`}>
+      <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-[22px] font-normal ${toneClassName.avatar}`}>
         {initial}
       </div>
-      <p className={`mt-2 break-keep text-[13px] font-normal leading-4 ${toneClassName.text}`}>
+      <p className={`mt-2 break-keep text-[15px] font-normal leading-4 ${toneClassName.text}`}>
         {author.name}
       </p>
-      <p className="mt-1 break-keep text-[10px] font-normal leading-3 text-[#7D7471]">
+      <p className="mt-1 break-keep text-[12px] font-normal leading-3 text-[#7D7471]">
         {author.organizationName ?? "소속 미지정"}
       </p>
     </aside>
@@ -116,17 +116,17 @@ function InitialTaskBubble({
   return (
     <article className="rounded-[18px] border border-[#F0C5D2] bg-[#FFF3F7] px-3 py-3 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="flex h-6 items-center justify-center rounded-[7px] border border-[#F2C8D5] bg-white px-2 text-[10px] font-normal text-[#D93D72]">
+        <span className="flex h-6 items-center justify-center rounded-[7px] border border-[#F2C8D5] bg-white px-2 text-[12px] font-normal text-[#D93D72]">
           최초작성
         </span>
-        <span className="min-w-0 flex-1 text-[11px] font-normal text-[#6F6662]">
+        <span className="min-w-0 flex-1 text-[13px] font-normal text-[#6F6662]">
           {formatDateTime(task.createdAt)}
         </span>
         <StatusBadge status={task.status} />
       </div>
 
       <BubbleTitle title={task.title} />
-      <p className="mt-3 whitespace-pre-wrap text-[14px] font-normal leading-7 text-[#1F1A18] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]">
+      <p className="mt-3 whitespace-pre-wrap text-[16px] font-normal leading-7 text-[#1F1A18] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]">
         {task.description}
       </p>
       <AttachmentPreviewGrid attachments={task.attachments} onImagePreview={onImagePreview} />
@@ -153,17 +153,17 @@ function CommentBubble({
   return (
     <article className={`rounded-[18px] border px-3 py-3 shadow-sm ${toneClassName.card}`}>
       <div className="flex items-center gap-2">
-        <span className={`flex h-6 min-w-9 items-center justify-center rounded-[7px] border px-2 text-[11px] font-normal ${toneClassName.index}`}>
+        <span className={`flex h-6 min-w-9 items-center justify-center rounded-[7px] border px-2 text-[13px] font-normal ${toneClassName.index}`}>
           #{index}
         </span>
-        <span className="min-w-0 flex-1 text-[11px] font-normal text-[#6F6662]">
+        <span className="min-w-0 flex-1 text-[13px] font-normal text-[#6F6662]">
           {formatDateTime(comment.createdAt)}
         </span>
         <StatusBadge status={comment.status} />
       </div>
 
       <BubbleTitle title={taskTitle} />
-      <p className="mt-3 whitespace-pre-wrap text-[14px] font-normal leading-7 text-[#1F1A18] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]">
+      <p className="mt-3 whitespace-pre-wrap text-[16px] font-normal leading-7 text-[#1F1A18] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]">
         {comment.content}
       </p>
       <AttachmentPreviewGrid attachments={comment.attachments} onImagePreview={onImagePreview} />
@@ -174,7 +174,7 @@ function CommentBubble({
 
 function BubbleTitle({ title }: { title: string }) {
   return (
-    <h2 className="mt-4 flex items-start gap-2 text-[18px] font-normal leading-6 text-[#181412]">
+    <h2 className="mt-4 flex items-start gap-2 text-[20px] font-normal leading-6 text-[#181412]">
       <ClipboardList aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-[#111111]" />
       <span className="min-w-0 break-keep">{title}</span>
     </h2>
@@ -183,7 +183,7 @@ function BubbleTitle({ title }: { title: string }) {
 
 function StatusBadge({ status }: { status: TaskDetail["status"] }) {
   return (
-    <span className={`flex h-6 shrink-0 items-center justify-center rounded-[7px] border px-2 text-[10px] font-normal ${getStatusClassName(status)}`}>
+    <span className={`flex h-6 shrink-0 items-center justify-center rounded-[7px] border px-2 text-[12px] font-normal ${getStatusClassName(status)}`}>
       {getStatusLabel(status)}
     </span>
   );
@@ -230,7 +230,7 @@ function OneLineComment({
   const iconColor = getToneClassName(tone).text;
 
   return (
-    <p className="mt-4 flex items-center gap-2 text-[14px] font-normal leading-5 text-[#1F1A18]">
+    <p className="mt-4 flex items-center gap-2 text-[16px] font-normal leading-5 text-[#1F1A18]">
       <MessageCircle aria-hidden className={`h-5 w-5 shrink-0 ${iconColor}`} />
       {value && <span>{value}</span>}
     </p>

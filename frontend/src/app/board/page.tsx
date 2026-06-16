@@ -177,15 +177,17 @@ export default function BoardRoutePage() {
       <div className="mx-auto w-full max-w-[380px] pb-20">
         <header className="relative mb-3 pt-1 text-center">
           <button
-            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-normal leading-6 text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-bold leading-6 text-[#333333] shadow-sm"
             onClick={() => router.push(backPath)}
             type="button"
           >
-            ← 뒤로가기
+            ←
           </button>
-          <h1 className="flex items-center justify-center gap-1.5 text-[24px] font-normal leading-tight text-[#111111]">
-            <ClipboardList aria-hidden className="h-7 w-7 -translate-y-0.5 text-[#D48B26]" />
-            사내게시판
+          <h1 className="text-center text-[24px] font-normal leading-tight text-[#111111]">
+            <span className="relative inline-block">
+              <ClipboardList aria-hidden className="absolute right-full top-1/2 mr-1.5 h-7 w-7 -translate-y-[55%] text-[#D48B26]" />
+              사내게시판
+            </span>
           </h1>
           <p className="mt-0.5 text-[15px] font-normal text-[#77716E]">함께 만드는 우리 회사 💕</p>
         </header>

@@ -19,7 +19,7 @@ export function DepartmentSelect({
   return (
     <div className="relative">
       <button
-        className="flex h-10 w-full items-center justify-between rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-left text-[13px] font-normal text-[#222222] shadow-sm transition hover:border-[#B9D7EF] hover:bg-[#F7FBFF]"
+        className="flex h-10 w-full items-center justify-between rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-left text-[15px] font-normal text-[#222222] shadow-sm transition hover:border-[#B9D7EF] hover:bg-[#F7FBFF]"
         onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
@@ -38,7 +38,7 @@ export function DepartmentSelect({
 
             return (
               <button
-                className={`flex h-8 w-full items-center justify-between px-3 text-left text-[12px] font-normal transition ${
+                className={`flex h-8 w-full items-center justify-between px-3 text-left text-[14px] font-normal transition ${
                   isSelected ? "bg-[#F3FAFF] text-[#416A83]" : "text-[#2F2926] hover:bg-[#FFF7F8]"
                 }`}
                 key={organization?.id ?? "none"}
@@ -125,11 +125,11 @@ export function StepCard({
     <section className="relative overflow-visible rounded-[16px] border border-[#D8D1CE] bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
       <span className={`absolute bottom-[-1px] left-[-1px] top-[-1px] w-2.5 rounded-l-[16px] ${accent}`} />
       <div className="py-3 pl-5 pr-3">
-        <h2 className="flex items-center gap-2 text-[20px] font-normal text-[#111111]">
+        <h2 className="flex items-center gap-2 text-[22px] font-normal text-[#111111]">
           {icon}
           {step}. {title}
         </h2>
-        <p className="mt-1 text-[12px] font-normal text-[#7B716D]">{description}</p>
+        <p className="mt-1 text-[14px] font-normal text-[#7B716D]">{description}</p>
         {children}
       </div>
     </section>
@@ -148,7 +148,7 @@ export function ShapeLayoutPreview({
   const getSlot = (slotKey: string) => shapeSlots.find((slot) => slot.slotKey === slotKey);
 
   return (
-    <div className="mt-3 grid grid-cols-[34px_minmax(0,1fr)] text-[12px] font-normal">
+    <div className="mt-3 grid grid-cols-[34px_minmax(0,1fr)] text-[14px] font-normal">
       <span className="pt-1.5 text-[#222222]">3층</span>
       <div className="grid grid-cols-4 items-start gap-1">
         <div className="col-span-2 flex justify-center">
@@ -246,7 +246,7 @@ function ShapeCheckbox({
 }) {
   return (
     <button
-      className={`flex h-6 min-w-5 items-center justify-center gap-0.5 rounded-[5px] border px-0.5 text-[10px] font-normal text-[#222222] ${
+      className={`flex h-6 min-w-5 items-center justify-center gap-0.5 rounded-[5px] border px-0.5 text-[12px] font-normal text-[#222222] ${
         isEditing ? "border-[#9DC7ED] bg-[#F4FAFF]" : "border-[#CFC7C3] bg-[#FFFEFC]"
       }`}
       disabled={!isEditing}
@@ -273,7 +273,7 @@ export function StepActions({
   return (
     <div className="mt-3 grid grid-cols-2 gap-2 px-9">
       <button
-        className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] border border-[#E2C76F] bg-[#FFF3B8] text-[13px] font-normal text-[#8B6B10]"
+        className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] border border-[#E2C76F] bg-[#FFF3B8] text-[15px] font-normal text-[#8B6B10]"
         onClick={onEdit}
         type="button"
       >
@@ -281,7 +281,7 @@ export function StepActions({
         수정
       </button>
       <button
-        className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] border border-[#2E8CDD] bg-[#1F8FE5] text-[13px] font-normal text-white"
+        className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] border border-[#2E8CDD] bg-[#1F8FE5] text-[15px] font-normal text-white"
         onClick={onComplete}
         type="button"
       >
@@ -337,8 +337,8 @@ function OrgPersonCard({
     <button
       className={`inline-grid items-center gap-1 rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] text-left font-normal shadow-sm ${
         compact
-          ? "grid-cols-1 px-1 py-1 text-[8px]"
-          : "grid-cols-[22px_minmax(0,1fr)_10px] px-1.5 py-1.5 text-[9px]"
+          ? "grid-cols-1 px-1 py-1 text-[10px]"
+          : "grid-cols-[22px_minmax(0,1fr)_10px] px-1.5 py-1.5 text-[11px]"
       } ${compact ? "w-[36px]" : "w-[92px]"}`}
       type="button"
     >

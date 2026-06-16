@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
 import {
   getTaskCategorySummaryCacheKey,
@@ -192,6 +192,13 @@ export class TaskService {
     currentMember: CurrentMember,
     files: UploadFile[] = []
   ): Promise<TaskCreateResponse> {
+    const hasDescription = Boolean(request.description?.trim());
+    const hasAttachment = files.length > 0 || (request.attachments?.length ?? 0) > 0;
+
+    if (!hasDescription && !hasAttachment) {
+      throw new BadRequestException("업무 내용 또는 사진 중 하나는 입력해주세요.");
+    }
+
     const assigneeIds = await this.findAssigneeIds(request);
     const tasks = assigneeIds.map((assigneeId) => request.toEntity(assigneeId, currentMember.memberId));
     const savedTasks = await this.taskRepository.saveAll(tasks);

@@ -91,12 +91,12 @@ export function CommentSection({
   return (
     <section className={`rounded-[18px] border-2 bg-[#FFFEFC] px-3 py-3 shadow-sm ${formToneClassName.section}`}>
       <div className="flex items-center gap-2">
-        <span className={`flex h-8 min-w-10 items-center justify-center rounded-[8px] px-2 text-[13px] font-normal text-white ${formToneClassName.index}`}>
+        <span className={`flex h-8 min-w-10 items-center justify-center rounded-[8px] px-2 text-[15px] font-normal text-white ${formToneClassName.index}`}>
           #{nextCommentNumber}
         </span>
-        <span className="min-w-0 flex-1 text-[11px] font-normal text-[#6F6662]">작성중</span>
+        <span className="min-w-0 flex-1 text-[13px] font-normal text-[#6F6662]">작성중</span>
         <button
-          className="flex h-8 shrink-0 items-center gap-1 rounded-[8px] border border-[#D6D6D6] bg-white px-2 text-[10px] font-normal text-[#333333]"
+          className="flex h-8 shrink-0 items-center gap-1 rounded-[8px] border border-[#D6D6D6] bg-white px-2 text-[12px] font-normal text-[#333333]"
           onClick={handleCopyTitle}
           type="button"
         >
@@ -106,7 +106,7 @@ export function CommentSection({
       </div>
 
       <div className="mt-4 flex h-10 items-center gap-2 rounded-[8px] border border-[#D6D6D6] bg-white px-3">
-        <span className="min-w-0 flex-1 truncate text-[14px] font-normal text-[#1F1A18]">
+        <span className="min-w-0 flex-1 truncate text-[16px] font-normal text-[#1F1A18]">
           {task.title}
         </span>
         <Lock aria-hidden className="h-4 w-4 shrink-0 text-[#7D7471]" />
@@ -114,13 +114,13 @@ export function CommentSection({
 
       <div className="relative mt-3">
         <textarea
-          className="h-[128px] w-full resize-none rounded-[8px] border border-[#D6D6D6] bg-white px-3 py-3 pb-7 text-[13px] font-normal leading-6 text-[#1F1A18] outline-none placeholder:text-[#8B8582] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]"
+          className="h-[128px] w-full resize-none rounded-[8px] border border-[#D6D6D6] bg-white px-3 py-3 pb-7 text-[15px] font-normal leading-6 text-[#1F1A18] outline-none placeholder:text-[#8B8582] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]"
           maxLength={MAX_COMMENT_LENGTH}
           onChange={(event) => setContent(event.target.value)}
           placeholder={"댓글 내용을 입력하세요.\n자유롭게 내용을 작성할 수 있어요"}
           value={content}
         />
-        <span className="absolute bottom-2 right-3 text-[11px] font-normal text-[#6F6662]">
+        <span className="absolute bottom-2 right-3 text-[13px] font-normal text-[#6F6662]">
           {content.length}/{MAX_COMMENT_LENGTH}
         </span>
       </div>
@@ -128,7 +128,7 @@ export function CommentSection({
       <div className="mt-3 flex h-10 items-center gap-2 rounded-[8px] border border-[#D6D6D6] bg-white px-3">
         <MessageCircle aria-hidden className="h-4 w-4 shrink-0 text-[#8B8582]" />
         <input
-          className="min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[#1F1A18] outline-none placeholder:text-[#8B8582]"
+          className="min-w-0 flex-1 bg-transparent text-[15px] font-normal text-[#1F1A18] outline-none placeholder:text-[#8B8582]"
           onChange={(event) => setOneLineComment(event.target.value)}
           placeholder="한줄 멘트를 남겨주세요."
           value={oneLineComment}
@@ -142,7 +142,7 @@ export function CommentSection({
 
           return (
             <button
-              className={`h-8 rounded-[8px] border px-1 text-[10px] font-normal ${
+              className={`h-8 rounded-[8px] border px-1 text-[12px] font-normal ${
                 selectedStatus === option.value
                   ? getStatusClassName(option.value)
                   : "border-[#D6D6D6] bg-white text-[#4F4542]"
@@ -168,7 +168,7 @@ export function CommentSection({
           type="file"
         />
         <button
-          className="flex h-9 items-center gap-1.5 rounded-[8px] border border-[#D6D6D6] bg-white px-3 text-[12px] font-normal text-[#333333]"
+          className="flex h-9 items-center gap-1.5 rounded-[8px] border border-[#D6D6D6] bg-white px-3 text-[14px] font-normal text-[#333333]"
           onClick={() => fileInputRef.current?.click()}
           type="button"
         >
@@ -176,7 +176,7 @@ export function CommentSection({
           사진첨부
         </button>
         <button
-          className={`flex h-9 items-center justify-center rounded-[8px] px-4 text-[12px] font-normal text-white disabled:opacity-60 ${formToneClassName.submit}`}
+          className={`flex h-9 items-center justify-center rounded-[8px] px-4 text-[14px] font-normal text-white disabled:opacity-60 ${formToneClassName.submit}`}
           disabled={isSubmitting}
           onClick={handleCommentSubmit}
           type="button"
@@ -187,7 +187,7 @@ export function CommentSection({
 
       {attachments.length > 0 && (
         <div className="mt-3 rounded-[10px] border border-[#D6D6D6] bg-white px-3 py-3">
-          <p className="text-[10px] font-normal text-[#333333]">선택한 사진 {attachments.length}장</p>
+          <p className="text-[12px] font-normal text-[#333333]">선택한 사진 {attachments.length}장</p>
           <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
             {attachments.map((attachment) => (
               <AttachmentPreview
@@ -200,7 +200,7 @@ export function CommentSection({
       )}
 
       {message && (
-        <p className="mt-3 text-[10px] font-normal text-[#D83A42]">{message}</p>
+        <p className="mt-3 text-[12px] font-normal text-[#D83A42]">{message}</p>
       )}
     </section>
   );

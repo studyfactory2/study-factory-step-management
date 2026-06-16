@@ -31,7 +31,7 @@ type LoginPositionTreeCache = {
   positions: PositionTreeNode[];
 };
 
-const LOGIN_POSITION_TREE_CACHE_KEY = "study-factory:login-position-tree";
+const LOGIN_POSITION_TREE_CACHE_KEY = "study-factory:login-position-tree:v2";
 const LOGIN_POSITION_TREE_CACHE_TTL_MS = 1000 * 60 * 30;
 
 function readLoginPositionTreeCache(): PositionTreeNode[] | null {

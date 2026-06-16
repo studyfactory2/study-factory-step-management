@@ -22,7 +22,7 @@ export function AllTasksFilterBar({
 
           return (
             <button
-              className={`h-7 rounded-full border px-1 text-[8px] font-black transition ${
+              className={`h-7 rounded-full border px-1 text-[10px] font-black transition ${
                 isSelected
                   ? "border-primary bg-primary text-white"
                   : "border-[#F2C9C2] bg-[#FFF8F6] text-[#9B7A75]"
@@ -37,7 +37,7 @@ export function AllTasksFilterBar({
         })}
       </div>
       <button
-        className="h-7 rounded-full border border-[#D9D1F3] bg-[#F7F3FF] px-2 text-[8px] font-black text-[#8B72C8]"
+        className="h-7 rounded-full border border-[#D9D1F3] bg-[#F7F3FF] px-2 text-[10px] font-black text-[#8B72C8]"
         onClick={onSortToggle}
         type="button"
       >

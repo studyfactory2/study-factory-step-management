@@ -50,32 +50,32 @@ export default function NotificationsRoutePage() {
       <div className="mx-auto w-full max-w-[380px] pb-8">
         <header className="relative mb-4 pt-1 text-center">
           <button
-            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-normal leading-6 text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[14px] font-bold leading-6 text-[#333333] shadow-sm"
             onClick={() => router.push(backPath)}
             type="button"
           >
-            ← 뒤로가기
+            ←
           </button>
-          <h1 className="flex items-center justify-center gap-1.5 text-[24px] font-normal leading-tight text-[#111111]">
+          <h1 className="flex items-center justify-center gap-1.5 text-[26px] font-normal leading-tight text-[#111111]">
             <Bell aria-hidden className="h-7 w-7 -translate-y-0.5 text-[#E30613]" />
             알림
           </h1>
-          <p className="mt-0.5 text-[13px] font-normal text-[#77716E]">업무 소식을 모아봤어요</p>
+          <p className="mt-0.5 text-[15px] font-normal text-[#77716E]">업무 소식을 모아봤어요</p>
         </header>
 
         {message ? (
-          <div className="mb-3 rounded-[12px] border border-[#D8D1CE] bg-white px-3 py-2 text-center text-[12px] font-normal text-[#B94C4C]">
+          <div className="mb-3 rounded-[12px] border border-[#D8D1CE] bg-white px-3 py-2 text-center text-[14px] font-normal text-[#B94C4C]">
             {message}
           </div>
         ) : null}
 
         <section className="rounded-[16px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
           {isLoading ? (
-            <p className="py-8 text-center text-[13px] font-normal text-[#7B716D]">알림을 불러오는 중입니다.</p>
+            <p className="py-8 text-center text-[15px] font-normal text-[#7B716D]">알림을 불러오는 중입니다.</p>
           ) : null}
 
           {!isLoading && notifications.length === 0 ? (
-            <p className="py-8 text-center text-[13px] font-normal text-[#7B716D]">아직 알림이 없습니다.</p>
+            <p className="py-8 text-center text-[15px] font-normal text-[#7B716D]">아직 알림이 없습니다.</p>
           ) : null}
 
           <div className="divide-y divide-[#ECE7E4]">
@@ -98,18 +98,18 @@ export default function NotificationsRoutePage() {
                   )}
                 </span>
                 <div className="min-w-0">
-                  <h2 className="truncate text-[15px] font-normal text-[#111111]">{notification.task.title}</h2>
-                  <p className="mt-1 break-keep text-[13px] font-normal leading-5 text-[#4F4542]">
+                  <h2 className="truncate text-[17px] font-normal text-[#111111]">{notification.task.title}</h2>
+                  <p className="mt-1 break-keep text-[15px] font-normal leading-5 text-[#4F4542]">
                     {notification.type === "TASK_ASSIGNED"
                       ? `${notification.actor.name}님이 업무를 할당하셨습니다.`
                       : `${notification.actor.name}님이 코멘트를 작성하셨습니다.`}
                   </p>
                   {notification.type === "TASK_COMMENTED" && notification.commentPreview ? (
-                    <p className="mt-1 truncate rounded-[10px] bg-[#F7F7F7] px-2 py-1 text-[12px] font-normal text-[#7B716D]">
+                    <p className="mt-1 truncate rounded-[10px] bg-[#F7F7F7] px-2 py-1 text-[14px] font-normal text-[#7B716D]">
                       {notification.commentPreview}
                     </p>
                   ) : null}
-                  <p className="mt-1 text-[11px] font-normal text-[#9B9592]">{formatNotificationDate(notification.createdAt)}</p>
+                  <p className="mt-1 text-[13px] font-normal text-[#9B9592]">{formatNotificationDate(notification.createdAt)}</p>
                 </div>
               </button>
             ))}

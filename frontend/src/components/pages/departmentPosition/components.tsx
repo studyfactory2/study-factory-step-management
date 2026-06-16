@@ -24,11 +24,11 @@ export function ManagementCard({
   return (
     <section className="rounded-[16px] border border-[#D8D1CE] bg-white px-3 py-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-[20px] font-normal text-[#222222]">
+        <h2 className="flex items-center gap-2 text-[22px] font-normal text-[#222222]">
           {icon}
           {title}
         </h2>
-        <span className="rounded-[12px] border border-[#F0C5C5] bg-[#FFF7F7] px-3 py-1.5 text-[12px] font-normal text-[#A24F4F]">
+        <span className="rounded-[12px] border border-[#F0C5C5] bg-[#FFF7F7] px-3 py-1.5 text-[14px] font-normal text-[#A24F4F]">
           총 {count}개
         </span>
       </div>
@@ -49,7 +49,7 @@ export function RowActions({
   onEdit: () => void;
 }) {
   return (
-    <span className="flex items-center justify-end gap-2 text-[12px] font-normal text-[#222222]">
+    <span className="flex items-center justify-end gap-2 text-[14px] font-normal text-[#222222]">
       <button className="flex items-center gap-1 disabled:opacity-50" disabled={disabled} onClick={onEdit} type="button">
         <Pencil aria-hidden className="h-4 w-4" />
         {iconOnly ? null : "수정"}
@@ -152,14 +152,14 @@ export function PositionRow({
         <PositionIcon aria-hidden className={`h-5 w-5 ${meta.iconClassName}`} />
         {isEditing ? (
           <input
-            className="min-w-0 rounded-[8px] border border-[#D8D1CE] bg-white px-2 py-1 text-[13px] font-normal outline-none"
+            className="min-w-0 rounded-[8px] border border-[#D8D1CE] bg-white px-2 py-1 text-[15px] font-normal outline-none"
             onChange={(event) => onEditDraftChange(event.target.value)}
             value={positionName}
           />
         ) : (
-          <span className="truncate text-[16px] font-normal text-[#222222]">{position.name}</span>
+          <span className="truncate text-[18px] font-normal text-[#222222]">{position.name}</span>
         )}
-        <span className="text-center text-[10px] font-normal text-[#8D8580]">
+        <span className="text-center text-[12px] font-normal text-[#8D8580]">
           {position.parentId ? "" : "최상위"}
         </span>
         {isEditing ? (
@@ -179,7 +179,7 @@ export function PositionRow({
       {dropPlacement === "before" ? <DropLine label="위에 넣기" /> : null}
       {dropPlacement === "after" ? <DropLine label="아래에 넣기" position="bottom" /> : null}
       {dropPlacement === "inside" ? (
-        <span className="pointer-events-none absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[#9FCBFF] bg-white px-2 py-0.5 text-[10px] font-normal text-[#2D70CB] shadow-sm">
+        <span className="pointer-events-none absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[#9FCBFF] bg-white px-2 py-0.5 text-[12px] font-normal text-[#2D70CB] shadow-sm">
           하위로 넣기
         </span>
       ) : null}
@@ -202,7 +202,7 @@ function DropLine({
     >
       <span className="h-2 w-2 rounded-full bg-[#2D70CB]" />
       <span className="h-[2px] flex-1 rounded-full bg-[#2D70CB]" />
-      <span className="rounded-full border border-[#9FCBFF] bg-white px-2 py-0.5 text-[10px] font-normal text-[#2D70CB] shadow-sm">
+      <span className="rounded-full border border-[#9FCBFF] bg-white px-2 py-0.5 text-[12px] font-normal text-[#2D70CB] shadow-sm">
         {label}
       </span>
     </div>
@@ -230,14 +230,14 @@ export function AddControl({
     <div className="mt-3 grid grid-cols-[minmax(0,1fr)_84px] items-center gap-2">
       <label className="flex h-11 items-center rounded-[12px] border border-[#D8D1CE] bg-white px-3 shadow-sm">
         <input
-          className="min-w-0 flex-1 bg-transparent text-[13px] font-normal outline-none placeholder:text-[#9A918C]"
+          className="min-w-0 flex-1 bg-transparent text-[15px] font-normal outline-none placeholder:text-[#9A918C]"
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           value={value}
         />
       </label>
       <button
-        className="flex h-11 items-center justify-center gap-1 rounded-[12px] border border-[#9FCBFF] bg-[#EAF4FF] text-[18px] font-normal text-[#2D70CB] shadow-sm disabled:opacity-60"
+        className="flex h-11 items-center justify-center gap-1 rounded-[12px] border border-[#9FCBFF] bg-[#EAF4FF] text-[20px] font-normal text-[#2D70CB] shadow-sm disabled:opacity-60"
         disabled={disabled}
         onClick={onAdd}
         type="button"
@@ -271,7 +271,7 @@ export function AddControl({
 
 export function EmptyState({ label }: { label: string }) {
   return (
-    <div className="rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-5 text-center text-[12px] font-normal text-[#7B716D]">
+    <div className="rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-5 text-center text-[14px] font-normal text-[#7B716D]">
       {label}
     </div>
   );
