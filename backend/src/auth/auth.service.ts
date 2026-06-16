@@ -91,13 +91,11 @@ export class AuthService {
   }
 
   private async saveRefreshToken(memberId: number, token: string): Promise<void> {
-    await this.refreshTokenRepository.deleteByMemberId(memberId);
-
     const refreshToken = new RefreshToken();
     refreshToken.memberId = memberId;
     refreshToken.token = token;
 
-    await this.refreshTokenRepository.save(refreshToken);
+    await this.refreshTokenRepository.upsertByMemberId(refreshToken);
   }
 
   private async issueAuthResponse(member: Member): Promise<AuthLoginResponse> {
