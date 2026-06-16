@@ -62,16 +62,3 @@ export type BoardPostDetailResponse = BoardPostListResponse & {
   attachments: BoardPostAttachmentResponse[];
   comments: BoardPostCommentResponse[];
 };
-
-export type BoardPostDraftResponse = {
-  id: number;
-  title: string;
-  content: string;
-  oneLineComment: string | null;
-  postType: BoardPostType;
-  visibility: BoardVisibility;
-  categoryIds: number[];
-  attachments: BoardPostAttachmentResponse[];
-  createdAt: string;
-  updatedAt: string;
-};
