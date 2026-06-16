@@ -3,14 +3,10 @@ import { ChevronDown, Check, Pencil, Save, Trash2 } from "lucide-react";
 import { type MemberPreRegistration } from "@/api/member";
 import { type PreRegistrationEditDraft, type DropdownOption, type FlatPosition } from "./types";
 import {
-  formatPhoneInput,
-  formatPhoneNumber,
   formatPlainDate,
-  formatResidence,
   getOrganizationGroupMeta,
   getPositionBadgeMeta,
-  organizationOptions,
-  residenceOptions
+  organizationOptions
 } from "./utils";
 
 export function StepField({
@@ -237,63 +233,22 @@ function PendingPreRegistrationRow({
     ?? "담당 미지정";
 
   if (isEditing && editDraft) {
-    const districtOptions = editDraft.residenceCity ? residenceOptions[editDraft.residenceCity] ?? [] : [];
-
     return (
       <article className="rounded-[11px] border border-[#B9D7EF] bg-[#F7FBFF] px-2 py-2">
         <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-1.5">
           <span className="pt-2 text-center text-[12px] font-normal text-[#416A83]">{index}.</span>
           <div className="min-w-0 space-y-2">
-            <div className="grid grid-cols-[minmax(0,1fr)_58px] gap-1.5">
-              <input
-                className="h-9 rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
-                onChange={(event) => onEditDraftChange({ name: event.target.value })}
-                placeholder="이름"
-                value={editDraft.name}
-              />
-              <input
-                className="h-9 rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
-                min="1"
-                onChange={(event) => onEditDraftChange({ age: event.target.value })}
-                placeholder="나이"
-                type="number"
-                value={editDraft.age}
-              />
-            </div>
+            <input
+              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
+              onChange={(event) => onEditDraftChange({ name: event.target.value })}
+              placeholder="이름"
+              value={editDraft.name}
+            />
             <input
               className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
               onChange={(event) => onEditDraftChange({ joinedAt: event.target.value })}
               type="date"
               value={editDraft.joinedAt}
-            />
-            <div className="grid grid-cols-2 gap-1.5">
-              <CustomDropdown
-                onChange={(value) => onEditDraftChange({ residenceCity: value, residenceDistrict: "" })}
-                options={Object.keys(residenceOptions).map((option) => ({
-                  label: option,
-                  value: option
-                }))}
-                placeholder="시"
-                value={editDraft.residenceCity}
-              />
-              <CustomDropdown
-                disabled={!editDraft.residenceCity}
-                onChange={(value) => onEditDraftChange({ residenceDistrict: value })}
-                options={districtOptions.map((option) => ({
-                  label: option,
-                  value: option
-                }))}
-                placeholder="구"
-                value={editDraft.residenceDistrict}
-              />
-            </div>
-            <input
-              className="h-9 w-full rounded-[9px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal outline-none"
-              inputMode="numeric"
-              maxLength={13}
-              onChange={(event) => onEditDraftChange({ phoneNumber: formatPhoneInput(event.target.value) })}
-              placeholder="번호만 입력해주세요"
-              value={editDraft.phoneNumber}
             />
             <div className="grid grid-cols-2 gap-1.5">
               <CustomDropdown
@@ -359,10 +314,7 @@ function PendingPreRegistrationRow({
             </span>
           </div>
           <p className="mt-1 break-keep text-[11px] font-normal leading-4 text-[#4F4542]">
-            {preRegistration.age ? `${preRegistration.age}세` : "나이 미입력"} · {formatPlainDate(preRegistration.joinedAt)}
-          </p>
-          <p className="mt-0.5 break-keep text-[11px] font-normal leading-4 text-[#7B716D]">
-            {formatResidence(preRegistration)} · {formatPhoneNumber(preRegistration.phoneNumber)}
+            {formatPlainDate(preRegistration.joinedAt)}
           </p>
           <p className="mt-0.5 break-keep text-[11px] font-normal leading-4 text-[#7B716D]">
             {dutyName}

@@ -174,11 +174,11 @@ export function AdminDashboardPage({
   }
 
   async function handlePreRegister(request: {
+    dutyText: string;
+    joinedAt: string;
     name: string;
-    positionDutyId: number;
+    organization: string;
     positionId: number;
-    residenceCity: string;
-    residenceDistrict: string;
   }) {
     setMessage("");
     setIsPreRegisterSubmitting(true);

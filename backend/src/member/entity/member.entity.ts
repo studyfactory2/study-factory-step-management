@@ -20,8 +20,8 @@ export class Member extends BaseEntity {
   @Column({ name: "avatar_url", type: "varchar", nullable: true })
   avatarUrl: string | null;
 
-  @Column({ type: "int", nullable: true })
-  age: number | null;
+  @Column({ name: "birth_date", type: "date", nullable: true })
+  birthDate: string | null;
 
   @Column({ name: "joined_at", type: "date", nullable: true })
   joinedAt: string | null;

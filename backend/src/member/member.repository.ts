@@ -280,6 +280,20 @@ export class MemberRepository {
     });
   }
 
+  async countByNameAndOrganizationId(name: string, organizationId: number | null): Promise<number> {
+    const queryBuilder = this.memberRepository
+      .createQueryBuilder("member")
+      .where("member.name = :name", { name });
+
+    if (organizationId === null) {
+      queryBuilder.andWhere("member.organizationId IS NULL");
+    } else {
+      queryBuilder.andWhere("member.organizationId = :organizationId", { organizationId });
+    }
+
+    return queryBuilder.getCount();
+  }
+
   async save(member: Member): Promise<Member> {
     return this.memberRepository.save(member);
   }
@@ -302,6 +316,29 @@ export class MemberRepository {
         isRegistered: false
       }
     });
+  }
+
+  async findPendingPreRegistrationForRegistration(
+    name: string,
+    organizationId: number | null,
+    positionId: number
+  ): Promise<MemberPreRegistration | null> {
+    const queryBuilder = this.memberPreRegistrationRepository
+      .createQueryBuilder("preRegistration")
+      .leftJoinAndSelect("preRegistration.branchInfo", "branchInfo")
+      .leftJoinAndSelect("preRegistration.organization", "organization")
+      .where("preRegistration.name = :name", { name })
+      .andWhere("preRegistration.positionId = :positionId", { positionId })
+      .andWhere("preRegistration.isRegistered = false")
+      .orderBy("preRegistration.createdAt", "DESC");
+
+    if (organizationId === null) {
+      queryBuilder.andWhere("preRegistration.organizationId IS NULL");
+    } else {
+      queryBuilder.andWhere("preRegistration.organizationId = :organizationId", { organizationId });
+    }
+
+    return queryBuilder.getOne();
   }
 
   async savePreRegistration(preRegistration: MemberPreRegistration): Promise<MemberPreRegistration> {

@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { MemberPreRegistration } from "@/api/member";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
+import { organizationOptions } from "@/components/pages/memberPreRegister/utils";
 
 type MemberPreRegisterPanelProps = {
   isLoading?: boolean;
@@ -10,11 +11,11 @@ type MemberPreRegisterPanelProps = {
   onClose: () => void;
   onDelete?: (id: number, name: string) => void;
   onSubmit: (request: {
+    dutyText: string;
+    joinedAt: string;
     name: string;
-    positionDutyId: number;
+    organization: string;
     positionId: number;
-    residenceCity: string;
-    residenceDistrict: string;
   }) => Promise<void>;
 };
 
@@ -28,14 +29,12 @@ export function MemberPreRegisterPanel({
   onSubmit
 }: MemberPreRegisterPanelProps) {
   const [name, setName] = useState("");
-  const [residenceCity, setResidenceCity] = useState("");
-  const [residenceDistrict, setResidenceDistrict] = useState("");
+  const [joinedAt, setJoinedAt] = useState("");
+  const [organization, setOrganization] = useState("자격증공장");
   const [positions, setPositions] = useState<PositionTreeNode[]>([]);
   const [positionId, setPositionId] = useState<number | "">("");
-  const [positionDutyId, setPositionDutyId] = useState<number | "">("");
+  const [dutyText, setDutyText] = useState("");
   const flatPositions = useMemo(() => flattenPositions(positions), [positions]);
-  const selectedPosition = flatPositions.find((position) => position.id === positionId);
-  const dutyOptions = selectedPosition?.dutyOptions ?? [];
 
   useEffect(() => {
     getPositionTree()
@@ -45,27 +44,27 @@ export function MemberPreRegisterPanel({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!positionId || !positionDutyId) {
+    if (!positionId || !joinedAt || !organization || !dutyText.trim()) {
       return;
     }
 
     await onSubmit({
+      dutyText: dutyText.trim(),
+      joinedAt,
       name,
-      positionDutyId,
-      positionId,
-      residenceCity,
-      residenceDistrict
+      organization,
+      positionId
     });
     setName("");
-    setResidenceCity("");
-    setResidenceDistrict("");
+    setJoinedAt("");
+    setOrganization("자격증공장");
     setPositionId("");
-    setPositionDutyId("");
+    setDutyText("");
   }
 
   function handlePositionChange(value: string) {
     setPositionId(value ? Number(value) : "");
-    setPositionDutyId("");
+    setDutyText("");
   }
 
   return (
@@ -103,18 +102,21 @@ export function MemberPreRegisterPanel({
         />
         <input
           className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium outline-none placeholder:text-[#B79A94]"
-          onChange={(event) => setResidenceCity(event.target.value)}
-          placeholder="거주지 시/도"
+          onChange={(event) => setJoinedAt(event.target.value)}
           required
-          value={residenceCity}
+          type="date"
+          value={joinedAt}
         />
-        <input
+        <select
           className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium outline-none placeholder:text-[#B79A94]"
-          onChange={(event) => setResidenceDistrict(event.target.value)}
-          placeholder="거주지 시/군/구"
+          onChange={(event) => setOrganization(event.target.value)}
           required
-          value={residenceDistrict}
-        />
+          value={organization}
+        >
+          {organizationOptions.map((option) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
         <select
           className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium text-[#B79A94] outline-none"
           onChange={(event) => handlePositionChange(event.target.value)}
@@ -131,20 +133,13 @@ export function MemberPreRegisterPanel({
             </option>
           ))}
         </select>
-        <select
-          className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium text-[#B79A94] outline-none"
-          disabled={!positionId || dutyOptions.length === 0}
-          onChange={(event) => setPositionDutyId(event.target.value ? Number(event.target.value) : "")}
+        <input
+          className="h-11 rounded-[10px] border-2 border-[#F2C9C2] bg-[#FFF8F6] px-4 text-sm font-medium outline-none placeholder:text-[#B79A94]"
+          onChange={(event) => setDutyText(event.target.value)}
+          placeholder="담당업무"
           required
-          value={positionDutyId}
-        >
-          <option value="">역할</option>
-          {dutyOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.name}
-            </option>
-          ))}
-        </select>
+          value={dutyText}
+        />
         <button
           className="h-11 rounded-full bg-primary px-5 text-sm font-bold text-white disabled:opacity-60  "
           disabled={isSubmitting}
@@ -186,7 +181,7 @@ export function MemberPreRegisterPanel({
                     </span>
                   </div>
                   <p className="mt-1 text-xs font-bold text-[#9B7A75]">
-                    {[preRegistration.residenceCity, preRegistration.residenceDistrict].filter(Boolean).join(" · ") || "거주지 미지정"} · {preRegistration.positionDuty?.name ?? preRegistration.positionDuty?.duty ?? "역할 미지정"}
+                    {preRegistration.organization?.name ?? "소속 미지정"} · {preRegistration.dutyText ?? preRegistration.positionDuty?.name ?? preRegistration.positionDuty?.duty ?? "담당 미지정"}
                   </p>
                 </div>
                 <button

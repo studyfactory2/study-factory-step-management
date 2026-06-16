@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Camera, CalendarDays, ClipboardList, ClipboardPenLine, MapPin, Phone, Save, UserRound } from "lucide-react";
+import { CalendarDays, ClipboardList, ClipboardPenLine, Save, UserRound } from "lucide-react";
 import {
   deleteMemberPreRegistration,
   getMemberPreRegistrations,
@@ -20,10 +20,8 @@ import { type PreRegistrationEditDraft } from "@/components/pages/memberPreRegis
 import {
   createEditDraft,
   flattenPositions,
-  formatPhoneInput,
   groupPreRegistrationsByOrganization,
-  organizationOptions,
-  residenceOptions
+  organizationOptions
 } from "@/components/pages/memberPreRegister/utils";
 
 
@@ -37,11 +35,7 @@ export function MemberPreRegisterPage({
   onBack
 }: MemberPreRegisterPageProps) {
   const [name, setName] = useState("");
-  const [age, setAge] = useState("");
   const [joinedAt, setJoinedAt] = useState("");
-  const [residenceCity, setResidenceCity] = useState("");
-  const [residenceDistrict, setResidenceDistrict] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [organization, setOrganization] = useState("자격증공장");
   const [positionId, setPositionId] = useState<number | "">("");
   const [dutyText, setDutyText] = useState("");
@@ -57,8 +51,6 @@ export function MemberPreRegisterPage({
 
   const flatPositions = useMemo(() => flattenPositions(positions), [positions]);
   const selectablePositions = flatPositions.filter((position) => !position.isAdmin && position.isActive);
-  const residenceCityOptions = Object.keys(residenceOptions);
-  const residenceDistrictOptions = residenceCity ? residenceOptions[residenceCity] ?? [] : [];
   const pendingPreRegistrations = preRegistrations.filter((preRegistration) => !preRegistration.isRegistered);
   const pendingGroups = useMemo(
     () => groupPreRegistrationsByOrganization(pendingPreRegistrations),
@@ -91,22 +83,9 @@ export function MemberPreRegisterPage({
     setPositionId(value ? Number(value) : "");
   }
 
-  function handleResidenceCityChange(value: string) {
-    setResidenceCity(value);
-    setResidenceDistrict("");
-  }
-
-  function handlePhoneNumberChange(value: string) {
-    setPhoneNumber(formatPhoneInput(value));
-  }
-
   function resetForm() {
     setName("");
-    setAge("");
     setJoinedAt("");
-    setResidenceCity("");
-    setResidenceDistrict("");
-    setPhoneNumber("");
     setOrganization("자격증공장");
     setPositionId("");
     setDutyText("");
@@ -117,16 +96,12 @@ export function MemberPreRegisterPage({
 
     if (
       !name.trim()
-      || !age.trim()
       || !joinedAt.trim()
-      || !residenceCity.trim()
-      || !residenceDistrict.trim()
-      || !phoneNumber.trim()
       || !organization.trim()
       || !positionId
       || !dutyText.trim()
     ) {
-      setMessage("사진을 제외한 모든 항목을 입력해주세요.");
+      setMessage("이름, 입사일, 소속, 직위, 담당을 모두 입력해주세요.");
       return;
     }
 
@@ -135,15 +110,11 @@ export function MemberPreRegisterPage({
 
     try {
       await preRegisterMember(accessToken, {
-        age: Number(age),
         dutyText: dutyText.trim(),
         joinedAt,
         name: name.trim(),
         organization,
-        phoneNumber: phoneNumber.trim(),
-        positionId,
-        residenceCity: residenceCity.trim(),
-        residenceDistrict: residenceDistrict.trim()
+        positionId
       });
       await refreshPreRegistrations();
       resetForm();
@@ -191,16 +162,12 @@ export function MemberPreRegisterPage({
 
     if (
       !editDraft.name.trim()
-      || !editDraft.age.trim()
       || !editDraft.joinedAt.trim()
-      || !editDraft.residenceCity.trim()
-      || !editDraft.residenceDistrict.trim()
-      || !editDraft.phoneNumber.trim()
       || !editDraft.organization.trim()
       || !editDraft.positionId
       || !editDraft.dutyText.trim()
     ) {
-      setMessage("사진을 제외한 모든 항목을 입력해주세요.");
+      setMessage("이름, 입사일, 소속, 직위, 담당을 모두 입력해주세요.");
       return;
     }
 
@@ -209,15 +176,11 @@ export function MemberPreRegisterPage({
 
     try {
       await updateMemberPreRegistration(accessToken, preRegistration.id, {
-        age: Number(editDraft.age),
         dutyText: editDraft.dutyText.trim(),
         joinedAt: editDraft.joinedAt,
         name: editDraft.name.trim(),
         organization: editDraft.organization,
-        phoneNumber: editDraft.phoneNumber.trim(),
-        positionId: Number(editDraft.positionId),
-        residenceCity: editDraft.residenceCity.trim(),
-        residenceDistrict: editDraft.residenceDistrict.trim()
+        positionId: Number(editDraft.positionId)
       });
       await refreshPreRegistrations();
       setEditingId(null);
@@ -259,17 +222,6 @@ export function MemberPreRegisterPage({
           </h2>
 
           <form className="mt-3 space-y-3" onSubmit={handleSubmit}>
-            <div className="flex justify-center">
-              <button
-                className="flex h-[92px] w-[92px] flex-col items-center justify-center gap-1 rounded-full border border-dashed border-[#B9B1AD] bg-[#FAFAFA] text-[11px] font-normal text-[#7B716D]"
-                type="button"
-              >
-                <Camera aria-hidden className="h-5 w-5 text-[#8C817D]" />
-                사진 추가
-                <span className="text-[9px] text-[#A69E9A]">필수 아님</span>
-              </button>
-            </div>
-
             <StepField label="이름" step="1">
               <input
                 className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#A69E9A]"
@@ -280,19 +232,7 @@ export function MemberPreRegisterPage({
               />
             </StepField>
 
-            <StepField label="나이" step="2">
-              <input
-                className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#A69E9A]"
-                min="1"
-                onChange={(event) => setAge(event.target.value)}
-                placeholder="나이를 입력하세요"
-                required
-                type="number"
-                value={age}
-              />
-            </StepField>
-
-            <StepField label="입사일" step="3">
+            <StepField label="입사일" step="2">
               <div className="relative">
                 <CalendarDays aria-hidden className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8B91]" />
                 <input
@@ -305,48 +245,7 @@ export function MemberPreRegisterPage({
               </div>
             </StepField>
 
-            <StepField label="거주지" step="4">
-              <div className="grid grid-cols-2 gap-2">
-                <CustomDropdown
-                  icon={<MapPin aria-hidden className="h-4 w-4 text-[#7B8B91]" />}
-                  onChange={handleResidenceCityChange}
-                  options={residenceCityOptions.map((option) => ({
-                    label: option,
-                    value: option
-                  }))}
-                  placeholder="시"
-                  value={residenceCity}
-                />
-                <CustomDropdown
-                  disabled={!residenceCity}
-                  onChange={setResidenceDistrict}
-                  options={residenceDistrictOptions.map((option) => ({
-                    label: option,
-                    value: option
-                  }))}
-                  placeholder="구"
-                  value={residenceDistrict}
-                />
-              </div>
-            </StepField>
-
-            <StepField label="전화번호" step="5">
-              <div className="relative">
-                <Phone aria-hidden className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8B91]" />
-                <input
-                  className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-9 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#A69E9A]"
-                  inputMode="numeric"
-                  maxLength={13}
-                  onChange={(event) => handlePhoneNumberChange(event.target.value)}
-                  placeholder="번호만 입력해주세요"
-                  required
-                  type="tel"
-                  value={phoneNumber}
-                />
-              </div>
-            </StepField>
-
-            <StepField label="소속" step="6">
+            <StepField label="소속" step="3">
               <CustomDropdown
                 onChange={setOrganization}
                 options={organizationOptions.map((option) => ({
@@ -357,7 +256,7 @@ export function MemberPreRegisterPage({
               />
             </StepField>
 
-            <StepField label="직위" step="7">
+            <StepField label="직위" step="4">
               <CustomDropdown
                 onChange={handlePositionChange}
                 options={selectablePositions.map((position) => ({
@@ -370,7 +269,7 @@ export function MemberPreRegisterPage({
               />
             </StepField>
 
-            <StepField label="담당" step="8">
+            <StepField label="담당" step="5">
               <input
                 className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#A69E9A]"
                 onChange={(event) => setDutyText(event.target.value)}

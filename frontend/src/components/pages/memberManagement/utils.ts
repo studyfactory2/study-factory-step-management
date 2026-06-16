@@ -26,7 +26,7 @@ export function groupMembersByOrganization(members: Member[]): OrganizationGroup
   return Array.from(groupMap.entries())
     .sort(([left], [right]) => getOrganizationOrder(left) - getOrganizationOrder(right))
     .map(([organizationName, groupMembers]) => ({
-      members: groupMembers.sort((left, right) => left.name.localeCompare(right.name, "ko-KR")),
+      members: groupMembers.sort((left, right) => getMemberDisplayName(left).localeCompare(getMemberDisplayName(right), "ko-KR")),
       organizationName
     }));
 }
@@ -56,6 +56,10 @@ export function getMemberOrganizationName(member: Member) {
     ?? "소속 미지정";
 }
 
+export function getMemberDisplayName(member: Member) {
+  return member.displayName ?? member.name;
+}
+
 export function getMemberPositionName(member: Member) {
   return member.positionInfo?.name ?? "직위 미지정";
 }
@@ -76,6 +80,30 @@ export function getMemberDutyName(member: Member) {
     ?? member.positionDuty?.name
     ?? member.positionDuty?.duty
     ?? "담당 미지정";
+}
+
+export function getMemberAgeLabel(member: Member) {
+  const calculatedAge = calculateAge(member.birthDate ?? null);
+
+  if (calculatedAge !== null) {
+    return String(calculatedAge);
+  }
+
+  return "-";
+}
+
+function calculateAge(birthDate: string | null) {
+  if (!birthDate) {
+    return null;
+  }
+
+  const parsedBirthDate = new Date(`${birthDate}T00:00:00`);
+  if (Number.isNaN(parsedBirthDate.getTime())) {
+    return null;
+  }
+
+  const today = new Date();
+  return today.getFullYear() - parsedBirthDate.getFullYear() + 1;
 }
 
 export function getOrganizationOrder(organizationName: string) {

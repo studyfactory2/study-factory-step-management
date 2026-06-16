@@ -4,27 +4,29 @@ import { handleUnauthorizedResponse } from "@/api/client";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 export type MemberPreRegisterRequest = {
-  age?: number;
-  dutyText?: string;
-  joinedAt?: string;
+  dutyText: string;
+  joinedAt: string;
   name: string;
-  organization?: string;
-  phoneNumber?: string;
+  organization: string;
   positionDutyId?: number;
+  positionId: number;
+};
+
+export type MemberRegisterRequest = {
+  avatar?: File;
+  birthDate: string;
+  name: string;
+  organization: string;
+  password: string;
+  phoneNumber: string;
   positionId: number;
   residenceCity: string;
   residenceDistrict: string;
 };
 
-export type MemberRegisterRequest = {
-  name: string;
-  password: string;
-};
-
 export type MemberPreRegistration = {
   id: number;
   affiliation: MemberAffiliation | null;
-  age: number | null;
   branch: string | null;
   createdAt: string;
   duty: MemberDuty | null;
@@ -177,12 +179,23 @@ export async function updateMemberPreRegistration(
 }
 
 export async function registerMember(request: MemberRegisterRequest): Promise<Member> {
+  const formData = new FormData();
+  formData.append("name", request.name);
+  formData.append("organization", request.organization);
+  formData.append("password", request.password);
+  formData.append("birthDate", request.birthDate);
+  formData.append("phoneNumber", request.phoneNumber);
+  formData.append("positionId", String(request.positionId));
+  formData.append("residenceCity", request.residenceCity);
+  formData.append("residenceDistrict", request.residenceDistrict);
+
+  if (request.avatar) {
+    formData.append("avatar", request.avatar);
+  }
+
   const response = await fetch(`${API_BASE_URL}/api/members/register`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(request)
+    body: formData
   });
 
   if (!response.ok) {

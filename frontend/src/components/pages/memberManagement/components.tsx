@@ -3,7 +3,9 @@ import { type OrganizationGroup, type PositionGroup } from "./types";
 import {
   formatPhoneNumber,
   formatPlainDate,
+  getMemberAgeLabel,
   getMemberBranchName,
+  getMemberDisplayName,
   getMemberDutyName,
   getOrganizationMeta,
   getPositionMeta,
@@ -69,14 +71,14 @@ export function EmployeeRow({ member }: { member: Member }) {
   return (
     <article className="rounded-[10px] border border-[#E6DFDC] bg-[#FFFEFC] px-2 py-2 text-[11px] font-normal text-[#4F4542]">
       <div className="grid grid-cols-[52px_minmax(0,1fr)_96px] items-center gap-1.5">
-        <span className="truncate text-[12px] text-[#2D70CB]">{member.name}</span>
+        <span className="truncate text-[12px] text-[#2D70CB]">{getMemberDisplayName(member)}</span>
         <span className="truncate text-[#7B716D]">{getMemberDutyName(member)}</span>
         <span className="whitespace-nowrap text-right text-[10px] text-[#6F6662]">
           {formatPhoneNumber(member.phoneNumber ?? null)}
         </span>
       </div>
       <div className="mt-1.5 grid grid-cols-3 gap-1">
-        <EmployeeInfoPill label="나이" value={member.age ? `${member.age}` : "-"} />
+        <EmployeeInfoPill label="나이" value={getMemberAgeLabel(member)} />
         <EmployeeInfoPill label="입사일" value={formatPlainDate(member.joinedAt ?? member.createdAt)} />
         <EmployeeInfoPill label="거주지" value={getMemberBranchName(member)} />
       </div>

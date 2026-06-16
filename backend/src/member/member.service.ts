@@ -14,12 +14,15 @@ import { MemberPositionNotFoundException } from "./exception/member-position-not
 import { MemberRepository } from "./member.repository";
 import { MemberRole } from "./enum/member-role.enum";
 import { PositionRepository } from "../position/position.repository";
+import { UploadService } from "../upload/upload.service";
+import { UploadFile } from "../upload/type/upload-file.type";
 
 @Injectable()
 export class MemberService {
   constructor(
     private readonly memberRepository: MemberRepository,
-    private readonly positionRepository: PositionRepository
+    private readonly positionRepository: PositionRepository,
+    private readonly uploadService: UploadService
   ) {}
 
   async findAll(): Promise<Member[]> {
@@ -108,12 +111,11 @@ export class MemberService {
       : null;
     const preRegistration = new MemberPreRegistration();
     preRegistration.name = request.name;
-    preRegistration.age = request.age ?? null;
     preRegistration.joinedAt = request.joinedAt ?? null;
-    preRegistration.phoneNumber = request.phoneNumber ?? null;
+    preRegistration.phoneNumber = null;
     preRegistration.dutyText = request.dutyText ?? null;
-    preRegistration.residenceCity = request.residenceCity;
-    preRegistration.residenceDistrict = request.residenceDistrict;
+    preRegistration.residenceCity = null;
+    preRegistration.residenceDistrict = null;
     preRegistration.branch = null;
     preRegistration.organizationId = organizationInfo?.id ?? null;
     preRegistration.branchId = null;
@@ -164,12 +166,11 @@ export class MemberService {
       : null;
 
     preRegistration.name = request.name;
-    preRegistration.age = request.age ?? null;
     preRegistration.joinedAt = request.joinedAt ?? null;
-    preRegistration.phoneNumber = request.phoneNumber ?? null;
+    preRegistration.phoneNumber = null;
     preRegistration.dutyText = request.dutyText ?? null;
-    preRegistration.residenceCity = request.residenceCity;
-    preRegistration.residenceDistrict = request.residenceDistrict;
+    preRegistration.residenceCity = null;
+    preRegistration.residenceDistrict = null;
     preRegistration.branch = null;
     preRegistration.organizationId = organizationInfo?.id ?? null;
     preRegistration.branchId = null;
@@ -197,8 +198,13 @@ export class MemberService {
     await this.memberRepository.deletePreRegistration(preRegistration);
   }
 
-  async register(request: MemberRegisterRequest): Promise<Member> {
-    const preRegistration = await this.memberRepository.findPendingPreRegistrationByName(request.name);
+  async register(request: MemberRegisterRequest, avatar?: UploadFile): Promise<Member> {
+    const organizationInfo = await this.memberRepository.findOrganizationByName(request.organization);
+    const preRegistration = await this.memberRepository.findPendingPreRegistrationForRegistration(
+      request.name,
+      organizationInfo?.id ?? null,
+      request.positionId
+    );
 
     if (!preRegistration) {
       throw new MemberPreRegistrationNotFoundException(request.name);
@@ -235,7 +241,8 @@ export class MemberService {
     }
 
     const roleType = this.resolveRoleType(position);
-    const displayName = await this.createDisplayName(request.name);
+    const displayName = await this.createDisplayName(request.name, organizationId);
+    const uploadedAvatar = avatar ? (await this.uploadService.saveImages([avatar]))[0] : null;
     const member = request.toEntity(
       passwordHash,
       displayName,
@@ -245,12 +252,9 @@ export class MemberService {
       positionDuty?.id ?? null,
       roleType
     );
-    member.age = preRegistration.age;
+    member.avatarUrl = uploadedAvatar?.imageUrl ?? member.avatarUrl;
     member.joinedAt = preRegistration.joinedAt;
-    member.phoneNumber = preRegistration.phoneNumber;
     member.dutyText = preRegistration.dutyText;
-    member.residenceCity = preRegistration.residenceCity;
-    member.residenceDistrict = preRegistration.residenceDistrict;
 
     preRegistration.isRegistered = true;
     await this.memberRepository.savePreRegistration(preRegistration);
@@ -262,8 +266,11 @@ export class MemberService {
     return createHash("sha256").update(password).digest("hex");
   }
 
-  private async createDisplayName(name: string): Promise<string> {
-    const sameNameMemberCount = await this.memberRepository.countByName(name);
+  private async createDisplayName(name: string, organizationId: number | null): Promise<string> {
+    const sameNameMemberCount = await this.memberRepository.countByNameAndOrganizationId(
+      name,
+      organizationId
+    );
 
     if (sameNameMemberCount === 0) {
       return name;
