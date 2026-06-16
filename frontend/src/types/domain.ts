@@ -23,7 +23,7 @@ export type Member = {
   name: string;
   displayName: string | null;
   avatarUrl: string | null;
-  age?: number | null;
+  birthDate?: string | null;
   branch: string | null;
   branchInfo?: {
     id: number;

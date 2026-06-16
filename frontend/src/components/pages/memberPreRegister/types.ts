@@ -11,13 +11,9 @@ export type DropdownOption = {
 };
 
 export type PreRegistrationEditDraft = {
-  age: string;
   dutyText: string;
   joinedAt: string;
   name: string;
   organization: string;
-  phoneNumber: string;
   positionId: string;
-  residenceCity: string;
-  residenceDistrict: string;
 };

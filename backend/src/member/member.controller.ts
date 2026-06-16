@@ -1,6 +1,8 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
+import { UploadFile } from "../upload/type/upload-file.type";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";
 import { OrganizationUpdateRequest } from "./dto/organization-update.request";
@@ -64,7 +66,11 @@ export class MemberController {
   }
 
   @Post("register")
-  async register(@Body() request: MemberRegisterRequest) {
-    return this.memberService.register(request);
+  @UseInterceptors(FileInterceptor("avatar"))
+  async register(
+    @Body() request: MemberRegisterRequest,
+    @UploadedFile() avatar?: UploadFile
+  ) {
+    return this.memberService.register(request, avatar);
   }
 }

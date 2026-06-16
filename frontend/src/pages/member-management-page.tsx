@@ -7,6 +7,7 @@ import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import type { Member } from "@/types/domain";
 import { EmployeeOrganizationSection } from "@/components/pages/memberManagement/components";
 import {
+  getMemberDisplayName,
   getMemberDutyName,
   getMemberOrganizationName,
   getMemberPositionName,
@@ -86,7 +87,7 @@ export function MemberManagementPage({ onBack }: MemberManagementPageProps) {
       const dutyName = getMemberDutyName(member);
       const matchesOrganization = selectedOrganization === "전체" || organizationName === selectedOrganization;
       const matchesKeyword = !keyword
-        || member.name.toLowerCase().includes(keyword)
+        || getMemberDisplayName(member).toLowerCase().includes(keyword)
         || dutyName.toLowerCase().includes(keyword)
         || getMemberPositionName(member).toLowerCase().includes(keyword);
 

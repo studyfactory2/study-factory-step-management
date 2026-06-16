@@ -300,7 +300,6 @@ export function getPreRegistrationOrganizationName(preRegistration: MemberPreReg
 
 export function createEditDraft(preRegistration: MemberPreRegistration): PreRegistrationEditDraft {
   return {
-    age: preRegistration.age ? String(preRegistration.age) : "",
     dutyText: preRegistration.dutyText
       ?? preRegistration.positionDuty?.name
       ?? preRegistration.positionDuty?.duty
@@ -309,10 +308,7 @@ export function createEditDraft(preRegistration: MemberPreRegistration): PreRegi
     joinedAt: preRegistration.joinedAt ?? "",
     name: preRegistration.name,
     organization: getPreRegistrationOrganizationName(preRegistration),
-    phoneNumber: formatPhoneInput(preRegistration.phoneNumber ?? ""),
-    positionId: preRegistration.positionId ? String(preRegistration.positionId) : "",
-    residenceCity: preRegistration.residenceCity ?? "",
-    residenceDistrict: preRegistration.residenceDistrict ?? ""
+    positionId: preRegistration.positionId ? String(preRegistration.positionId) : ""
   };
 }
 

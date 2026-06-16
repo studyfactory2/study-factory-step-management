@@ -9,14 +9,11 @@ import { MemberRole } from "../enum/member-role.enum";
 import { OrganizationBranch } from "./organization-branch.entity";
 import { Organization } from "./organization.entity";
 
-@Index(["name", "residenceCity", "residenceDistrict", "positionId", "positionDutyId"], { unique: true })
+@Index(["name", "organizationId", "positionId"], { unique: true, where: "is_registered = false" })
 @Entity({ name: "member_pre_registration" })
 export class MemberPreRegistration extends BaseEntity {
   @Column()
   name: string;
-
-  @Column({ type: "int", nullable: true })
-  age: number | null;
 
   @Column({ name: "joined_at", type: "date", nullable: true })
   joinedAt: string | null;
