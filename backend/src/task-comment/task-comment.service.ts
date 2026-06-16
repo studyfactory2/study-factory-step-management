@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
 import { Member } from "../member/entity/member.entity";
 import { MemberRole } from "../member/enum/member-role.enum";
+import { NotificationService } from "../notification/notification.service";
 import { Task } from "../task/entity/task.entity";
 import { TaskStatus } from "../task/enum/task-status.enum";
 import { TaskNotFoundException } from "../task/exception/task-not-found.exception";
@@ -18,7 +19,8 @@ import { TaskCommentRepository } from "./task-comment.repository";
 export class TaskCommentService {
   constructor(
     private readonly taskCommentRepository: TaskCommentRepository,
-    private readonly uploadService: UploadService
+    private readonly uploadService: UploadService,
+    private readonly notificationService: NotificationService
   ) {}
 
   async create(
@@ -45,6 +47,7 @@ export class TaskCommentService {
     }
 
     await this.taskCommentRepository.markTaskViewed(taskId, currentMember.memberId);
+    await this.notificationService.createTaskCommentNotifications(task, currentMember.memberId, request.content);
 
     const createdComment = await this.taskCommentRepository.findById(savedComment.id);
     return this.toResponse(createdComment ?? savedComment);

@@ -3,6 +3,7 @@ import { CurrentMember } from "../auth/type/current-member.type";
 import { Member } from "../member/entity/member.entity";
 import { MemberRepository } from "../member/member.repository";
 import { MemberRole } from "../member/enum/member-role.enum";
+import { NotificationService } from "../notification/notification.service";
 import { TaskCommentResponse } from "../task-comment/dto/task-comment.response";
 import { TaskCreateRequest } from "./dto/task-create.request";
 import { TaskCreateResponse } from "./dto/task-create.response";
@@ -35,7 +36,8 @@ export class TaskService {
   constructor(
     private readonly taskRepository: TaskRepository,
     private readonly memberRepository: MemberRepository,
-    private readonly uploadService: UploadService
+    private readonly uploadService: UploadService,
+    private readonly notificationService: NotificationService
   ) {}
 
   async getStatusSummary(): Promise<TaskStatusSummaryResponse> {
@@ -176,6 +178,7 @@ export class TaskService {
     const assigneeIds = await this.findAssigneeIds(request);
     const tasks = assigneeIds.map((assigneeId) => request.toEntity(assigneeId, currentMember.memberId));
     const savedTasks = await this.taskRepository.saveAll(tasks);
+    await this.notificationService.createTaskAssignedNotifications(savedTasks, currentMember.memberId);
     await this.taskRepository.markTasksViewed(
       savedTasks.map((task) => task.id),
       currentMember.memberId
@@ -401,6 +404,7 @@ export class TaskService {
     draft.status = TaskStatus.REGISTERED;
 
     const savedTask = await this.taskRepository.save(draft);
+    await this.notificationService.createTaskAssignedNotifications([savedTask], currentMember.memberId);
     await this.taskRepository.markTaskViewed(savedTask.id, currentMember.memberId);
 
     return {
