@@ -32,6 +32,12 @@ export class Member extends BaseEntity {
   @Column({ name: "duty_text", type: "varchar", nullable: true })
   dutyText: string | null;
 
+  @Column({ name: "residence_city", type: "varchar", nullable: true })
+  residenceCity: string | null;
+
+  @Column({ name: "residence_district", type: "varchar", nullable: true })
+  residenceDistrict: string | null;
+
   @Column({ name: "organization_id", type: "int", nullable: true })
   organizationId: number | null;
 

@@ -134,17 +134,16 @@ export function MemberPreRegisterPage({
     setMessage("");
 
     try {
-      const residence = `${residenceCity.trim()} ${residenceDistrict.trim()}`;
-
       await preRegisterMember(accessToken, {
         age: Number(age),
-        branch: residence,
         dutyText: dutyText.trim(),
         joinedAt,
         name: name.trim(),
         organization,
         phoneNumber: phoneNumber.trim(),
-        positionId
+        positionId,
+        residenceCity: residenceCity.trim(),
+        residenceDistrict: residenceDistrict.trim()
       });
       await refreshPreRegistrations();
       resetForm();
@@ -211,13 +210,14 @@ export function MemberPreRegisterPage({
     try {
       await updateMemberPreRegistration(accessToken, preRegistration.id, {
         age: Number(editDraft.age),
-        branch: `${editDraft.residenceCity.trim()} ${editDraft.residenceDistrict.trim()}`,
         dutyText: editDraft.dutyText.trim(),
         joinedAt: editDraft.joinedAt,
         name: editDraft.name.trim(),
         organization: editDraft.organization,
         phoneNumber: editDraft.phoneNumber.trim(),
-        positionId: Number(editDraft.positionId)
+        positionId: Number(editDraft.positionId),
+        residenceCity: editDraft.residenceCity.trim(),
+        residenceDistrict: editDraft.residenceDistrict.trim()
       });
       await refreshPreRegistrations();
       setEditingId(null);

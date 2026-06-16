@@ -45,6 +45,8 @@ export type Member = {
     name: string;
   } | null;
   phoneNumber?: string | null;
+  residenceCity?: string | null;
+  residenceDistrict?: string | null;
   positionDutyId: number | null;
   positionDuty?: {
     duty: MemberDuty | null;

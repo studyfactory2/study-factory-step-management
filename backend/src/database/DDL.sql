@@ -135,6 +135,8 @@ CREATE TABLE member (
   joined_at DATE,
   phone_number VARCHAR,
   duty_text VARCHAR,
+  residence_city VARCHAR,
+  residence_district VARCHAR,
   organization_id INTEGER,
   branch_id INTEGER,
   position_id INTEGER,
@@ -183,6 +185,8 @@ CREATE TABLE member_pre_registration (
   joined_at DATE,
   phone_number VARCHAR,
   duty_text VARCHAR,
+  residence_city VARCHAR,
+  residence_district VARCHAR,
   branch VARCHAR,
   position_id INTEGER,
   position_duty_id INTEGER,
@@ -209,8 +213,9 @@ CREATE INDEX idx_member_pre_registration_organization_id
 CREATE INDEX idx_member_pre_registration_branch_id
   ON member_pre_registration (branch_id);
 
-CREATE UNIQUE INDEX idx_member_pre_registration_name_branch_affiliation_position_duty
-  ON member_pre_registration (name, branch, affiliation, position, duty);
+CREATE UNIQUE INDEX idx_member_pre_registration_unique_pending
+  ON member_pre_registration (name, residence_city, residence_district, position_id, position_duty_id)
+  WHERE is_registered = false;
 
 CREATE TABLE refresh_token (
   id SERIAL PRIMARY KEY,

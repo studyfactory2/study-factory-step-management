@@ -175,6 +175,12 @@ CREATE TABLE member (
   display_name VARCHAR,
   password_hash VARCHAR NOT NULL,
   avatar_url VARCHAR,
+  age INTEGER,
+  joined_at DATE,
+  phone_number VARCHAR,
+  duty_text VARCHAR,
+  residence_city VARCHAR,
+  residence_district VARCHAR,
   organization_id INTEGER,
   branch_id INTEGER,
   position_id INTEGER,
@@ -220,6 +226,8 @@ CREATE TABLE member_pre_registration (
   joined_at DATE,
   phone_number VARCHAR,
   duty_text VARCHAR,
+  residence_city VARCHAR,
+  residence_district VARCHAR,
   affiliation member_pre_registration_affiliation_enum,
   position member_pre_registration_position_enum,
   role_type member_pre_registration_role_type_enum NOT NULL,
@@ -249,7 +257,7 @@ CREATE TABLE member_pre_registration (
 );
 
 CREATE UNIQUE INDEX idx_member_pre_registration_unique_pending
-  ON member_pre_registration (name, branch, position_id, position_duty_id)
+  ON member_pre_registration (name, residence_city, residence_district, position_id, position_duty_id)
   WHERE is_registered = false;
 
 CREATE INDEX idx_member_pre_registration_position_id

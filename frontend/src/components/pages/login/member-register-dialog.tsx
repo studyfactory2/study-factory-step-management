@@ -1,25 +1,14 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
-import { ChevronDown, X } from "lucide-react";
-import { getMemberBranches, registerMember } from "@/api/member";
+import { type FormEvent, useState } from "react";
+import { X } from "lucide-react";
+import { registerMember } from "@/api/member";
 
 export function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
   const [registerName, setRegisterName] = useState("");
-  const [registerBranch, setRegisterBranch] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
-  const [branches, setBranches] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    getMemberBranches()
-      .then(setBranches)
-      .catch(() => {
-        setBranches([]);
-        setMessage("지점 목록을 불러오지 못했습니다.");
-      });
-  }, []);
 
   async function handleRegisterSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,13 +17,11 @@ export function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
 
     try {
       await registerMember({
-        branch: registerBranch,
         name: registerName,
         password: registerPassword
       });
       setMessage("직원 등록이 완료되었습니다. 로그인해주세요.");
       setRegisterName("");
-      setRegisterBranch("");
       setRegisterPassword("");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "직원 등록에 실패했습니다.");
@@ -50,7 +37,7 @@ export function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
           <div>
             <h2 className="text-[21px] font-black tracking-normal text-[#3F2C28]">직원 등록</h2>
             <p className="mt-1 text-xs font-bold leading-5 text-[#9C7D79]">
-              사전등록된 이름, 지점과 사용할 비밀번호를 입력해주세요.
+              사전등록된 이름과 사용할 비밀번호를 입력해주세요.
             </p>
           </div>
           <button
@@ -64,26 +51,6 @@ export function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
         </div>
 
         <form className="mt-4 space-y-2.5" onSubmit={handleRegisterSubmit}>
-          <div className="relative">
-            <select
-              className="h-11 w-full appearance-none rounded-[15px] border border-[#EBCDD1] bg-white px-3 pr-10 text-sm font-bold text-[#8D706B] outline-none disabled:bg-[#FFF7F8] disabled:text-[#C9ABA6]"
-              disabled={branches.length === 0}
-              onChange={(event) => setRegisterBranch(event.target.value)}
-              required
-              value={registerBranch}
-            >
-              <option value="">지점</option>
-              {branches.map((branch) => (
-                <option key={branch} value={branch}>
-                  {branch}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              aria-hidden
-              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#B88F89]"
-            />
-          </div>
           <input
             className="h-11 w-full rounded-[15px] border border-[#EBCDD1] bg-white px-3 text-sm font-bold text-[#4B332E] outline-none placeholder:text-[#C9ABA6]"
             onChange={(event) => setRegisterName(event.target.value)}

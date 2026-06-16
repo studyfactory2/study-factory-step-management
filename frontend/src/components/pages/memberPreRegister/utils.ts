@@ -299,8 +299,6 @@ export function getPreRegistrationOrganizationName(preRegistration: MemberPreReg
 }
 
 export function createEditDraft(preRegistration: MemberPreRegistration): PreRegistrationEditDraft {
-  const residence = splitResidence(preRegistration.branch);
-
   return {
     age: preRegistration.age ? String(preRegistration.age) : "",
     dutyText: preRegistration.dutyText
@@ -313,8 +311,8 @@ export function createEditDraft(preRegistration: MemberPreRegistration): PreRegi
     organization: getPreRegistrationOrganizationName(preRegistration),
     phoneNumber: formatPhoneInput(preRegistration.phoneNumber ?? ""),
     positionId: preRegistration.positionId ? String(preRegistration.positionId) : "",
-    residenceCity: residence.city,
-    residenceDistrict: residence.district
+    residenceCity: preRegistration.residenceCity ?? "",
+    residenceDistrict: preRegistration.residenceDistrict ?? ""
   };
 }
 
@@ -341,6 +339,14 @@ export function splitResidence(value: string | null): {
     city: matchedCity,
     district: value.slice(matchedCity.length).trim()
   };
+}
+
+export function formatResidence(preRegistration: Pick<MemberPreRegistration, "branch" | "residenceCity" | "residenceDistrict">) {
+  if (preRegistration.residenceCity || preRegistration.residenceDistrict) {
+    return [preRegistration.residenceCity, preRegistration.residenceDistrict].filter(Boolean).join(" ");
+  }
+
+  return preRegistration.branch ?? "지역 미지정";
 }
 
 export function groupPreRegistrationsByOrganization(preRegistrations: MemberPreRegistration[]) {
@@ -501,4 +507,3 @@ export function formatPhoneNumber(value: string | null) {
 
   return value;
 }
-

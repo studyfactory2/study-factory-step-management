@@ -5,7 +5,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4
 
 export type MemberPreRegisterRequest = {
   age?: number;
-  branch: string;
   dutyText?: string;
   joinedAt?: string;
   name: string;
@@ -13,10 +12,11 @@ export type MemberPreRegisterRequest = {
   phoneNumber?: string;
   positionDutyId?: number;
   positionId: number;
+  residenceCity: string;
+  residenceDistrict: string;
 };
 
 export type MemberRegisterRequest = {
-  branch: string;
   name: string;
   password: string;
 };
@@ -25,7 +25,7 @@ export type MemberPreRegistration = {
   id: number;
   affiliation: MemberAffiliation | null;
   age: number | null;
-  branch: string;
+  branch: string | null;
   createdAt: string;
   duty: MemberDuty | null;
   dutyText: string | null;
@@ -46,6 +46,8 @@ export type MemberPreRegistration = {
     duty: MemberDuty | null;
   } | null;
   positionId: number | null;
+  residenceCity: string | null;
+  residenceDistrict: string | null;
   positionInfo?: {
     id: number;
     name: string;
