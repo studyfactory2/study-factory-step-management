@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 :root {
-  color: #4b332e;
-  background: #fff8f4;
+  color: #222222;
+  background: #f5f7fa;
 }
 
 * {
@@ -21,9 +21,9 @@ body {
   min-height: 100%;
   margin: 0;
   background:
-    radial-gradient(circle at 15% 10%, rgba(245, 166, 184, 0.16), transparent 24rem),
-    linear-gradient(180deg, #fff8f4 0%, #fff0f2 100%);
-  color: #4b332e;
+    radial-gradient(circle at 14% 8%, rgba(157, 199, 237, 0.18), transparent 23rem),
+    linear-gradient(180deg, #f7fbff 0%, #f4f6f8 100%);
+  color: #222222;
   font-family:
     "Jua",
     "Apple SD Gothic Neo",
