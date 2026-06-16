@@ -343,7 +343,7 @@ export function splitResidence(value: string | null): {
 
 export function formatResidence(preRegistration: Pick<MemberPreRegistration, "branch" | "residenceCity" | "residenceDistrict">) {
   if (preRegistration.residenceCity || preRegistration.residenceDistrict) {
-    return [preRegistration.residenceCity, preRegistration.residenceDistrict].filter(Boolean).join(" ");
+    return [preRegistration.residenceCity, preRegistration.residenceDistrict].filter(Boolean).join(" · ");
   }
 
   return preRegistration.branch ?? "지역 미지정";
