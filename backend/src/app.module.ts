@@ -22,6 +22,8 @@ import { MemberPreRegistration } from "./member/entity/member-pre-registration.e
 import { OrganizationBranch } from "./member/entity/organization-branch.entity";
 import { Organization } from "./member/entity/organization.entity";
 import { MemberModule } from "./member/member.module";
+import { Notification } from "./notification/entity/notification.entity";
+import { NotificationModule } from "./notification/notification.module";
 import { OrganizationChartNode } from "./organization-chart/entity/organization-chart-node.entity";
 import { OrganizationChart } from "./organization-chart/entity/organization-chart.entity";
 import { OrganizationChartModule } from "./organization-chart/organization-chart.module";
@@ -58,6 +60,7 @@ import { TaskModule } from "./task/task.module";
           FavoriteMember,
           Member,
           MemberPreRegistration,
+          Notification,
           Organization,
           OrganizationBranch,
           OrganizationChart,
@@ -79,6 +82,7 @@ import { TaskModule } from "./task/task.module";
     BoardModule,
     FavoriteMemberModule,
     MemberModule,
+    NotificationModule,
     OrganizationChartModule,
     PositionModule,
     TaskCommentModule,

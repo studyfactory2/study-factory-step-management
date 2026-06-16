@@ -14,20 +14,20 @@ export function ConfirmDialog({
   title
 }: ConfirmDialogProps) {
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#3F2C28]/35 px-4">
-      <div className="w-full max-w-[420px] rounded-[28px] border border-[#F2C9C2] bg-[#FFFEFC] p-7 text-center shadow-[0_18px_44px_rgba(90,62,59,0.2)]">
-        <p className="text-2xl font-black text-[#3F2C28]">{title}</p>
-        <p className="mt-3 text-sm font-bold leading-6 text-[#8F7470]">{description}</p>
-        <div className="mt-7 grid grid-cols-2 gap-3">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#222222]/30 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-[360px] rounded-[18px] border border-[#D8D1CE] bg-[#FFFEFC] p-5 text-center shadow-[0_12px_30px_rgba(60,52,48,0.16)]">
+        <p className="text-[20px] font-normal text-[#111111]">{title}</p>
+        <p className="mt-2 break-keep text-[13px] font-normal leading-5 text-[#7B716D]">{description}</p>
+        <div className="mt-5 grid grid-cols-2 gap-2">
           <button
-            className="h-11 rounded-full border border-[#F0B9C8] bg-white text-sm font-black text-primary"
+            className="h-10 rounded-[12px] border border-[#D8D1CE] bg-white text-[14px] font-normal text-[#4F4542]"
             onClick={onCancel}
             type="button"
           >
             취소
           </button>
           <button
-            className="h-11 rounded-full bg-primary text-sm font-black text-white shadow-sm"
+            className="h-10 rounded-[12px] border border-[#8FBDF0] bg-[#EAF4FF] text-[14px] font-normal text-[#1171E8]"
             onClick={onConfirm}
             type="button"
           >

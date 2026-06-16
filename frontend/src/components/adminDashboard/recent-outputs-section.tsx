@@ -174,8 +174,15 @@ export function RecentOutputsSection({
                 </span>
               </span>
               <span className="flex min-w-0 flex-col justify-center pl-5 pr-1.5">
-                <span className={`truncate text-[10px] font-normal leading-3 text-[#222222] ${completedTextClassName}`}>
-                  {output.taskTitle}
+                <span className="flex min-w-0 items-center gap-1">
+                  <span className={`truncate text-[10px] font-normal leading-3 text-[#222222] ${completedTextClassName}`}>
+                    {output.taskTitle}
+                  </span>
+                  {output.isNew && !isCompleted ? (
+                    <span className="shrink-0 rounded-full bg-[#E30613] px-1 py-0.5 text-[6px] font-normal uppercase leading-none text-white">
+                      new
+                    </span>
+                  ) : null}
                 </span>
                 {output.oneLineComment && (
                   <span className={`mt-1 flex min-w-0 items-center gap-1 text-[7px] font-normal leading-none text-[#9A918D] ${completedTextClassName}`}>

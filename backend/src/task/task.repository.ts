@@ -304,6 +304,14 @@ export class TaskRepository {
     });
   }
 
+  async deleteDraftByIdAndCreator(id: number, createdBy: number): Promise<void> {
+    await this.taskRepository.delete({
+      id,
+      createdBy,
+      isDraft: true
+    });
+  }
+
   async save(task: Task): Promise<Task> {
     return this.taskRepository.save(task);
   }

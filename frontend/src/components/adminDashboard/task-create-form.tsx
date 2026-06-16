@@ -3,12 +3,14 @@ import { ImagePlus, Search } from "lucide-react";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import {
   createTaskDraft,
+  deleteTaskDraft,
   getTaskDrafts,
   publishTaskDraft,
   type TaskCategory,
   updateTaskDraft
 } from "@/api/task";
 import { RoleTree } from "@/components/role-tree";
+import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 import { ImagePreviewDialog } from "@/components/pages/taskDetail/image-preview-dialog";
 import type { Member } from "@/types/domain";
 import { roleLabels } from "./constants";
@@ -79,6 +81,7 @@ export function TaskCreateForm({
   const [isPositionLoading, setIsPositionLoading] = useState(true);
   const [isPositionTreeCollapsed, setIsPositionTreeCollapsed] = useState(false);
   const [savingDraftId, setSavingDraftId] = useState<number | null>(null);
+  const [deleteTargetDraft, setDeleteTargetDraft] = useState<TaskDraftForm | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
 
@@ -300,12 +303,39 @@ export function TaskCreateForm({
     });
   }
 
-  function handleDeleteDraft(id: number) {
-    setDrafts((currentDrafts) => {
-      const remainingDrafts = currentDrafts.filter((draft) => draft.id !== id);
+  async function handleDeleteDraftConfirm() {
+    if (!deleteTargetDraft) {
+      return;
+    }
 
-      return remainingDrafts.length > 0 ? remainingDrafts : [createEmptyDraft(1)];
-    });
+    setMessage("");
+
+    try {
+      if (deleteTargetDraft.draftId) {
+        await deleteTaskDraft(accessToken, deleteTargetDraft.draftId);
+      }
+
+      setDrafts((currentDrafts) => {
+        const remainingDrafts = currentDrafts.filter((draft) => draft.id !== deleteTargetDraft.id);
+
+        return remainingDrafts.length > 0 ? remainingDrafts : [createEmptyDraft(1)];
+      });
+      setMessage("임시저장 업무가 삭제되었습니다.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "임시저장 업무를 삭제하지 못했습니다.");
+    } finally {
+      setDeleteTargetDraft(null);
+    }
+  }
+
+  function handleDeleteDraft(id: number) {
+    const targetDraft = drafts.find((draft) => draft.id === id);
+
+    if (!targetDraft) {
+      return;
+    }
+
+    setDeleteTargetDraft(targetDraft);
   }
 
   return (
@@ -366,6 +396,15 @@ export function TaskCreateForm({
             새 업무 추가
           </button>
         </div>
+      )}
+      {deleteTargetDraft && (
+        <ConfirmDialog
+          confirmLabel="삭제"
+          description={`임시저장한 업무를 삭제할까요? ${deleteTargetDraft.title || "작성 중인 업무"}은 삭제하면 다시 불러올 수 없습니다.`}
+          onCancel={() => setDeleteTargetDraft(null)}
+          onConfirm={() => void handleDeleteDraftConfirm()}
+          title="임시저장 업무 삭제"
+        />
       )}
     </section>
   );

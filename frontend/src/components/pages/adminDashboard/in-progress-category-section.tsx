@@ -19,10 +19,14 @@ const categoryColorClassNames = {
 
 export function InProgressCategorySection({
   categorySummary,
-  onBoardOpen
+  notificationUnreadCount = 0,
+  onBoardOpen,
+  onNotificationOpen
 }: {
   categorySummary: TaskCategorySummaryItem[];
+  notificationUnreadCount?: number;
   onBoardOpen: () => void;
+  onNotificationOpen?: () => void;
 }) {
   const summaryMap = new Map(categorySummary.map((item) => [item.category, item.count]));
 
@@ -39,10 +43,16 @@ export function InProgressCategorySection({
           </span>
           <button
             aria-label="내 알림"
-            className="flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542]"
+            className="relative flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542]"
+            onClick={onNotificationOpen}
             type="button"
           >
             <Bell aria-hidden className="h-3 w-3 text-[#E30613]" />
+            {notificationUnreadCount > 0 ? (
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E30613] px-1 text-[9px] font-normal leading-none text-white">
+                {notificationUnreadCount > 99 ? "99+" : notificationUnreadCount}
+              </span>
+            ) : null}
           </button>
           <button
             aria-label="게시판으로 이동"

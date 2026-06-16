@@ -49,6 +49,7 @@ export default function EmployeeDashboardRoutePage() {
       currentMember={currentMember}
       onAllTasksOpen={() => router.push("/tasks")}
       onBoardOpen={() => router.push("/board")}
+      onNotificationOpen={() => router.push("/notifications")}
       onLogout={handleLogout}
       onTaskCreateOpen={() => router.push("/tasks/new")}
       onTaskDetailOpen={(taskId) => router.push(`/tasks/${taskId}`)}

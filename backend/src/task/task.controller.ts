@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
 import { CurrentMember } from "../auth/decorator/current-member.decorator";
@@ -80,6 +80,15 @@ export class TaskController {
     @CurrentMember() currentMember: CurrentMemberType
   ) {
     return this.taskService.publishDraft(id, currentMember);
+  }
+
+  @UseGuards(JWTAuthGuard)
+  @Delete("drafts/:id")
+  async deleteDraft(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    await this.taskService.deleteDraft(id, currentMember);
   }
 
   @UseGuards(JWTAuthGuard)
