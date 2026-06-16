@@ -79,7 +79,7 @@ export function AdminSettingsPage({
   return (
     <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
       <div className="relative mx-auto w-full max-w-[360px] space-y-3">
-        <header className="relative pb-2 text-center">
+        <header className="relative pb-2 pt-0.5 text-center">
           <button
             className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[11px] font-normal text-[#333333] shadow-sm"
             onClick={onBack}
@@ -87,14 +87,14 @@ export function AdminSettingsPage({
           >
             ← 뒤로가기
           </button>
+          <div className="absolute right-0 top-0 inline-flex h-7 items-center gap-1 rounded-[9px] border border-[#C7CDD4] bg-[#F4FAFF] px-2.5 text-[10px] font-normal text-[#2D70CB] shadow-sm">
+            <Lock aria-hidden className="h-3 w-3" />
+            관리자 전용
+          </div>
           <h1 className="flex items-center justify-center gap-2 text-[24px] font-normal text-[#111111]">
             <Settings aria-hidden className="h-7 w-7 text-[#222222]" />
             설정
           </h1>
-          <div className="mt-3 inline-flex h-8 items-center gap-1 rounded-[10px] border border-[#F0C5C5] bg-[#FFF1F1] px-3 text-[12px] font-normal text-[#D95858]">
-            <Lock aria-hidden className="h-3.5 w-3.5" />
-            관리자 전용
-          </div>
         </header>
 
         <section className="rounded-[16px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
