@@ -400,7 +400,7 @@ export function TaskCreateForm({
       {deleteTargetDraft && (
         <ConfirmDialog
           confirmLabel="삭제"
-          description={`${deleteTargetDraft.title || "작성 중인 업무"} 임시저장을 삭제할까요? 삭제하면 다시 불러올 수 없습니다.`}
+          description={`임시저장한 업무를 삭제할까요? ${deleteTargetDraft.title || "작성 중인 업무"}은 삭제하면 다시 불러올 수 없습니다.`}
           onCancel={() => setDeleteTargetDraft(null)}
           onConfirm={() => void handleDeleteDraftConfirm()}
           title="임시저장 업무 삭제"
