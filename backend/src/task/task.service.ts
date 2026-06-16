@@ -1,5 +1,11 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
+import {
+  getTaskCategorySummaryCacheKey,
+  TASK_DASHBOARD_CACHE_KEYS,
+  TASK_DASHBOARD_CACHE_TTL_SECONDS
+} from "../cache/task-dashboard-cache";
+import { RedisCacheService } from "../cache/redis-cache.service";
 import { Member } from "../member/entity/member.entity";
 import { MemberRepository } from "../member/member.repository";
 import { MemberRole } from "../member/enum/member-role.enum";
@@ -37,7 +43,8 @@ export class TaskService {
     private readonly taskRepository: TaskRepository,
     private readonly memberRepository: MemberRepository,
     private readonly uploadService: UploadService,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly cacheService: RedisCacheService
   ) {}
 
   async getStatusSummary(): Promise<TaskStatusSummaryResponse> {
@@ -153,12 +160,22 @@ export class TaskService {
   async getCategorySummary(
     query: TaskRecentWorkStatusQueryRequest = {}
   ): Promise<TaskCategorySummaryItemResponse[]> {
+    const cacheKey = getTaskCategorySummaryCacheKey(query.status);
+    const cachedSummary = await this.cacheService.getJson<TaskCategorySummaryItemResponse[]>(cacheKey);
+    if (cachedSummary) {
+      return cachedSummary;
+    }
+
     const rows = await this.taskRepository.findActiveCountRowsByCategory(query.status);
 
-    return rows.map((row) => ({
+    const summary = rows.map((row) => ({
       category: row.category,
       count: Number(row.count)
     }));
+
+    await this.cacheService.setJson(cacheKey, summary, TASK_DASHBOARD_CACHE_TTL_SECONDS);
+
+    return summary;
   }
 
   private getStartOfWeek(date: Date): Date {
@@ -188,6 +205,8 @@ export class TaskService {
     if (attachments.length > 0) {
       await this.taskRepository.saveAttachments(attachments);
     }
+
+    await this.clearDashboardCache();
 
     return {
       createdCount: savedTasks.length,
@@ -407,6 +426,7 @@ export class TaskService {
     const savedTask = await this.taskRepository.save(draft);
     await this.notificationService.createTaskAssignedNotifications([savedTask], currentMember.memberId);
     await this.taskRepository.markTaskViewed(savedTask.id, currentMember.memberId);
+    await this.clearDashboardCache();
 
     return {
       createdCount: 1,
@@ -600,5 +620,9 @@ export class TaskService {
 
   private getDisplayName(member: Member): string {
     return member.displayName ?? member.name;
+  }
+
+  private async clearDashboardCache(): Promise<void> {
+    await this.cacheService.deleteByPrefix(TASK_DASHBOARD_CACHE_KEYS.categorySummaryPattern);
   }
 }

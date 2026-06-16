@@ -24,6 +24,69 @@ export type TaskCategorySummaryItem = {
   count: number;
 };
 
+type TaskCategorySummaryCache = {
+  savedAt: number;
+  summary: TaskCategorySummaryItem[];
+};
+
+const TASK_CATEGORY_SUMMARY_CACHE_TTL_MS = 1000 * 15;
+const TASK_CATEGORY_SUMMARY_CACHE_KEY_PREFIX = "study-factory:task-category-summary";
+
+function getTaskCategorySummaryCacheKey(filters: { statuses?: TaskStatus[] } = {}) {
+  const statusKey = filters.statuses?.length
+    ? [...filters.statuses].sort().join(",")
+    : "ALL";
+
+  return `${TASK_CATEGORY_SUMMARY_CACHE_KEY_PREFIX}:${statusKey}`;
+}
+
+export function readTaskCategorySummaryCache(
+  filters: {
+    statuses?: TaskStatus[];
+  } = {}
+): TaskCategorySummaryItem[] | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const cachedValue = window.localStorage.getItem(getTaskCategorySummaryCacheKey(filters));
+    if (!cachedValue) {
+      return null;
+    }
+
+    const cache = JSON.parse(cachedValue) as TaskCategorySummaryCache;
+    if (!Array.isArray(cache.summary) || Date.now() - cache.savedAt > TASK_CATEGORY_SUMMARY_CACHE_TTL_MS) {
+      window.localStorage.removeItem(getTaskCategorySummaryCacheKey(filters));
+      return null;
+    }
+
+    return cache.summary;
+  } catch {
+    window.localStorage.removeItem(getTaskCategorySummaryCacheKey(filters));
+    return null;
+  }
+}
+
+function saveTaskCategorySummaryCache(
+  filters: {
+    statuses?: TaskStatus[];
+  } = {},
+  summary: TaskCategorySummaryItem[]
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    getTaskCategorySummaryCacheKey(filters),
+    JSON.stringify({
+      savedAt: Date.now(),
+      summary
+    } satisfies TaskCategorySummaryCache)
+  );
+}
+
 export type TaskAssigneeScope = "SINGLE" | "ALL";
 
 export type TaskCreateRequest = {
@@ -206,7 +269,10 @@ export async function getTaskCategorySummary(
     throw new Error("업무 종류별 현황을 불러오지 못했습니다.");
   }
 
-  return response.json() as Promise<TaskCategorySummaryItem[]>;
+  const summary = await response.json() as TaskCategorySummaryItem[];
+  saveTaskCategorySummaryCache(filters, summary);
+
+  return summary;
 }
 
 type ApiErrorResponse = {

@@ -15,6 +15,7 @@ import {
 } from "@/api/member";
 import {
   getTaskCategorySummary,
+  readTaskCategorySummaryCache,
   type TaskCategorySummaryItem
 } from "@/api/task";
 import {
@@ -70,6 +71,8 @@ const allRecentTaskStatuses: TaskStatus[] = [
   "COMPLETED"
 ];
 
+const inProgressTaskStatuses: TaskStatus[] = ["IN_PROGRESS"];
+
 type ConfirmDialogState = {
   confirmLabel?: string;
   description: string;
@@ -109,23 +112,31 @@ export function AdminDashboardPage({
   useEffect(() => {
     async function loadDashboard() {
       try {
+        const cachedCategorySummary = readTaskCategorySummaryCache({
+          statuses: inProgressTaskStatuses
+        });
+        if (cachedCategorySummary) {
+          setCategorySummary(cachedCategorySummary);
+        }
+
+        void getTaskCategorySummary({
+          statuses: inProgressTaskStatuses
+        })
+          .then(setCategorySummary)
+          .catch(() => undefined);
+
         const [
           dashboardResponse,
-          categorySummaryResponse,
           notificationCountResponse
         ] = await Promise.all([
           getAdminDashboard(accessToken, {
             sortOrder: recentTaskSortOrder,
             statuses: recentTaskStatuses
           }),
-          getTaskCategorySummary({
-            statuses: ["IN_PROGRESS"]
-          }),
           getNotificationUnreadCount(accessToken)
         ]);
 
         setDashboard(dashboardResponse);
-        setCategorySummary(categorySummaryResponse);
         setNotificationUnreadCount(notificationCountResponse.unreadCount);
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "대시보드를 불러오지 못했습니다.");

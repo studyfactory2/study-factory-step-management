@@ -13,6 +13,7 @@ import {
 import {
   getTaskCategorySummary,
   getTaskRecentWorkStatus,
+  readTaskCategorySummaryCache,
   type TaskCategorySummaryItem
 } from "@/api/task";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
@@ -21,6 +22,8 @@ import { InProgressCategorySection } from "@/components/pages/adminDashboard/in-
 import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 import type { StoredMember } from "@/lib/auth-storage";
 import type { TaskStatus } from "@/types/domain";
+
+const inProgressTaskStatuses: TaskStatus[] = ["IN_PROGRESS"];
 
 type EmployeeDashboardPageProps = {
   accessToken: string;
@@ -63,10 +66,20 @@ export function EmployeeDashboardPage({
       }
 
       try {
-        const [categorySummaryResponse, recentOutputResponse, notificationCountResponse] = await Promise.all([
-          getTaskCategorySummary({
-            statuses: ["IN_PROGRESS"]
-          }),
+        const cachedCategorySummary = readTaskCategorySummaryCache({
+          statuses: inProgressTaskStatuses
+        });
+        if (cachedCategorySummary) {
+          setCategorySummary(cachedCategorySummary);
+        }
+
+        void getTaskCategorySummary({
+          statuses: inProgressTaskStatuses
+        })
+          .then(setCategorySummary)
+          .catch(() => undefined);
+
+        const [recentOutputResponse, notificationCountResponse] = await Promise.all([
           getTaskRecentWorkStatus(accessToken, {
             sortOrder: recentTaskSortOrder,
             statuses: recentTaskStatuses
@@ -74,7 +87,6 @@ export function EmployeeDashboardPage({
           getNotificationUnreadCount(accessToken)
         ]);
 
-        setCategorySummary(categorySummaryResponse);
         setRecentOutputs(recentOutputResponse);
         setNotificationUnreadCount(notificationCountResponse.unreadCount);
         setMessage("");
@@ -165,17 +177,16 @@ export function EmployeeDashboardPage({
           </div>
         </section>
         <MessageBanner message={message} />
-        {isLoading ? (
+        <InProgressCategorySection
+          categorySummary={categorySummary}
+          notificationUnreadCount={notificationUnreadCount}
+          onBoardOpen={onBoardOpen}
+          onNotificationOpen={() => void handleNotificationOpen()}
+        />
+        {isLoading && (
           <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-5 text-center text-[13px] font-normal text-[#7B716D] shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-            직원 대시보드를 불러오는 중입니다.
+            최근 업무를 불러오는 중입니다.
           </section>
-        ) : (
-          <InProgressCategorySection
-            categorySummary={categorySummary}
-            notificationUnreadCount={notificationUnreadCount}
-            onBoardOpen={onBoardOpen}
-            onNotificationOpen={() => void handleNotificationOpen()}
-          />
         )}
         <RecentOutputsSection
           currentMemberId={currentMember.id}

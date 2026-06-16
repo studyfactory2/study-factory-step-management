@@ -1,5 +1,7 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { CurrentMember } from "../auth/type/current-member.type";
+import { TASK_DASHBOARD_CACHE_KEYS } from "../cache/task-dashboard-cache";
+import { RedisCacheService } from "../cache/redis-cache.service";
 import { Member } from "../member/entity/member.entity";
 import { MemberRole } from "../member/enum/member-role.enum";
 import { NotificationService } from "../notification/notification.service";
@@ -20,7 +22,8 @@ export class TaskCommentService {
   constructor(
     private readonly taskCommentRepository: TaskCommentRepository,
     private readonly uploadService: UploadService,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly cacheService: RedisCacheService
   ) {}
 
   async create(
@@ -48,6 +51,7 @@ export class TaskCommentService {
 
     await this.taskCommentRepository.markTaskViewed(taskId, currentMember.memberId);
     await this.notificationService.createTaskCommentNotifications(task, currentMember.memberId, request.content);
+    await this.clearDashboardCache();
 
     const createdComment = await this.taskCommentRepository.findById(savedComment.id);
     return this.toResponse(createdComment ?? savedComment);
@@ -189,5 +193,9 @@ export class TaskCommentService {
 
   private getDisplayName(member: Member): string {
     return member.displayName ?? member.name;
+  }
+
+  private async clearDashboardCache(): Promise<void> {
+    await this.cacheService.deleteByPrefix(TASK_DASHBOARD_CACHE_KEYS.categorySummaryPattern);
   }
 }

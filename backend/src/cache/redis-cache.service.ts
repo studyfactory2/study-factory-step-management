@@ -77,4 +77,23 @@ export class RedisCacheService implements OnModuleInit, OnModuleDestroy {
       return;
     }
   }
+
+  async deleteByPrefix(prefix: string): Promise<void> {
+    if (!this.client || !this.isReady) {
+      return;
+    }
+
+    try {
+      const keys: string[] = [];
+      for await (const key of this.client.scanIterator({ MATCH: `${prefix}*`, COUNT: 100 })) {
+        keys.push(String(key));
+      }
+
+      if (keys.length > 0) {
+        await this.client.del(keys);
+      }
+    } catch {
+      return;
+    }
+  }
 }
