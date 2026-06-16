@@ -1,4 +1,10 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  LOGIN_STRUCTURE_CACHE_KEY_LIST,
+  LOGIN_STRUCTURE_CACHE_KEYS,
+  LOGIN_STRUCTURE_CACHE_TTL_SECONDS
+} from "../cache/login-structure-cache";
+import { RedisCacheService } from "../cache/redis-cache.service";
 import { PositionCreateRequest } from "./dto/position-create.request";
 import { PositionResponse, PositionTreeResponse } from "./dto/position.response";
 import { PositionTreeUpdateRequest } from "./dto/position-tree-update.request";
@@ -9,7 +15,10 @@ import { PositionRepository } from "./position.repository";
 
 @Injectable()
 export class PositionService {
-  constructor(private readonly positionRepository: PositionRepository) {}
+  constructor(
+    private readonly positionRepository: PositionRepository,
+    private readonly cacheService: RedisCacheService
+  ) {}
 
   async findAll(): Promise<PositionResponse[]> {
     const positions = await this.positionRepository.findActivePositions();
@@ -17,6 +26,24 @@ export class PositionService {
   }
 
   async findTree(): Promise<PositionTreeResponse[]> {
+    const cachedTree = await this.cacheService.getJson<PositionTreeResponse[]>(
+      LOGIN_STRUCTURE_CACHE_KEYS.positionTree
+    );
+    if (cachedTree) {
+      return cachedTree;
+    }
+
+    const tree = await this.buildTree();
+    await this.cacheService.setJson(
+      LOGIN_STRUCTURE_CACHE_KEYS.positionTree,
+      tree,
+      LOGIN_STRUCTURE_CACHE_TTL_SECONDS
+    );
+
+    return tree;
+  }
+
+  private async buildTree(): Promise<PositionTreeResponse[]> {
     const positions = await this.positionRepository.findActivePositions();
     const positionMap = new Map<number, PositionTreeResponse>();
     const roots: PositionTreeResponse[] = [];
@@ -71,6 +98,8 @@ export class PositionService {
       savedPosition.dutyLinks = [];
     }
 
+    await this.clearLoginStructureCache();
+
     return PositionResponse.from(savedPosition);
   }
 
@@ -97,6 +126,8 @@ export class PositionService {
       }))
     );
 
+    await this.clearLoginStructureCache();
+
     return this.findTree();
   }
 
@@ -111,6 +142,8 @@ export class PositionService {
     }
 
     const savedPosition = await this.positionRepository.save(position);
+
+    await this.clearLoginStructureCache();
 
     return PositionResponse.from(savedPosition);
   }
@@ -133,6 +166,7 @@ export class PositionService {
     }
 
     await this.deletePositionTree(id);
+    await this.clearLoginStructureCache();
   }
 
   private async findPositionTreeIds(id: number): Promise<number[]> {
@@ -150,5 +184,9 @@ export class PositionService {
     }
 
     await this.positionRepository.deleteById(id);
+  }
+
+  private async clearLoginStructureCache(): Promise<void> {
+    await this.cacheService.delete(LOGIN_STRUCTURE_CACHE_KEY_LIST);
   }
 }

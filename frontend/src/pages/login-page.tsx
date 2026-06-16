@@ -26,6 +26,61 @@ type LoginPageProps = {
   onLogin?: (response: LoginResponse) => void;
 };
 
+type LoginPositionTreeCache = {
+  savedAt: number;
+  positions: PositionTreeNode[];
+};
+
+const LOGIN_POSITION_TREE_CACHE_KEY = "study-factory:login-position-tree";
+const LOGIN_POSITION_TREE_CACHE_TTL_MS = 1000 * 60 * 30;
+
+function readLoginPositionTreeCache(): PositionTreeNode[] | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const cachedValue = window.localStorage.getItem(LOGIN_POSITION_TREE_CACHE_KEY);
+    if (!cachedValue) {
+      return null;
+    }
+
+    const cache = JSON.parse(cachedValue) as LoginPositionTreeCache;
+    if (!Array.isArray(cache.positions) || Date.now() - cache.savedAt > LOGIN_POSITION_TREE_CACHE_TTL_MS) {
+      window.localStorage.removeItem(LOGIN_POSITION_TREE_CACHE_KEY);
+      return null;
+    }
+
+    return cache.positions;
+  } catch {
+    window.localStorage.removeItem(LOGIN_POSITION_TREE_CACHE_KEY);
+    return null;
+  }
+}
+
+function saveLoginPositionTreeCache(positions: PositionTreeNode[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    LOGIN_POSITION_TREE_CACHE_KEY,
+    JSON.stringify({
+      savedAt: Date.now(),
+      positions
+    } satisfies LoginPositionTreeCache)
+  );
+}
+
+async function fetchLoginPositionTree(): Promise<PositionTreeNode[]> {
+  try {
+    const chart = await getActiveOrganizationChart();
+    return organizationChartNodesToPositionTree(chart.nodes);
+  } catch {
+    return getPositionTree();
+  }
+}
+
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -56,21 +111,47 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }, []);
 
   useEffect(() => {
-    setIsPositionTreeLoading(true);
-    getActiveOrganizationChart()
-      .then((chart) => organizationChartNodesToPositionTree(chart.nodes))
-      .catch(() => getPositionTree())
+    let isMounted = true;
+    const cachedPositionTree = readLoginPositionTreeCache();
+
+    if (cachedPositionTree) {
+      setPositions(cachedPositionTree);
+      setSelectedPositionId(cachedPositionTree[0]?.id ?? null);
+      setPositionTreeMessage("");
+      setIsPositionTreeLoading(false);
+    } else {
+      setIsPositionTreeLoading(true);
+    }
+
+    fetchLoginPositionTree()
       .then((positionTree) => {
+        if (!isMounted) {
+          return;
+        }
+
         setPositions(positionTree);
         setSelectedPositionId(positionTree[0]?.id ?? null);
         setPositionTreeMessage("");
+        saveLoginPositionTreeCache(positionTree);
       })
       .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
         setPositions([]);
         setSelectedPositionId(null);
         setPositionTreeMessage("로그인 화면 조직도를 불러오지 못했습니다.");
       })
-      .finally(() => setIsPositionTreeLoading(false));
+      .finally(() => {
+        if (isMounted) {
+          setIsPositionTreeLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
