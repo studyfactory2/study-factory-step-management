@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TaskDetailPage } from "@/pages/task-detail-page";
 import {
   getStoredAuth,
@@ -18,6 +18,7 @@ type TaskDetailRoutePageProps = {
 export default function TaskDetailRoutePage({ params }: TaskDetailRoutePageProps) {
   const { taskId } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [accessToken, setAccessToken] = useState("");
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -45,12 +46,16 @@ export default function TaskDetailRoutePage({ params }: TaskDetailRoutePageProps
     return null;
   }
 
+  const backPath = searchParams?.get("from") === "notifications"
+    ? "/notifications"
+    : isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard";
+
   return (
     <TaskDetailPage
       accessToken={accessToken}
       currentMemberId={currentMember.id}
       currentMemberRole={currentMember.roleType}
-      onBack={() => router.push(isAdminRole(currentMember.roleType) ? "/admin-dashboard" : "/employee-dashboard")}
+      onBack={() => router.push(backPath)}
       taskId={parsedTaskId}
     />
   );
