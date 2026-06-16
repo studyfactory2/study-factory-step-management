@@ -1,4 +1,5 @@
 type ConfirmDialogProps = {
+  cancelLabel?: string | null;
   confirmLabel: string;
   description: string;
   onCancel: () => void;
@@ -7,6 +8,7 @@ type ConfirmDialogProps = {
 };
 
 export function ConfirmDialog({
+  cancelLabel = "취소",
   confirmLabel,
   description,
   onCancel,
@@ -18,14 +20,16 @@ export function ConfirmDialog({
       <div className="w-full max-w-[360px] rounded-[18px] border border-[#D8D1CE] bg-[#FFFEFC] p-5 text-center shadow-[0_12px_30px_rgba(60,52,48,0.16)]">
         <p className="text-[22px] font-normal text-[#111111]">{title}</p>
         <p className="mt-2 break-keep text-[15px] font-normal leading-5 text-[#7B716D]">{description}</p>
-        <div className="mt-5 grid grid-cols-2 gap-2">
-          <button
-            className="h-10 rounded-[12px] border border-[#D8D1CE] bg-white text-[16px] font-normal text-[#4F4542]"
-            onClick={onCancel}
-            type="button"
-          >
-            취소
-          </button>
+        <div className={`mt-5 grid gap-2 ${cancelLabel ? "grid-cols-2" : "grid-cols-1"}`}>
+          {cancelLabel ? (
+            <button
+              className="h-10 rounded-[12px] border border-[#D8D1CE] bg-white text-[16px] font-normal text-[#4F4542]"
+              onClick={onCancel}
+              type="button"
+            >
+              {cancelLabel}
+            </button>
+          ) : null}
           <button
             className="h-10 rounded-[12px] border border-[#8FBDF0] bg-[#EAF4FF] text-[16px] font-normal text-[#1171E8]"
             onClick={onConfirm}

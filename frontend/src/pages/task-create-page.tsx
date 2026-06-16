@@ -7,6 +7,7 @@ import { getMembers } from "@/api/member";
 import { TaskCreateForm, type TaskCreateDraftSubmit } from "@/components/adminDashboard/task-create-form";
 import { isAssignableMember } from "@/components/adminDashboard/utils";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
+import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 import type { Member } from "@/types/domain";
 
 type TaskCreatePageProps = {
@@ -24,6 +25,7 @@ export function TaskCreatePage({
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
 
   useEffect(() => {
     async function loadMembers() {
@@ -54,12 +56,17 @@ export function TaskCreatePage({
         oneLineComment: request.oneLineComment,
         title: request.title
       });
-      onCreated();
+      setIsSuccessDialogOpen(true);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "업무를 등록하지 못했습니다.");
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function handleSuccessConfirm() {
+    setIsSuccessDialogOpen(false);
+    onCreated();
   }
 
   return (
@@ -89,10 +96,20 @@ export function TaskCreatePage({
           assignees={members}
           isLoading={isLoading}
           isSubmitting={isSubmitting}
-          onPublished={async () => onCreated()}
+          onPublished={async () => setIsSuccessDialogOpen(true)}
           onSubmit={handleCreateTask}
         />
       </div>
+      {isSuccessDialogOpen && (
+        <ConfirmDialog
+          cancelLabel={null}
+          confirmLabel="확인"
+          description="업무가 성공적으로 등록되었습니다."
+          onCancel={handleSuccessConfirm}
+          onConfirm={handleSuccessConfirm}
+          title="업무 등록 완료"
+        />
+      )}
     </main>
   );
 }
