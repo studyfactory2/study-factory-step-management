@@ -24,6 +24,11 @@ import {
 } from "@/api/board";
 import { getStoredAuth, isAdminRole, type StoredMember } from "@/lib/auth-storage";
 
+type AttachmentDeleteTarget = {
+  index: number;
+  name: string;
+} | null;
+
 const categoryStyles = {
   pink: "bg-[#FFE4EC] text-[#EC4D7B] border-[#F7B7C9]",
   green: "bg-[#DFF6E8] text-[#228C50] border-[#9BD7B5]",
@@ -47,6 +52,7 @@ export default function BoardPostCreatePage() {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [attachmentDeleteTarget, setAttachmentDeleteTarget] = useState<AttachmentDeleteTarget>(null);
 
   const attachmentPreviews = useMemo(() => {
     return attachments.map((file) => ({
@@ -71,6 +77,7 @@ export default function BoardPostCreatePage() {
 
     setAccessToken(auth.accessToken);
     setCurrentMember(auth.currentMember);
+    resetForm();
 
     async function loadCategories() {
       try {
@@ -131,6 +138,39 @@ export default function BoardPostCreatePage() {
 
   function handleAttachmentRemove(index: number) {
     setAttachments((currentFiles) => currentFiles.filter((_, fileIndex) => fileIndex !== index));
+  }
+
+  function resetForm() {
+    setAttachments([]);
+    setContent("");
+    setMessage("");
+    setOneLineComment("");
+    setSelectedCategoryIds([]);
+    setSelectedPostType("EMPLOYEE");
+    setTitle("");
+    setVisibility("ALL");
+  }
+
+  function handleAttachmentDeleteRequest(index: number) {
+    const attachment = attachments[index];
+
+    if (!attachment) {
+      return;
+    }
+
+    setAttachmentDeleteTarget({
+      index,
+      name: attachment.name
+    });
+  }
+
+  function handleAttachmentDeleteConfirm() {
+    if (!attachmentDeleteTarget) {
+      return;
+    }
+
+    handleAttachmentRemove(attachmentDeleteTarget.index);
+    setAttachmentDeleteTarget(null);
   }
 
   async function handleSubmit() {
@@ -329,7 +369,7 @@ export default function BoardPostCreatePage() {
                 <button
                   aria-label="첨부 삭제"
                   className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#333333] shadow"
-                  onClick={() => handleAttachmentRemove(index)}
+                  onClick={() => handleAttachmentDeleteRequest(index)}
                   type="button"
                 >
                   <X aria-hidden className="h-3.5 w-3.5" />
@@ -414,6 +454,33 @@ export default function BoardPostCreatePage() {
           </button>
         </div>
       </div>
+
+      {attachmentDeleteTarget ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/35 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-[320px] rounded-[16px] border border-[#D8D1CE] bg-white p-4 text-center shadow-[0_12px_28px_rgba(95,73,68,0.22)]">
+            <h2 className="text-[18px] font-normal text-[#111111]">첨부 사진을 삭제할까요?</h2>
+            <p className="mt-2 break-keep text-[13px] font-normal leading-5 text-[#7B716D]">
+              {attachmentDeleteTarget.name} 파일이 작성 중인 게시글에서 삭제됩니다.
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                className="h-10 rounded-[12px] border border-[#D8D1CE] bg-white text-[14px] font-normal text-[#4F4542]"
+                onClick={() => setAttachmentDeleteTarget(null)}
+                type="button"
+              >
+                취소
+              </button>
+              <button
+                className="h-10 rounded-[12px] border border-[#E7B6BE] bg-[#FFF0F3] text-[14px] font-normal text-[#D83A42]"
+                onClick={handleAttachmentDeleteConfirm}
+                type="button"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
