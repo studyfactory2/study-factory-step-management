@@ -186,7 +186,7 @@ export function MemberPreRegisterPanel({
                     </span>
                   </div>
                   <p className="mt-1 text-xs font-bold text-[#9B7A75]">
-                    {[preRegistration.residenceCity, preRegistration.residenceDistrict].filter(Boolean).join(" ") || "거주지 미지정"} · {preRegistration.positionDuty?.name ?? preRegistration.positionDuty?.duty ?? "역할 미지정"}
+                    {[preRegistration.residenceCity, preRegistration.residenceDistrict].filter(Boolean).join(" · ") || "거주지 미지정"} · {preRegistration.positionDuty?.name ?? preRegistration.positionDuty?.duty ?? "역할 미지정"}
                   </p>
                 </div>
                 <button
