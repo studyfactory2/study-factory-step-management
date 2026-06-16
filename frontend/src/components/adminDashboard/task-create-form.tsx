@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { ImagePlus, Search } from "lucide-react";
+import { Check, ChevronDown, ImagePlus, Search } from "lucide-react";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import {
   createTaskDraft,
@@ -569,6 +569,22 @@ function TaskDraftCard({
   const isDisabled = isLocked || isSaving || isSubmitting || isLoading;
   const attachmentInputId = `task-attachment-${draft.id}`;
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [isAssigneeMenuOpen, setIsAssigneeMenuOpen] = useState(false);
+  const selectedAssignee = assignees.find((member) => String(member.id) === draft.assigneeId);
+
+  useEffect(() => {
+    if (isDisabled) {
+      setIsAssigneeMenuOpen(false);
+    }
+  }, [isDisabled]);
+
+  function handleAssigneeSelect(assigneeId: string) {
+    onUpdate(draft.id, (currentDraft) => ({
+      ...currentDraft,
+      assigneeId
+    }));
+    setIsAssigneeMenuOpen(false);
+  }
 
   return (
     <article className="space-y-4">
@@ -618,26 +634,55 @@ function TaskDraftCard({
                 </span>
               )}
             </div>
-            <div className="flex min-w-0 items-center gap-1 text-[#333333]">
+            <div className="relative flex min-w-0 items-center gap-1 text-[#333333]">
               <span className="shrink-0">담당자 :</span>
-              <select
-                className="min-w-0 max-w-[112px] truncate rounded-[7px] border border-[#D8D1CE] bg-white px-1.5 py-1 text-[12px] font-normal text-[#333333] outline-none disabled:opacity-60"
+              <button
+                className="flex h-7 min-w-[112px] max-w-[132px] items-center justify-between gap-1 rounded-[7px] border border-[#D8D1CE] bg-white px-2 text-[12px] font-normal text-[#333333] shadow-sm outline-none disabled:opacity-60"
                 disabled={isDisabled}
-                onChange={(event) =>
-                  onUpdate(draft.id, (currentDraft) => ({
-                    ...currentDraft,
-                    assigneeId: event.target.value
-                  }))
-                }
-                value={draft.assigneeId}
+                onClick={() => setIsAssigneeMenuOpen((current) => !current)}
+                type="button"
               >
-                <option value="">미선택</option>
-                {assignees.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {getMemberDisplayName(member)}
-                  </option>
-                ))}
-              </select>
+                <span className="min-w-0 truncate">
+                  {selectedAssignee ? getMemberDisplayName(selectedAssignee) : "미선택"}
+                </span>
+                <ChevronDown aria-hidden className={`h-3.5 w-3.5 shrink-0 text-[#7B716D] transition ${isAssigneeMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+              {isAssigneeMenuOpen && (
+                <div className="absolute right-0 top-8 z-30 w-[190px] overflow-hidden rounded-[10px] border border-[#D8D1CE] bg-white p-1.5 shadow-[0_10px_24px_rgba(95,73,68,0.16)]">
+                  <button
+                    className={`flex h-8 w-full items-center justify-between rounded-[8px] px-2 text-left text-[12px] font-normal ${
+                      draft.assigneeId ? "text-[#7B716D] hover:bg-[#F7F7F7]" : "bg-[#EAF3FF] text-[#2D70CB]"
+                    }`}
+                    onClick={() => handleAssigneeSelect("")}
+                    type="button"
+                  >
+                    <span>미선택</span>
+                    {!draft.assigneeId ? <Check aria-hidden className="h-3.5 w-3.5" /> : null}
+                  </button>
+                  <div className="max-h-[188px] overflow-y-auto">
+                    {assignees.map((member) => {
+                      const isSelected = String(member.id) === draft.assigneeId;
+
+                      return (
+                        <button
+                          className={`flex h-9 w-full items-center justify-between gap-2 rounded-[8px] px-2 text-left font-normal ${
+                            isSelected ? "bg-[#EAF3FF] text-[#2D70CB]" : "text-[#333333] hover:bg-[#F7F7F7]"
+                          }`}
+                          key={member.id}
+                          onClick={() => handleAssigneeSelect(String(member.id))}
+                          type="button"
+                        >
+                          <span className="min-w-0 truncate text-[12px]">{getMemberDisplayName(member)}</span>
+                          <span className="flex shrink-0 items-center gap-1 text-[10px] text-[#7B716D]">
+                            {getMemberPositionName(member)}
+                            {isSelected ? <Check aria-hidden className="h-3.5 w-3.5 text-[#2D70CB]" /> : null}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <input
