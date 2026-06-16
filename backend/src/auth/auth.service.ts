@@ -7,6 +7,7 @@ import { AuthLoginResponse } from "./dto/auth-login.response";
 import { AuthTokenType } from "./enum/auth-token-type.enum";
 import { InvalidCredentialsException } from "./exception/invalid-credentials.exception";
 import { InvalidTokenException } from "./exception/invalid-token.exception";
+import { Member } from "../member/entity/member.entity";
 import { MemberRepository } from "../member/member.repository";
 import { RefreshTokenRepository } from "./refresh-token.repository";
 import { JwtPayload } from "./type/jwt-payload.type";
@@ -35,31 +36,30 @@ export class AuthService {
       throw new InvalidCredentialsException();
     }
 
-    const tokenPayload = {
-      userId: member.id,
-      name: member.displayName ?? member.name,
-      roleType: member.roleType
-    };
-    const accessToken = this.generateAccessToken(tokenPayload);
-    const refreshToken = this.generateRefreshToken(tokenPayload);
+    return this.issueAuthResponse(member);
+  }
 
-    await this.saveRefreshToken(member.id, refreshToken);
+  async refresh(refreshToken: string): Promise<AuthLoginResponse> {
+    const payload = this.verifyToken(refreshToken) as JwtPayload;
 
-    return {
-      accessToken,
-      refreshToken,
-      member: {
-        id: member.id,
-        name: member.displayName ?? member.name,
-        branch: member.branchInfo?.name ?? null,
-        organizationId: member.organizationId,
-        organizationName: member.organization?.name ?? null,
-        branchId: member.branchId,
-        branchName: member.branchInfo?.name ?? null,
-        positionName: member.positionInfo?.name ?? null,
-        roleType: member.roleType
-      }
-    };
+    if (payload.tokenType !== AuthTokenType.REFRESH) {
+      throw new InvalidTokenException();
+    }
+
+    const savedRefreshToken = await this.refreshTokenRepository.findByToken(refreshToken);
+
+    if (!savedRefreshToken || savedRefreshToken.memberId !== payload.userId) {
+      throw new InvalidTokenException();
+    }
+
+    const member = await this.memberRepository.findById(payload.userId);
+
+    if (!member || !member.isActive) {
+      await this.refreshTokenRepository.deleteByToken(refreshToken);
+      throw new InvalidTokenException();
+    }
+
+    return this.issueAuthResponse(member);
   }
 
   generateToken(expiresIn: string | number, payload: object = {}): string {
@@ -98,6 +98,34 @@ export class AuthService {
     refreshToken.token = token;
 
     await this.refreshTokenRepository.save(refreshToken);
+  }
+
+  private async issueAuthResponse(member: Member): Promise<AuthLoginResponse> {
+    const tokenPayload = {
+      userId: member.id,
+      name: member.displayName ?? member.name,
+      roleType: member.roleType
+    };
+    const accessToken = this.generateAccessToken(tokenPayload);
+    const refreshToken = this.generateRefreshToken(tokenPayload);
+
+    await this.saveRefreshToken(member.id, refreshToken);
+
+    return {
+      accessToken,
+      refreshToken,
+      member: {
+        id: member.id,
+        name: member.displayName ?? member.name,
+        branch: member.branchInfo?.name ?? null,
+        organizationId: member.organizationId,
+        organizationName: member.organization?.name ?? null,
+        branchId: member.branchId,
+        branchName: member.branchInfo?.name ?? null,
+        positionName: member.positionInfo?.name ?? null,
+        roleType: member.roleType
+      }
+    };
   }
 
   private createPasswordHash(password: string): string {
