@@ -17,6 +17,10 @@ import {
   getTaskCategorySummary,
   type TaskCategorySummaryItem
 } from "@/api/task";
+import {
+  getNotificationUnreadCount,
+  markAllNotificationsAsRead
+} from "@/api/notification";
 import type { TaskStatus } from "@/types/domain";
 import {
   DashboardActionSection,
@@ -42,6 +46,7 @@ type AdminDashboardPageProps = {
   onSettingsOpen: () => void;
   onTaskCreateOpen: () => void;
   onLogout: () => void;
+  onNotificationOpen: () => void;
   onTaskDetailOpen: (taskId: number) => void;
 };
 
@@ -78,11 +83,13 @@ export function AdminDashboardPage({
   onSettingsOpen,
   onTaskCreateOpen,
   onLogout,
+  onNotificationOpen,
   onTaskDetailOpen
 }: AdminDashboardPageProps) {
   const [dashboard, setDashboard] = useState<AdminDashboard>(emptyDashboard);
   const [memberPreRegistrations, setMemberPreRegistrations] = useState<MemberPreRegistration[]>([]);
   const [categorySummary, setCategorySummary] = useState<TaskCategorySummaryItem[]>([]);
+  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   const [recentTaskStatuses] = useState<TaskStatus[]>(allRecentTaskStatuses);
   const [recentTaskSortOrder] = useState<AdminDashboardSortOrder>("LATEST");
   const [recentOutputScope, setRecentOutputScope] = useState<RecentOutputScope>("ALL");
@@ -99,7 +106,8 @@ export function AdminDashboardPage({
       try {
         const [
           dashboardResponse,
-          categorySummaryResponse
+          categorySummaryResponse,
+          notificationCountResponse
         ] = await Promise.all([
           getAdminDashboard(accessToken, {
             sortOrder: recentTaskSortOrder,
@@ -107,11 +115,13 @@ export function AdminDashboardPage({
           }),
           getTaskCategorySummary({
             statuses: ["IN_PROGRESS"]
-          })
+          }),
+          getNotificationUnreadCount(accessToken)
         ]);
 
         setDashboard(dashboardResponse);
         setCategorySummary(categorySummaryResponse);
+        setNotificationUnreadCount(notificationCountResponse.unreadCount);
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "대시보드를 불러오지 못했습니다.");
       }
@@ -211,6 +221,17 @@ export function AdminDashboardPage({
     await confirmAction();
   }
 
+  async function handleNotificationOpen() {
+    try {
+      await markAllNotificationsAsRead(accessToken);
+      setNotificationUnreadCount(0);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "알림을 읽음 처리하지 못했습니다.");
+    } finally {
+      onNotificationOpen();
+    }
+  }
+
   return (
     <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
       <div className="relative mx-auto w-full max-w-[360px] space-y-3">
@@ -244,7 +265,12 @@ export function AdminDashboardPage({
         </section>
 
         <MessageBanner message={message} />
-        <InProgressCategorySection categorySummary={categorySummary} onBoardOpen={onBoardOpen} />
+        <InProgressCategorySection
+          categorySummary={categorySummary}
+          notificationUnreadCount={notificationUnreadCount}
+          onBoardOpen={onBoardOpen}
+          onNotificationOpen={() => void handleNotificationOpen()}
+        />
         <RecentOutputsSection
           currentMemberId={dashboard.currentMember.id}
           onDetailOpen={onTaskDetailOpen}

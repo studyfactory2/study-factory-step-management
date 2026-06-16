@@ -47,6 +47,7 @@ export default function AdminDashboardRoutePage() {
     <AdminDashboardPage
       accessToken={accessToken}
       onBoardOpen={() => router.push("/board")}
+      onNotificationOpen={() => router.push("/notifications")}
       onSettingsOpen={() => router.push("/admin-settings")}
       onTaskCreateOpen={() => router.push("/tasks/new")}
       onLogout={handleLogout}

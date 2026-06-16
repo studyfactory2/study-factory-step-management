@@ -7,6 +7,10 @@ import type {
   AdminDashboardSortOrder
 } from "@/api/admin";
 import {
+  getNotificationUnreadCount,
+  markAllNotificationsAsRead
+} from "@/api/notification";
+import {
   getTaskCategorySummary,
   getTaskRecentWorkStatus,
   type TaskCategorySummaryItem
@@ -23,6 +27,7 @@ type EmployeeDashboardPageProps = {
   currentMember: StoredMember;
   onAllTasksOpen: () => void;
   onBoardOpen: () => void;
+  onNotificationOpen: () => void;
   onLogout: () => void;
   onTaskCreateOpen: () => void;
   onTaskDetailOpen: (taskId: number) => void;
@@ -33,6 +38,7 @@ export function EmployeeDashboardPage({
   currentMember,
   onAllTasksOpen,
   onBoardOpen,
+  onNotificationOpen,
   onLogout,
   onTaskCreateOpen,
   onTaskDetailOpen
@@ -41,6 +47,7 @@ export function EmployeeDashboardPage({
   const [recentOutputs, setRecentOutputs] = useState<AdminDashboardRecentOutput[]>([]);
   const [recentTaskStatuses, setRecentTaskStatuses] = useState<TaskStatus[]>(["REVIEW_REQUESTED"]);
   const [recentTaskSortOrder, setRecentTaskSortOrder] = useState<AdminDashboardSortOrder>("LATEST");
+  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,18 +58,20 @@ export function EmployeeDashboardPage({
       }
 
       try {
-        const [categorySummaryResponse, recentOutputResponse] = await Promise.all([
+        const [categorySummaryResponse, recentOutputResponse, notificationCountResponse] = await Promise.all([
           getTaskCategorySummary({
             statuses: ["IN_PROGRESS"]
           }),
           getTaskRecentWorkStatus(accessToken, {
             sortOrder: recentTaskSortOrder,
             statuses: recentTaskStatuses
-          })
+          }),
+          getNotificationUnreadCount(accessToken)
         ]);
 
         setCategorySummary(categorySummaryResponse);
         setRecentOutputs(recentOutputResponse);
+        setNotificationUnreadCount(notificationCountResponse.unreadCount);
         setMessage("");
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "직원 대시보드를 불러오지 못했습니다.");
@@ -92,11 +101,27 @@ export function EmployeeDashboardPage({
     setRecentTaskSortOrder((currentSortOrder) => (currentSortOrder === "LATEST" ? "OLDEST" : "LATEST"));
   }
 
+  async function handleNotificationOpen() {
+    if (!accessToken || !onNotificationOpen) {
+      return;
+    }
+
+    try {
+      await markAllNotificationsAsRead(accessToken);
+      setNotificationUnreadCount(0);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "알림을 읽음 처리하지 못했습니다.");
+    } finally {
+      onNotificationOpen();
+    }
+  }
+
   if (
     !accessToken
     || !currentMember
     || !onAllTasksOpen
     || !onBoardOpen
+    || !onNotificationOpen
     || !onLogout
     || !onTaskCreateOpen
     || !onTaskDetailOpen
@@ -141,7 +166,12 @@ export function EmployeeDashboardPage({
             직원 대시보드를 불러오는 중입니다.
           </section>
         ) : (
-          <InProgressCategorySection categorySummary={categorySummary} onBoardOpen={onBoardOpen} />
+          <InProgressCategorySection
+            categorySummary={categorySummary}
+            notificationUnreadCount={notificationUnreadCount}
+            onBoardOpen={onBoardOpen}
+            onNotificationOpen={() => void handleNotificationOpen()}
+          />
         )}
         <RecentOutputsSection
           currentMemberId={currentMember.id}
