@@ -160,17 +160,17 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
       <div className="relative mx-auto w-full max-w-[360px] space-y-3">
         <header className="relative pb-1 text-center">
           <button
-            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[11px] font-normal text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold text-[#333333] shadow-sm"
             onClick={onBack}
             type="button"
           >
-            ← 뒤로가기
+            ←
           </button>
-          <h1 className="flex items-center justify-center gap-2 text-[25px] font-normal text-[#111111]">
+          <h1 className="flex items-center justify-center gap-2 text-[27px] font-normal text-[#111111]">
             <Building2 aria-hidden className="h-7 w-7 text-[#4F6F82]" />
             조직도 설정
           </h1>
-          <p className="mt-2 text-[12px] font-normal text-[#7B716D]">
+          <p className="mt-2 text-[14px] font-normal text-[#7B716D]">
             3단계로 조직도를 만들어보세요
           </p>
         </header>
@@ -207,7 +207,7 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
             {departmentRows.length > 0 ? (
               departmentRows.map((row) => (
                 <div className="grid grid-cols-[118px_minmax(0,1fr)] items-center gap-2" key={row.node.slotKey}>
-                  <span className="text-[12px] font-normal text-[#222222]">{row.label}</span>
+                  <span className="text-[14px] font-normal text-[#222222]">{row.label}</span>
                   <DepartmentSelect
                     node={row.node}
                     onChange={handleDepartmentChange}
@@ -216,17 +216,17 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
                 </div>
               ))
             ) : (
-              <div className="rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-4 text-center text-[12px] font-normal text-[#7B716D]">
+              <div className="rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-4 text-center text-[14px] font-normal text-[#7B716D]">
                 체크된 3층-2층 연결 구간이 없습니다.
               </div>
             )}
           </div>
-          <p className="mt-3 text-[11px] font-normal leading-4 text-[#7B716D]">
+          <p className="mt-3 text-[13px] font-normal leading-4 text-[#7B716D]">
             체크된 2층 칸만 부서 입력 구간으로 표시됩니다
           </p>
           <div className="mt-3 flex justify-end">
             <button
-              className="flex h-9 items-center justify-center gap-1.5 rounded-[10px] border border-[#B9D7EF] bg-[#F3FAFF] px-4 text-[13px] font-normal text-[#416A83] shadow-sm disabled:opacity-60"
+              className="flex h-9 items-center justify-center gap-1.5 rounded-[10px] border border-[#B9D7EF] bg-[#F3FAFF] px-4 text-[15px] font-normal text-[#416A83] shadow-sm disabled:opacity-60"
               disabled={isSaving || !chart}
               onClick={handleSave}
               type="button"
@@ -245,7 +245,7 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
           title="조직도 내용채우기"
         >
           {isLoading ? (
-            <div className="mt-3 rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-6 text-center text-[12px] text-[#7B716D]">
+            <div className="mt-3 rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-6 text-center text-[14px] text-[#7B716D]">
               저장된 조직도를 불러오는 중입니다.
             </div>
           ) : enabledChartNodes.length ? (
@@ -257,18 +257,18 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
               </div>
             </div>
           ) : (
-            <div className="mt-3 rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-6 text-center text-[12px] text-[#7B716D]">
+            <div className="mt-3 rounded-[12px] border border-dashed border-[#D8D1CE] bg-[#FFFEFC] px-3 py-6 text-center text-[14px] text-[#7B716D]">
               저장된 조직도 노드가 없습니다.
             </div>
           )}
-          <div className="mt-3 space-y-1 text-[10px] font-normal leading-4 text-[#7B716D]">
+          <div className="mt-3 space-y-1 text-[12px] font-normal leading-4 text-[#7B716D]">
             <p>직급 또는 이름 둘 중 하나만 입력해도 OK!</p>
             <p>부서명은 3층 직급 아래 좌우로 갈라지는 분배 라인 위에 표시됩니다</p>
           </div>
 
           <div className="mt-3 grid grid-cols-[92px_minmax(0,1fr)] gap-3">
             <button
-              className="flex h-12 items-center justify-center gap-1.5 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] text-[14px] font-normal text-[#4F4542] shadow-sm"
+              className="flex h-12 items-center justify-center gap-1.5 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] text-[16px] font-normal text-[#4F4542] shadow-sm"
               disabled={isSaving}
               onClick={handleReset}
               type="button"
@@ -277,7 +277,7 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
               초기화
             </button>
             <button
-              className="flex h-12 items-center justify-center gap-2 rounded-[12px] border border-[#2E8CDD] bg-[#1F8FE5] text-[16px] font-normal text-white shadow-sm disabled:opacity-60"
+              className="flex h-12 items-center justify-center gap-2 rounded-[12px] border border-[#2E8CDD] bg-[#1F8FE5] text-[18px] font-normal text-white shadow-sm disabled:opacity-60"
               disabled={isSaving || !chart}
               onClick={handleSave}
               type="button"
@@ -286,7 +286,7 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
               {isSaving ? "저장 중" : "저장하기"}
             </button>
           </div>
-          <p className="mt-2 text-center text-[11px] font-normal text-[#7B716D]">
+          <p className="mt-2 text-center text-[13px] font-normal text-[#7B716D]">
             저장 후 새업무작성 화면의 업무조직도에 반영됩니다
           </p>
         </StepCard>

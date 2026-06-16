@@ -172,10 +172,10 @@ export function EmployeeDashboardPage({
               <Settings aria-hidden className="h-4.5 w-4.5" />
             </button>
             <div className="min-w-0 text-center">
-              <p className="truncate text-[15px] font-normal text-[#222222]">
+              <p className="truncate text-[17px] font-normal text-[#222222]">
                 안녕하세요 {currentMember.name}님
               </p>
-              <p className="mt-1 text-[11px] font-normal text-[#7B716D]">오늘도 즐거운 하루 되세요</p>
+              <p className="mt-1 text-[13px] font-normal text-[#7B716D]">오늘도 즐거운 하루 되세요</p>
             </div>
             <button
               aria-label="로그아웃"
@@ -195,7 +195,7 @@ export function EmployeeDashboardPage({
           onNotificationOpen={() => void handleNotificationOpen()}
         />
         {isLoading && (
-          <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-5 text-center text-[13px] font-normal text-[#7B716D] shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
+          <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-5 text-center text-[15px] font-normal text-[#7B716D] shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
             최근 업무를 불러오는 중입니다.
           </section>
         )}

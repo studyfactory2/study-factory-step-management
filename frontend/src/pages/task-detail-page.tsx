@@ -57,7 +57,7 @@ export function TaskDetailPage({
 
         {message && (
           <section className="rounded-[22px] border border-[#F2C9C2] bg-[#FFFEFC] px-4 py-7 text-center shadow-[0_6px_0_#EFC6BE]">
-            <p className="text-[13px] font-black text-primary">{message}</p>
+            <p className="text-[15px] font-black text-primary">{message}</p>
           </section>
         )}
 

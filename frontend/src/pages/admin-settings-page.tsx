@@ -81,24 +81,24 @@ export function AdminSettingsPage({
       <div className="relative mx-auto w-full max-w-[360px] space-y-3">
         <header className="relative pb-2 pt-0.5 text-center">
           <button
-            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[11px] font-normal text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold text-[#333333] shadow-sm"
             onClick={onBack}
             type="button"
           >
-            ← 뒤로가기
+            ←
           </button>
-          <div className="absolute right-0 top-0 inline-flex h-7 items-center gap-1 rounded-[9px] border border-[#C7CDD4] bg-[#F4FAFF] px-2.5 text-[10px] font-normal text-[#2D70CB] shadow-sm">
+          <div className="absolute right-0 top-0 inline-flex h-7 items-center gap-1 rounded-[9px] border border-[#C7CDD4] bg-[#F4FAFF] px-2.5 text-[12px] font-normal text-[#2D70CB] shadow-sm">
             <Lock aria-hidden className="h-3 w-3" />
             관리자 전용
           </div>
-          <h1 className="flex items-center justify-center gap-2 text-[24px] font-normal text-[#111111]">
+          <h1 className="flex items-center justify-center gap-2 text-[26px] font-normal text-[#111111]">
             <Settings aria-hidden className="h-7 w-7 text-[#222222]" />
             설정
           </h1>
         </header>
 
         <section className="rounded-[16px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-          <h2 className="mb-3 flex items-center gap-1.5 text-[16px] font-normal text-[#222222]">
+          <h2 className="mb-3 flex items-center gap-1.5 text-[18px] font-normal text-[#222222]">
             <BriefcaseBusiness aria-hidden className="h-4.5 w-4.5 text-[#A87928]" />
             관리 메뉴
           </h2>
@@ -108,7 +108,7 @@ export function AdminSettingsPage({
 
               return (
                 <button
-                  className={`flex h-[52px] items-center justify-center gap-2 rounded-[12px] border text-[13px] font-normal shadow-sm ${menu.tone}`}
+                  className={`flex h-[52px] items-center justify-center gap-2 rounded-[12px] border text-[15px] font-normal shadow-sm ${menu.tone}`}
                   key={menu.label}
                   onClick={
                     menu.action === "preRegister"
@@ -136,21 +136,21 @@ export function AdminSettingsPage({
         >
           <span className="absolute bottom-[-1px] left-[-1px] top-[-1px] w-2.5 rounded-l-[16px] bg-[#FFD6DC]" />
           <span className="py-4 pl-5 pr-3">
-            <span className="flex items-center gap-2 text-[18px] font-normal text-[#222222]">
+            <span className="flex items-center gap-2 text-[20px] font-normal text-[#222222]">
               <Building2 aria-hidden className="h-5 w-5 text-[#7B8B91]" />
               조직도 관리
             </span>
-            <span className="mt-2 block text-[11px] font-normal text-[#7B716D]">
+            <span className="mt-2 block text-[13px] font-normal text-[#7B716D]">
               조직 구조와 부서, 직급을 관리합니다
             </span>
           </span>
-          <span className="flex items-center justify-center text-[28px] font-normal text-[#4F4542]">›</span>
+          <span className="flex items-center justify-center text-[30px] font-normal text-[#4F4542]">›</span>
         </button>
 
         <section className="relative overflow-visible rounded-[16px] border border-[#D8D1CE] bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
           <span className="absolute bottom-[-1px] left-[-1px] top-[-1px] w-2.5 rounded-l-[16px] bg-[#D8ECFF]" />
           <div className="py-4 pl-5 pr-3">
-            <h2 className="flex items-center gap-2 text-[18px] font-normal text-[#222222]">
+            <h2 className="flex items-center gap-2 text-[20px] font-normal text-[#222222]">
               <Bell aria-hidden className="h-5 w-5 text-[#E0AA2E]" />
               알림 설정
             </h2>
@@ -172,7 +172,7 @@ export function AdminSettingsPage({
                 title="CEO"
               />
               <div className="flex h-12 items-center justify-between">
-                <span className="flex items-center gap-2 text-[14px] font-normal text-[#222222]">
+                <span className="flex items-center gap-2 text-[16px] font-normal text-[#222222]">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F5F5F5]">
                     <Bell aria-hidden className="h-4 w-4 text-[#777777]" />
                   </span>
@@ -185,14 +185,14 @@ export function AdminSettingsPage({
         </section>
 
         <section className="rounded-[16px] border border-[#D8D1CE] bg-white px-3 py-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-          <h2 className="mb-2 flex items-center gap-2 text-[18px] font-normal text-[#222222]">
+          <h2 className="mb-2 flex items-center gap-2 text-[20px] font-normal text-[#222222]">
             <Smartphone aria-hidden className="h-5 w-5 text-[#4F6F82]" />
             앱 정보
           </h2>
           <InfoRow label="버전:" value="v1.0.0" />
           <InfoRow label="개발사:" value="수험생 연구소" />
           <InfoRow label="문의:" value="051)757-5134" />
-          <div className="mt-3 flex items-center justify-center gap-4 border-t border-dashed border-[#D8D1CE] pt-3 text-[12px] font-normal text-[#6F6662]">
+          <div className="mt-3 flex items-center justify-center gap-4 border-t border-dashed border-[#D8D1CE] pt-3 text-[14px] font-normal text-[#6F6662]">
             <button type="button">이용약관</button>
             <span>/</span>
             <button type="button">개인정보처리방침</button>
@@ -216,8 +216,8 @@ function NotificationRole({
     <div className="flex gap-3 py-2.5">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#EAF3FF]">{icon}</span>
       <span className="min-w-0">
-        <span className="block text-[14px] font-normal text-[#222222]">{title}</span>
-        <span className="mt-1 block text-[11px] font-normal leading-4 text-[#7B716D]">{description}</span>
+        <span className="block text-[16px] font-normal text-[#222222]">{title}</span>
+        <span className="mt-1 block text-[13px] font-normal leading-4 text-[#7B716D]">{description}</span>
       </span>
     </div>
   );
@@ -231,7 +231,7 @@ function InfoRow({
   value: string;
 }) {
   return (
-    <div className="flex h-8 items-center justify-between border-b border-dashed border-[#D8D1CE] text-[12px] font-normal">
+    <div className="flex h-8 items-center justify-between border-b border-dashed border-[#D8D1CE] text-[14px] font-normal">
       <span className="text-[#6F6662]">{label}</span>
       <span className="text-[#4F4542]">{value}</span>
     </div>

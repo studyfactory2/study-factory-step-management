@@ -103,7 +103,7 @@ export function AllTasksPage({
           />
 
           {message && (
-            <div className="mt-3 rounded-[14px] border border-[#F2C9C2] bg-[#FFF8F9] px-3 py-2 text-[11px] font-black text-primary">
+            <div className="mt-3 rounded-[14px] border border-[#F2C9C2] bg-[#FFF8F9] px-3 py-2 text-[13px] font-black text-primary">
               {message}
             </div>
           )}
@@ -111,11 +111,11 @@ export function AllTasksPage({
           <div className="mt-3 rounded-[16px] border border-[#F2C9C2] bg-white p-2">
             <div className="max-h-[calc(100dvh-220px)] min-h-[330px] space-y-2.5 overflow-y-auto pr-1.5">
               {isLoading ? (
-                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-[11px] font-semibold text-[#9B7A75]">
+                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-[13px] font-semibold text-[#9B7A75]">
                   업무를 불러오는 중입니다.
                 </div>
               ) : tasks.length === 0 ? (
-                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-[11px] font-semibold text-[#9B7A75]">
+                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-[13px] font-semibold text-[#9B7A75]">
                   표시할 업무가 없습니다.
                 </div>
               ) : (

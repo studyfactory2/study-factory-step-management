@@ -67,17 +67,17 @@ export function TaskCreatePage({
       <div className="relative mx-auto w-full max-w-[360px] space-y-3">
         <header className="relative border-b border-[#DCE8F5] pb-3 text-center">
           <button
-            className="absolute left-0 top-0 h-7 shrink-0 bg-transparent px-0 text-[12px] font-normal text-[#111111]"
+            className="absolute left-0 top-0 h-7 shrink-0 bg-transparent px-0 text-[14px] font-bold text-[#111111]"
             onClick={onBack}
             type="button"
           >
-            ← 뒤로
+            ←
           </button>
-          <h1 className="flex items-center justify-center gap-1.5 text-[18px] font-normal tracking-normal text-[#1F1A18]">
+          <h1 className="flex items-center justify-center gap-1.5 text-[20px] font-normal tracking-normal text-[#1F1A18]">
             새 업무 등록
             <Pencil aria-hidden className="h-4 w-4 text-[#1F1A18]" />
           </h1>
-          <p className="mt-2 text-[13px] font-normal text-[#7B716D] drop-shadow-[0_2px_1px_rgba(95,73,68,0.24)]">
+          <p className="mt-2 text-[15px] font-normal text-[#7B716D] drop-shadow-[0_2px_1px_rgba(95,73,68,0.24)]">
             오늘도 화이팅
           </p>
         </header>

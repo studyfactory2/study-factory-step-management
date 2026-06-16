@@ -114,7 +114,7 @@ function PositionNode({
                   )}
                 />
                 {child.organizationName ? (
-                  <span className="absolute left-1/2 top-[-1.55rem] z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#C8D9E7] bg-[#F3FAFF] px-1.5 py-0.5 text-[7px] font-bold leading-none text-[#416A83] shadow-sm">
+                  <span className="absolute left-1/2 top-[-1.55rem] z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#C8D9E7] bg-[#F3FAFF] px-1.5 py-0.5 text-[9px] font-bold leading-none text-[#416A83] shadow-sm">
                     {child.organizationName}
                   </span>
                 ) : null}
@@ -160,9 +160,9 @@ function PositionCard({
       <span className="mb-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-primary shadow-sm">
         <Icon aria-hidden className="h-2.5 w-2.5" />
       </span>
-      <span className="text-[9px] font-black leading-tight">{position.name}</span>
+      <span className="text-[11px] font-black leading-tight">{position.name}</span>
       {position.subtitle && (
-        <span className="mt-0.5 max-w-full rounded-full bg-white/80 px-1 py-0.5 text-[6px] font-bold leading-tight text-muted-foreground">
+        <span className="mt-0.5 max-w-full rounded-full bg-white/80 px-1 py-0.5 text-[8px] font-bold leading-tight text-muted-foreground">
           {position.subtitle}
         </span>
       )}

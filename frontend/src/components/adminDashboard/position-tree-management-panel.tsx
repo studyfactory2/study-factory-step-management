@@ -306,13 +306,13 @@ export function PositionTreeManagementPanel({
     <section className="relative rounded-[18px] border border-[#D9D1F3] bg-[#F8F5FF] px-3 py-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h2 className="text-[14px] font-black text-[#5A3E3B]">로그인 화면 직위트리 관리</h2>
-          <p className="mt-0.5 text-[9px] font-bold leading-3 text-[#9B7A75]">
+          <h2 className="text-[16px] font-black text-[#5A3E3B]">로그인 화면 직위트리 관리</h2>
+          <p className="mt-0.5 text-[11px] font-bold leading-3 text-[#9B7A75]">
             직위를 추가하고 드래그해서 로그인 화면의 직급 구조를 연결합니다.
           </p>
         </div>
         <button
-          className="h-7 shrink-0 rounded-full border-2 border-[#8B72C8] bg-white px-3 text-[10px] font-black text-[#8B72C8]"
+          className="h-7 shrink-0 rounded-full border-2 border-[#8B72C8] bg-white px-3 text-[12px] font-black text-[#8B72C8]"
           onClick={onClose}
           type="button"
         >
@@ -322,11 +322,11 @@ export function PositionTreeManagementPanel({
 
       <div className="mt-3 rounded-[16px] border border-[#D9D1F3] bg-white p-2.5">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[12px] font-black text-[#3F2C28]">직위 트리 구성</p>
+          <p className="text-[14px] font-black text-[#3F2C28]">직위 트리 구성</p>
           <div className="flex items-center gap-1.5">
-            {isSaving && <span className="text-[9px] font-black text-[#8B72C8]">저장 중</span>}
+            {isSaving && <span className="text-[11px] font-black text-[#8B72C8]">저장 중</span>}
             <button
-              className="flex h-7 items-center gap-1 rounded-full bg-[#8B72C8] px-2.5 text-[9px] font-black text-white shadow-sm"
+              className="flex h-7 items-center gap-1 rounded-full bg-[#8B72C8] px-2.5 text-[11px] font-black text-white shadow-sm"
               onClick={handleOpenCreateModal}
               type="button"
             >
@@ -336,7 +336,7 @@ export function PositionTreeManagementPanel({
           </div>
         </div>
         {draggingPosition && (
-          <div className="mt-2 rounded-[12px] border border-[#D9D1F3] bg-[#F7F3FF] px-2.5 py-2 text-center text-[9px] font-black text-[#5A3E3B]">
+          <div className="mt-2 rounded-[12px] border border-[#D9D1F3] bg-[#F7F3FF] px-2.5 py-2 text-center text-[11px] font-black text-[#5A3E3B]">
             {dropTargetPosition ? (
               <>
                 <span className="text-[#8B72C8]">{draggingPosition.name}</span>
@@ -354,11 +354,11 @@ export function PositionTreeManagementPanel({
         )}
         <div className="mt-2.5 max-h-[260px] overflow-auto rounded-[14px] bg-[#FFFEFC] px-3 py-5">
           {isLoading ? (
-            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[10px] font-bold text-[#8B72C8]">
+            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[12px] font-bold text-[#8B72C8]">
               로그인 화면 조직도를 불러오는 중입니다.
             </p>
           ) : flatPositions.length === 0 ? (
-            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[10px] font-bold text-[#8B72C8]">
+            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[12px] font-bold text-[#8B72C8]">
               등록된 직위가 없습니다.
             </p>
           ) : (
@@ -406,12 +406,12 @@ export function PositionTreeManagementPanel({
       </div>
       <div className="mt-3 rounded-[16px] border border-[#D9D1F3] bg-white p-2.5">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-black text-[#3F2C28]">상위 직위 설정</p>
-          <span className="text-[8px] font-bold text-[#9B7A75]">드래그 없이 관계 변경</span>
+          <p className="text-[13px] font-black text-[#3F2C28]">상위 직위 설정</p>
+          <span className="text-[10px] font-bold text-[#9B7A75]">드래그 없이 관계 변경</span>
         </div>
         <div className="mt-2 max-h-[130px] space-y-1.5 overflow-y-auto pr-1">
           {flatPositions.length === 0 ? (
-            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[10px] font-bold text-[#8B72C8]">
+            <p className="rounded-[12px] bg-[#F8F5FF] px-3 py-3 text-[12px] font-bold text-[#8B72C8]">
               등록된 직위가 없습니다.
             </p>
           ) : (
@@ -421,13 +421,13 @@ export function PositionTreeManagementPanel({
                 key={position.id}
               >
                 <div>
-                  <p className="text-[10px] font-black text-[#3F2C28]">{position.name}</p>
-                  <p className="mt-0.5 text-[8px] font-bold text-[#9B7A75]">
+                  <p className="text-[12px] font-black text-[#3F2C28]">{position.name}</p>
+                  <p className="mt-0.5 text-[10px] font-bold text-[#9B7A75]">
                     {position.subtitle || "설명 없음"}
                   </p>
                 </div>
                 <select
-                  className="h-8 rounded-[10px] border border-[#D9D1F3] bg-white px-2 text-[9px] font-bold text-[#8D706B] outline-none"
+                  className="h-8 rounded-[10px] border border-[#D9D1F3] bg-white px-2 text-[11px] font-bold text-[#8D706B] outline-none"
                   disabled={isSaving}
                   onChange={(event) =>
                     void handleParentChange(position.id, event.target.value ? Number(event.target.value) : null)
@@ -491,8 +491,8 @@ export function PositionTreeManagementPanel({
             top: dragPreview.y
           }}
         >
-          <p className="text-[12px] font-black leading-tight text-[#3F2C28]">{dragPreview.name}</p>
-          <p className="mt-1 line-clamp-1 text-[9px] font-bold leading-tight text-[#9B7A75]">
+          <p className="text-[14px] font-black leading-tight text-[#3F2C28]">{dragPreview.name}</p>
+          <p className="mt-1 line-clamp-1 text-[11px] font-bold leading-tight text-[#9B7A75]">
             {dragPreview.subtitle || "설명 없음"}
           </p>
         </div>
@@ -885,21 +885,21 @@ function PositionTreeCard({
         <X aria-hidden className="h-2 w-2 stroke-[3]" />
       </button>
       {isDropTarget && !isDragging && (
-        <span className="pointer-events-none absolute -top-6 left-1/2 z-10 w-max -translate-x-1/2 rounded-full bg-[#8B72C8] px-2 py-0.5 text-[8px] font-black text-white shadow-sm">
+        <span className="pointer-events-none absolute -top-6 left-1/2 z-10 w-max -translate-x-1/2 rounded-full bg-[#8B72C8] px-2 py-0.5 text-[10px] font-black text-white shadow-sm">
           여기 하위로 이동
         </span>
       )}
       {isDropTarget && !isDragging && (
         <span className="pointer-events-none absolute -top-1.5 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 bg-[#8B72C8]" />
       )}
-      <p className="pointer-events-none text-[9px] font-black leading-tight text-[#3F2C28]">
+      <p className="pointer-events-none text-[11px] font-black leading-tight text-[#3F2C28]">
         {position.name}
       </p>
-      <p className="pointer-events-none mt-0.5 line-clamp-1 text-[7px] font-bold leading-tight text-[#9B7A75]">
+      <p className="pointer-events-none mt-0.5 line-clamp-1 text-[9px] font-bold leading-tight text-[#9B7A75]">
         {position.subtitle || "설명 없음"}
       </p>
       {!position.isLoginVisible && (
-        <span className="pointer-events-none mt-0.5 rounded-full bg-white/80 px-1 py-0.5 text-[6px] font-black text-[#9B7A75]">
+        <span className="pointer-events-none mt-0.5 rounded-full bg-white/80 px-1 py-0.5 text-[8px] font-black text-[#9B7A75]">
           로그인 숨김
         </span>
       )}

@@ -87,7 +87,7 @@ export function PullToRefresh() {
   return (
     <div
       aria-hidden={!isVisible}
-      className={`pointer-events-none fixed left-1/2 top-3 z-[100] flex -translate-x-1/2 items-center gap-2 rounded-full border border-[#F1CFD5] bg-[#FFFEFC]/95 px-3 py-2 text-[11px] font-black text-[#8F7470] shadow-[0_10px_22px_rgba(239,126,158,0.16)] backdrop-blur transition-opacity duration-150 ${
+      className={`pointer-events-none fixed left-1/2 top-3 z-[100] flex -translate-x-1/2 items-center gap-2 rounded-full border border-[#F1CFD5] bg-[#FFFEFC]/95 px-3 py-2 text-[13px] font-black text-[#8F7470] shadow-[0_10px_22px_rgba(239,126,158,0.16)] backdrop-blur transition-opacity duration-150 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
       style={{

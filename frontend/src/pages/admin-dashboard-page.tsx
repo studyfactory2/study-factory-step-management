@@ -275,10 +275,10 @@ export function AdminDashboardPage({
               <Settings aria-hidden className="h-4.5 w-4.5" />
             </button>
             <div className="min-w-0 text-center">
-              <p className="truncate text-[15px] font-normal text-[#222222]">
+              <p className="truncate text-[17px] font-normal text-[#222222]">
                 안녕하세요 {dashboard.currentMember.name} {getPositionName(dashboard.currentMember.positionName, dashboard.currentMember.roleType)}님
               </p>
-              <p className="mt-1 text-[11px] font-normal text-[#7B716D]">오늘도 즐거운 하루 되세요</p>
+              <p className="mt-1 text-[13px] font-normal text-[#7B716D]">오늘도 즐거운 하루 되세요</p>
             </div>
             <button
               aria-label="로그아웃"

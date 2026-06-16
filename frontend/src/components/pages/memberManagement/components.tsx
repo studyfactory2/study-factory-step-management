@@ -21,12 +21,12 @@ export function EmployeeOrganizationSection({ group }: { group: OrganizationGrou
     <section className={`relative overflow-hidden rounded-[16px] border bg-white shadow-[0_2px_10px_rgba(95,73,68,0.08)] ${meta.borderClassName}`}>
       <span className={`absolute bottom-[-1px] left-[-1px] top-[-1px] w-2.5 rounded-l-[16px] ${meta.accentClassName}`} />
       <div className="py-3 pl-5 pr-2.5">
-        <h2 className="flex items-center gap-2 text-[17px] font-normal text-[#222222]">
+        <h2 className="flex items-center gap-2 text-[19px] font-normal text-[#222222]">
           <span className={`flex h-7 w-7 items-center justify-center rounded-full ${meta.iconClassName}`}>
             <OrganizationIcon aria-hidden className="h-4 w-4" />
           </span>
           {group.organizationName}
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-normal ${meta.countClassName}`}>
+          <span className={`rounded-full px-2 py-0.5 text-[12px] font-normal ${meta.countClassName}`}>
             {group.members.length}명
           </span>
         </h2>
@@ -50,12 +50,12 @@ export function EmployeePositionTable({ positionGroup }: { positionGroup: Positi
 
   return (
     <div>
-      <h3 className="mb-1.5 flex items-center gap-1.5 text-[12px] font-normal text-[#4F4542]">
-        <span className={`inline-flex h-6 items-center gap-1 rounded-full border px-2 text-[10px] font-normal ${positionMeta.className}`}>
+      <h3 className="mb-1.5 flex items-center gap-1.5 text-[14px] font-normal text-[#4F4542]">
+        <span className={`inline-flex h-6 items-center gap-1 rounded-full border px-2 text-[12px] font-normal ${positionMeta.className}`}>
           <PositionIcon aria-hidden className="h-3 w-3" />
           {positionGroup.positionName}
         </span>
-        <span className="text-[10px] text-[#7B716D]">({positionGroup.members.length}명)</span>
+        <span className="text-[12px] text-[#7B716D]">({positionGroup.members.length}명)</span>
       </h3>
 
       <div className="space-y-1.5">
@@ -69,11 +69,11 @@ export function EmployeePositionTable({ positionGroup }: { positionGroup: Positi
 
 export function EmployeeRow({ member }: { member: Member }) {
   return (
-    <article className="rounded-[10px] border border-[#E6DFDC] bg-[#FFFEFC] px-2 py-2 text-[11px] font-normal text-[#4F4542]">
+    <article className="rounded-[10px] border border-[#E6DFDC] bg-[#FFFEFC] px-2 py-2 text-[13px] font-normal text-[#4F4542]">
       <div className="grid grid-cols-[52px_minmax(0,1fr)_96px] items-center gap-1.5">
-        <span className="truncate text-[12px] text-[#2D70CB]">{getMemberDisplayName(member)}</span>
+        <span className="truncate text-[14px] text-[#2D70CB]">{getMemberDisplayName(member)}</span>
         <span className="truncate text-[#7B716D]">{getMemberDutyName(member)}</span>
-        <span className="whitespace-nowrap text-right text-[10px] text-[#6F6662]">
+        <span className="whitespace-nowrap text-right text-[12px] text-[#6F6662]">
           {formatPhoneNumber(member.phoneNumber ?? null)}
         </span>
       </div>
@@ -95,8 +95,8 @@ export function EmployeeInfoPill({
 }) {
   return (
     <span className="min-w-0 rounded-[8px] bg-white px-1.5 py-1 text-center leading-4 shadow-[inset_0_0_0_1px_#EFE8E5]">
-      <span className="block text-[9px] text-[#9A918C]">{label}</span>
-      <span className="block truncate text-[10px] text-[#4F4542]">{value}</span>
+      <span className="block text-[11px] text-[#9A918C]">{label}</span>
+      <span className="block truncate text-[12px] text-[#4F4542]">{value}</span>
     </span>
   );
 }

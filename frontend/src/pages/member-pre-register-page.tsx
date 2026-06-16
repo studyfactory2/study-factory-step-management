@@ -198,17 +198,17 @@ export function MemberPreRegisterPage({
       <div className="relative mx-auto w-full max-w-[360px] space-y-3">
         <header className="relative pb-1 text-center">
           <button
-            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[11px] font-normal text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold text-[#333333] shadow-sm"
             onClick={onBack}
             type="button"
           >
-            ← 뒤로가기
+            ←
           </button>
-          <h1 className="flex items-center justify-center gap-2 text-[23px] font-normal text-[#111111]">
+          <h1 className="flex items-center justify-center gap-2 text-[25px] font-normal text-[#111111]">
             <UserRound aria-hidden className="h-6 w-6 text-[#111111]" />
             사원사전등록
           </h1>
-          <p className="mt-2 text-[12px] font-normal text-[#7B716D]">
+          <p className="mt-2 text-[14px] font-normal text-[#7B716D]">
             신규 사원 정보를 미리 등록해주세요
           </p>
         </header>
@@ -216,7 +216,7 @@ export function MemberPreRegisterPage({
         <MessageBanner message={message} />
 
         <section className="rounded-[16px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-          <h2 className="flex items-center gap-2 text-[17px] font-normal text-[#222222]">
+          <h2 className="flex items-center gap-2 text-[19px] font-normal text-[#222222]">
             <ClipboardPenLine aria-hidden className="h-5 w-5 text-[#4F4542]" />
             신규 사원 정보
           </h2>
@@ -224,7 +224,7 @@ export function MemberPreRegisterPage({
           <form className="mt-3 space-y-3" onSubmit={handleSubmit}>
             <StepField label="이름" step="1">
               <input
-                className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#A69E9A]"
+                className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[15px] font-normal text-[#222222] outline-none placeholder:text-[#A69E9A]"
                 onChange={(event) => setName(event.target.value)}
                 placeholder="사원 이름을 입력하세요"
                 required
@@ -236,7 +236,7 @@ export function MemberPreRegisterPage({
               <div className="relative">
                 <CalendarDays aria-hidden className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8B91]" />
                 <input
-                  className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-9 text-[13px] font-normal text-[#222222] outline-none"
+                  className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-9 text-[15px] font-normal text-[#222222] outline-none"
                   onChange={(event) => setJoinedAt(event.target.value)}
                   required
                   type="date"
@@ -271,7 +271,7 @@ export function MemberPreRegisterPage({
 
             <StepField label="담당" step="5">
               <input
-                className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#A69E9A]"
+                className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[15px] font-normal text-[#222222] outline-none placeholder:text-[#A69E9A]"
                 onChange={(event) => setDutyText(event.target.value)}
                 placeholder="담당업무를 입력하세요"
                 required
@@ -281,7 +281,7 @@ export function MemberPreRegisterPage({
 
             <div className="pt-1">
               <button
-                className="flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-[#9DC7ED] bg-[#D8ECFF] text-[13px] font-normal text-[#2D70CB] disabled:opacity-60"
+                className="flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-[#9DC7ED] bg-[#D8ECFF] text-[15px] font-normal text-[#2D70CB] disabled:opacity-60"
                 disabled={isSubmitting}
                 type="submit"
               >
@@ -295,14 +295,14 @@ export function MemberPreRegisterPage({
         <section className="rounded-[16px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="flex items-center gap-2 text-[18px] font-normal text-[#222222]">
+              <h2 className="flex items-center gap-2 text-[20px] font-normal text-[#222222]">
                 <ClipboardList aria-hidden className="h-5 w-5 text-[#4F6F82]" />
                 등록대기
-                <span className="rounded-full bg-[#FFF1F1] px-2 py-0.5 text-[11px] text-[#D95858]">
+                <span className="rounded-full bg-[#FFF1F1] px-2 py-0.5 text-[13px] text-[#D95858]">
                   {pendingPreRegistrations.length}건
                 </span>
               </h2>
-              <p className="mt-1 text-[11px] font-normal text-[#7B716D]">
+              <p className="mt-1 text-[13px] font-normal text-[#7B716D]">
                 아직 앱에 가입하지 않은 사원입니다
               </p>
             </div>
@@ -310,11 +310,11 @@ export function MemberPreRegisterPage({
 
           <div className="mt-3 space-y-2">
             {isLoading ? (
-              <p className="rounded-[12px] border border-[#E6DFDC] bg-[#FFFEFC] px-3 py-4 text-center text-[12px] text-[#7B716D]">
+              <p className="rounded-[12px] border border-[#E6DFDC] bg-[#FFFEFC] px-3 py-4 text-center text-[14px] text-[#7B716D]">
                 사전등록 목록을 불러오는 중입니다.
               </p>
             ) : pendingPreRegistrations.length === 0 ? (
-              <p className="rounded-[12px] border border-[#E6DFDC] bg-[#FFFEFC] px-3 py-4 text-center text-[12px] text-[#7B716D]">
+              <p className="rounded-[12px] border border-[#E6DFDC] bg-[#FFFEFC] px-3 py-4 text-center text-[14px] text-[#7B716D]">
                 등록대기 중인 사원이 없습니다.
               </p>
             ) : (

@@ -37,8 +37,8 @@ export function DashboardActionSection({
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[18px] font-black text-[#3F2C28]">직원관리</p>
-            <p className="mt-1 text-[11px] font-semibold text-[#9B7A75]">
+            <p className="text-[20px] font-black text-[#3F2C28]">직원관리</p>
+            <p className="mt-1 text-[13px] font-semibold text-[#9B7A75]">
               {memberManagementView === "menu" && "관리할 항목을 선택해주세요."}
               {memberManagementView === "preRegister" && "사원 사전등록 정보를 입력해주세요."}
               {memberManagementView === "positionTree" && "로그인 화면 조직도를 관리해주세요."}
@@ -63,7 +63,7 @@ export function DashboardActionSection({
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary shadow-sm">
                 <UserPlus aria-hidden className="h-4 w-4" />
               </span>
-              <span className="text-[11px] font-black leading-4 text-[#3F2C28]">사원 사전등록 관리</span>
+              <span className="text-[13px] font-black leading-4 text-[#3F2C28]">사원 사전등록 관리</span>
             </button>
             <button
               className="flex min-h-[84px] flex-col items-start justify-between rounded-[16px] border border-[#D9D1F3] bg-[#F7F3FF] p-3 text-left transition hover:-translate-y-0.5 hover:border-[#8B72C8]"
@@ -73,7 +73,7 @@ export function DashboardActionSection({
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#8B72C8] shadow-sm">
                 <GitBranch aria-hidden className="h-4 w-4" />
               </span>
-              <span className="text-[11px] font-black leading-4 text-[#3F2C28]">로그인 화면 직위트리 관리</span>
+              <span className="text-[13px] font-black leading-4 text-[#3F2C28]">로그인 화면 직위트리 관리</span>
             </button>
           </div>
         ) : memberManagementView === "preRegister" ? (

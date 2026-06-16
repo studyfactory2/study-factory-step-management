@@ -209,7 +209,7 @@ export function EmployeeListSection({
   return (
     <section className="space-y-2.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-[16px] font-normal text-[#222222]">함께 프로젝트 중</h2>
+        <h2 className="text-[18px] font-normal text-[#222222]">함께 프로젝트 중</h2>
       </div>
       <div className="rounded-[18px] border border-[#D8D1CE] bg-white p-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
         <div className="grid grid-cols-5 gap-1.5">
@@ -351,28 +351,28 @@ function EmployeeCard({
       )}
       <button
         aria-label={`${employee.name} 삭제`}
-        className="absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full border border-[#D8D1CE] bg-[#F7F7F7] text-[8px] font-black leading-none text-[#2D70CB]"
+        className="absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full border border-[#D8D1CE] bg-[#F7F7F7] text-[10px] font-black leading-none text-[#2D70CB]"
         onClick={onRemove}
         type="button"
       >
         ×
       </button>
-      <span className="block truncate pl-3.5 text-[7px] font-black leading-tight text-[#7B716D]">
+      <span className="block truncate pl-3.5 text-[9px] font-black leading-tight text-[#7B716D]">
         {employee.positionName ?? "직원"}
       </span>
-      <p className="mt-1.5 truncate text-[10px] font-black leading-tight text-[#222222]">{employee.name}</p>
+      <p className="mt-1.5 truncate text-[12px] font-black leading-tight text-[#222222]">{employee.name}</p>
       <div className="my-1.5 border-t border-[#D8D1CE]" />
       <button
-        className={`mx-auto h-5 w-full rounded-full border border-[#D8D1CE] text-[7px] font-black ${getStatusClassName(visibleStatus)}`}
+        className={`mx-auto h-5 w-full rounded-full border border-[#D8D1CE] text-[9px] font-black ${getStatusClassName(visibleStatus)}`}
         onClick={handleStatusClick}
         type="button"
       >
         {getShortStatusLabel(visibleStatus)}
       </button>
-      <p className={`mt-1 text-[10px] font-black leading-none ${getStatusTextClassName(visibleStatus)}`}>
+      <p className={`mt-1 text-[12px] font-black leading-none ${getStatusTextClassName(visibleStatus)}`}>
         {visibleStatusCount}건
       </p>
-      <button className="mt-1.5 h-5 w-full rounded-full border border-[#C7CDD4] bg-white text-[7px] font-black text-[#2D70CB]">
+      <button className="mt-1.5 h-5 w-full rounded-full border border-[#C7CDD4] bg-white text-[9px] font-black text-[#2D70CB]">
         상세
       </button>
     </article>
@@ -398,8 +398,8 @@ function EmptySlot({
       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-black text-[#2D70CB] shadow-sm">
         +
       </span>
-      <p className="mt-1.5 text-[8px] font-black text-[#7B716D]">{slotNumber}번</p>
-      <p className="mt-0.5 text-[7px] font-bold text-[#9A918D]">미선택</p>
+      <p className="mt-1.5 text-[10px] font-black text-[#7B716D]">{slotNumber}번</p>
+      <p className="mt-0.5 text-[9px] font-bold text-[#9A918D]">미선택</p>
     </button>
   );
 }

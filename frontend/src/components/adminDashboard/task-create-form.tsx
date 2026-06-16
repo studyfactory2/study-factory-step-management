@@ -341,7 +341,7 @@ export function TaskCreateForm({
   return (
     <section className="rounded-[22px] border border-[#D9D5D2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#DDD6D2]">
       {message && (
-        <p className="mb-3 rounded-[12px] bg-[#FFF2F2] px-3 py-2 text-[11px] font-normal text-[#D83A42]">
+        <p className="mb-3 rounded-[12px] bg-[#FFF2F2] px-3 py-2 text-[13px] font-normal text-[#D83A42]">
           {message}
         </p>
       )}
@@ -364,7 +364,7 @@ export function TaskCreateForm({
       <div className="my-4 border-t border-dashed border-[#CFC7C3]" />
 
       {isDraftLoading && (
-        <div className="rounded-[14px] border border-dashed border-[#D8D1CE] bg-white px-4 py-6 text-center text-[11px] font-normal text-[#7B716D]">
+        <div className="rounded-[14px] border border-dashed border-[#D8D1CE] bg-white px-4 py-6 text-center text-[13px] font-normal text-[#7B716D]">
           임시저장 업무를 불러오는 중입니다.
         </div>
       )}
@@ -389,7 +389,7 @@ export function TaskCreateForm({
             />
           ))}
           <button
-            className="h-10 w-full rounded-[10px] border border-dashed border-[#333333] bg-[#F7F7F7] text-[12px] font-normal text-[#222222] transition hover:bg-[#EFEFEF]"
+            className="h-10 w-full rounded-[10px] border border-dashed border-[#333333] bg-[#F7F7F7] text-[14px] font-normal text-[#222222] transition hover:bg-[#EFEFEF]"
             onClick={handleAddDraft}
             type="button"
           >
@@ -447,12 +447,12 @@ function AssigneePicker({
   return (
     <section className="space-y-3">
       <div>
-        <div className="flex items-center gap-1.5 text-[13px] font-normal text-[#222222]">
+        <div className="flex items-center gap-1.5 text-[15px] font-normal text-[#222222]">
           <Search aria-hidden className="h-4 w-4 text-[#222222]" />
           <span>담당자 찾기</span>
         </div>
         <input
-          className="mt-2 h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-[12px] font-normal text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
+          className="mt-2 h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-[14px] font-normal text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
           disabled={isLoading}
           onChange={(event) => onSearchKeywordChange(event.target.value)}
           placeholder="이름 또는 직위로 검색하세요"
@@ -462,14 +462,14 @@ function AssigneePicker({
           <div className="mt-2 max-h-[118px] space-y-1 overflow-y-auto rounded-[12px] border border-[#E4DCD9] bg-white p-1.5">
             {searchedAssignees.map((member) => (
               <button
-                className="flex h-8 w-full items-center justify-between rounded-[8px] px-2 text-left text-[11px] font-normal text-[#333333] hover:bg-[#F5FAFF] disabled:opacity-60"
+                className="flex h-8 w-full items-center justify-between rounded-[8px] px-2 text-left text-[13px] font-normal text-[#333333] hover:bg-[#F5FAFF] disabled:opacity-60"
                 disabled={isLoading}
                 key={member.id}
                 onClick={() => onAssigneeSelect(member.id)}
                 type="button"
               >
                 <span>{getMemberDisplayName(member)}</span>
-                <span className="text-[10px] text-[#7B716D]">{getMemberPositionName(member)}</span>
+                <span className="text-[12px] text-[#7B716D]">{getMemberPositionName(member)}</span>
               </button>
             ))}
           </div>
@@ -479,12 +479,12 @@ function AssigneePicker({
       <section className="rounded-[14px] border border-[#D8D1CE] bg-white px-1.5 py-2.5">
         <button
           aria-expanded={!isPositionTreeCollapsed}
-          className="mb-2 flex h-7 w-full items-center justify-between px-1.5 text-[12px] font-normal text-[#333333]"
+          className="mb-2 flex h-7 w-full items-center justify-between px-1.5 text-[14px] font-normal text-[#333333]"
           onClick={onPositionTreeCollapseToggle}
           type="button"
         >
           <span>직위트리</span>
-          <span className="text-[10px] text-[#7B716D]">
+          <span className="text-[12px] text-[#7B716D]">
             {isPositionTreeCollapsed ? "펼치기" : "접어두기"}
           </span>
         </button>
@@ -507,26 +507,26 @@ function AssigneePicker({
           <div className="relative mt-2">
             <button
               aria-expanded={isPositionAssigneeOpen}
-              className="flex h-9 w-full items-center justify-between rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-left text-[12px] font-normal text-[#333333] outline-none disabled:opacity-60"
+              className="flex h-9 w-full items-center justify-between rounded-[10px] border border-[#D8D1CE] bg-white px-3 text-left text-[14px] font-normal text-[#333333] outline-none disabled:opacity-60"
               disabled={isLoading || positionAssignees.length === 0}
               onClick={() => setIsPositionAssigneeOpen((currentValue) => !currentValue)}
               type="button"
             >
               <span>해당 직위 직원 선택</span>
-              <span className="text-[10px] text-[#8E8581]">{isPositionAssigneeOpen ? "접기" : "열기"}</span>
+              <span className="text-[12px] text-[#8E8581]">{isPositionAssigneeOpen ? "접기" : "열기"}</span>
             </button>
 
             {isPositionAssigneeOpen && (
               <div className="absolute left-0 right-0 top-[42px] z-20 max-h-[136px] overflow-y-auto rounded-[10px] border border-[#D8D1CE] bg-white p-1.5 shadow-[0_10px_24px_rgba(95,73,68,0.16)]">
                 {positionAssignees.map((member) => (
                   <button
-                    className="flex h-8 w-full items-center justify-between rounded-[8px] px-2 text-left text-[11px] font-normal text-[#333333] hover:bg-[#F5FAFF]"
+                    className="flex h-8 w-full items-center justify-between rounded-[8px] px-2 text-left text-[13px] font-normal text-[#333333] hover:bg-[#F5FAFF]"
                     key={member.id}
                     onClick={() => handleAssigneeSelect(member.id)}
                     type="button"
                   >
                     <span>{getMemberDisplayName(member)}</span>
-                    <span className="text-[10px] text-[#7B716D]">{getMemberPositionName(member)}</span>
+                    <span className="text-[12px] text-[#7B716D]">{getMemberPositionName(member)}</span>
                   </button>
                 ))}
               </div>
@@ -574,7 +574,7 @@ function TaskDraftCard({
     <article className="space-y-4">
       <section className="relative space-y-3 rounded-[16px] border border-[#D8D1CE] bg-white p-3">
         <button
-          className="absolute right-2 top-2 h-6 rounded-[7px] border border-[#D8D1CE] bg-white px-2 text-[8px] font-normal text-[#4F4542] transition hover:bg-[#F7F7F7] disabled:opacity-60"
+          className="absolute right-2 top-2 h-6 rounded-[7px] border border-[#D8D1CE] bg-white px-2 text-[10px] font-normal text-[#4F4542] transition hover:bg-[#F7F7F7] disabled:opacity-60"
           disabled={isSaving || isSubmitting || isLoading}
           onClick={() => onDelete(draft.id)}
           type="button"
@@ -588,7 +588,7 @@ function TaskDraftCard({
 
             return (
               <button
-                className={`h-6 rounded-[6px] border px-0.5 text-[7px] font-normal transition disabled:opacity-60 ${
+                className={`h-6 rounded-[6px] border px-0.5 text-[9px] font-normal transition disabled:opacity-60 ${
                   isSelected
                     ? getCategoryButtonClassName(option.value)
                     : "border-[#D8D1CE] bg-white text-[#6F6662]"
@@ -610,10 +610,10 @@ function TaskDraftCard({
         </div>
 
         <div>
-          <div className="mb-1.5 flex items-center justify-between gap-2 text-[11px] font-normal text-[#7B716D]">
+          <div className="mb-1.5 flex items-center justify-between gap-2 text-[13px] font-normal text-[#7B716D]">
             <div className="flex items-center gap-1.5">
               {isLocked && (
-                <span className="rounded-full bg-[#F1F1F1] px-2 py-0.5 text-[8px] font-normal text-[#6B6B6B]">
+                <span className="rounded-full bg-[#F1F1F1] px-2 py-0.5 text-[10px] font-normal text-[#6B6B6B]">
                   임시저장됨
                 </span>
               )}
@@ -621,7 +621,7 @@ function TaskDraftCard({
             <div className="flex min-w-0 items-center gap-1 text-[#333333]">
               <span className="shrink-0">담당자 :</span>
               <select
-                className="min-w-0 max-w-[112px] truncate rounded-[7px] border border-[#D8D1CE] bg-white px-1.5 py-1 text-[10px] font-normal text-[#333333] outline-none disabled:opacity-60"
+                className="min-w-0 max-w-[112px] truncate rounded-[7px] border border-[#D8D1CE] bg-white px-1.5 py-1 text-[12px] font-normal text-[#333333] outline-none disabled:opacity-60"
                 disabled={isDisabled}
                 onChange={(event) =>
                   onUpdate(draft.id, (currentDraft) => ({
@@ -641,7 +641,7 @@ function TaskDraftCard({
             </div>
           </div>
           <input
-            className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
+            className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[15px] font-normal text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
             disabled={isDisabled}
             onChange={(event) =>
               onUpdate(draft.id, (currentDraft) => ({
@@ -655,7 +655,7 @@ function TaskDraftCard({
         </div>
 
         <textarea
-          className="h-28 w-full resize-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 py-3 text-[13px] font-normal leading-6 text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
+          className="h-28 w-full resize-none rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 py-3 text-[15px] font-normal leading-6 text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
           disabled={isDisabled}
           onChange={(event) =>
             onUpdate(draft.id, (currentDraft) => ({
@@ -668,7 +668,7 @@ function TaskDraftCard({
         />
 
         <label
-          className={`flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[#B9D5EF] bg-[#F5FAFF] text-[11px] font-normal text-[#2D70CB] ${
+          className={`flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[#B9D5EF] bg-[#F5FAFF] text-[13px] font-normal text-[#2D70CB] ${
             isDisabled ? "pointer-events-none opacity-60" : ""
           }`}
           htmlFor={attachmentInputId}
@@ -699,7 +699,7 @@ function TaskDraftCard({
         )}
 
         <input
-          className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[13px] font-normal text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
+          className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-3 text-[15px] font-normal text-[#222222] outline-none placeholder:text-[#9A918D] disabled:opacity-60"
           disabled={isDisabled}
           onChange={(event) =>
             onUpdate(draft.id, (currentDraft) => ({
@@ -714,7 +714,7 @@ function TaskDraftCard({
 
       <div className="grid grid-cols-3 gap-1.5">
         <button
-          className="h-9 rounded-[9px] border border-[#D8D1CE] bg-[#F3F1EF] px-2 text-[10px] font-normal text-[#6F6662] transition hover:bg-[#EBE7E4] disabled:opacity-60"
+          className="h-9 rounded-[9px] border border-[#D8D1CE] bg-[#F3F1EF] px-2 text-[12px] font-normal text-[#6F6662] transition hover:bg-[#EBE7E4] disabled:opacity-60"
           disabled={!isLocked || isSaving || isSubmitting || isLoading}
           onClick={() => onEdit(draft.id)}
           type="button"
@@ -722,7 +722,7 @@ function TaskDraftCard({
           수정
         </button>
         <button
-          className="h-9 rounded-[9px] border border-[#F0C5D2] bg-[#FFF3F7] px-2 text-[10px] font-normal text-[#D93D72] transition hover:bg-[#FFEAF2] disabled:opacity-60"
+          className="h-9 rounded-[9px] border border-[#F0C5D2] bg-[#FFF3F7] px-2 text-[12px] font-normal text-[#D93D72] transition hover:bg-[#FFEAF2] disabled:opacity-60"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onClick={() => void onSave(draft.id)}
           type="button"
@@ -730,7 +730,7 @@ function TaskDraftCard({
           {isSaving ? "저장 중" : "임시저장"}
         </button>
         <button
-          className="h-9 rounded-[9px] border border-[#B9D5EF] bg-[#EAF3FF] px-2 text-[10px] font-normal text-[#2D70CB] transition hover:bg-[#DDEEFF] disabled:opacity-60"
+          className="h-9 rounded-[9px] border border-[#B9D5EF] bg-[#EAF3FF] px-2 text-[12px] font-normal text-[#2D70CB] transition hover:bg-[#DDEEFF] disabled:opacity-60"
           disabled={isLocked || isSaving || isSubmitting || isLoading}
           onClick={() => void onSubmit(draft)}
           type="button"
@@ -768,7 +768,7 @@ function AttachmentPreview({
     <div className="relative w-[58px] shrink-0">
       <button
         aria-label={`${attachment.name} 첨부 삭제`}
-        className="absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[10px] font-normal leading-none text-[#333333] shadow-sm"
+        className="absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[12px] font-normal leading-none text-[#333333] shadow-sm"
         onClick={onDelete}
         type="button"
       >

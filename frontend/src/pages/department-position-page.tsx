@@ -309,20 +309,20 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
       <div className="mx-auto w-full max-w-[360px] space-y-3">
         <header className="relative pb-1 text-center">
           <button
-            className="absolute left-0 top-0 h-8 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] px-3 text-[12px] font-normal text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 h-8 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] px-3 text-[14px] font-bold text-[#333333] shadow-sm"
             onClick={onBack}
             type="button"
           >
-            ← 뒤로가기
+            ←
           </button>
-          <h1 className="flex items-center justify-center gap-2 text-[22px] font-normal text-[#111111]">
+          <h1 className="flex items-center justify-center gap-2 text-[24px] font-normal text-[#111111]">
             <Tag aria-hidden className="h-6 w-6 rotate-[-10deg] fill-[#FFE2A6] text-[#4F4542]" />
             부서/직급관리
           </h1>
         </header>
 
         {message ? (
-          <div className="rounded-[12px] border border-[#F0C5C5] bg-[#FFF8F8] px-3 py-2 text-[11px] font-normal text-[#A24F4F]">
+          <div className="rounded-[12px] border border-[#F0C5C5] bg-[#FFF8F8] px-3 py-2 text-[13px] font-normal text-[#A24F4F]">
             {message}
           </div>
         ) : null}
@@ -372,7 +372,7 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
 
         <div className="grid grid-cols-[1fr_1.25fr] gap-2 pb-4">
           <button
-            className="flex h-12 items-center justify-center gap-2 rounded-[13px] border border-[#D8D1CE] bg-white text-[18px] font-normal text-[#4F4542] shadow-sm"
+            className="flex h-12 items-center justify-center gap-2 rounded-[13px] border border-[#D8D1CE] bg-white text-[20px] font-normal text-[#4F4542] shadow-sm"
             onClick={() => setMessage("초기화 기능은 다음 단계에서 연결됩니다.")}
             type="button"
           >
@@ -380,7 +380,7 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
             초기화
           </button>
           <button
-            className="flex h-12 items-center justify-center gap-2 rounded-[13px] border border-[#9FCBFF] bg-[#EAF4FF] text-[18px] font-normal text-[#2D70CB] shadow-sm disabled:opacity-60"
+            className="flex h-12 items-center justify-center gap-2 rounded-[13px] border border-[#9FCBFF] bg-[#EAF4FF] text-[20px] font-normal text-[#2D70CB] shadow-sm disabled:opacity-60"
             disabled={isSavingPositions}
             onClick={handleSavePositionOrder}
             type="button"

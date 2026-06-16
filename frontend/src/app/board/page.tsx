@@ -177,11 +177,11 @@ export default function BoardRoutePage() {
       <div className="mx-auto w-full max-w-[380px] pb-20">
         <header className="relative mb-3 pt-1 text-center">
           <button
-            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-normal leading-6 text-[#333333] shadow-sm"
+            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-bold leading-6 text-[#333333] shadow-sm"
             onClick={() => router.push(backPath)}
             type="button"
           >
-            ← 뒤로가기
+            ←
           </button>
           <h1 className="flex items-center justify-center gap-1.5 text-[24px] font-normal leading-tight text-[#111111]">
             <ClipboardList aria-hidden className="h-7 w-7 -translate-y-0.5 text-[#D48B26]" />
