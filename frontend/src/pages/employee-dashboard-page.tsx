@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { PencilLine, Settings } from "lucide-react";
+import { DoorOpen, PencilLine, Settings } from "lucide-react";
 import type {
   AdminDashboardRecentOutput,
   AdminDashboardSortOrder
@@ -178,14 +178,12 @@ export function EmployeeDashboardPage({
               <p className="mt-1 text-[11px] font-normal text-[#7B716D]">오늘도 즐거운 하루 되세요</p>
             </div>
             <button
-              className="flex h-8 items-center justify-center rounded-[8px] border border-[#C7CDD4] bg-[#EAF3FF] px-1 text-[8px] font-normal text-[#2D70CB] shadow-[0_1px_4px_rgba(45,112,203,0.08)]"
-              onClick={onTaskCreateOpen}
+              aria-label="로그아웃"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm"
+              onClick={onLogout}
               type="button"
             >
-              <span className="mr-1 inline-flex">
-                <PencilLine aria-hidden className="h-2.5 w-2.5" />
-              </span>
-              새 업무 등록
+              <DoorOpen aria-hidden className="h-4.5 w-4.5" />
             </button>
           </div>
         </section>
@@ -194,7 +192,6 @@ export function EmployeeDashboardPage({
           categorySummary={categorySummary}
           notificationUnreadCount={notificationUnreadCount}
           onBoardOpen={onBoardOpen}
-          onLogout={onLogout}
           onNotificationOpen={() => void handleNotificationOpen()}
         />
         {isLoading && (
@@ -215,7 +212,14 @@ export function EmployeeDashboardPage({
           showScopeSelector={false}
         />
       </div>
-
+      <button
+        aria-label="새 업무 등록"
+        className="fixed bottom-6 left-1/2 z-30 flex h-14 w-14 translate-x-[128px] items-center justify-center rounded-full border border-[#C7CDD4] bg-[#EAF3FF] text-[#2D70CB] shadow-[0_8px_18px_rgba(45,112,203,0.22)] max-[420px]:left-auto max-[420px]:right-5 max-[420px]:translate-x-0"
+        onClick={onTaskCreateOpen}
+        type="button"
+      >
+        <PencilLine aria-hidden className="h-6 w-6" />
+      </button>
     </main>
   );
 }
