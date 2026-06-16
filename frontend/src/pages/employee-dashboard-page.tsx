@@ -13,6 +13,7 @@ import {
 import {
   getTaskCategorySummary,
   getTaskRecentWorkStatus,
+  readTaskRecentWorkStatusCache,
   readTaskCategorySummaryCache,
   type TaskCategorySummaryItem
 } from "@/api/task";
@@ -46,6 +47,7 @@ export function EmployeeDashboardPage({
   onAllTasksOpen,
   onBoardOpen,
   onNotificationOpen,
+  onLogout,
   onTaskCreateOpen,
   onTaskDetailOpen
 }: Partial<EmployeeDashboardPageProps>) {
@@ -70,6 +72,16 @@ export function EmployeeDashboardPage({
       }
 
       try {
+        const recentWorkStatusFilters = {
+          sortOrder: recentTaskSortOrder,
+          statuses: recentTaskStatuses
+        };
+        const cachedRecentOutputs = readTaskRecentWorkStatusCache(accessToken, recentWorkStatusFilters);
+        if (cachedRecentOutputs) {
+          setRecentOutputs(cachedRecentOutputs);
+          setIsLoading(false);
+        }
+
         const cachedCategorySummary = readTaskCategorySummaryCache({
           statuses: activeTaskStatuses
         });
@@ -84,10 +96,7 @@ export function EmployeeDashboardPage({
           .catch(() => undefined);
 
         const [recentOutputResponse, notificationCountResponse] = await Promise.all([
-          getTaskRecentWorkStatus(accessToken, {
-            sortOrder: recentTaskSortOrder,
-            statuses: recentTaskStatuses
-          }),
+          getTaskRecentWorkStatus(accessToken, recentWorkStatusFilters),
           getNotificationUnreadCount(accessToken)
         ]);
 
@@ -185,6 +194,7 @@ export function EmployeeDashboardPage({
           categorySummary={categorySummary}
           notificationUnreadCount={notificationUnreadCount}
           onBoardOpen={onBoardOpen}
+          onLogout={onLogout}
           onNotificationOpen={() => void handleNotificationOpen()}
         />
         {isLoading && (

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { PencilLine, Settings } from "lucide-react";
 import {
   getAdminDashboard,
+  readAdminDashboardCache,
   type AdminDashboard,
   type AdminDashboardSortOrder
 } from "@/api/admin";
@@ -89,6 +90,7 @@ export function AdminDashboardPage({
   onBoardOpen,
   onSettingsOpen,
   onTaskCreateOpen,
+  onLogout,
   onNotificationOpen,
   onTaskDetailOpen
 }: AdminDashboardPageProps) {
@@ -116,6 +118,15 @@ export function AdminDashboardPage({
   useEffect(() => {
     async function loadDashboard() {
       try {
+        const dashboardFilters = {
+          sortOrder: recentTaskSortOrder,
+          statuses: recentTaskStatuses
+        };
+        const cachedDashboard = readAdminDashboardCache(accessToken, dashboardFilters);
+        if (cachedDashboard) {
+          setDashboard(cachedDashboard);
+        }
+
         const cachedCategorySummary = readTaskCategorySummaryCache({
           statuses: activeTaskStatuses
         });
@@ -133,10 +144,7 @@ export function AdminDashboardPage({
           dashboardResponse,
           notificationCountResponse
         ] = await Promise.all([
-          getAdminDashboard(accessToken, {
-            sortOrder: recentTaskSortOrder,
-            statuses: recentTaskStatuses
-          }),
+          getAdminDashboard(accessToken, dashboardFilters),
           getNotificationUnreadCount(accessToken)
         ]);
 
@@ -290,6 +298,7 @@ export function AdminDashboardPage({
           categorySummary={categorySummary}
           notificationUnreadCount={notificationUnreadCount}
           onBoardOpen={onBoardOpen}
+          onLogout={onLogout}
           onNotificationOpen={() => void handleNotificationOpen()}
         />
         <RecentOutputsSection

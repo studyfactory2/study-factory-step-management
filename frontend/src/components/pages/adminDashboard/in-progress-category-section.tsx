@@ -1,4 +1,4 @@
-import { Bell, ClipboardList, Newspaper } from "lucide-react";
+import { Bell, ClipboardList, DoorOpen, Newspaper } from "lucide-react";
 import { type AdminDashboard } from "@/api/admin";
 import { type TaskCategorySummaryItem } from "@/api/task";
 import { roleLabels } from "@/components/adminDashboard/constants";
@@ -21,11 +21,13 @@ export function InProgressCategorySection({
   categorySummary,
   notificationUnreadCount = 0,
   onBoardOpen,
+  onLogout,
   onNotificationOpen
 }: {
   categorySummary: TaskCategorySummaryItem[];
   notificationUnreadCount?: number;
   onBoardOpen: () => void;
+  onLogout?: () => void;
   onNotificationOpen?: () => void;
 }) {
   const summaryMap = new Map(categorySummary.map((item) => [item.category, item.count]));
@@ -33,14 +35,11 @@ export function InProgressCategorySection({
   return (
     <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
       <div className="mb-2.5 flex items-center justify-between">
-        <h2 className="flex items-center gap-1.5 text-[16px] font-normal text-[#222222]">
-          <ClipboardList aria-hidden className="h-4 w-4 text-[#7B716D]" />
-          진행중 업무
-        </h2>
         <div className="flex items-center gap-1.5">
-          <span className="rounded-full bg-[#FFF1E8] px-2 py-0.5 text-[9px] font-normal text-[#B97A67]">
-            화이팅!
-          </span>
+          <h2 className="flex items-center gap-1.5 text-[16px] font-normal text-[#222222]">
+            <ClipboardList aria-hidden className="h-4 w-4 text-[#7B716D]" />
+            진행중 업무
+          </h2>
           <button
             aria-label="내 알림"
             className="relative flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542]"
@@ -63,6 +62,16 @@ export function InProgressCategorySection({
             <Newspaper aria-hidden className="h-3.5 w-3.5 text-[#2D70CB]" />
           </button>
         </div>
+        {onLogout ? (
+          <button
+            aria-label="로그아웃"
+            className="flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542]"
+            onClick={onLogout}
+            type="button"
+          >
+            <DoorOpen aria-hidden className="h-3.5 w-3.5 text-[#4F4542]" />
+          </button>
+        ) : null}
       </div>
       <div className="grid grid-cols-4 gap-1.5">
         {Object.entries(categoryLabels).map(([category, label]) => (

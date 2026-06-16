@@ -31,6 +31,10 @@ type TaskCategorySummaryCache = {
 
 const TASK_CATEGORY_SUMMARY_CACHE_TTL_MS = 1000 * 15;
 const TASK_CATEGORY_SUMMARY_CACHE_KEY_PREFIX = "study-factory:task-category-summary";
+const TASK_DETAIL_CACHE_TTL_MS = 1000 * 60 * 5;
+const TASK_DETAIL_CACHE_KEY_PREFIX = "study-factory:task-detail";
+const TASK_RECENT_WORK_STATUS_CACHE_TTL_MS = 1000 * 30;
+const TASK_RECENT_WORK_STATUS_CACHE_KEY_PREFIX = "study-factory:task-recent-work-status";
 
 function getTaskCategorySummaryCacheKey(filters: { statuses?: TaskStatus[] } = {}) {
   const statusKey = filters.statuses?.length
@@ -225,6 +229,131 @@ export type TaskRecentWorkStatus = {
   isNew: boolean;
 };
 
+type TaskDetailCache = {
+  savedAt: number;
+  task: TaskDetail;
+};
+
+type TaskRecentWorkStatusCache = {
+  outputs: TaskRecentWorkStatus[];
+  savedAt: number;
+};
+
+function getViewerCacheKey(accessToken: string) {
+  return accessToken.slice(-24);
+}
+
+function getTaskDetailCacheKey(accessToken: string, taskId: number) {
+  return `${TASK_DETAIL_CACHE_KEY_PREFIX}:${getViewerCacheKey(accessToken)}:${taskId}`;
+}
+
+function getTaskRecentWorkStatusCacheKey(filters: {
+  category?: TaskCategory;
+  sortOrder?: "LATEST" | "OLDEST";
+  statuses?: TaskStatus[];
+} = {}, accessToken = "") {
+  const statusKey = filters.statuses?.length
+    ? [...filters.statuses].sort().join(",")
+    : "ALL";
+  const sortOrderKey = filters.sortOrder ?? "LATEST";
+  const categoryKey = filters.category ?? "ALL";
+
+  return `${TASK_RECENT_WORK_STATUS_CACHE_KEY_PREFIX}:${getViewerCacheKey(accessToken)}:${categoryKey}:${sortOrderKey}:${statusKey}`;
+}
+
+export function readTaskDetailCache(accessToken: string, taskId: number): TaskDetail | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const cacheKey = getTaskDetailCacheKey(accessToken, taskId);
+    const cachedValue = window.localStorage.getItem(cacheKey);
+    if (!cachedValue) {
+      return null;
+    }
+
+    const cache = JSON.parse(cachedValue) as TaskDetailCache;
+    if (!cache.task || Date.now() - cache.savedAt > TASK_DETAIL_CACHE_TTL_MS) {
+      window.localStorage.removeItem(cacheKey);
+      return null;
+    }
+
+    return cache.task;
+  } catch {
+    window.localStorage.removeItem(getTaskDetailCacheKey(accessToken, taskId));
+    return null;
+  }
+}
+
+export function saveTaskDetailCache(accessToken: string, task: TaskDetail) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    getTaskDetailCacheKey(accessToken, task.id),
+    JSON.stringify({
+      savedAt: Date.now(),
+      task
+    } satisfies TaskDetailCache)
+  );
+}
+
+export function readTaskRecentWorkStatusCache(
+  accessToken: string,
+  filters: {
+    category?: TaskCategory;
+    sortOrder?: "LATEST" | "OLDEST";
+    statuses?: TaskStatus[];
+  } = {}
+): TaskRecentWorkStatus[] | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const cacheKey = getTaskRecentWorkStatusCacheKey(filters, accessToken);
+    const cachedValue = window.localStorage.getItem(cacheKey);
+    if (!cachedValue) {
+      return null;
+    }
+
+    const cache = JSON.parse(cachedValue) as TaskRecentWorkStatusCache;
+    if (!Array.isArray(cache.outputs) || Date.now() - cache.savedAt > TASK_RECENT_WORK_STATUS_CACHE_TTL_MS) {
+      window.localStorage.removeItem(cacheKey);
+      return null;
+    }
+
+    return cache.outputs;
+  } catch {
+    window.localStorage.removeItem(getTaskRecentWorkStatusCacheKey(filters, accessToken));
+    return null;
+  }
+}
+
+function saveTaskRecentWorkStatusCache(
+  accessToken: string,
+  filters: {
+    category?: TaskCategory;
+    sortOrder?: "LATEST" | "OLDEST";
+    statuses?: TaskStatus[];
+  } = {},
+  outputs: TaskRecentWorkStatus[]
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    getTaskRecentWorkStatusCacheKey(filters, accessToken),
+    JSON.stringify({
+      outputs,
+      savedAt: Date.now()
+    } satisfies TaskRecentWorkStatusCache)
+  );
+}
+
 export async function getTaskStatusSummary(): Promise<TaskStatusSummary> {
   const response = await fetch(`${API_BASE_URL}/api/tasks/status-summary`, {
     cache: "no-store"
@@ -347,7 +476,10 @@ export async function getTaskDetail(accessToken: string, taskId: number): Promis
     throw new Error(message ?? "업무 상세 정보를 불러오지 못했습니다.");
   }
 
-  return response.json() as Promise<TaskDetail>;
+  const taskDetail = await response.json() as TaskDetail;
+  saveTaskDetailCache(accessToken, taskDetail);
+
+  return taskDetail;
 }
 
 export async function updateTaskDescription(
@@ -372,7 +504,10 @@ export async function updateTaskDescription(
     throw new Error(message ?? "프로젝트 내용을 수정하지 못했습니다.");
   }
 
-  return response.json() as Promise<TaskDetail>;
+  const taskDetail = await response.json() as TaskDetail;
+  saveTaskDetailCache(accessToken, taskDetail);
+
+  return taskDetail;
 }
 
 export async function addTaskAttachments(
@@ -401,7 +536,10 @@ export async function addTaskAttachments(
     throw new Error(message ?? "업무 사진을 첨부하지 못했습니다.");
   }
 
-  return response.json() as Promise<TaskDetail>;
+  const taskDetail = await response.json() as TaskDetail;
+  saveTaskDetailCache(accessToken, taskDetail);
+
+  return taskDetail;
 }
 
 export async function getTaskDrafts(accessToken: string): Promise<TaskDraft[]> {
@@ -610,7 +748,10 @@ export async function getTaskRecentWorkStatus(
     throw new Error(message ?? "최근 작업 근황을 불러오지 못했습니다.");
   }
 
-  return response.json() as Promise<TaskRecentWorkStatus[]>;
+  const outputs = await response.json() as TaskRecentWorkStatus[];
+  saveTaskRecentWorkStatusCache(accessToken, filters, outputs);
+
+  return outputs;
 }
 
 export async function getTaskAllWorkStatus(
