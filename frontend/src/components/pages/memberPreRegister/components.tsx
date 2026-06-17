@@ -302,41 +302,43 @@ function PendingPreRegistrationRow({
   }
 
   return (
-    <article className="rounded-[11px] border border-[#E6DFDC] bg-white px-2 py-2">
-      <div className="grid grid-cols-[18px_minmax(0,1fr)_50px] items-start gap-1.5">
-        <span className="pt-0.5 text-center text-[14px] font-normal text-[#7B716D]">{index}.</span>
-        <div className="min-w-0">
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-            <strong className="break-keep text-[15px] font-normal leading-4 text-[#222222]">{preRegistration.name}</strong>
-            <span className={`flex shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[11px] font-normal ${positionBadge.className}`}>
-              <PositionIcon aria-hidden className="h-2.5 w-2.5" />
-              {positionName}
+    <article className="rounded-[11px] border border-[#E6DFDC] bg-white px-2 py-2 md:px-3 md:py-2.5">
+      <div className="grid grid-cols-[18px_minmax(0,1fr)_50px] items-start gap-1.5 md:grid-cols-[26px_minmax(82px,0.8fr)_minmax(96px,0.95fr)_minmax(96px,0.85fr)_minmax(120px,1.1fr)_76px] md:items-center md:gap-2">
+        <span className="pt-0.5 text-center text-[14px] font-normal text-[#7B716D] md:pt-0 md:text-[16px]">{index}.</span>
+        <div className="min-w-0 md:contents">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5 md:contents">
+            <strong className="break-keep text-[15px] font-normal leading-4 text-[#222222] md:truncate md:text-[17px] md:leading-5 lg:text-[18px]">
+              {preRegistration.name}
+            </strong>
+            <span className={`flex w-fit shrink-0 items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[11px] font-normal md:max-w-full md:px-2 md:py-1 md:text-[13px] lg:text-[14px] ${positionBadge.className}`}>
+              <PositionIcon aria-hidden className="h-2.5 w-2.5 md:h-3.5 md:w-3.5" />
+              <span className="truncate">{positionName}</span>
             </span>
           </div>
-          <p className="mt-1 break-keep text-[13px] font-normal leading-4 text-[#4F4542]">
+          <p className="mt-1 break-keep text-[13px] font-normal leading-4 text-[#4F4542] md:mt-0 md:truncate md:text-[15px] lg:text-[16px]">
             {formatPlainDate(preRegistration.joinedAt)}
           </p>
-          <p className="mt-0.5 break-keep text-[13px] font-normal leading-4 text-[#7B716D]">
+          <p className="mt-0.5 break-keep text-[13px] font-normal leading-4 text-[#7B716D] md:mt-0 md:truncate md:text-[15px] lg:text-[16px]">
             {dutyName}
           </p>
         </div>
-        <div className="flex justify-end gap-1">
+        <div className="flex justify-end gap-1 md:gap-1.5">
           <button
-            className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#D8D1CE] bg-[#FFFEFC] text-[#4F4542]"
+            className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#D8D1CE] bg-[#FFFEFC] text-[#4F4542] md:h-9 md:w-9 md:rounded-[10px]"
             onClick={onEdit}
             title="수정"
             type="button"
           >
-            <Pencil aria-hidden className="h-3.5 w-3.5" />
+            <Pencil aria-hidden className="h-3.5 w-3.5 md:h-4.5 md:w-4.5" />
           </button>
           <button
-            className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#F0C5C5] bg-[#FFF1F1] text-[#D95858] disabled:opacity-60"
+            className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#F0C5C5] bg-[#FFF1F1] text-[#D95858] disabled:opacity-60 md:h-9 md:w-9 md:rounded-[10px]"
             disabled={isDeleting}
             onClick={onDelete}
             title="삭제"
             type="button"
           >
-            <Trash2 aria-hidden className="h-3.5 w-3.5" />
+            <Trash2 aria-hidden className="h-3.5 w-3.5 md:h-4.5 md:w-4.5" />
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, ClipboardList, ClipboardPenLine, Save, UserRound } from "lucide-react";
+import { CalendarDays, ClipboardList, ClipboardPenLine, UserPlus, UserRound } from "lucide-react";
 import {
   deleteMemberPreRegistration,
   getMemberPreRegistrations,
@@ -286,7 +286,7 @@ export function MemberPreRegisterPage({
                 disabled={isSubmitting}
                 type="submit"
               >
-                <Save aria-hidden className="h-4 w-4" />
+                <UserPlus aria-hidden className="h-4 w-4" />
                 {isSubmitting ? "등록 중" : "사전등록하기"}
               </button>
             </div>
