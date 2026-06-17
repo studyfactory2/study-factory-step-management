@@ -77,7 +77,7 @@ function PositionNode({
   return (
     <div className="relative flex flex-col items-center">
       <PositionCard
-        className="w-[70px]"
+        className="w-[70px] sm:w-[82px] md:w-[92px]"
         index={index}
         onSelect={() => onSelectPosition(position.id)}
         position={position}
@@ -150,19 +150,19 @@ function PositionCard({
   return (
     <button
       className={cn(
-        "flex min-h-[44px] w-full flex-col items-center justify-center rounded-[11px] border px-1 py-1 text-center shadow-sm transition",
+        "flex min-h-[44px] w-full flex-col items-center justify-center rounded-[11px] border px-1 py-1 text-center shadow-sm transition sm:min-h-[52px] sm:rounded-[13px] sm:px-1.5 sm:py-1.5 md:min-h-[58px]",
         toneClassName,
         className
       )}
       onClick={onSelect}
       type="button"
     >
-      <span className="mb-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-primary shadow-sm">
-        <Icon aria-hidden className="h-2.5 w-2.5" />
+      <span className="mb-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-primary shadow-sm sm:h-5 sm:w-5 md:h-6 md:w-6">
+        <Icon aria-hidden className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5" />
       </span>
-      <span className="text-[11px] font-black leading-tight">{position.name}</span>
+      <span className="text-[11px] font-black leading-tight sm:text-[12px] md:text-[13px]">{position.name}</span>
       {position.subtitle && (
-        <span className="mt-0.5 max-w-full rounded-full bg-white/80 px-1 py-0.5 text-[8px] font-bold leading-tight text-muted-foreground">
+        <span className="mt-0.5 max-w-full rounded-full bg-white/80 px-1 py-0.5 text-[8px] font-bold leading-tight text-muted-foreground sm:text-[9px] md:text-[10px]">
           {position.subtitle}
         </span>
       )}
