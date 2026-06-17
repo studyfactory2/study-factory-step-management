@@ -265,29 +265,29 @@ export function AdminDashboardPage({
   return (
     <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
       <ResponsiveContainer variant="dashboard">
-        <section className="rounded-[20px] border border-[#D8D1CE] bg-white px-3 py-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-          <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-2">
+        <section className="rounded-[20px] border border-[#D8D1CE] bg-white px-3 py-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)] sm:px-4 sm:py-4">
+          <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-2 sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:gap-3">
             <button
               aria-label="설정"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm sm:h-10 sm:w-10"
               onClick={onSettingsOpen}
               type="button"
             >
-              <Settings aria-hidden className="h-4.5 w-4.5" />
+              <Settings aria-hidden className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
             </button>
             <div className="min-w-0 text-center">
-              <p className="truncate text-[17px] font-normal text-[#222222]">
+              <p className="truncate text-[17px] font-normal text-[#222222] sm:text-[19px] md:text-[20px]">
                 안녕하세요 {dashboard.currentMember.name} {getPositionName(dashboard.currentMember.positionName, dashboard.currentMember.roleType)}님
               </p>
-              <p className="mt-1 text-[13px] font-normal text-[#7B716D]">오늘도 즐거운 하루 되세요</p>
+              <p className="mt-1 text-[13px] font-normal text-[#7B716D] sm:text-[14px] md:text-[15px]">오늘도 즐거운 하루 되세요</p>
             </div>
             <button
               aria-label="로그아웃"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm sm:h-10 sm:w-10"
               onClick={onLogout}
               type="button"
             >
-              <DoorOpen aria-hidden className="h-4.5 w-4.5" />
+              <DoorOpen aria-hidden className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
             </button>
           </div>
         </section>
@@ -336,11 +336,14 @@ export function AdminDashboardPage({
       </ResponsiveContainer>
       <button
         aria-label="새 업무 등록"
-        className="fixed bottom-6 left-1/2 z-30 flex h-14 w-14 translate-x-[128px] items-center justify-center rounded-full border border-[#C7CDD4] bg-[#EAF3FF] text-[#2D70CB] shadow-[0_8px_18px_rgba(45,112,203,0.22)] max-[420px]:left-auto max-[420px]:right-5 max-[420px]:translate-x-0"
+        className="fixed bottom-6 z-30 flex h-14 w-14 items-center justify-center rounded-full border border-[#C7CDD4] bg-[#EAF3FF] text-[#2D70CB] shadow-[0_8px_18px_rgba(45,112,203,0.22)] sm:h-16 sm:w-16"
         onClick={onTaskCreateOpen}
+        style={{
+          right: "max(1.25rem, calc((100vw - min(calc(100vw - 1.5rem), 72rem)) / 2 + 1rem))"
+        }}
         type="button"
       >
-        <PencilLine aria-hidden className="h-6 w-6" />
+        <PencilLine aria-hidden className="h-6 w-6 sm:h-7 sm:w-7" />
       </button>
       {confirmDialog && (
         <ConfirmDialog

@@ -33,31 +33,31 @@ export function InProgressCategorySection({
   return (
     <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)] sm:p-4">
       <div className="mb-2.5 flex items-center justify-between">
-        <h2 className="flex items-center gap-1.5 text-[18px] font-normal text-[#222222]">
-          <ClipboardList aria-hidden className="h-4 w-4 text-[#7B716D]" />
+        <h2 className="flex items-center gap-1.5 text-[18px] font-normal text-[#222222] sm:text-[20px] md:text-[21px]">
+          <ClipboardList aria-hidden className="h-4 w-4 text-[#7B716D] sm:h-5 sm:w-5" />
           진행중 업무
         </h2>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
           <button
             aria-label="내 알림"
-            className="relative flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542]"
+            className="relative flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542] sm:h-7 sm:min-w-7 md:h-8 md:min-w-8 md:px-2"
             onClick={onNotificationOpen}
             type="button"
           >
-            <Bell aria-hidden className="h-3 w-3 text-[#E30613]" />
+            <Bell aria-hidden className="h-3 w-3 text-[#E30613] sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
             {notificationUnreadCount > 0 ? (
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E30613] px-1 text-[11px] font-normal leading-none text-white">
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E30613] px-1 text-[11px] font-normal leading-none text-white sm:h-5 sm:min-w-5 sm:text-[12px] md:h-6 md:min-w-6">
                 {notificationUnreadCount > 99 ? "99+" : notificationUnreadCount}
               </span>
             ) : null}
           </button>
           <button
             aria-label="게시판으로 이동"
-            className="flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542]"
+            className="flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542] sm:h-7 sm:min-w-7 md:h-8 md:min-w-8 md:px-2"
             onClick={onBoardOpen}
             type="button"
           >
-            <Newspaper aria-hidden className="h-3.5 w-3.5 text-[#2D70CB]" />
+            <Newspaper aria-hidden className="h-3.5 w-3.5 text-[#2D70CB] sm:h-4 sm:w-4 md:h-4.5 md:w-4.5" />
           </button>
         </div>
       </div>
@@ -67,8 +67,8 @@ export function InProgressCategorySection({
             className="flex min-h-[58px] flex-col items-center justify-center rounded-[10px] border border-dashed border-[#E4DCD9] bg-white px-1 text-center sm:min-h-[68px]"
             key={category}
           >
-            <p className="break-keep text-[11px] font-normal leading-3 text-[#4F4542] sm:text-[12px]">{label}</p>
-            <p className={`mt-1 text-[19px] font-normal leading-none sm:text-[22px] ${categoryColorClassNames[category as keyof typeof categoryColorClassNames]}`}>
+            <p className="break-keep text-[11px] font-normal leading-3 text-[#4F4542] sm:text-[13px] md:text-[14px]">{label}</p>
+            <p className={`mt-1 text-[19px] font-normal leading-none sm:text-[23px] md:text-[25px] ${categoryColorClassNames[category as keyof typeof categoryColorClassNames]}`}>
               {summaryMap.get(category as keyof typeof categoryLabels) ?? 0}건
             </p>
           </article>
