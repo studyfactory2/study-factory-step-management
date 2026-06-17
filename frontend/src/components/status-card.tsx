@@ -22,9 +22,9 @@ export function StatusCard({ label, value, helper, tone }: StatusCardProps) {
         toneClassNames[tone]
       )}
     >
-      <p className="whitespace-nowrap text-[10px] font-black leading-tight text-[#4F4542]">{label}</p>
-      <p className="mt-0.5 whitespace-nowrap text-[17px] font-black leading-none tracking-normal">{value}건</p>
-      <p className="mt-0.5 whitespace-nowrap text-[7px] font-bold leading-[1.05] text-[#4F4542]">
+      <p className="whitespace-nowrap text-[10px] font-black leading-tight text-[#4F4542] sm:text-[11px] md:text-[12px]">{label}</p>
+      <p className="mt-0.5 whitespace-nowrap text-[17px] font-black leading-none tracking-normal sm:text-[19px] md:text-[21px]">{value}건</p>
+      <p className="mt-0.5 whitespace-nowrap text-[7px] font-bold leading-[1.05] text-[#4F4542] sm:text-[8px] md:text-[9px]">
         <HelperText helper={helper} />
       </p>
     </article>
@@ -44,7 +44,7 @@ function HelperText({ helper }: { helper: string }) {
   return (
     <>
       {match[1]}
-      <strong className={`text-[8px] font-black ${arrowClassName}`}>{arrow}</strong>
+      <strong className={`text-[8px] font-black sm:text-[9px] md:text-[10px] ${arrowClassName}`}>{arrow}</strong>
     </>
   );
 }

@@ -153,12 +153,12 @@ export function LoginFormSection({
   }
 
   return (
-    <section className="rounded-[16px] border border-[#D9D2CF] bg-white p-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
-      <form className="space-y-2.5" onSubmit={onSubmit}>
-        <label className="flex min-h-[46px] w-full min-w-0 items-center gap-2 rounded-[8px] border border-[#D9D2CF] bg-white px-3">
+    <section className="rounded-[16px] border border-[#D9D2CF] bg-white p-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)] sm:p-3">
+      <form className="space-y-2.5 sm:space-y-3" onSubmit={onSubmit}>
+        <label className="flex min-h-[46px] w-full min-w-0 items-center gap-2 rounded-[8px] border border-[#D9D2CF] bg-white px-3 sm:min-h-[52px] sm:px-3.5">
           <UserRound aria-hidden className="h-5 w-5 text-[#7B716D]" />
             <input
-              className="min-w-0 flex-1 bg-transparent text-[14px] font-bold outline-none placeholder:text-[#B9B0AD]"
+              className="min-w-0 flex-1 bg-transparent text-[14px] font-bold outline-none placeholder:text-[#B9B0AD] sm:text-[15px]"
               onChange={(event) => onNameChange(event.target.value)}
               placeholder="이름을 입력하세요"
               type="text"
@@ -166,10 +166,10 @@ export function LoginFormSection({
             />
         </label>
 
-        <label className="flex min-h-[46px] w-full min-w-0 items-center gap-2 rounded-[8px] border border-[#D9D2CF] bg-white px-3">
+        <label className="flex min-h-[46px] w-full min-w-0 items-center gap-2 rounded-[8px] border border-[#D9D2CF] bg-white px-3 sm:min-h-[52px] sm:px-3.5">
           <Lock aria-hidden className="h-5 w-5 text-[#7B716D]" />
             <input
-              className="min-w-0 flex-1 bg-transparent text-[14px] font-bold outline-none placeholder:text-[#B9B0AD]"
+              className="min-w-0 flex-1 bg-transparent text-[14px] font-bold outline-none placeholder:text-[#B9B0AD] sm:text-[15px]"
               maxLength={4}
               onChange={(event) => onPasswordChange(event.target.value)}
               placeholder="비밀번호 (4자리)"
@@ -190,7 +190,7 @@ export function LoginFormSection({
             </button>
         </label>
 
-        <div className="flex items-center justify-between gap-3 px-1 text-[13px] font-bold text-[#4F4542]">
+        <div className="flex items-center justify-between gap-3 px-1 text-[13px] font-bold text-[#4F4542] sm:text-[14px]">
           <label className="flex items-center gap-2">
             <input
               checked={rememberName}
@@ -216,19 +216,19 @@ export function LoginFormSection({
         )}
 
         <button
-          className="flex min-h-[42px] w-full items-center justify-center rounded-[7px] bg-[#E30613] px-4 py-2 text-[15px] font-black text-white shadow-[0_3px_8px_rgba(227,6,19,0.2)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex min-h-[42px] w-full items-center justify-center rounded-[7px] bg-[#E30613] px-4 py-2 text-[15px] font-black text-white shadow-[0_3px_8px_rgba(227,6,19,0.2)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-[48px] sm:text-[16px]"
           disabled={isSubmitting}
           type="submit"
         >
           {isSubmitting ? "로그인 중" : "로그인"}
         </button>
 
-        <div className="border-y border-[#D9D2CF] py-2.5 text-center text-[13px] font-black text-[#4F4542]">
+        <div className="border-y border-[#D9D2CF] py-2.5 text-center text-[13px] font-black text-[#4F4542] sm:py-3 sm:text-[14px]">
           당신은 우리 회사의 자랑스러운 인재!
         </div>
 
         <button
-          className="flex min-h-[36px] w-full items-center justify-center gap-2 rounded-[8px] bg-white px-4 py-2 text-[13px] font-black text-[#4F4542] transition hover:bg-[#FFF3F3]"
+          className="flex min-h-[36px] w-full items-center justify-center gap-2 rounded-[8px] bg-white px-4 py-2 text-[13px] font-black text-[#4F4542] transition hover:bg-[#FFF3F3] sm:min-h-[42px] sm:text-[14px]"
           onClick={handleInstallClick}
           type="button"
         >
