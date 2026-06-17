@@ -69,15 +69,15 @@ export function EmployeePositionTable({ positionGroup }: { positionGroup: Positi
 
 export function EmployeeRow({ member }: { member: Member }) {
   return (
-    <article className="rounded-[10px] border border-[#E6DFDC] bg-[#FFFEFC] px-2 py-2 text-[13px] font-normal text-[#4F4542]">
-      <div className="grid grid-cols-[52px_minmax(0,1fr)_96px] items-center gap-1.5">
-        <span className="truncate text-[14px] text-[#2D70CB]">{getMemberDisplayName(member)}</span>
-        <span className="truncate text-[#7B716D]">{getMemberDutyName(member)}</span>
-        <span className="whitespace-nowrap text-right text-[12px] text-[#6F6662]">
+    <article className="rounded-[10px] border border-[#E6DFDC] bg-[#FFFEFC] px-2 py-2 text-[13px] font-normal text-[#4F4542] md:px-3 md:py-3 md:text-[15px]">
+      <div className="grid grid-cols-[52px_minmax(0,1fr)_96px] items-center gap-1.5 md:grid-cols-[76px_minmax(0,1fr)_132px] md:gap-3">
+        <span className="truncate text-[14px] text-[#2D70CB] md:text-[17px]">{getMemberDisplayName(member)}</span>
+        <span className="truncate text-[#7B716D] md:text-[15px]">{getMemberDutyName(member)}</span>
+        <span className="whitespace-nowrap text-right text-[12px] text-[#6F6662] md:text-[14px]">
           {formatPhoneNumber(member.phoneNumber ?? null)}
         </span>
       </div>
-      <div className="mt-1.5 grid grid-cols-3 gap-1">
+      <div className="mt-1.5 grid grid-cols-3 gap-1 md:mt-2.5 md:gap-2">
         <EmployeeInfoPill label="나이" value={getMemberAgeLabel(member)} />
         <EmployeeInfoPill label="입사일" value={formatPlainDate(member.joinedAt ?? member.createdAt)} />
         <EmployeeInfoPill label="거주지" value={getMemberBranchName(member)} />
@@ -94,9 +94,10 @@ export function EmployeeInfoPill({
   value: string;
 }) {
   return (
-    <span className="min-w-0 rounded-[8px] bg-white px-1.5 py-1 text-center leading-4 shadow-[inset_0_0_0_1px_#EFE8E5]">
-      <span className="block text-[11px] text-[#9A918C]">{label}</span>
-      <span className="block truncate text-[12px] text-[#4F4542]">{value}</span>
+    <span className="min-w-0 rounded-[8px] bg-white px-1.5 py-1 text-center leading-4 shadow-[inset_0_0_0_1px_#EFE8E5] md:flex md:min-h-9 md:items-center md:justify-center md:gap-2 md:px-2.5 md:py-2 md:text-left">
+      <span className="block text-[11px] text-[#9A918C] md:text-[14px]">{label}</span>
+      <span aria-hidden className="hidden text-[14px] text-[#B0A8A3] md:inline">-</span>
+      <span className="block truncate text-[12px] text-[#4F4542] md:text-[14px]">{value}</span>
     </span>
   );
 }

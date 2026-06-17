@@ -374,7 +374,7 @@ export function TaskCreateForm({
   }
 
   return (
-    <section className="rounded-[22px] border border-[#D9D5D2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#DDD6D2]">
+    <section className="rounded-[22px] border border-[#D9D5D2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#DDD6D2] lg:px-5">
       <AssigneePicker
         isLoading={isLoading}
         isPositionLoading={isPositionLoading}
@@ -390,7 +390,7 @@ export function TaskCreateForm({
         selectedPositionId={selectedPositionId}
       />
 
-      <div className="my-4 border-t border-dashed border-[#CFC7C3]" />
+      <div className="my-4 border-t border-dashed border-[#CFC7C3] sm:my-5" />
 
       {isDraftLoading && (
         <div className="rounded-[14px] border border-dashed border-[#D8D1CE] bg-white px-4 py-6 text-center text-[13px] font-normal text-[#7B716D]">
@@ -600,6 +600,7 @@ function TaskDraftCard({
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [isAssigneeMenuOpen, setIsAssigneeMenuOpen] = useState(false);
   const selectedAssignee = assignees.find((member) => String(member.id) === draft.assigneeId);
+  const canDeleteDraft = Boolean(draft.draftId);
 
   useEffect(() => {
     if (isDisabled) {
@@ -618,22 +619,24 @@ function TaskDraftCard({
   return (
     <article className="space-y-4">
       <section className="relative space-y-3 rounded-[16px] border border-[#D8D1CE] bg-white p-3">
-        <button
-          className="absolute right-2 top-2 h-6 rounded-[7px] border border-[#D8D1CE] bg-white px-2 text-[10px] font-normal text-[#4F4542] transition hover:bg-[#F7F7F7] disabled:opacity-60"
-          disabled={isSaving || isSubmitting || isLoading}
-          onClick={() => onDelete(draft.id)}
-          type="button"
-        >
-          삭제
-        </button>
+        {canDeleteDraft && (
+          <button
+            className="absolute right-2 top-2 h-6 rounded-[7px] border border-[#D8D1CE] bg-white px-2 text-[10px] font-normal text-[#4F4542] transition hover:bg-[#F7F7F7] disabled:opacity-60 sm:h-7 sm:px-2.5 sm:text-[11px] md:h-8 md:text-[12px]"
+            disabled={isSaving || isSubmitting || isLoading}
+            onClick={() => onDelete(draft.id)}
+            type="button"
+          >
+            삭제
+          </button>
+        )}
 
-        <div className="grid grid-cols-4 gap-1 pr-11">
+        <div className={`grid grid-cols-4 gap-1 sm:gap-1.5 md:gap-2 ${canDeleteDraft ? "pr-11 sm:pr-14" : ""}`}>
           {categoryOptions.map((option) => {
             const isSelected = draft.category === option.value;
 
             return (
               <button
-                className={`h-6 rounded-[6px] border px-0.5 text-[9px] font-normal transition disabled:opacity-60 ${
+                className={`h-6 rounded-[6px] border px-0.5 text-[9px] font-normal transition disabled:opacity-60 sm:h-8 sm:rounded-[8px] sm:text-[11px] md:h-9 md:text-[12px] ${
                   isSelected
                     ? getCategoryButtonClassName(option.value)
                     : "border-[#D8D1CE] bg-white text-[#6F6662]"

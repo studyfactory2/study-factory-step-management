@@ -10,6 +10,7 @@ import {
   type TaskCreateDraftSubmit
 } from "@/components/adminDashboard/task-create-form";
 import { isAssignableMember } from "@/components/adminDashboard/utils";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 import type { Member } from "@/types/domain";
 
@@ -77,11 +78,12 @@ export function TaskCreatePage({
 
   return (
     <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+      <ResponsiveContainer variant="form">
         <header className="relative border-b border-[#DCE8F5] pb-3 text-center">
           <button
-            className="absolute left-0 top-0 h-7 shrink-0 bg-transparent px-0 text-[14px] font-bold text-[#111111]"
+            className="absolute left-0 top-0 flex h-8 w-8 shrink-0 items-center justify-center bg-transparent text-[18px] font-bold leading-none text-[#111111] sm:h-9 sm:w-9 sm:text-[22px] md:h-10 md:w-10 md:text-[24px]"
             onClick={onBack}
+            aria-label="뒤로가기"
             type="button"
           >
             ←
@@ -105,7 +107,7 @@ export function TaskCreatePage({
           onPublished={async () => setIsSuccessDialogOpen(true)}
           onSubmit={handleCreateTask}
         />
-      </div>
+      </ResponsiveContainer>
       {isSuccessDialogOpen && (
         <ConfirmDialog
           cancelLabel={null}

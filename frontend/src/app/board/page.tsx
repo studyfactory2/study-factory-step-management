@@ -18,6 +18,7 @@ import {
   type StoredMember
 } from "@/lib/auth-storage";
 import { getBoardPosts, toggleBoardPostLike, type BoardPost, type BoardPostCategory } from "@/api/board";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 
 type BoardTab = "NOTICE" | "EMPLOYEE";
 
@@ -174,10 +175,11 @@ export default function BoardRoutePage() {
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="mx-auto w-full max-w-[380px] pb-20">
+      <ResponsiveContainer className="pb-20" variant="board">
         <header className="relative mb-3 pt-1 text-center">
           <button
-            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-bold leading-6 text-[#333333] shadow-sm"
+            aria-label="뒤로가기"
+            className="absolute left-0 top-0 flex h-7 min-w-7 items-center justify-center rounded-[9px] border border-[#D8D1CE] bg-white px-2.5 text-[13px] font-bold leading-none text-[#333333] shadow-sm sm:h-8 sm:min-w-8 sm:px-3 sm:text-[17px] md:h-9 md:min-w-9 md:text-[19px]"
             onClick={() => router.push(backPath)}
             type="button"
           >
@@ -325,19 +327,21 @@ export default function BoardRoutePage() {
                     {getAuthorName(post).slice(0, 1)}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-[12px] font-normal text-[#7B716D]">
-                      <span className="text-[14px] text-[#1171E8]">{getAuthorName(post)} {post.author.positionName ?? ""}</span>
-                      <span className="px-1.5">·</span>
-                      {post.author.organizationName ?? "소속 미정"}
-                      <span className="px-1.5">·</span>
-                      {formatBoardDate(post.createdAt)}
-                    </p>
-                    {category ? (
-                      <div className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-normal ${categoryClassName}`}>
-                        <span aria-hidden>{category.icon}</span>
-                        {category.name}
-                      </div>
-                    ) : null}
+                    <div className="min-w-0 sm:flex sm:items-center sm:gap-2">
+                      <p className="truncate text-[12px] font-normal text-[#7B716D]">
+                        <span className="text-[14px] text-[#1171E8]">{getAuthorName(post)} {post.author.positionName ?? ""}</span>
+                        <span className="px-1.5">·</span>
+                        {post.author.organizationName ?? "소속 미정"}
+                        <span className="px-1.5">·</span>
+                        {formatBoardDate(post.createdAt)}
+                      </p>
+                      {category ? (
+                        <div className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-normal sm:mt-0 sm:shrink-0 ${categoryClassName}`}>
+                          <span aria-hidden>{category.icon}</span>
+                          {category.name}
+                        </div>
+                      ) : null}
+                    </div>
                     <h3 className="mt-1 truncate text-[15px] font-normal text-[#111111]">{post.title}</h3>
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <p className="min-w-0 truncate text-[12px] font-normal text-[#7B716D]">
@@ -376,7 +380,7 @@ export default function BoardRoutePage() {
           </div>
         </section>
         ) : null}
-      </div>
+      </ResponsiveContainer>
 
       <button
         aria-label="게시글 작성"

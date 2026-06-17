@@ -11,6 +11,7 @@ import {
 } from "@/api/organization-chart";
 import { getOrganizations, type OrganizationOption } from "@/api/member";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 import {
   buildChartNodeTree,
   DepartmentSelect,
@@ -157,10 +158,11 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+      <ResponsiveContainer variant="settings">
         <header className="relative pb-1 text-center">
           <button
-            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold text-[#333333] shadow-sm"
+            aria-label="뒤로가기"
+            className="absolute left-0 top-0 flex h-7 min-w-7 items-center justify-center rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold leading-none text-[#333333] shadow-sm sm:h-8 sm:min-w-8 sm:px-3 sm:text-[17px] md:h-9 md:min-w-9 md:text-[19px]"
             onClick={onBack}
             type="button"
           >
@@ -290,7 +292,7 @@ export function OrgChartSettingsPage({ accessToken, onBack }: OrgChartSettingsPa
             저장 후 새업무작성 화면의 업무조직도에 반영됩니다
           </p>
         </StepCard>
-      </div>
+      </ResponsiveContainer>
     </main>
   );
 }

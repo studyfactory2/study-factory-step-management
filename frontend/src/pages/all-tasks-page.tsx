@@ -13,6 +13,7 @@ import { AllTasksFilterBar } from "@/components/pages/allTasks/all-tasks-filter-
 import { AllTasksHeader } from "@/components/pages/allTasks/all-tasks-header";
 import { TaskRow } from "@/components/pages/allTasks/task-row";
 import type { SortOrder } from "@/components/pages/allTasks/constants";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 
 type AllTasksPageProps = {
   accessToken: string;
@@ -91,7 +92,7 @@ export function AllTasksPage({
         <Sparkles aria-hidden className="h-8 w-8 fill-current" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+      <ResponsiveContainer variant="detail">
         <AllTasksHeader isAdmin={isAdmin} onBack={onBack} taskCount={tasks.length} />
 
         <section className="rounded-[20px] border border-[#F2C9C2] bg-[#FFFEFC] px-3 py-3 shadow-[0_5px_0_#EFC6BE]">
@@ -130,7 +131,7 @@ export function AllTasksPage({
             </div>
           </div>
         </section>
-      </div>
+      </ResponsiveContainer>
     </main>
   );
 }

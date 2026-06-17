@@ -23,6 +23,7 @@ import {
   type BoardVisibility
 } from "@/api/board";
 import { getStoredAuth, isAdminRole, type StoredMember } from "@/lib/auth-storage";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 
 type AttachmentDeleteTarget = {
   index: number;
@@ -213,10 +214,11 @@ export default function BoardPostCreatePage() {
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="mx-auto w-full max-w-[380px] pb-8">
+      <ResponsiveContainer className="pb-8" variant="board">
         <header className="relative mb-4 pt-1 text-center">
           <button
-            className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-bold leading-6 text-[#333333] shadow-sm"
+            aria-label="뒤로가기"
+            className="absolute left-0 top-0 flex h-7 min-w-7 items-center justify-center rounded-[9px] border border-[#D8D1CE] bg-white px-2.5 text-[13px] font-bold leading-none text-[#333333] shadow-sm sm:h-8 sm:min-w-8 sm:px-3 sm:text-[17px] md:h-9 md:min-w-9 md:text-[19px]"
             onClick={() => router.push("/board")}
             type="button"
           >
@@ -453,7 +455,7 @@ export default function BoardPostCreatePage() {
             ✓ 게시하기
           </button>
         </div>
-      </div>
+      </ResponsiveContainer>
 
       {attachmentDeleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F2C28]/35 px-4 backdrop-blur-sm">

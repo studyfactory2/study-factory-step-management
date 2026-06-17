@@ -17,6 +17,7 @@ import {
   UserRound,
   UsersRound
 } from "lucide-react";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 
 type AdminSettingsPageProps = {
   onBack?: () => void;
@@ -78,17 +79,18 @@ export function AdminSettingsPage({
 
   return (
     <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+      <ResponsiveContainer variant="settings">
         <header className="relative pb-2 pt-0.5 text-center">
           <button
-            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold text-[#333333] shadow-sm"
+            aria-label="뒤로가기"
+            className="absolute left-0 top-0 flex h-7 min-w-7 items-center justify-center rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold leading-none text-[#333333] shadow-sm sm:h-8 sm:min-w-8 sm:px-3 sm:text-[17px] md:h-9 md:min-w-9 md:text-[19px]"
             onClick={onBack}
             type="button"
           >
             ←
           </button>
-          <div className="absolute right-0 top-0 inline-flex h-7 items-center gap-1 rounded-[9px] border border-[#C7CDD4] bg-[#F4FAFF] px-2.5 text-[12px] font-normal text-[#2D70CB] shadow-sm">
-            <Lock aria-hidden className="h-3 w-3" />
+          <div className="absolute right-0 top-0 inline-flex h-7 items-center gap-1 rounded-[9px] border border-[#C7CDD4] bg-[#F4FAFF] px-2.5 text-[12px] font-normal text-[#2D70CB] shadow-sm sm:h-8 sm:gap-1.5 sm:px-3 sm:text-[13px] md:h-9 md:px-3.5 md:text-[14px]">
+            <Lock aria-hidden className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
             관리자 전용
           </div>
           <h1 className="flex items-center justify-center gap-2 text-[26px] font-normal text-[#111111]">
@@ -102,7 +104,7 @@ export function AdminSettingsPage({
             <BriefcaseBusiness aria-hidden className="h-4.5 w-4.5 text-[#A87928]" />
             관리 메뉴
           </h2>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
             {managementMenus.map((menu) => {
               const Icon = menu.icon;
 
@@ -198,7 +200,7 @@ export function AdminSettingsPage({
             <button type="button">개인정보처리방침</button>
           </div>
         </section>
-      </div>
+      </ResponsiveContainer>
     </main>
   );
 }
