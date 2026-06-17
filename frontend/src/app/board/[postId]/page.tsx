@@ -339,64 +339,66 @@ export default function BoardPostDetailPage() {
                 <span className="text-[11px] font-normal text-[#7B716D]">{formatBoardDate(post.createdAt)}</span>
               </div>
 
-              {isOwnPost || canDeletePost ? (
-                <div className="mb-2 flex justify-end gap-1.5">
-                  {isEditing ? (
-                    <>
-                      <button
-                        className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
-                        disabled={isPostSubmitting}
-                        onClick={() => setIsEditing(false)}
-                        type="button"
-                      >
-                        취소
-                      </button>
-                      <button
-                        className="rounded-[10px] border border-[#B8CDD9] bg-[#EAF7FF] px-2.5 py-0.5 text-[12px] font-normal text-[#2D70CB] disabled:opacity-50"
-                        disabled={isPostSubmitting}
-                        onClick={() => void handlePostUpdateSubmit()}
-                        type="button"
-                      >
-                        저장
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {isOwnPost ? (
+              <div className="flex items-start justify-between gap-2">
+                {isEditing ? (
+                  <input
+                    className="h-10 min-w-0 flex-1 rounded-[12px] border border-[#D8D1CE] bg-white px-3 text-[16px] font-normal text-[#111111] outline-none placeholder:text-[#9B9592]"
+                    maxLength={40}
+                    onChange={(event) => setEditTitle(event.target.value)}
+                    value={editTitle}
+                  />
+                ) : (
+                  <h2 className="min-w-0 flex-1 break-keep text-[21px] font-normal leading-7 text-[#111111]">{post.title}</h2>
+                )}
+
+                {isOwnPost || canDeletePost ? (
+                  <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+                    {isEditing ? (
+                      <>
                         <button
                           className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
                           disabled={isPostSubmitting}
-                          onClick={handleEditClick}
+                          onClick={() => setIsEditing(false)}
                           type="button"
                         >
-                          수정
+                          취소
                         </button>
-                      ) : null}
-                      {canDeletePost ? (
                         <button
-                          className="rounded-[10px] border border-[#E7C7C7] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
+                          className="rounded-[10px] border border-[#B8CDD9] bg-[#EAF7FF] px-2.5 py-0.5 text-[12px] font-normal text-[#2D70CB] disabled:opacity-50"
                           disabled={isPostSubmitting}
-                          onClick={() => setDeleteTarget({ type: "post" })}
+                          onClick={() => void handlePostUpdateSubmit()}
                           type="button"
                         >
-                          삭제
+                          저장
                         </button>
-                      ) : null}
-                    </>
-                  )}
-                </div>
-              ) : null}
-
-              {isEditing ? (
-                <input
-                  className="h-10 w-full rounded-[12px] border border-[#D8D1CE] bg-white px-3 text-[16px] font-normal text-[#111111] outline-none placeholder:text-[#9B9592]"
-                  maxLength={40}
-                  onChange={(event) => setEditTitle(event.target.value)}
-                  value={editTitle}
-                />
-              ) : (
-                <h2 className="break-keep text-[21px] font-normal leading-7 text-[#111111]">{post.title}</h2>
-              )}
+                      </>
+                    ) : (
+                      <>
+                        {isOwnPost ? (
+                          <button
+                            className="rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#333333] shadow-sm disabled:opacity-50"
+                            disabled={isPostSubmitting}
+                            onClick={handleEditClick}
+                            type="button"
+                          >
+                            수정
+                          </button>
+                        ) : null}
+                        {canDeletePost ? (
+                          <button
+                            className="rounded-[10px] border border-[#E7C7C7] bg-white px-2.5 py-0.5 text-[12px] font-normal text-[#B94C4C] shadow-sm disabled:opacity-50"
+                            disabled={isPostSubmitting}
+                            onClick={() => setDeleteTarget({ type: "post" })}
+                            type="button"
+                          >
+                            삭제
+                          </button>
+                        ) : null}
+                      </>
+                    )}
+                  </div>
+                ) : null}
+              </div>
 
               <div className="mt-2 flex items-center gap-2 text-[12px] font-normal text-[#7B716D]">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#DFF0FF] text-[17px] text-[#1171E8]">
