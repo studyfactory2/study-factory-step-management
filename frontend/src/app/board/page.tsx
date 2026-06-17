@@ -327,19 +327,21 @@ export default function BoardRoutePage() {
                     {getAuthorName(post).slice(0, 1)}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-[12px] font-normal text-[#7B716D]">
-                      <span className="text-[14px] text-[#1171E8]">{getAuthorName(post)} {post.author.positionName ?? ""}</span>
-                      <span className="px-1.5">·</span>
-                      {post.author.organizationName ?? "소속 미정"}
-                      <span className="px-1.5">·</span>
-                      {formatBoardDate(post.createdAt)}
-                    </p>
-                    {category ? (
-                      <div className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-normal ${categoryClassName}`}>
-                        <span aria-hidden>{category.icon}</span>
-                        {category.name}
-                      </div>
-                    ) : null}
+                    <div className="min-w-0 sm:flex sm:items-center sm:gap-2">
+                      <p className="truncate text-[12px] font-normal text-[#7B716D]">
+                        <span className="text-[14px] text-[#1171E8]">{getAuthorName(post)} {post.author.positionName ?? ""}</span>
+                        <span className="px-1.5">·</span>
+                        {post.author.organizationName ?? "소속 미정"}
+                        <span className="px-1.5">·</span>
+                        {formatBoardDate(post.createdAt)}
+                      </p>
+                      {category ? (
+                        <div className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-normal sm:mt-0 sm:shrink-0 ${categoryClassName}`}>
+                          <span aria-hidden>{category.icon}</span>
+                          {category.name}
+                        </div>
+                      ) : null}
+                    </div>
                     <h3 className="mt-1 truncate text-[15px] font-normal text-[#111111]">{post.title}</h3>
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <p className="min-w-0 truncate text-[12px] font-normal text-[#7B716D]">
