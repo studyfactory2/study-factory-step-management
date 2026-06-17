@@ -60,9 +60,15 @@ FRONTEND_ORIGIN=https://Vercel프론트주소
 UPLOAD_DIR=uploads
 UPLOAD_BASE_URL=https://Render백엔드주소/uploads
 MAX_UPLOAD_SIZE_MB=10
+SUPABASE_URL=https://Supabase프로젝트Ref.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=Supabase_service_role_key
+SUPABASE_STORAGE_BUCKET=uploads
+SUPABASE_STORAGE_FOLDER=uploads
 ```
 
 처음에는 Vercel 주소가 없으므로 `FRONTEND_ORIGIN`은 임시로 비워두거나 나중에 수정합니다. Vercel 배포 후 Render 환경변수를 수정하고 백엔드를 재배포합니다.
+
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET`을 모두 입력하면 이미지는 Render 컨테이너 로컬이 아니라 Supabase Storage에 저장됩니다. 세 값 중 하나라도 없으면 기존처럼 Render의 `UPLOAD_DIR` 로컬 폴더에 저장됩니다. Storage bucket은 public bucket으로 만들거나, public URL 조회가 가능하도록 정책을 설정해야 합니다.
 
 ## 4. 프론트엔드 Vercel CLI 배포
 
