@@ -133,14 +133,15 @@ export function RecentOutputsSection({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-[50px_minmax(0,1fr)_56px_56px] gap-1 px-2 pb-1 text-center text-[10px] font-normal text-[#7B716D] sm:grid-cols-[72px_minmax(0,1fr)_72px_72px] sm:text-[12px] md:grid-cols-[124px_minmax(0,1fr)_82px_82px] md:text-[13px] lg:grid-cols-[156px_minmax(0,1fr)_96px_96px] lg:text-[14px]">
+      <div className="grid grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] gap-1 pb-1.5 pr-0.5 text-center text-[11px] font-normal leading-tight text-[#7B716D] sm:grid-cols-[5px_72px_minmax(0,1fr)_72px_72px] sm:text-[13px] md:grid-cols-[5px_124px_minmax(0,1fr)_82px_82px] md:pr-4 md:text-[14px] lg:grid-cols-[5px_156px_minmax(0,1fr)_96px_96px] lg:text-[15px]">
+        <span aria-hidden />
         <span>최초 작성자</span>
         <span>업무 제목</span>
         <span>상태</span>
         <span>받는이</span>
       </div>
 
-      <div className="max-h-[330px] space-y-1.5 overflow-y-auto pr-0.5 sm:max-h-[460px]">
+      <div className="max-h-[330px] space-y-1.5 overflow-y-auto pr-0.5 sm:max-h-[460px] md:pr-4">
         {filteredOutputs.length === 0 && (
           <div className="flex h-24 items-center justify-center rounded-[12px] border border-dashed border-[#D8D1CE] bg-white text-[13px] font-normal text-[#7B716D] sm:text-[15px]">
             표시할 최근 업무가 없습니다.
@@ -156,7 +157,7 @@ export function RecentOutputsSection({
 
           return (
             <button
-              className="grid min-h-[56px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)] sm:min-h-[66px] sm:grid-cols-[5px_72px_minmax(0,1fr)_72px_72px] md:min-h-[72px] md:grid-cols-[5px_124px_minmax(0,1fr)_82px_82px] lg:grid-cols-[5px_156px_minmax(0,1fr)_96px_96px]"
+              className="grid min-h-[56px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)] sm:min-h-[68px] sm:grid-cols-[5px_72px_minmax(0,1fr)_72px_72px] md:min-h-[76px] md:grid-cols-[5px_124px_minmax(0,1fr)_82px_82px] lg:grid-cols-[5px_156px_minmax(0,1fr)_96px_96px]"
               key={output.taskId}
               onClick={() => onDetailOpen(output.taskId)}
               type="button"
@@ -178,7 +179,7 @@ export function RecentOutputsSection({
               </span>
               <span className="flex min-w-0 flex-col justify-center pl-5 pr-1.5 text-left sm:items-start sm:pl-6 sm:pr-3 md:pl-[30%] md:pr-4 lg:pl-[34%] lg:pr-5">
                 <span className="flex min-w-0 max-w-full items-center gap-1">
-                  <span className={`truncate text-[12px] font-normal leading-3 text-[#222222] sm:text-[14px] sm:leading-4 md:text-[16px] lg:text-[17px] ${completedTextClassName}`}>
+                  <span className={`truncate pt-px text-[12px] font-normal leading-[1.25] text-[#222222] sm:text-[14px] sm:leading-[1.3] md:text-[16px] lg:text-[17px] ${completedTextClassName}`}>
                     {output.taskTitle}
                   </span>
                   {output.isNew && !isCompleted ? (
