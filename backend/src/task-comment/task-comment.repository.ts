@@ -67,6 +67,10 @@ export class TaskCommentRepository {
       .getOne();
   }
 
+  async deleteComment(id: number): Promise<void> {
+    await this.taskCommentRepository.delete(id);
+  }
+
   async findRecent(limit: number, memberId?: number): Promise<TaskComment[]> {
     const queryBuilder = this.taskCommentRepository
       .createQueryBuilder("comment")

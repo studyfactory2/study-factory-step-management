@@ -7,6 +7,7 @@ import {
   getTaskDetail,
   type TaskDetail
 } from "@/api/task";
+import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 import type { MemberRole, TaskStatus } from "@/types/domain";
 import { getStatusClassName, statusOptions } from "./constants";
 
@@ -31,6 +32,7 @@ export function CommentSection({
   const [oneLineComment, setOneLineComment] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus>(task.status);
   const [message, setMessage] = useState("");
+  const [alertDialog, setAlertDialog] = useState<{ description: string; title: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -80,7 +82,10 @@ export function CommentSection({
       setAttachments([]);
       setContent("");
       setOneLineComment("");
-      setMessage("코멘트가 등록되었습니다.");
+      setAlertDialog({
+        description: "코멘트가 등록되었습니다.",
+        title: "등록 완료"
+      });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "코멘트를 등록하지 못했습니다.");
     } finally {
@@ -202,6 +207,16 @@ export function CommentSection({
       {message && (
         <p className="mt-3 text-[12px] font-normal text-[#D83A42]">{message}</p>
       )}
+      {alertDialog ? (
+        <ConfirmDialog
+          cancelLabel={null}
+          confirmLabel="확인"
+          description={alertDialog.description}
+          onCancel={() => setAlertDialog(null)}
+          onConfirm={() => setAlertDialog(null)}
+          title={alertDialog.title}
+        />
+      ) : null}
     </section>
   );
 }

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ClipboardList, MessageCircle } from "lucide-react";
+import { ClipboardList, MessageCircle, Trash2 } from "lucide-react";
 import type {
   TaskComment,
   TaskDetail,
@@ -10,6 +10,9 @@ import type { MemberRole } from "@/types/domain";
 import { getStatusClassName, getStatusLabel } from "./constants";
 
 type TaskConversationSectionProps = {
+  currentMemberId: number;
+  currentMemberRole: MemberRole;
+  onCommentDelete: (commentId: number) => void;
   onImagePreview: (imageUrl: string) => void;
   task: TaskDetail;
 };
@@ -25,6 +28,9 @@ type TimelineAuthor = {
 };
 
 export function TaskConversationSection({
+  currentMemberId,
+  currentMemberRole,
+  onCommentDelete,
   onImagePreview,
   task
 }: TaskConversationSectionProps) {
@@ -46,8 +52,10 @@ export function TaskConversationSection({
             author={comment.creator}
             card={
               <CommentBubble
+                canDelete={comment.creator.id === currentMemberId || isAdminRole(currentMemberRole)}
                 comment={comment}
                 index={index + 1}
+                onDelete={onCommentDelete}
                 onImagePreview={onImagePreview}
                 taskTitle={task.title}
                 tone={tone}
@@ -136,14 +144,18 @@ function InitialTaskBubble({
 }
 
 function CommentBubble({
+  canDelete,
   comment,
   index,
+  onDelete,
   onImagePreview,
   taskTitle,
   tone
 }: {
+  canDelete: boolean;
   comment: TaskComment;
   index: number;
+  onDelete: (commentId: number) => void;
   onImagePreview: (imageUrl: string) => void;
   taskTitle: string;
   tone: ConversationTone;
@@ -151,8 +163,18 @@ function CommentBubble({
   const toneClassName = getToneClassName(tone);
 
   return (
-    <article className={`rounded-[18px] border px-3 py-3 shadow-sm ${toneClassName.card}`}>
-      <div className="flex items-center gap-2">
+    <article className={`relative rounded-[18px] border px-3 py-3 shadow-sm ${toneClassName.card}`}>
+      {canDelete ? (
+        <button
+          aria-label="코멘트 삭제"
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm"
+          onClick={() => onDelete(comment.id)}
+          type="button"
+        >
+          <Trash2 aria-hidden className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
+      <div className={`flex items-center gap-2 ${canDelete ? "pr-8" : ""}`}>
         <span className={`flex h-6 min-w-9 items-center justify-center rounded-[7px] border px-2 text-[13px] font-normal ${toneClassName.index}`}>
           #{index}
         </span>
@@ -251,6 +273,10 @@ function getConversationTone(task: TaskDetail, comment: TaskComment): Conversati
   }
 
   return "assignee";
+}
+
+function isAdminRole(role: MemberRole): boolean {
+  return role === "ADMIN" || role === "CEO";
 }
 
 function getToneClassName(tone: ConversationTone) {

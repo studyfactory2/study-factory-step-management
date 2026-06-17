@@ -688,6 +688,27 @@ export async function createTaskComment(
   return response.json() as Promise<TaskComment>;
 }
 
+export async function deleteTaskComment(
+  accessToken: string,
+  taskId: number,
+  commentId: number
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/comments/${commentId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "코멘트를 삭제하지 못했습니다.");
+  }
+}
+
 export async function getTaskCommentActivities(
   accessToken: string,
   limit = 100

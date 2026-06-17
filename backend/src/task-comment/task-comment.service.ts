@@ -68,6 +68,25 @@ export class TaskCommentService {
     return comments.map((comment) => this.toResponse(comment));
   }
 
+  async delete(taskId: number, commentId: number, currentMember: CurrentMember): Promise<void> {
+    const task = await this.findPublishedTaskEntity(taskId);
+    this.validateTaskCommentAccess(task, currentMember);
+
+    const comment = await this.taskCommentRepository.findById(commentId);
+    if (!comment || comment.taskId !== taskId) {
+      throw new TaskNotFoundException(taskId);
+    }
+
+    if (comment.createdBy !== currentMember.memberId && !this.isAdminRole(currentMember.role)) {
+      throw new ForbiddenException("코멘트 삭제 권한이 없습니다.");
+    }
+
+    task.updatedAt = new Date();
+    await this.taskCommentRepository.deleteComment(commentId);
+    await this.taskCommentRepository.saveTask(task);
+    await this.clearDashboardCache();
+  }
+
   async findRecent(
     limit = 100,
     currentMember?: CurrentMember

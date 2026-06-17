@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { CurrentMember } from "../auth/decorator/current-member.decorator";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
@@ -30,5 +30,15 @@ export class TaskCommentController {
     @UploadedFiles() files: UploadFile[] = []
   ) {
     return this.taskCommentService.create(taskId, request, currentMember, files);
+  }
+
+  @UseGuards(JWTAuthGuard)
+  @Delete(":commentId")
+  async delete(
+    @Param("taskId", ParseIntPipe) taskId: number,
+    @Param("commentId", ParseIntPipe) commentId: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    await this.taskCommentService.delete(taskId, commentId, currentMember);
   }
 }
