@@ -188,29 +188,36 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="login-pdf-font mx-auto flex min-h-dvh w-full max-w-[360px] flex-col bg-[#FFFEFC] px-4 py-5 text-[#3F2C28]">
-      <PositionTreeSection
-        isLoading={isPositionTreeLoading}
-        message={positionTreeMessage}
-        onSelectPosition={setSelectedPositionId}
-        positions={positions}
-        selectedPositionId={selectedPositionId}
-      />
-      <TaskSummarySection branchSummaries={branchSummaries} />
-      <LoginFormSection
-        isPasswordVisible={isPasswordVisible}
-        isSubmitting={isSubmitting}
-        message={message}
-        name={name}
-        onNameChange={setName}
-        onOpenRegister={() => setIsRegisterModalOpen(true)}
-        onPasswordChange={setPassword}
-        onRememberNameChange={handleRememberNameChange}
-        onSubmit={handleSubmit}
-        onTogglePasswordVisible={() => setIsPasswordVisible((current) => !current)}
-        password={password}
-        rememberName={rememberName}
-      />
+    <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-4 py-5 text-[#3F2C28] sm:px-6 lg:flex lg:items-center lg:py-8">
+      <div className="mx-auto flex w-full max-w-[360px] flex-col lg:grid lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-5">
+        <div className="lg:min-w-0">
+          <PositionTreeSection
+            isLoading={isPositionTreeLoading}
+            message={positionTreeMessage}
+            onSelectPosition={setSelectedPositionId}
+            positions={positions}
+            selectedPositionId={selectedPositionId}
+          />
+          <TaskSummarySection branchSummaries={branchSummaries} />
+        </div>
+
+        <div className="lg:sticky lg:top-8">
+          <LoginFormSection
+            isPasswordVisible={isPasswordVisible}
+            isSubmitting={isSubmitting}
+            message={message}
+            name={name}
+            onNameChange={setName}
+            onOpenRegister={() => setIsRegisterModalOpen(true)}
+            onPasswordChange={setPassword}
+            onRememberNameChange={handleRememberNameChange}
+            onSubmit={handleSubmit}
+            onTogglePasswordVisible={() => setIsPasswordVisible((current) => !current)}
+            password={password}
+            rememberName={rememberName}
+          />
+        </div>
+      </div>
 
       {isRegisterModalOpen && (
         <MemberRegisterDialog onClose={() => setIsRegisterModalOpen(false)} />

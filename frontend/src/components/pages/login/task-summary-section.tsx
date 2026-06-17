@@ -11,7 +11,7 @@ export function TaskSummarySection({
   const summaries = branchSummaries.length > 0 ? branchSummaries : defaultBranchSummaries;
 
   return (
-    <section className="mb-3 rounded-[16px] border border-[#D9D2CF] bg-white p-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
+    <section className="mb-3 rounded-[16px] border border-[#D9D2CF] bg-white p-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)] lg:p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-1.5 text-[15px] font-black tracking-normal text-[#3F2C28]">
           <ClipboardList aria-hidden className="h-4.5 w-4.5 text-[#7B716D]" />
@@ -22,12 +22,12 @@ export function TaskSummarySection({
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 xl:grid xl:grid-cols-2 xl:gap-2 xl:space-y-0">
         {summaries.map((summary, index) => {
           const BranchIcon = getBranchIcon(summary.branch);
 
           return (
-          <div className="grid grid-cols-[70px_minmax(0,1fr)] gap-1.5" key={summary.branch}>
+          <div className="grid grid-cols-[70px_minmax(0,1fr)] gap-1.5 xl:grid-cols-[76px_minmax(0,1fr)]" key={summary.branch}>
             <div
               className={`flex min-h-[46px] flex-col items-center justify-center rounded-[9px] border px-1.5 text-center ${
                 index % 2 === 0
