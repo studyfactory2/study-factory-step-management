@@ -199,10 +199,10 @@ export function ShapeLayoutPreview({
         {[0, 1, 2, 3].map((group) => (
           <div className="relative" key={`bottom-connector-${group}`}>
             <span className="absolute left-1/2 top-0 h-2.5 w-px -translate-x-1/2 bg-[#B9B1AD]" />
-            <span className="absolute left-[15%] right-[15%] top-2.5 h-px bg-[#B9B1AD]" />
-            <span className="absolute left-[15%] top-2.5 h-2.5 w-px bg-[#B9B1AD]" />
+            <span className="absolute left-[16.666%] right-[16.666%] top-2.5 h-px bg-[#B9B1AD]" />
+            <span className="absolute left-[16.666%] top-2.5 h-2.5 w-px bg-[#B9B1AD]" />
             <span className="absolute left-1/2 top-2.5 h-2.5 w-px -translate-x-1/2 bg-[#B9B1AD]" />
-            <span className="absolute right-[15%] top-2.5 h-2.5 w-px bg-[#B9B1AD]" />
+            <span className="absolute right-[16.666%] top-2.5 h-2.5 w-px bg-[#B9B1AD]" />
           </div>
         ))}
       </div>
@@ -210,20 +210,21 @@ export function ShapeLayoutPreview({
       <span className="pt-1.5 text-[#222222]">1층</span>
       <div className="grid grid-cols-4 gap-1">
         {[0, 1, 2, 3].map((group) => (
-          <div className="flex justify-center gap-0.5" key={`first-${group}`}>
+          <div className="grid grid-cols-3 gap-0.5" key={`first-${group}`}>
             {["1", "2", "3"].map((label, index) => {
               const parentGroup = Math.floor(group / 2) + 1;
               const secondIndex = group % 2 + 1;
               const slot = getSlot(`1-${parentGroup}-${secondIndex}-${index + 1}`);
 
               return (
-                <ShapeCheckbox
-                  checked={slot ? checkedSlotKeys.has(slot.slotKey) : false}
-                  isEditing={isEditing}
-                  key={`first-${group}-${label}`}
-                  label={label}
-                  onClick={() => slot && onToggleSlot(slot)}
-                />
+                <div className="flex justify-center" key={`first-${group}-${label}`}>
+                  <ShapeCheckbox
+                    checked={slot ? checkedSlotKeys.has(slot.slotKey) : false}
+                    isEditing={isEditing}
+                    label={label}
+                    onClick={() => slot && onToggleSlot(slot)}
+                  />
+                </div>
               );
             })}
           </div>
@@ -246,15 +247,18 @@ function ShapeCheckbox({
 }) {
   return (
     <button
-      className={`flex h-6 min-w-5 items-center justify-center gap-0.5 rounded-[5px] border px-0.5 text-[12px] font-normal text-[#222222] ${
+      className={`flex h-6 min-w-5 items-center justify-center gap-0.5 rounded-[5px] border px-0.5 text-[12px] font-normal text-[#222222] sm:h-7 sm:min-w-6 sm:gap-1 sm:px-1 sm:text-[13px] md:h-8 md:min-w-7 md:rounded-[6px] md:px-1.5 md:text-[15px] ${
         isEditing ? "border-[#9DC7ED] bg-[#F4FAFF]" : "border-[#CFC7C3] bg-[#FFFEFC]"
       }`}
       disabled={!isEditing}
       onClick={onClick}
       type="button"
     >
-      <span className="flex h-2.5 w-2.5 items-center justify-center border border-[#8C817D] bg-white">
-        {checked ? <Check aria-hidden className="h-2 w-2 text-[#222222]" /> : null}
+      <span className="flex h-2.5 w-2.5 shrink-0 items-center justify-center border border-[#8C817D] bg-white sm:h-3 sm:w-3 md:h-3.5 md:w-3.5">
+        <Check
+          aria-hidden
+          className={`h-2 w-2 shrink-0 text-[#222222] sm:h-2.5 sm:w-2.5 md:h-3 md:w-3 ${checked ? "opacity-100" : "opacity-0"}`}
+        />
       </span>
       {label}
     </button>

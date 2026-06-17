@@ -310,7 +310,8 @@ export function DepartmentPositionPage({ accessToken, onBack }: DepartmentPositi
       <ResponsiveContainer variant="settings">
         <header className="relative pb-1 text-center">
           <button
-            className="absolute left-0 top-0 h-8 rounded-[12px] border border-[#D8D1CE] bg-[#F7F7F7] px-3 text-[14px] font-bold text-[#333333] shadow-sm"
+            aria-label="뒤로가기"
+            className="absolute left-0 top-0 flex h-7 min-w-7 items-center justify-center rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold leading-none text-[#333333] shadow-sm sm:h-8 sm:min-w-8 sm:px-3 sm:text-[17px] md:h-9 md:min-w-9 md:text-[19px]"
             onClick={onBack}
             type="button"
           >
