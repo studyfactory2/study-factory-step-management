@@ -21,11 +21,11 @@ export function StepField({
   step: string;
 }) {
   return (
-    <div className="grid grid-cols-[32px_58px_minmax(0,1fr)] items-start gap-2">
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FBE3E8] text-[15px] font-normal text-[#C24D68]">
+    <div className="grid grid-cols-[32px_58px_minmax(0,1fr)] items-center gap-2 sm:grid-cols-[36px_72px_minmax(0,1fr)]">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FBE3E8] text-[15px] font-normal text-[#C24D68] sm:h-8 sm:w-8 sm:text-[16px]">
         {step}
       </span>
-      <span className="pt-2 text-[15px] font-normal text-[#4F4542]">{label}</span>
+      <span className="flex h-10 items-center text-[15px] font-normal text-[#4F4542] sm:h-11 sm:text-[16px]">{label}</span>
       <span className="min-w-0">
         {children}
         {helper ? (

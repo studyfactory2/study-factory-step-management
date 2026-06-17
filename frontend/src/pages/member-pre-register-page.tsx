@@ -199,7 +199,8 @@ export function MemberPreRegisterPage({
       <ResponsiveContainer variant="settings">
         <header className="relative pb-1 text-center">
           <button
-            className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold text-[#333333] shadow-sm"
+            aria-label="뒤로가기"
+            className="absolute left-0 top-0 flex h-7 min-w-7 items-center justify-center rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold leading-none text-[#333333] shadow-sm sm:h-8 sm:min-w-8 sm:px-3 sm:text-[17px] md:h-9 md:min-w-9 md:text-[19px]"
             onClick={onBack}
             type="button"
           >
@@ -237,7 +238,10 @@ export function MemberPreRegisterPage({
               <div className="relative">
                 <CalendarDays aria-hidden className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8B91]" />
                 <input
-                  className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] px-9 text-[15px] font-normal text-[#222222] outline-none"
+                  className="h-10 w-full cursor-pointer rounded-[10px] border border-[#D8D1CE] bg-[#FFFEFC] pl-9 pr-3 text-[15px] font-normal text-[#222222] outline-none [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                  onClick={(event) => {
+                    (event.currentTarget as HTMLInputElement & { showPicker?: () => void }).showPicker?.();
+                  }}
                   onChange={(event) => setJoinedAt(event.target.value)}
                   required
                   type="date"
