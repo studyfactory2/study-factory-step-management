@@ -18,6 +18,7 @@ import {
   type StoredMember
 } from "@/lib/auth-storage";
 import { getBoardPosts, toggleBoardPostLike, type BoardPost, type BoardPostCategory } from "@/api/board";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 
 type BoardTab = "NOTICE" | "EMPLOYEE";
 
@@ -174,7 +175,7 @@ export default function BoardRoutePage() {
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="mx-auto w-full max-w-[380px] pb-20">
+      <ResponsiveContainer className="pb-20" variant="board">
         <header className="relative mb-3 pt-1 text-center">
           <button
             className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-bold leading-6 text-[#333333] shadow-sm"
@@ -376,7 +377,7 @@ export default function BoardRoutePage() {
           </div>
         </section>
         ) : null}
-      </div>
+      </ResponsiveContainer>
 
       <button
         aria-label="게시글 작성"

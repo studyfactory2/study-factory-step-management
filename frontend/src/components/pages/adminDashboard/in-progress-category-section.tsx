@@ -31,7 +31,7 @@ export function InProgressCategorySection({
   const summaryMap = new Map(categorySummary.map((item) => [item.category, item.count]));
 
   return (
-    <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
+    <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)] sm:p-4">
       <div className="mb-2.5 flex items-center justify-between">
         <h2 className="flex items-center gap-1.5 text-[18px] font-normal text-[#222222]">
           <ClipboardList aria-hidden className="h-4 w-4 text-[#7B716D]" />
@@ -61,14 +61,14 @@ export function InProgressCategorySection({
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
         {Object.entries(categoryLabels).map(([category, label]) => (
           <article
-            className="flex min-h-[58px] flex-col items-center justify-center rounded-[10px] border border-dashed border-[#E4DCD9] bg-white px-1 text-center"
+            className="flex min-h-[58px] flex-col items-center justify-center rounded-[10px] border border-dashed border-[#E4DCD9] bg-white px-1 text-center sm:min-h-[68px]"
             key={category}
           >
-            <p className="break-keep text-[11px] font-normal leading-3 text-[#4F4542]">{label}</p>
-            <p className={`mt-1 text-[19px] font-normal leading-none ${categoryColorClassNames[category as keyof typeof categoryColorClassNames]}`}>
+            <p className="break-keep text-[11px] font-normal leading-3 text-[#4F4542] sm:text-[12px]">{label}</p>
+            <p className={`mt-1 text-[19px] font-normal leading-none sm:text-[22px] ${categoryColorClassNames[category as keyof typeof categoryColorClassNames]}`}>
               {summaryMap.get(category as keyof typeof categoryLabels) ?? 0}건
             </p>
           </article>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Bell, MessageCircle, ClipboardList } from "lucide-react";
 import { getNotifications, type NotificationItem } from "@/api/notification";
 import { getStoredAuth, isAdminRole, type StoredMember } from "@/lib/auth-storage";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 
 export default function NotificationsRoutePage() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function NotificationsRoutePage() {
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="mx-auto w-full max-w-[380px] pb-8">
+      <ResponsiveContainer className="pb-8" variant="detail">
         <header className="relative mb-4 pt-1 text-center">
           <button
             className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[14px] font-bold leading-6 text-[#333333] shadow-sm"
@@ -115,7 +116,7 @@ export default function NotificationsRoutePage() {
             ))}
           </div>
         </section>
-      </div>
+      </ResponsiveContainer>
     </main>
   );
 }

@@ -374,58 +374,64 @@ export function TaskCreateForm({
   }
 
   return (
-    <section className="rounded-[22px] border border-[#D9D5D2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#DDD6D2]">
-      <AssigneePicker
-        isLoading={isLoading}
-        isPositionLoading={isPositionLoading}
-        isPositionTreeCollapsed={isPositionTreeCollapsed}
-        onAssigneeSelect={selectAssigneeForEditableDraft}
-        onPositionSelect={setSelectedPositionId}
-        onPositionTreeCollapseToggle={() => setIsPositionTreeCollapsed((currentValue) => !currentValue)}
-        onSearchKeywordChange={setSearchKeyword}
-        positionAssignees={positionAssignees}
-        positions={positions}
-        searchKeyword={searchKeyword}
-        searchedAssignees={searchedAssignees}
-        selectedPositionId={selectedPositionId}
-      />
-
-      <div className="my-4 border-t border-dashed border-[#CFC7C3]" />
-
-      {isDraftLoading && (
-        <div className="rounded-[14px] border border-dashed border-[#D8D1CE] bg-white px-4 py-6 text-center text-[13px] font-normal text-[#7B716D]">
-          임시저장 업무를 불러오는 중입니다.
+    <section className="rounded-[22px] border border-[#D9D5D2] bg-[#FFFEFC] px-4 py-5 shadow-[0_6px_0_#DDD6D2] lg:px-5">
+      <div className="lg:grid lg:grid-cols-[minmax(260px,0.85fr)_minmax(0,1.15fr)] lg:items-start lg:gap-5">
+        <div className="lg:sticky lg:top-4">
+          <AssigneePicker
+            isLoading={isLoading}
+            isPositionLoading={isPositionLoading}
+            isPositionTreeCollapsed={isPositionTreeCollapsed}
+            onAssigneeSelect={selectAssigneeForEditableDraft}
+            onPositionSelect={setSelectedPositionId}
+            onPositionTreeCollapseToggle={() => setIsPositionTreeCollapsed((currentValue) => !currentValue)}
+            onSearchKeywordChange={setSearchKeyword}
+            positionAssignees={positionAssignees}
+            positions={positions}
+            searchKeyword={searchKeyword}
+            searchedAssignees={searchedAssignees}
+            selectedPositionId={selectedPositionId}
+          />
         </div>
-      )}
 
-      {!isDraftLoading && (
-        <div className="space-y-6">
-          {drafts.map((draft) => (
-            <TaskDraftCard
-              assignees={sortedAssignees}
-              draft={draft}
-              isLoading={isLoading}
-              isSaving={savingDraftId === draft.id}
-              isSubmitting={isSubmitting}
-              key={draft.id}
-              onAttachmentChange={handleFileChange}
-              onAttachmentDelete={handleAttachmentDelete}
-              onDelete={handleDeleteDraft}
-              onEdit={handleEditDraft}
-              onSave={handleSaveDraft}
-              onSubmit={handleSubmitDraft}
-              onUpdate={updateDraft}
-            />
-          ))}
-          <button
-            className="h-10 w-full rounded-[10px] border border-dashed border-[#333333] bg-[#F7F7F7] text-[14px] font-normal text-[#222222] transition hover:bg-[#EFEFEF]"
-            onClick={handleAddDraft}
-            type="button"
-          >
-            새 업무 추가
-          </button>
+        <div>
+          <div className="my-4 border-t border-dashed border-[#CFC7C3] lg:hidden" />
+
+          {isDraftLoading && (
+            <div className="rounded-[14px] border border-dashed border-[#D8D1CE] bg-white px-4 py-6 text-center text-[13px] font-normal text-[#7B716D]">
+              임시저장 업무를 불러오는 중입니다.
+            </div>
+          )}
+
+          {!isDraftLoading && (
+            <div className="space-y-6">
+              {drafts.map((draft) => (
+                <TaskDraftCard
+                  assignees={sortedAssignees}
+                  draft={draft}
+                  isLoading={isLoading}
+                  isSaving={savingDraftId === draft.id}
+                  isSubmitting={isSubmitting}
+                  key={draft.id}
+                  onAttachmentChange={handleFileChange}
+                  onAttachmentDelete={handleAttachmentDelete}
+                  onDelete={handleDeleteDraft}
+                  onEdit={handleEditDraft}
+                  onSave={handleSaveDraft}
+                  onSubmit={handleSubmitDraft}
+                  onUpdate={updateDraft}
+                />
+              ))}
+              <button
+                className="h-10 w-full rounded-[10px] border border-dashed border-[#333333] bg-[#F7F7F7] text-[14px] font-normal text-[#222222] transition hover:bg-[#EFEFEF]"
+                onClick={handleAddDraft}
+                type="button"
+              >
+                새 업무 추가
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
       {deleteTargetDraft && (
         <ConfirmDialog
           confirmLabel="삭제"

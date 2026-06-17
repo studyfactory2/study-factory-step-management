@@ -26,6 +26,7 @@ import {
   isAdminRole,
   type StoredMember
 } from "@/lib/auth-storage";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 
 const categoryStyles = {
   pink: "bg-[#FFE4EC] text-[#EC4D7B]",
@@ -292,7 +293,7 @@ export default function BoardPostDetailPage() {
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="mx-auto w-full max-w-[380px] pb-8">
+      <ResponsiveContainer className="pb-8" variant="board">
         <header className="relative mb-3 pt-1 text-center">
           <button
             className="absolute left-0 top-0 flex min-h-0 items-center rounded-[10px] border border-[#D8D1CE] bg-white px-2.5 py-0 text-[12px] font-bold leading-6 text-[#333333] shadow-sm"
@@ -608,7 +609,7 @@ export default function BoardPostDetailPage() {
             </section>
           </div>
         ) : null}
-      </div>
+      </ResponsiveContainer>
 
       {deleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 px-4">

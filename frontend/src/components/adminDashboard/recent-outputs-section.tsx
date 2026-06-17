@@ -66,7 +66,7 @@ export function RecentOutputsSection({
   }
 
   return (
-    <section className="rounded-[18px] border border-[#D8D1CE] bg-[#FFFEFC] p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
+    <section className="rounded-[18px] border border-[#D8D1CE] bg-[#FFFEFC] p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)] sm:p-4">
       <div className="mb-2.5 flex items-center gap-1.5">
         <Clipboard aria-hidden className="h-4.5 w-4.5 text-[#7B716D]" />
         <h2 className="text-[18px] font-normal text-[#222222]">최근 업무 현황</h2>
@@ -133,14 +133,14 @@ export function RecentOutputsSection({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-[50px_minmax(0,1fr)_56px_56px] gap-1 px-2 pb-1 text-center text-[10px] font-normal text-[#7B716D]">
+      <div className="grid grid-cols-[50px_minmax(0,1fr)_56px_56px] gap-1 px-2 pb-1 text-center text-[10px] font-normal text-[#7B716D] sm:grid-cols-[72px_minmax(0,1fr)_72px_72px] sm:text-[11px]">
         <span>최초 작성자</span>
         <span>업무 제목</span>
         <span>상태</span>
         <span>받는이</span>
       </div>
 
-      <div className="max-h-[330px] space-y-1.5 overflow-y-auto pr-0.5">
+      <div className="max-h-[330px] space-y-1.5 overflow-y-auto pr-0.5 sm:max-h-[460px]">
         {filteredOutputs.length === 0 && (
           <div className="flex h-24 items-center justify-center rounded-[12px] border border-dashed border-[#D8D1CE] bg-white text-[13px] font-normal text-[#7B716D]">
             표시할 최근 업무가 없습니다.
@@ -156,7 +156,7 @@ export function RecentOutputsSection({
 
           return (
             <button
-              className="grid min-h-[56px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)]"
+              className="grid min-h-[56px] w-full grid-cols-[5px_50px_minmax(0,1fr)_56px_56px] items-stretch overflow-hidden rounded-[10px] border border-[#E7E0DD] bg-white text-left shadow-[0_1px_4px_rgba(95,73,68,0.06)] sm:grid-cols-[5px_72px_minmax(0,1fr)_72px_72px]"
               key={output.taskId}
               onClick={() => onDetailOpen(output.taskId)}
               type="button"
@@ -173,7 +173,7 @@ export function RecentOutputsSection({
                   {formatCompactDateTime(output.updatedAt ?? output.startedAt)}
                 </span>
               </span>
-              <span className="flex min-w-0 flex-col justify-center pl-5 pr-1.5">
+              <span className="flex min-w-0 flex-col justify-center pl-5 pr-1.5 sm:pl-6 sm:pr-3">
                 <span className="flex min-w-0 items-center gap-1">
                   <span className={`truncate text-[12px] font-normal leading-3 text-[#222222] ${completedTextClassName}`}>
                     {output.taskTitle}
@@ -192,7 +192,7 @@ export function RecentOutputsSection({
                 )}
               </span>
               <span className="flex items-center justify-center px-0">
-                <span className={`flex h-[18px] w-[50px] items-center justify-center gap-0.5 rounded-full text-[9px] font-normal leading-none ${getStatusBadgeClassName(output.taskStatus)}`}>
+                <span className={`flex h-[18px] w-[50px] items-center justify-center gap-0.5 rounded-full text-[9px] font-normal leading-none sm:w-[58px] sm:text-[10px] ${getStatusBadgeClassName(output.taskStatus)}`}>
                   {!isCompleted && direction === "TO_CREATOR" && <span aria-hidden>←</span>}
                   <span>{getStatusLabel(output.taskStatus)}</span>
                   {!isCompleted && direction === "TO_MEMBER" && <span aria-hidden>→</span>}

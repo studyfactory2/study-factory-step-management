@@ -10,6 +10,7 @@ import {
 import type { MemberRole } from "@/types/domain";
 import { CommentSection } from "@/components/pages/taskDetail/comment-section";
 import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 import { ImagePreviewDialog } from "@/components/pages/taskDetail/image-preview-dialog";
 import { TaskConversationSection } from "@/components/pages/taskDetail/task-conversation-section";
 import { TaskDetailHeader } from "@/components/pages/taskDetail/task-detail-header";
@@ -75,7 +76,7 @@ export function TaskDetailPage({
 
   return (
     <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+      <ResponsiveContainer variant="detail">
         <TaskDetailHeader onBack={onBack} title={task?.title} />
 
         {message && (
@@ -102,7 +103,7 @@ export function TaskDetailPage({
             />
           </>
         )}
-      </div>
+      </ResponsiveContainer>
 
       {previewImageUrl && (
         <ImagePreviewDialog imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl(null)} />

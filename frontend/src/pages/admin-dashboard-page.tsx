@@ -40,6 +40,7 @@ import {
   getPositionName,
   InProgressCategorySection
 } from "@/components/pages/adminDashboard/in-progress-category-section";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 
 type AdminDashboardPageProps = {
@@ -263,7 +264,7 @@ export function AdminDashboardPage({
 
   return (
     <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+      <ResponsiveContainer variant="dashboard">
         <section className="rounded-[20px] border border-[#D8D1CE] bg-white px-3 py-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)]">
           <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-2">
             <button
@@ -332,7 +333,7 @@ export function AdminDashboardPage({
           onSelectMemberPreRegister={handleSelectMemberPreRegister}
           onSelectPositionTree={handleSelectPositionTree}
         />
-      </div>
+      </ResponsiveContainer>
       <button
         aria-label="새 업무 등록"
         className="fixed bottom-6 left-1/2 z-30 flex h-14 w-14 translate-x-[128px] items-center justify-center rounded-full border border-[#C7CDD4] bg-[#EAF3FF] text-[#2D70CB] shadow-[0_8px_18px_rgba(45,112,203,0.22)] max-[420px]:left-auto max-[420px]:right-5 max-[420px]:translate-x-0"

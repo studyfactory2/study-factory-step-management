@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, NotebookTabs, Search } from "lucide-react";
 import { getMembers } from "@/api/member";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 import type { Member } from "@/types/domain";
 import { EmployeeOrganizationSection } from "@/components/pages/memberManagement/components";
 import {
@@ -99,7 +100,7 @@ export function MemberManagementPage({ onBack }: MemberManagementPageProps) {
 
   return (
     <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+      <ResponsiveContainer variant="settings">
         <header className="relative pb-1 text-center">
           <button
             className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold text-[#333333] shadow-sm"
@@ -178,7 +179,7 @@ export function MemberManagementPage({ onBack }: MemberManagementPageProps) {
             />
           ))}
         </div>
-      </div>
+      </ResponsiveContainer>
     </main>
   );
 }

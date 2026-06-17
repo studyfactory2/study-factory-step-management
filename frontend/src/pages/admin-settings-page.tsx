@@ -17,6 +17,7 @@ import {
   UserRound,
   UsersRound
 } from "lucide-react";
+import { ResponsiveContainer } from "@/components/layout/responsive-container";
 
 type AdminSettingsPageProps = {
   onBack?: () => void;
@@ -78,7 +79,7 @@ export function AdminSettingsPage({
 
   return (
     <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <div className="relative mx-auto w-full max-w-[360px] space-y-3">
+      <ResponsiveContainer variant="settings">
         <header className="relative pb-2 pt-0.5 text-center">
           <button
             className="absolute left-0 top-0 h-7 rounded-[9px] border border-[#D8D1CE] bg-[#F7F7F7] px-2.5 text-[13px] font-bold text-[#333333] shadow-sm"
@@ -102,7 +103,7 @@ export function AdminSettingsPage({
             <BriefcaseBusiness aria-hidden className="h-4.5 w-4.5 text-[#A87928]" />
             관리 메뉴
           </h2>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
             {managementMenus.map((menu) => {
               const Icon = menu.icon;
 
@@ -198,7 +199,7 @@ export function AdminSettingsPage({
             <button type="button">개인정보처리방침</button>
           </div>
         </section>
-      </div>
+      </ResponsiveContainer>
     </main>
   );
 }
