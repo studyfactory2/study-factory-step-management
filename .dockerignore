@@ -1,4 +1,7 @@
 .git
+.DS_Store
+._*
+**/._*
 .next
 node_modules
 frontend/.next

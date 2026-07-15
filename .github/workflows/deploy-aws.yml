@@ -1,0 +1,119 @@
+name: Deploy to AWS EC2 over SSH
+
+on:
+  push:
+    branches: [deploy]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-aws-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  EC2_HOST: ${{ vars.EC2_HOST }}
+  EC2_USER: ${{ vars.EC2_USER }}
+  EC2_SECURITY_GROUP_ID: ${{ vars.EC2_SECURITY_GROUP_ID }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build:backend
+      - name: Build frontend
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.APP_ORIGIN }}
+        run: npm run build:frontend
+      - name: Validate production Compose file
+        env:
+          APP_ORIGIN: ${{ vars.APP_ORIGIN }}
+          SITE_ADDRESS: ":80"
+          POSTGRES_DB: study_factory
+          POSTGRES_USER: study_factory
+          POSTGRES_PASSWORD: validation-only
+          JWT_SECRET_KEY: validation-only
+          IMAGE_TAG: validation
+        run: docker compose --file docker-compose.prod.yml config --quiet
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy source and containers over SSH
+        env:
+          RELEASE: ${{ github.sha }}
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+
+          runner_ip="$(curl --fail --silent --show-error https://checkip.amazonaws.com | tr -d '[:space:]')"
+          runner_cidr="$runner_ip/32"
+
+          cleanup() {
+            aws ec2 revoke-security-group-ingress \
+              --group-id "$EC2_SECURITY_GROUP_ID" \
+              --protocol tcp \
+              --port 22 \
+              --cidr "$runner_cidr" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          aws ec2 authorize-security-group-ingress \
+            --group-id "$EC2_SECURITY_GROUP_ID" \
+            --protocol tcp \
+            --port 22 \
+            --cidr "$runner_cidr"
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ec2
+          chmod 600 ~/.ssh/id_ec2
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+          git archive --format=tar.gz --output="release-$RELEASE.tar.gz" HEAD
+
+          ssh -i ~/.ssh/id_ec2 "$EC2_USER@$EC2_HOST" \
+            'sudo mkdir -p /opt/study-factory && sudo chown -R "$(id -un):$(id -gn)" /opt/study-factory'
+          scp -i ~/.ssh/id_ec2 \
+            "release-$RELEASE.tar.gz" \
+            "$EC2_USER@$EC2_HOST:/tmp/study-factory-release.tar.gz"
+
+          ssh -i ~/.ssh/id_ec2 "$EC2_USER@$EC2_HOST" "RELEASE='$RELEASE' bash -s" <<'REMOTE'
+          set -euo pipefail
+          cd /opt/study-factory
+          tar -xzf /tmp/study-factory-release.tar.gz
+          rm -f /tmp/study-factory-release.tar.gz
+          test -s .env
+
+          set -a
+          . ./.env
+          export IMAGE_TAG="$RELEASE"
+          set +a
+
+          docker compose -f docker-compose.prod.yml build --pull frontend backend
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker compose -f docker-compose.prod.yml ps
+          docker image prune -f
+          REMOTE
+
+      - name: Verify public health endpoint
+        run: curl --fail --retry 12 --retry-delay 5 "${{ vars.APP_ORIGIN }}/api/health"
