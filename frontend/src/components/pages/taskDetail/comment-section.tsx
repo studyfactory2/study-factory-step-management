@@ -2,11 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Clipboard, Lock, MessageCircle, Paperclip } from "lucide-react";
-import {
-  createTaskComment,
-  getTaskDetail,
-  type TaskDetail
-} from "@/api/task";
+import { createTaskComment, getTaskDetail, type TaskDetail } from "@/api/task";
 import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 import type { MemberRole, TaskStatus } from "@/types/domain";
 import { getStatusClassName, statusOptions } from "./constants";
@@ -26,18 +22,22 @@ export function CommentSection({
   currentMemberId,
   currentMemberRole,
   onTaskUpdate,
-  task
+  task,
 }: CommentSectionProps) {
   const [content, setContent] = useState("");
   const [oneLineComment, setOneLineComment] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus>(task.status);
   const [message, setMessage] = useState("");
-  const [alertDialog, setAlertDialog] = useState<{ description: string; title: string } | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{
+    description: string;
+    title: string;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const nextCommentNumber = task.comments.length + 1;
-  const canCompleteTask = currentMemberRole === "ADMIN" || currentMemberRole === "CEO";
+  const canCompleteTask =
+    currentMemberRole === "ADMIN" || currentMemberRole === "CEO";
   const formTone = getCommentFormTone(task, currentMemberId, currentMemberRole);
   const formToneClassName = getFormToneClassName(formTone);
 
@@ -47,7 +47,9 @@ export function CommentSection({
 
   useEffect(() => {
     if (selectedStatus === "COMPLETED" && !canCompleteTask) {
-      setSelectedStatus(task.status === "COMPLETED" ? "REVIEW_REQUESTED" : task.status);
+      setSelectedStatus(
+        task.status === "COMPLETED" ? "REVIEW_REQUESTED" : task.status,
+      );
     }
   }, [canCompleteTask, selectedStatus, task.status]);
 
@@ -75,7 +77,7 @@ export function CommentSection({
         attachments,
         content,
         oneLineComment: oneLineComment.trim() || undefined,
-        status: selectedStatus
+        status: selectedStatus,
       });
       const updatedTask = await getTaskDetail(accessToken, task.id);
       onTaskUpdate(updatedTask);
@@ -84,22 +86,32 @@ export function CommentSection({
       setOneLineComment("");
       setAlertDialog({
         description: "코멘트가 등록되었습니다.",
-        title: "등록 완료"
+        title: "등록 완료",
       });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "코멘트를 등록하지 못했습니다.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "코멘트를 등록하지 못했습니다.",
+      );
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <section className={`rounded-[18px] border-2 bg-[#FFFEFC] px-3 py-3 shadow-sm ${formToneClassName.section}`}>
+    <section
+      className={`rounded-[18px] border px-3 py-3 shadow-[0_10px_28px_rgba(49,91,140,0.1)] ${formToneClassName.section}`}
+    >
       <div className="flex items-center gap-2">
-        <span className={`flex h-8 min-w-10 items-center justify-center rounded-[8px] px-2 text-[15px] font-normal text-white ${formToneClassName.index}`}>
+        <span
+          className={`flex h-8 min-w-10 items-center justify-center rounded-[8px] px-2 text-[15px] font-normal text-white ${formToneClassName.index}`}
+        >
           #{nextCommentNumber}
         </span>
-        <span className="min-w-0 flex-1 text-[13px] font-normal text-[#6F6662]">작성중</span>
+        <span className="min-w-0 flex-1 text-[13px] font-normal text-[#6F6662]">
+          작성중
+        </span>
         <button
           className="flex h-8 shrink-0 items-center gap-1 rounded-[8px] border border-[#D6D6D6] bg-white px-2 text-[12px] font-normal text-[#333333]"
           onClick={handleCopyTitle}
@@ -122,7 +134,9 @@ export function CommentSection({
           className="h-[128px] w-full resize-none rounded-[8px] border border-[#D6D6D6] bg-white px-3 py-3 pb-7 text-[15px] font-normal leading-6 text-[#1F1A18] outline-none placeholder:text-[#8B8582] [font-family:'Apple_SD_Gothic_Neo',system-ui,sans-serif]"
           maxLength={MAX_COMMENT_LENGTH}
           onChange={(event) => setContent(event.target.value)}
-          placeholder={"댓글 내용을 입력하세요.\n자유롭게 내용을 작성할 수 있어요"}
+          placeholder={
+            "댓글 내용을 입력하세요.\n자유롭게 내용을 작성할 수 있어요"
+          }
           value={content}
         />
         <span className="absolute bottom-2 right-3 text-[13px] font-normal text-[#6F6662]">
@@ -131,7 +145,10 @@ export function CommentSection({
       </div>
 
       <div className="mt-3 flex h-10 items-center gap-2 rounded-[8px] border border-[#D6D6D6] bg-white px-3">
-        <MessageCircle aria-hidden className="h-4 w-4 shrink-0 text-[#8B8582]" />
+        <MessageCircle
+          aria-hidden
+          className="h-4 w-4 shrink-0 text-[#8B8582]"
+        />
         <input
           className="min-w-0 flex-1 bg-transparent text-[15px] font-normal text-[#1F1A18] outline-none placeholder:text-[#8B8582]"
           onChange={(event) => setOneLineComment(event.target.value)}
@@ -168,7 +185,9 @@ export function CommentSection({
           accept="image/jpeg,image/png,image/webp"
           className="hidden"
           multiple
-          onChange={(event) => setAttachments(Array.from(event.target.files ?? []))}
+          onChange={(event) =>
+            setAttachments(Array.from(event.target.files ?? []))
+          }
           ref={fileInputRef}
           type="file"
         />
@@ -192,7 +211,9 @@ export function CommentSection({
 
       {attachments.length > 0 && (
         <div className="mt-3 rounded-[10px] border border-[#D6D6D6] bg-white px-3 py-3">
-          <p className="text-[12px] font-normal text-[#333333]">선택한 사진 {attachments.length}장</p>
+          <p className="text-[12px] font-normal text-[#333333]">
+            선택한 사진 {attachments.length}장
+          </p>
           <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
             {attachments.map((attachment) => (
               <AttachmentPreview
@@ -226,7 +247,7 @@ type CommentFormTone = "admin" | "assignee" | "creator";
 function getCommentFormTone(
   task: TaskDetail,
   currentMemberId: number,
-  currentMemberRole: MemberRole
+  currentMemberRole: MemberRole,
 ): CommentFormTone {
   if (currentMemberId === task.creator.id) {
     return "creator";
@@ -246,24 +267,25 @@ function getCommentFormTone(
 function getFormToneClassName(tone: CommentFormTone) {
   if (tone === "creator") {
     return {
-      index: "bg-[#D93D72]",
-      section: "border-[#D93D72]",
-      submit: "bg-[#D93D72]"
+      index: "bg-[linear-gradient(135deg,#3182f6,#6b5cff)]",
+      section:
+        "border-[#cbd5ff] bg-[linear-gradient(145deg,#ffffff,#f1f5ff_58%,#f5f0ff)]",
+      submit: "bg-[linear-gradient(135deg,#3182f6,#6b5cff)]",
     };
   }
 
   if (tone === "admin") {
     return {
       index: "bg-[#8B5CF6]",
-      section: "border-[#8B5CF6]",
-      submit: "bg-[#8B5CF6]"
+      section: "border-[#c9b7f5] bg-[linear-gradient(145deg,#ffffff,#f5f0ff)]",
+      submit: "bg-[linear-gradient(135deg,#9b71f7,#7156d9)]",
     };
   }
 
   return {
     index: "bg-[#1687E8]",
-    section: "border-[#1687E8]",
-    submit: "bg-[#1687E8]"
+    section: "border-[#abd4f5] bg-[linear-gradient(145deg,#ffffff,#eef7ff)]",
+    submit: "bg-[linear-gradient(135deg,#3182f6,#6b5cff)]",
   };
 }
 

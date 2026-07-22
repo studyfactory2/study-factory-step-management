@@ -7,69 +7,85 @@ const categoryLabels = {
   DEVELOPMENT: "개발관련",
   OPERATION: "운영관련",
   MEMBER: "회원관련",
-  ORDER: "주문관련"
+  ORDER: "주문관련",
 } as const;
 
 const categoryColorClassNames = {
-  DEVELOPMENT: "text-[#2D70CB]",
-  OPERATION: "text-[#E30613]",
-  MEMBER: "text-[#8B72C8]",
-  ORDER: "text-[#D0A112]"
+  DEVELOPMENT: "text-[#3182F6]",
+  OPERATION: "text-[#F04452]",
+  MEMBER: "text-[#8B5CF6]",
+  ORDER: "text-[#F59F00]",
+} as const;
+
+const categoryBackgroundClassNames = {
+  DEVELOPMENT: "bg-[linear-gradient(135deg,#f5f9ff,#eaf3ff)]",
+  OPERATION: "bg-[linear-gradient(135deg,#fff7f8,#ffedef)]",
+  MEMBER: "bg-[linear-gradient(135deg,#faf7ff,#f1eaff)]",
+  ORDER: "bg-[linear-gradient(135deg,#fffaf0,#fff2d6)]",
 } as const;
 
 export function InProgressCategorySection({
   categorySummary,
   notificationUnreadCount = 0,
   onBoardOpen,
-  onNotificationOpen
+  onNotificationOpen,
 }: {
   categorySummary: TaskCategorySummaryItem[];
   notificationUnreadCount?: number;
   onBoardOpen: () => void;
   onNotificationOpen?: () => void;
 }) {
-  const summaryMap = new Map(categorySummary.map((item) => [item.category, item.count]));
+  const summaryMap = new Map(
+    categorySummary.map((item) => [item.category, item.count]),
+  );
 
   return (
-    <section className="rounded-[18px] border border-[#D8D1CE] bg-white p-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)] sm:p-4">
-      <div className="mb-2.5 flex items-center justify-between">
-        <h2 className="flex items-center gap-1.5 text-[18px] font-normal text-[#222222] sm:text-[20px] md:text-[21px]">
-          <ClipboardList aria-hidden className="h-4 w-4 text-[#7B716D] sm:h-5 sm:w-5" />
+    <section className="surface-card bg-[linear-gradient(145deg,#ffffff_0%,#f6f9ff_55%,#faf7ff_100%)] p-4 sm:p-5">
+      <div className="mb-3 flex items-start justify-between">
+        <h2 className="flex items-start gap-2 pt-0.5 text-xl font-bold tracking-[-0.03em] text-[#191f28] sm:text-2xl">
+          <ClipboardList aria-hidden className="mt-0.5 h-5 w-5 text-primary" />
           진행중 업무
         </h2>
-        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
+        <div className="flex items-center gap-2">
           <button
             aria-label="내 알림"
-            className="relative flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542] sm:h-7 sm:min-w-7 md:h-8 md:min-w-8 md:px-2"
+            className="relative flex h-9 w-9 items-center justify-center rounded-[12px] bg-[#f2f4f6] text-[#4e5968] transition hover:bg-[#e5e8eb]"
             onClick={onNotificationOpen}
             type="button"
           >
-            <Bell aria-hidden className="h-3 w-3 text-[#E30613] sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+            <Bell aria-hidden className="h-5 w-5" />
             {notificationUnreadCount > 0 ? (
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E30613] px-1 text-[11px] font-normal leading-none text-white sm:h-5 sm:min-w-5 sm:text-[12px] md:h-6 md:min-w-6">
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f04452] px-1 text-[10px] font-bold leading-none text-white">
                 {notificationUnreadCount > 99 ? "99+" : notificationUnreadCount}
               </span>
             ) : null}
           </button>
           <button
             aria-label="게시판으로 이동"
-            className="flex h-6 min-w-6 items-center justify-center rounded-full border border-[#E4DCD9] bg-white px-1.5 text-[#4F4542] sm:h-7 sm:min-w-7 md:h-8 md:min-w-8 md:px-2"
+            className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[#f2f4f6] text-[#4e5968] transition hover:bg-[#e5e8eb]"
             onClick={onBoardOpen}
             type="button"
           >
-            <Newspaper aria-hidden className="h-3.5 w-3.5 text-[#2D70CB] sm:h-4 sm:w-4 md:h-4.5 md:w-4.5" />
+            <Newspaper aria-hidden className="h-5 w-5" />
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {Object.entries(categoryLabels).map(([category, label]) => (
           <article
-            className="flex min-h-[58px] flex-col items-center justify-center rounded-[10px] border border-dashed border-[#E4DCD9] bg-white px-1 text-center sm:min-h-[68px]"
+            className={`flex min-h-[68px] flex-col items-start justify-center rounded-[15px] px-4 py-2.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] sm:min-h-[72px] ${categoryBackgroundClassNames[category as keyof typeof categoryBackgroundClassNames]}`}
             key={category}
           >
-            <p className="break-keep text-[11px] font-normal leading-3 text-[#4F4542] sm:text-[13px] md:text-[14px]">{label}</p>
-            <p className={`mt-1 text-[19px] font-normal leading-none sm:text-[23px] md:text-[25px] ${categoryColorClassNames[category as keyof typeof categoryColorClassNames]}`}>
-              {summaryMap.get(category as keyof typeof categoryLabels) ?? 0}건
+            <p className="break-keep text-sm font-semibold text-[#6b7684]">
+              {label}
+            </p>
+            <p
+              className={`mt-1 text-2xl font-extrabold leading-none tracking-[-0.04em] sm:text-[25px] ${categoryColorClassNames[category as keyof typeof categoryColorClassNames]}`}
+            >
+              {summaryMap.get(category as keyof typeof categoryLabels) ?? 0}
+              <span className="ml-1 text-xs font-semibold text-[#8b95a1]">
+                건
+              </span>
             </p>
           </article>
         ))}
@@ -78,6 +94,9 @@ export function InProgressCategorySection({
   );
 }
 
-export function getPositionName(positionName: string | null, roleType: AdminDashboard["currentMember"]["roleType"]) {
+export function getPositionName(
+  positionName: string | null,
+  roleType: AdminDashboard["currentMember"]["roleType"],
+) {
   return positionName ?? roleLabels[roleType];
 }

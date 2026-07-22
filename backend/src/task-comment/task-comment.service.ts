@@ -13,6 +13,7 @@ import { UploadService } from "../upload/upload.service";
 import { TaskCommentActivityResponse } from "./dto/task-comment-activity.response";
 import { TaskCommentCreateRequest } from "./dto/task-comment-create.request";
 import { TaskCommentResponse } from "./dto/task-comment.response";
+import { TaskCommentUpdateRequest } from "./dto/task-comment-update.request";
 import { TaskCommentAttachment } from "./entity/task-comment-attachment.entity";
 import { TaskComment } from "./entity/task-comment.entity";
 import { TaskCommentRepository } from "./task-comment.repository";
@@ -23,14 +24,14 @@ export class TaskCommentService {
     private readonly taskCommentRepository: TaskCommentRepository,
     private readonly uploadService: UploadService,
     private readonly notificationService: NotificationService,
-    private readonly cacheService: RedisCacheService
+    private readonly cacheService: RedisCacheService,
   ) {}
 
   async create(
     taskId: number,
     request: TaskCommentCreateRequest,
     currentMember: CurrentMember,
-    files: UploadFile[] = []
+    files: UploadFile[] = [],
   ): Promise<TaskCommentResponse> {
     const task = await this.findPublishedTaskEntity(taskId);
     this.validateTaskCommentAccess(task, currentMember);
@@ -39,27 +40,41 @@ export class TaskCommentService {
     this.validateTaskStatusUpdate(commentStatus, currentMember);
     await this.updateTaskStatus(task, commentStatus);
 
-    const comment = request.toEntity(taskId, currentMember.memberId, commentStatus);
+    const comment = request.toEntity(
+      taskId,
+      currentMember.memberId,
+      commentStatus,
+    );
     const savedComment = await this.taskCommentRepository.saveComment(comment);
     const attachments = await this.createAttachments(savedComment.id, files);
 
     if (attachments.length > 0) {
-      savedComment.attachments = await this.taskCommentRepository.saveAttachments(attachments);
+      savedComment.attachments =
+        await this.taskCommentRepository.saveAttachments(attachments);
     } else {
       savedComment.attachments = [];
     }
 
-    await this.taskCommentRepository.markTaskViewed(taskId, currentMember.memberId);
-    await this.notificationService.createTaskCommentNotifications(task, currentMember.memberId, request.content);
+    await this.taskCommentRepository.markTaskViewed(
+      taskId,
+      currentMember.memberId,
+    );
+    await this.notificationService.createTaskCommentNotifications(
+      task,
+      currentMember.memberId,
+      request.content,
+    );
     await this.clearDashboardCache();
 
-    const createdComment = await this.taskCommentRepository.findById(savedComment.id);
+    const createdComment = await this.taskCommentRepository.findById(
+      savedComment.id,
+    );
     return this.toResponse(createdComment ?? savedComment);
   }
 
   async findByTaskId(
     taskId: number,
-    currentMember: CurrentMember
+    currentMember: CurrentMember,
   ): Promise<TaskCommentResponse[]> {
     const task = await this.findPublishedTaskEntity(taskId);
     this.validateTaskCommentAccess(task, currentMember);
@@ -68,7 +83,12 @@ export class TaskCommentService {
     return comments.map((comment) => this.toResponse(comment));
   }
 
-  async delete(taskId: number, commentId: number, currentMember: CurrentMember): Promise<void> {
+  async update(
+    taskId: number,
+    commentId: number,
+    request: TaskCommentUpdateRequest,
+    currentMember: CurrentMember,
+  ): Promise<TaskCommentResponse> {
     const task = await this.findPublishedTaskEntity(taskId);
     this.validateTaskCommentAccess(task, currentMember);
 
@@ -77,7 +97,49 @@ export class TaskCommentService {
       throw new TaskNotFoundException(taskId);
     }
 
-    if (comment.createdBy !== currentMember.memberId && !this.isAdminRole(currentMember.role)) {
+    if (
+      comment.createdBy !== currentMember.memberId &&
+      !this.isAdminRole(currentMember.role)
+    ) {
+      throw new ForbiddenException("코멘트 수정 권한이 없습니다.");
+    }
+
+    const commentStatus = request.status ?? comment.status;
+    this.validateTaskStatusUpdate(commentStatus, currentMember);
+    await this.updateTaskStatus(task, commentStatus);
+
+    comment.content = request.content;
+    comment.oneLineComment = request.oneLineComment?.trim() || null;
+    comment.status = commentStatus;
+
+    await this.taskCommentRepository.saveComment(comment);
+    await this.taskCommentRepository.markTaskViewed(
+      taskId,
+      currentMember.memberId,
+    );
+    await this.clearDashboardCache();
+
+    const updatedComment = await this.taskCommentRepository.findById(commentId);
+    return this.toResponse(updatedComment ?? comment);
+  }
+
+  async delete(
+    taskId: number,
+    commentId: number,
+    currentMember: CurrentMember,
+  ): Promise<void> {
+    const task = await this.findPublishedTaskEntity(taskId);
+    this.validateTaskCommentAccess(task, currentMember);
+
+    const comment = await this.taskCommentRepository.findById(commentId);
+    if (!comment || comment.taskId !== taskId) {
+      throw new TaskNotFoundException(taskId);
+    }
+
+    if (
+      comment.createdBy !== currentMember.memberId &&
+      !this.isAdminRole(currentMember.role)
+    ) {
       throw new ForbiddenException("코멘트 삭제 권한이 없습니다.");
     }
 
@@ -89,12 +151,16 @@ export class TaskCommentService {
 
   async findRecent(
     limit = 100,
-    currentMember?: CurrentMember
+    currentMember?: CurrentMember,
   ): Promise<TaskCommentActivityResponse[]> {
-    const memberId = currentMember && !this.isAdminRole(currentMember.role)
-      ? currentMember.memberId
-      : undefined;
-    const comments = await this.taskCommentRepository.findRecent(limit, memberId);
+    const memberId =
+      currentMember && !this.isAdminRole(currentMember.role)
+        ? currentMember.memberId
+        : undefined;
+    const comments = await this.taskCommentRepository.findRecent(
+      limit,
+      memberId,
+    );
     return comments.map((comment) => this.toActivityResponse(comment));
   }
 
@@ -108,7 +174,10 @@ export class TaskCommentService {
     return task;
   }
 
-  private validateTaskCommentAccess(task: Task, currentMember: CurrentMember): void {
+  private validateTaskCommentAccess(
+    task: Task,
+    currentMember: CurrentMember,
+  ): void {
     if (this.isAdminRole(currentMember.role)) {
       return;
     }
@@ -121,13 +190,24 @@ export class TaskCommentService {
     }
   }
 
-  private validateTaskStatusUpdate(status: TaskStatus, currentMember: CurrentMember): void {
-    if (status === TaskStatus.COMPLETED && !this.isAdminRole(currentMember.role)) {
-      throw new ForbiddenException("완료 상태는 관리자 또는 CEO만 변경할 수 있습니다.");
+  private validateTaskStatusUpdate(
+    status: TaskStatus,
+    currentMember: CurrentMember,
+  ): void {
+    if (
+      status === TaskStatus.COMPLETED &&
+      !this.isAdminRole(currentMember.role)
+    ) {
+      throw new ForbiddenException(
+        "완료 상태는 관리자 또는 CEO만 변경할 수 있습니다.",
+      );
     }
   }
 
-  private async updateTaskStatus(task: Task, status: TaskStatus): Promise<void> {
+  private async updateTaskStatus(
+    task: Task,
+    status: TaskStatus,
+  ): Promise<void> {
     task.updatedAt = new Date();
     task.status = status;
 
@@ -148,7 +228,7 @@ export class TaskCommentService {
 
   private async createAttachments(
     taskCommentId: number,
-    files: UploadFile[]
+    files: UploadFile[],
   ): Promise<TaskCommentAttachment[]> {
     const uploadedFiles = await this.uploadService.saveImages(files);
 
@@ -172,7 +252,7 @@ export class TaskCommentService {
         branch: comment.creator.branchInfo?.name ?? null,
         organizationName: comment.creator.organization?.name ?? null,
         roleType: comment.creator.roleType,
-        positionName: comment.creator.positionInfo?.name ?? null
+        positionName: comment.creator.positionInfo?.name ?? null,
       },
       content: comment.content,
       oneLineComment: comment.oneLineComment,
@@ -181,14 +261,16 @@ export class TaskCommentService {
         id: attachment.id,
         imageUrl: attachment.imageUrl,
         originalName: attachment.originalName,
-        createdAt: attachment.createdAt
+        createdAt: attachment.createdAt,
       })),
       createdAt: comment.createdAt,
-      updatedAt: comment.updatedAt
+      updatedAt: comment.updatedAt,
     };
   }
 
-  private toActivityResponse(comment: TaskComment): TaskCommentActivityResponse {
+  private toActivityResponse(
+    comment: TaskComment,
+  ): TaskCommentActivityResponse {
     return {
       id: comment.id,
       taskId: comment.taskId,
@@ -202,7 +284,7 @@ export class TaskCommentService {
       oneLineComment: comment.oneLineComment,
       status: comment.status,
       createdAt: comment.createdAt,
-      updatedAt: comment.updatedAt
+      updatedAt: comment.updatedAt,
     };
   }
 
@@ -215,6 +297,8 @@ export class TaskCommentService {
   }
 
   private async clearDashboardCache(): Promise<void> {
-    await this.cacheService.deleteByPrefix(TASK_DASHBOARD_CACHE_KEYS.categorySummaryPattern);
+    await this.cacheService.deleteByPrefix(
+      TASK_DASHBOARD_CACHE_KEYS.categorySummaryPattern,
+    );
   }
 }

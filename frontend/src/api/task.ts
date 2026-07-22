@@ -1,7 +1,8 @@
 import type { MemberRole, TaskStatus } from "@/types/domain";
 import { handleUnauthorizedResponse } from "@/api/client";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 export type TaskStatusSummary = {
   registered: number;
@@ -30,13 +31,17 @@ type TaskCategorySummaryCache = {
 };
 
 const TASK_CATEGORY_SUMMARY_CACHE_TTL_MS = 1000 * 15;
-const TASK_CATEGORY_SUMMARY_CACHE_KEY_PREFIX = "study-factory:task-category-summary";
+const TASK_CATEGORY_SUMMARY_CACHE_KEY_PREFIX =
+  "study-factory:task-category-summary";
 const TASK_DETAIL_CACHE_TTL_MS = 1000 * 60 * 5;
 const TASK_DETAIL_CACHE_KEY_PREFIX = "study-factory:task-detail";
 const TASK_RECENT_WORK_STATUS_CACHE_TTL_MS = 1000 * 30;
-const TASK_RECENT_WORK_STATUS_CACHE_KEY_PREFIX = "study-factory:task-recent-work-status";
+const TASK_RECENT_WORK_STATUS_CACHE_KEY_PREFIX =
+  "study-factory:task-recent-work-status";
 
-function getTaskCategorySummaryCacheKey(filters: { statuses?: TaskStatus[] } = {}) {
+function getTaskCategorySummaryCacheKey(
+  filters: { statuses?: TaskStatus[] } = {},
+) {
   const statusKey = filters.statuses?.length
     ? [...filters.statuses].sort().join(",")
     : "ALL";
@@ -47,20 +52,25 @@ function getTaskCategorySummaryCacheKey(filters: { statuses?: TaskStatus[] } = {
 export function readTaskCategorySummaryCache(
   filters: {
     statuses?: TaskStatus[];
-  } = {}
+  } = {},
 ): TaskCategorySummaryItem[] | null {
   if (typeof window === "undefined") {
     return null;
   }
 
   try {
-    const cachedValue = window.localStorage.getItem(getTaskCategorySummaryCacheKey(filters));
+    const cachedValue = window.localStorage.getItem(
+      getTaskCategorySummaryCacheKey(filters),
+    );
     if (!cachedValue) {
       return null;
     }
 
     const cache = JSON.parse(cachedValue) as TaskCategorySummaryCache;
-    if (!Array.isArray(cache.summary) || Date.now() - cache.savedAt > TASK_CATEGORY_SUMMARY_CACHE_TTL_MS) {
+    if (
+      !Array.isArray(cache.summary) ||
+      Date.now() - cache.savedAt > TASK_CATEGORY_SUMMARY_CACHE_TTL_MS
+    ) {
       window.localStorage.removeItem(getTaskCategorySummaryCacheKey(filters));
       return null;
     }
@@ -76,7 +86,7 @@ function saveTaskCategorySummaryCache(
   filters: {
     statuses?: TaskStatus[];
   } = {},
-  summary: TaskCategorySummaryItem[]
+  summary: TaskCategorySummaryItem[],
 ) {
   if (typeof window === "undefined") {
     return;
@@ -86,8 +96,8 @@ function saveTaskCategorySummaryCache(
     getTaskCategorySummaryCacheKey(filters),
     JSON.stringify({
       savedAt: Date.now(),
-      summary
-    } satisfies TaskCategorySummaryCache)
+      summary,
+    } satisfies TaskCategorySummaryCache),
   );
 }
 
@@ -187,6 +197,12 @@ export type TaskCommentCreateRequest = {
   status?: TaskStatus;
 };
 
+export type TaskCommentUpdateRequest = {
+  content: string;
+  oneLineComment?: string;
+  status?: TaskStatus;
+};
+
 export type TaskDetail = {
   id: number;
   title: string;
@@ -247,11 +263,14 @@ function getTaskDetailCacheKey(accessToken: string, taskId: number) {
   return `${TASK_DETAIL_CACHE_KEY_PREFIX}:${getViewerCacheKey(accessToken)}:${taskId}`;
 }
 
-function getTaskRecentWorkStatusCacheKey(filters: {
-  category?: TaskCategory;
-  sortOrder?: "LATEST" | "OLDEST";
-  statuses?: TaskStatus[];
-} = {}, accessToken = "") {
+function getTaskRecentWorkStatusCacheKey(
+  filters: {
+    category?: TaskCategory;
+    sortOrder?: "LATEST" | "OLDEST";
+    statuses?: TaskStatus[];
+  } = {},
+  accessToken = "",
+) {
   const statusKey = filters.statuses?.length
     ? [...filters.statuses].sort().join(",")
     : "ALL";
@@ -261,7 +280,10 @@ function getTaskRecentWorkStatusCacheKey(filters: {
   return `${TASK_RECENT_WORK_STATUS_CACHE_KEY_PREFIX}:${getViewerCacheKey(accessToken)}:${categoryKey}:${sortOrderKey}:${statusKey}`;
 }
 
-export function readTaskDetailCache(accessToken: string, taskId: number): TaskDetail | null {
+export function readTaskDetailCache(
+  accessToken: string,
+  taskId: number,
+): TaskDetail | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -295,8 +317,8 @@ export function saveTaskDetailCache(accessToken: string, task: TaskDetail) {
     getTaskDetailCacheKey(accessToken, task.id),
     JSON.stringify({
       savedAt: Date.now(),
-      task
-    } satisfies TaskDetailCache)
+      task,
+    } satisfies TaskDetailCache),
   );
 }
 
@@ -306,7 +328,7 @@ export function readTaskRecentWorkStatusCache(
     category?: TaskCategory;
     sortOrder?: "LATEST" | "OLDEST";
     statuses?: TaskStatus[];
-  } = {}
+  } = {},
 ): TaskRecentWorkStatus[] | null {
   if (typeof window === "undefined") {
     return null;
@@ -320,14 +342,19 @@ export function readTaskRecentWorkStatusCache(
     }
 
     const cache = JSON.parse(cachedValue) as TaskRecentWorkStatusCache;
-    if (!Array.isArray(cache.outputs) || Date.now() - cache.savedAt > TASK_RECENT_WORK_STATUS_CACHE_TTL_MS) {
+    if (
+      !Array.isArray(cache.outputs) ||
+      Date.now() - cache.savedAt > TASK_RECENT_WORK_STATUS_CACHE_TTL_MS
+    ) {
       window.localStorage.removeItem(cacheKey);
       return null;
     }
 
     return cache.outputs;
   } catch {
-    window.localStorage.removeItem(getTaskRecentWorkStatusCacheKey(filters, accessToken));
+    window.localStorage.removeItem(
+      getTaskRecentWorkStatusCacheKey(filters, accessToken),
+    );
     return null;
   }
 }
@@ -339,7 +366,7 @@ function saveTaskRecentWorkStatusCache(
     sortOrder?: "LATEST" | "OLDEST";
     statuses?: TaskStatus[];
   } = {},
-  outputs: TaskRecentWorkStatus[]
+  outputs: TaskRecentWorkStatus[],
 ) {
   if (typeof window === "undefined") {
     return;
@@ -349,14 +376,14 @@ function saveTaskRecentWorkStatusCache(
     getTaskRecentWorkStatusCacheKey(filters, accessToken),
     JSON.stringify({
       outputs,
-      savedAt: Date.now()
-    } satisfies TaskRecentWorkStatusCache)
+      savedAt: Date.now(),
+    } satisfies TaskRecentWorkStatusCache),
   );
 }
 
 export async function getTaskStatusSummary(): Promise<TaskStatusSummary> {
   const response = await fetch(`${API_BASE_URL}/api/tasks/status-summary`, {
-    cache: "no-store"
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -366,10 +393,15 @@ export async function getTaskStatusSummary(): Promise<TaskStatusSummary> {
   return response.json() as Promise<TaskStatusSummary>;
 }
 
-export async function getTaskStatusSummaryByBranch(): Promise<TaskStatusSummaryByBranch[]> {
-  const response = await fetch(`${API_BASE_URL}/api/tasks/status-summary/branches`, {
-    cache: "no-store"
-  });
+export async function getTaskStatusSummaryByBranch(): Promise<
+  TaskStatusSummaryByBranch[]
+> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/status-summary/branches`,
+    {
+      cache: "no-store",
+    },
+  );
 
   if (!response.ok) {
     throw new Error("소속별 업무 현황을 불러오지 못했습니다.");
@@ -381,7 +413,7 @@ export async function getTaskStatusSummaryByBranch(): Promise<TaskStatusSummaryB
 export async function getTaskCategorySummary(
   filters: {
     statuses?: TaskStatus[];
-  } = {}
+  } = {},
 ): Promise<TaskCategorySummaryItem[]> {
   const params = new URLSearchParams();
 
@@ -390,15 +422,18 @@ export async function getTaskCategorySummary(
   });
 
   const queryString = params.toString();
-  const response = await fetch(`${API_BASE_URL}/api/tasks/category-summary${queryString ? `?${queryString}` : ""}`, {
-    cache: "no-store"
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/category-summary${queryString ? `?${queryString}` : ""}`,
+    {
+      cache: "no-store",
+    },
+  );
 
   if (!response.ok) {
     throw new Error("업무 종류별 현황을 불러오지 못했습니다.");
   }
 
-  const summary = await response.json() as TaskCategorySummaryItem[];
+  const summary = (await response.json()) as TaskCategorySummaryItem[];
   saveTaskCategorySummaryCache(filters, summary);
 
   return summary;
@@ -410,7 +445,7 @@ type ApiErrorResponse = {
 
 export async function createTask(
   accessToken: string,
-  request: TaskCreateRequest
+  request: TaskCreateRequest,
 ): Promise<TaskCreateResponse> {
   const formData = new FormData();
   formData.append("title", request.title);
@@ -444,15 +479,19 @@ export async function createTask(
   const response = await fetch(`${API_BASE_URL}/api/tasks`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`
+      Authorization: `Bearer ${accessToken}`,
     },
-    body: formData
+    body: formData,
   });
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "업무를 등록하지 못했습니다.");
   }
@@ -460,23 +499,30 @@ export async function createTask(
   return response.json() as Promise<TaskCreateResponse>;
 }
 
-export async function getTaskDetail(accessToken: string, taskId: number): Promise<TaskDetail> {
+export async function getTaskDetail(
+  accessToken: string,
+  taskId: number,
+): Promise<TaskDetail> {
   const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}`, {
     cache: "no-store",
     headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "업무 상세 정보를 불러오지 못했습니다.");
   }
 
-  const taskDetail = await response.json() as TaskDetail;
+  const taskDetail = (await response.json()) as TaskDetail;
   saveTaskDetailCache(accessToken, taskDetail);
 
   return taskDetail;
@@ -485,26 +531,33 @@ export async function getTaskDetail(accessToken: string, taskId: number): Promis
 export async function updateTaskDescription(
   accessToken: string,
   taskId: number,
-  description: string
+  description: string,
 ): Promise<TaskDetail> {
-  const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/description`, {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json"
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/${taskId}/description`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ description }),
     },
-    body: JSON.stringify({ description })
-  });
+  );
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "프로젝트 내용을 수정하지 못했습니다.");
   }
 
-  const taskDetail = await response.json() as TaskDetail;
+  const taskDetail = (await response.json()) as TaskDetail;
   saveTaskDetailCache(accessToken, taskDetail);
 
   return taskDetail;
@@ -513,30 +566,37 @@ export async function updateTaskDescription(
 export async function addTaskAttachments(
   accessToken: string,
   taskId: number,
-  attachments: File[]
+  attachments: File[],
 ): Promise<TaskDetail> {
   const formData = new FormData();
   attachments.forEach((attachment) => {
     formData.append("attachments", attachment);
   });
 
-  const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/attachments`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/${taskId}/attachments`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
     },
-    body: formData
-  });
+  );
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "업무 사진을 첨부하지 못했습니다.");
   }
 
-  const taskDetail = await response.json() as TaskDetail;
+  const taskDetail = (await response.json()) as TaskDetail;
   saveTaskDetailCache(accessToken, taskDetail);
 
   return taskDetail;
@@ -546,14 +606,18 @@ export async function getTaskDrafts(accessToken: string): Promise<TaskDraft[]> {
   const response = await fetch(`${API_BASE_URL}/api/tasks/drafts`, {
     cache: "no-store",
     headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "임시저장 업무를 불러오지 못했습니다.");
   }
@@ -563,21 +627,25 @@ export async function getTaskDrafts(accessToken: string): Promise<TaskDraft[]> {
 
 export async function createTaskDraft(
   accessToken: string,
-  request: TaskDraftSaveRequest
+  request: TaskDraftSaveRequest,
 ): Promise<TaskDraft> {
   const response = await fetch(`${API_BASE_URL}/api/tasks/drafts`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(request)
+    body: JSON.stringify(request),
   });
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "업무를 임시저장하지 못했습니다.");
   }
@@ -588,21 +656,25 @@ export async function createTaskDraft(
 export async function updateTaskDraft(
   accessToken: string,
   draftId: number,
-  request: TaskDraftSaveRequest
+  request: TaskDraftSaveRequest,
 ): Promise<TaskDraft> {
   const response = await fetch(`${API_BASE_URL}/api/tasks/drafts/${draftId}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(request)
+    body: JSON.stringify(request),
   });
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "임시저장 업무를 수정하지 못했습니다.");
   }
@@ -612,19 +684,26 @@ export async function updateTaskDraft(
 
 export async function publishTaskDraft(
   accessToken: string,
-  draftId: number
+  draftId: number,
 ): Promise<TaskCreateResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/tasks/drafts/${draftId}/publish`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/drafts/${draftId}/publish`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "임시저장 업무를 등록하지 못했습니다.");
   }
@@ -632,18 +711,25 @@ export async function publishTaskDraft(
   return response.json() as Promise<TaskCreateResponse>;
 }
 
-export async function deleteTaskDraft(accessToken: string, draftId: number): Promise<void> {
+export async function deleteTaskDraft(
+  accessToken: string,
+  draftId: number,
+): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/api/tasks/drafts/${draftId}`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "임시저장 업무를 삭제하지 못했습니다.");
   }
@@ -652,7 +738,7 @@ export async function deleteTaskDraft(accessToken: string, draftId: number): Pro
 export async function createTaskComment(
   accessToken: string,
   taskId: number,
-  request: TaskCommentCreateRequest
+  request: TaskCommentCreateRequest,
 ): Promise<TaskComment> {
   const formData = new FormData();
   formData.append("content", request.content);
@@ -672,17 +758,54 @@ export async function createTaskComment(
   const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/comments`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`
+      Authorization: `Bearer ${accessToken}`,
     },
-    body: formData
+    body: formData,
   });
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "코멘트를 등록하지 못했습니다.");
+  }
+
+  return response.json() as Promise<TaskComment>;
+}
+
+export async function updateTaskComment(
+  accessToken: string,
+  taskId: number,
+  commentId: number,
+  request: TaskCommentUpdateRequest,
+): Promise<TaskComment> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/${taskId}/comments/${commentId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    },
+  );
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
+
+    throw new Error(message ?? "코멘트를 수정하지 못했습니다.");
   }
 
   return response.json() as Promise<TaskComment>;
@@ -691,19 +814,26 @@ export async function createTaskComment(
 export async function deleteTaskComment(
   accessToken: string,
   taskId: number,
-  commentId: number
+  commentId: number,
 ): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/comments/${commentId}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/${taskId}/comments/${commentId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "코멘트를 삭제하지 못했습니다.");
   }
@@ -711,19 +841,26 @@ export async function deleteTaskComment(
 
 export async function getTaskCommentActivities(
   accessToken: string,
-  limit = 100
+  limit = 100,
 ): Promise<TaskCommentActivity[]> {
-  const response = await fetch(`${API_BASE_URL}/api/task-comments?limit=${limit}`, {
-    cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/task-comments?limit=${limit}`,
+    {
+      cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "활동내역을 불러오지 못했습니다.");
   }
@@ -737,7 +874,7 @@ export async function getTaskRecentWorkStatus(
     category?: TaskCategory;
     sortOrder?: "LATEST" | "OLDEST";
     statuses?: TaskStatus[];
-  } = {}
+  } = {},
 ): Promise<TaskRecentWorkStatus[]> {
   const params = new URLSearchParams();
 
@@ -754,22 +891,29 @@ export async function getTaskRecentWorkStatus(
   }
 
   const queryString = params.toString();
-  const response = await fetch(`${API_BASE_URL}/api/tasks/recent-work-status${queryString ? `?${queryString}` : ""}`, {
-    cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/recent-work-status${queryString ? `?${queryString}` : ""}`,
+    {
+      cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "최근 작업 근황을 불러오지 못했습니다.");
   }
 
-  const outputs = await response.json() as TaskRecentWorkStatus[];
+  const outputs = (await response.json()) as TaskRecentWorkStatus[];
   saveTaskRecentWorkStatusCache(accessToken, filters, outputs);
 
   return outputs;
@@ -781,7 +925,7 @@ export async function getTaskAllWorkStatus(
     category?: TaskCategory;
     sortOrder?: "LATEST" | "OLDEST";
     statuses?: TaskStatus[];
-  } = {}
+  } = {},
 ): Promise<TaskRecentWorkStatus[]> {
   const params = new URLSearchParams();
 
@@ -798,17 +942,24 @@ export async function getTaskAllWorkStatus(
   }
 
   const queryString = params.toString();
-  const response = await fetch(`${API_BASE_URL}/api/tasks/all-work-status${queryString ? `?${queryString}` : ""}`, {
-    cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/tasks/all-work-status${queryString ? `?${queryString}` : ""}`,
+    {
+      cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
 
   if (!response.ok) {
     handleUnauthorizedResponse(response);
-    const error = (await response.json().catch(() => null)) as ApiErrorResponse | null;
-    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
 
     throw new Error(message ?? "전체 업무를 불러오지 못했습니다.");
   }

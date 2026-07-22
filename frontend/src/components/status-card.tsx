@@ -1,10 +1,10 @@
 import { cn } from "@/util/utils";
 
 const toneClassNames = {
-  pink: "bg-white text-[#2D70CB] border-[#E6DDDA]",
-  lavender: "bg-white text-[#2D70CB] border-[#E6DDDA]",
-  gold: "bg-white text-[#E22E46] border-[#E6DDDA]",
-  sage: "bg-white text-[#2D70CB] border-[#E6DDDA]"
+  pink: "text-[#3182F6]",
+  lavender: "text-[#8B5CF6]",
+  gold: "text-[#F04452]",
+  sage: "text-[#00A878]",
 };
 
 type StatusCardProps = {
@@ -18,13 +18,20 @@ export function StatusCard({ label, value, helper, tone }: StatusCardProps) {
   return (
     <article
       className={cn(
-        "flex min-h-[46px] flex-col items-center justify-center rounded-[9px] border border-dashed px-0.5 py-0.5 text-center",
-        toneClassNames[tone]
+        "flex min-h-[52px] flex-col items-center justify-center rounded-[10px] bg-white px-0.5 py-1.5 text-center shadow-[0_1px_4px_rgba(0,27,55,0.06)]",
+        toneClassNames[tone],
       )}
     >
-      <p className="whitespace-nowrap text-[10px] font-black leading-tight text-[#4F4542] sm:text-[11px] md:text-[12px]">{label}</p>
-      <p className="mt-0.5 whitespace-nowrap text-[17px] font-black leading-none tracking-normal sm:text-[19px] md:text-[21px]">{value}건</p>
-      <p className="mt-0.5 whitespace-nowrap text-[7px] font-bold leading-[1.05] text-[#4F4542] sm:text-[8px] md:text-[9px]">
+      <p className="whitespace-nowrap text-[8px] font-semibold leading-tight text-[#6b7684]">
+        {label}
+      </p>
+      <p className="mt-1 whitespace-nowrap text-base font-extrabold leading-none tracking-[-0.03em]">
+        {value}
+        <span className="ml-0.5 text-[8px] font-semibold text-[#8b95a1]">
+          건
+        </span>
+      </p>
+      <p className="mt-1 max-w-full truncate whitespace-nowrap text-[6px] font-medium leading-none text-[#8b95a1]">
         <HelperText helper={helper} />
       </p>
     </article>
@@ -44,7 +51,11 @@ function HelperText({ helper }: { helper: string }) {
   return (
     <>
       {match[1]}
-      <strong className={`text-[8px] font-black sm:text-[9px] md:text-[10px] ${arrowClassName}`}>{arrow}</strong>
+      <strong
+        className={`text-[8px] font-black sm:text-[9px] md:text-[10px] ${arrowClassName}`}
+      >
+        {arrow}
+      </strong>
     </>
   );
 }

@@ -7,35 +7,35 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#FFF8F4",
-        foreground: "#4B332E",
+        background: "#F7F8FA",
+        foreground: "#191F28",
         card: "#FFFFFF",
-        "card-foreground": "#4B332E",
-        primary: "#EF7890",
+        "card-foreground": "#191F28",
+        primary: "#3182F6",
         "primary-foreground": "#FFFFFF",
-        secondary: "#F6E5F6",
-        "secondary-foreground": "#4B332E",
-        muted: "#FFF0F2",
-        "muted-foreground": "#8A6D68",
-        accent: "#D6A548",
-        "accent-foreground": "#4B332E",
-        border: "#F5D6DC",
-        input: "#F5D6DC",
-        ring: "#EF7890",
-        lavender: "#A98B84",
-        sage: "#9D7AD8"
+        secondary: "#F2F4F6",
+        "secondary-foreground": "#333D4B",
+        muted: "#F9FAFB",
+        "muted-foreground": "#8B95A1",
+        accent: "#8B5CF6",
+        "accent-foreground": "#FFFFFF",
+        border: "#E5E8EB",
+        input: "#D1D6DB",
+        ring: "#3182F6",
+        lavender: "#8B5CF6",
+        sage: "#00A878",
       },
       borderRadius: {
-        lg: "20px",
-        md: "16px",
-        sm: "12px"
+        lg: "24px",
+        md: "18px",
+        sm: "14px",
       },
       boxShadow: {
-        soft: "0 16px 40px rgba(239, 120, 144, 0.16)"
-      }
-    }
+        soft: "0 12px 36px rgba(0, 27, 55, 0.08)",
+      },
+    },
   },
-  plugins: [tailwindcssAnimate]
+  plugins: [tailwindcssAnimate],
 };
 
 export default config;

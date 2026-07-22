@@ -1,4 +1,4 @@
-const CACHE_NAME = "study-factory-shell-v1";
+const CACHE_NAME = "study-factory-shell-v2";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icons/app-icon.svg", "/icons/maskable-icon.svg"];
 
 self.addEventListener("install", (event) => {

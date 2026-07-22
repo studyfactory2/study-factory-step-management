@@ -4,18 +4,18 @@ import { type FormEvent, useEffect, useState } from "react";
 import { login, type LoginResponse } from "@/api/auth";
 import {
   getActiveOrganizationChart,
-  organizationChartNodesToPositionTree
+  organizationChartNodesToPositionTree,
 } from "@/api/organization-chart";
 import { getPositionTree, type PositionTreeNode } from "@/api/position";
 import {
   getTaskStatusSummaryByBranch,
-  type TaskStatusSummaryByBranch
+  type TaskStatusSummaryByBranch,
 } from "@/api/task";
 import {
   clearRememberedLoginName,
   getRememberedLoginName,
   saveAuth,
-  saveRememberedLoginName
+  saveRememberedLoginName,
 } from "@/lib/auth-storage";
 import { LoginFormSection } from "@/components/pages/login/login-form-section";
 import { MemberRegisterDialog } from "@/components/pages/login/member-register-dialog";
@@ -40,13 +40,18 @@ function readLoginPositionTreeCache(): PositionTreeNode[] | null {
   }
 
   try {
-    const cachedValue = window.localStorage.getItem(LOGIN_POSITION_TREE_CACHE_KEY);
+    const cachedValue = window.localStorage.getItem(
+      LOGIN_POSITION_TREE_CACHE_KEY,
+    );
     if (!cachedValue) {
       return null;
     }
 
     const cache = JSON.parse(cachedValue) as LoginPositionTreeCache;
-    if (!Array.isArray(cache.positions) || Date.now() - cache.savedAt > LOGIN_POSITION_TREE_CACHE_TTL_MS) {
+    if (
+      !Array.isArray(cache.positions) ||
+      Date.now() - cache.savedAt > LOGIN_POSITION_TREE_CACHE_TTL_MS
+    ) {
       window.localStorage.removeItem(LOGIN_POSITION_TREE_CACHE_KEY);
       return null;
     }
@@ -67,8 +72,8 @@ function saveLoginPositionTreeCache(positions: PositionTreeNode[]) {
     LOGIN_POSITION_TREE_CACHE_KEY,
     JSON.stringify({
       savedAt: Date.now(),
-      positions
-    } satisfies LoginPositionTreeCache)
+      positions,
+    } satisfies LoginPositionTreeCache),
   );
 }
 
@@ -88,11 +93,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [rememberName, setRememberName] = useState(false);
   const [positions, setPositions] = useState<PositionTreeNode[]>([]);
   const [isPositionTreeLoading, setIsPositionTreeLoading] = useState(true);
-  const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
+  const [selectedPositionId, setSelectedPositionId] = useState<number | null>(
+    null,
+  );
   const [positionTreeMessage, setPositionTreeMessage] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [branchSummaries, setBranchSummaries] = useState<TaskStatusSummaryByBranch[]>([]);
+  const [branchSummaries, setBranchSummaries] = useState<
+    TaskStatusSummaryByBranch[]
+  >([]);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   useEffect(() => {
@@ -162,7 +171,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     try {
       const response = await login({
         name,
-        password
+        password,
       });
 
       saveAuth(response);
@@ -173,7 +182,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       }
       onLogin?.(response);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "로그인에 실패했습니다.");
+      setMessage(
+        error instanceof Error ? error.message : "로그인에 실패했습니다.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -188,8 +199,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="login-pdf-font min-h-dvh bg-[#FFFEFC] px-4 py-5 text-[#3F2C28] sm:px-6 sm:py-7 lg:py-8">
-      <div className="mx-auto flex w-full max-w-[360px] flex-col sm:max-w-[440px] md:max-w-[520px] lg:max-w-[620px]">
+    <main className="login-pdf-font min-h-dvh bg-[#f7f8fa] px-3 py-3 text-[#191f28] sm:py-5">
+      <div className="mx-auto w-full max-w-[336px]">
         <PositionTreeSection
           isLoading={isPositionTreeLoading}
           message={positionTreeMessage}
@@ -197,21 +208,28 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           positions={positions}
           selectedPositionId={selectedPositionId}
         />
-        <TaskSummarySection branchSummaries={branchSummaries} />
-        <LoginFormSection
-          isPasswordVisible={isPasswordVisible}
-          isSubmitting={isSubmitting}
-          message={message}
-          name={name}
-          onNameChange={setName}
-          onOpenRegister={() => setIsRegisterModalOpen(true)}
-          onPasswordChange={setPassword}
-          onRememberNameChange={handleRememberNameChange}
-          onSubmit={handleSubmit}
-          onTogglePasswordVisible={() => setIsPasswordVisible((current) => !current)}
-          password={password}
-          rememberName={rememberName}
-        />
+
+        <div className="mt-3 space-y-3">
+          <TaskSummarySection branchSummaries={branchSummaries} />
+          <div className="w-full">
+            <LoginFormSection
+              isPasswordVisible={isPasswordVisible}
+              isSubmitting={isSubmitting}
+              message={message}
+              name={name}
+              onNameChange={setName}
+              onOpenRegister={() => setIsRegisterModalOpen(true)}
+              onPasswordChange={setPassword}
+              onRememberNameChange={handleRememberNameChange}
+              onSubmit={handleSubmit}
+              onTogglePasswordVisible={() =>
+                setIsPasswordVisible((current) => !current)
+              }
+              password={password}
+              rememberName={rememberName}
+            />
+          </div>
+        </div>
       </div>
 
       {isRegisterModalOpen && (

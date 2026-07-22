@@ -1,12 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=Jua&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color: #4b332e;
-  background: #fff8f4;
+  color: #191f28;
+  background: #f7f8fa;
+  color-scheme: light;
 }
 
 * {
@@ -20,15 +19,19 @@ html {
 body {
   min-height: 100%;
   margin: 0;
-  background:
-    radial-gradient(circle at 15% 10%, rgba(245, 166, 184, 0.16), transparent 24rem),
-    linear-gradient(180deg, #fff8f4 0%, #fff0f2 100%);
-  color: #4b332e;
+  background: #f7f8fa;
+  color: #191f28;
   font-family:
-    "Jua",
+    "Pretendard Variable",
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
     "Apple SD Gothic Neo",
+    "Noto Sans KR",
     system-ui,
     sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -37,12 +40,38 @@ textarea {
   font: inherit;
 }
 
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(49, 130, 246, 0.22);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(49, 130, 246, 0.18);
+}
+
 .login-pdf-font {
-  font-family:
-    "Jua",
-    "Apple SD Gothic Neo",
-    system-ui,
-    sans-serif;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+}
+
+@layer components {
+  .surface-card {
+    @apply rounded-[24px] border border-[#e5e8eb] bg-white shadow-[0_8px_28px_rgba(0,27,55,0.06)];
+  }
+
+  .icon-button {
+    @apply flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#f2f4f6] text-[#4e5968] transition hover:bg-[#e5e8eb] hover:text-[#191f28];
+  }
 }

@@ -5,7 +5,9 @@ import {
   deleteTaskComment,
   getTaskDetail,
   readTaskDetailCache,
-  type TaskDetail
+  updateTaskComment,
+  type TaskCommentUpdateRequest,
+  type TaskDetail,
 } from "@/api/task";
 import type { MemberRole } from "@/types/domain";
 import { CommentSection } from "@/components/pages/taskDetail/comment-section";
@@ -28,9 +30,11 @@ export function TaskDetailPage({
   currentMemberId,
   currentMemberRole,
   onBack,
-  taskId
+  taskId,
 }: TaskDetailPageProps) {
-  const [task, setTask] = useState<TaskDetail | null>(() => readTaskDetailCache(accessToken, taskId));
+  const [task, setTask] = useState<TaskDetail | null>(() =>
+    readTaskDetailCache(accessToken, taskId),
+  );
   const [message, setMessage] = useState("");
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [deleteCommentId, setDeleteCommentId] = useState<number | null>(null);
@@ -48,7 +52,11 @@ export function TaskDetailPage({
         setTask(taskDetail);
         setMessage("");
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "업무 상세 정보를 불러오지 못했습니다.");
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "업무 상세 정보를 불러오지 못했습니다.",
+        );
       }
     }
 
@@ -68,15 +76,46 @@ export function TaskDetailPage({
       setDeleteCommentId(null);
       setMessage("");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "코멘트를 삭제하지 못했습니다.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "코멘트를 삭제하지 못했습니다.",
+      );
     } finally {
       setIsDeletingComment(false);
     }
   }
 
+  async function handleCommentUpdate(
+    commentId: number,
+    request: TaskCommentUpdateRequest,
+  ) {
+    try {
+      await updateTaskComment(accessToken, taskId, commentId, request);
+      const taskDetail = await getTaskDetail(accessToken, taskId);
+      setTask(taskDetail);
+      setMessage("");
+    } catch (error) {
+      const updateMessage =
+        error instanceof Error
+          ? error.message
+          : "코멘트를 수정하지 못했습니다.";
+      setMessage(updateMessage);
+      throw error;
+    }
+  }
+
   return (
-    <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <ResponsiveContainer variant="detail">
+    <main className="login-pdf-font relative isolate min-h-dvh overflow-hidden bg-[linear-gradient(180deg,#eaf4ff_0%,#f4f1ff_38%,#f7f8fa_76%)] px-3 py-4 text-[#222222]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-28 -top-28 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(49,130,246,0.26)_0%,rgba(49,130,246,0)_70%)] blur-md"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-28 top-44 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.2)_0%,rgba(124,92,255,0)_70%)] blur-lg"
+      />
+      <ResponsiveContainer className="relative z-10 space-y-4" variant="detail">
         <TaskDetailHeader onBack={onBack} title={task?.title} />
 
         {message && (
@@ -91,6 +130,7 @@ export function TaskDetailPage({
               currentMemberId={currentMemberId}
               currentMemberRole={currentMemberRole}
               onCommentDelete={setDeleteCommentId}
+              onCommentUpdate={handleCommentUpdate}
               onImagePreview={setPreviewImageUrl}
               task={task}
             />
@@ -106,7 +146,10 @@ export function TaskDetailPage({
       </ResponsiveContainer>
 
       {previewImageUrl && (
-        <ImagePreviewDialog imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl(null)} />
+        <ImagePreviewDialog
+          imageUrl={previewImageUrl}
+          onClose={() => setPreviewImageUrl(null)}
+        />
       )}
       {deleteCommentId ? (
         <ConfirmDialog

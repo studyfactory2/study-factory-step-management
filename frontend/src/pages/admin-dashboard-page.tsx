@@ -6,39 +6,39 @@ import {
   getAdminDashboard,
   readAdminDashboardCache,
   type AdminDashboard,
-  type AdminDashboardSortOrder
+  type AdminDashboardSortOrder,
 } from "@/api/admin";
 import {
   deleteMemberPreRegistration,
   getMemberPreRegistrations,
   preRegisterMember,
-  type MemberPreRegistration
+  type MemberPreRegistration,
 } from "@/api/member";
 import {
   getTaskCategorySummary,
   readTaskCategorySummaryCache,
-  type TaskCategorySummaryItem
+  type TaskCategorySummaryItem,
 } from "@/api/task";
 import {
   getNotificationUnreadCount,
-  markAllNotificationsAsRead
+  markAllNotificationsAsRead,
 } from "@/api/notification";
 import type { TaskStatus } from "@/types/domain";
 import {
   DashboardActionSection,
-  type MemberManagementView
+  type MemberManagementView,
 } from "@/components/adminDashboard/dashboard-action-section";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
 import { MemberPreRegisterPanel } from "@/components/adminDashboard/member-pre-register-panel";
 import { PositionTreeManagementPanel } from "@/components/adminDashboard/position-tree-management-panel";
 import {
   RecentOutputsSection,
-  type RecentOutputScope
+  type RecentOutputScope,
 } from "@/components/adminDashboard/recent-outputs-section";
 import { ConfirmDialog } from "@/components/pages/dashboard/confirm-dialog";
 import {
   getPositionName,
-  InProgressCategorySection
+  InProgressCategorySection,
 } from "@/components/pages/adminDashboard/in-progress-category-section";
 import { ResponsiveContainer } from "@/components/layout/responsive-container";
 import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
@@ -59,24 +59,24 @@ const emptyDashboard: AdminDashboard = {
     name: "관리자",
     roleType: "ADMIN",
     positionName: "관리자",
-    branch: null
+    branch: null,
   },
   employees: [],
   branchGroups: [],
-  recentOutputs: []
+  recentOutputs: [],
 };
 
 const allRecentTaskStatuses: TaskStatus[] = [
   "REGISTERED",
   "IN_PROGRESS",
   "REVIEW_REQUESTED",
-  "COMPLETED"
+  "COMPLETED",
 ];
 
 const activeTaskStatuses: TaskStatus[] = [
   "REGISTERED",
   "IN_PROGRESS",
-  "REVIEW_REQUESTED"
+  "REVIEW_REQUESTED",
 ];
 
 type ConfirmDialogState = {
@@ -93,21 +93,30 @@ export function AdminDashboardPage({
   onTaskCreateOpen,
   onLogout,
   onNotificationOpen,
-  onTaskDetailOpen
+  onTaskDetailOpen,
 }: AdminDashboardPageProps) {
   const [dashboard, setDashboard] = useState<AdminDashboard>(emptyDashboard);
-  const [memberPreRegistrations, setMemberPreRegistrations] = useState<MemberPreRegistration[]>([]);
-  const [categorySummary, setCategorySummary] = useState<TaskCategorySummaryItem[]>([]);
+  const [memberPreRegistrations, setMemberPreRegistrations] = useState<
+    MemberPreRegistration[]
+  >([]);
+  const [categorySummary, setCategorySummary] = useState<
+    TaskCategorySummaryItem[]
+  >([]);
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   const [recentTaskStatuses] = useState<TaskStatus[]>(allRecentTaskStatuses);
   const [recentTaskSortOrder] = useState<AdminDashboardSortOrder>("LATEST");
-  const [recentOutputScope, setRecentOutputScope] = useState<RecentOutputScope>("ALL");
-  const [selectedRecentStatuses, setSelectedRecentStatuses] = useState<TaskStatus[]>([]);
+  const [recentOutputScope, setRecentOutputScope] =
+    useState<RecentOutputScope>("ALL");
+  const [selectedRecentStatuses, setSelectedRecentStatuses] = useState<
+    TaskStatus[]
+  >([]);
   const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
-  const [memberManagementView, setMemberManagementView] = useState<MemberManagementView>("menu");
+  const [memberManagementView, setMemberManagementView] =
+    useState<MemberManagementView>("menu");
   const [message, setMessage] = useState("");
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
-  const [isPreRegistrationLoading, setIsPreRegistrationLoading] = useState(false);
+  const [isPreRegistrationLoading, setIsPreRegistrationLoading] =
+    useState(false);
   const [isPreRegisterSubmitting, setIsPreRegisterSubmitting] = useState(false);
 
   const handleRealtimeNotification = useCallback(() => {
@@ -121,38 +130,43 @@ export function AdminDashboardPage({
       try {
         const dashboardFilters = {
           sortOrder: recentTaskSortOrder,
-          statuses: recentTaskStatuses
+          statuses: recentTaskStatuses,
         };
-        const cachedDashboard = readAdminDashboardCache(accessToken, dashboardFilters);
+        const cachedDashboard = readAdminDashboardCache(
+          accessToken,
+          dashboardFilters,
+        );
         if (cachedDashboard) {
           setDashboard(cachedDashboard);
         }
 
         const cachedCategorySummary = readTaskCategorySummaryCache({
-          statuses: activeTaskStatuses
+          statuses: activeTaskStatuses,
         });
         if (cachedCategorySummary) {
           setCategorySummary(cachedCategorySummary);
         }
 
         void getTaskCategorySummary({
-          statuses: activeTaskStatuses
+          statuses: activeTaskStatuses,
         })
           .then(setCategorySummary)
           .catch(() => undefined);
 
-        const [
-          dashboardResponse,
-          notificationCountResponse
-        ] = await Promise.all([
-          getAdminDashboard(accessToken, dashboardFilters),
-          getNotificationUnreadCount(accessToken)
-        ]);
+        const [dashboardResponse, notificationCountResponse] =
+          await Promise.all([
+            getAdminDashboard(accessToken, dashboardFilters),
+            getNotificationUnreadCount(accessToken),
+          ]);
 
         setDashboard(dashboardResponse);
         setNotificationUnreadCount(notificationCountResponse.unreadCount);
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : "대시보드를 불러오지 못했습니다.");
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "대시보드를 불러오지 못했습니다.",
+        );
       }
     }
 
@@ -164,9 +178,17 @@ export function AdminDashboardPage({
 
     try {
       const preRegistrations = await getMemberPreRegistrations(accessToken);
-      setMemberPreRegistrations(preRegistrations.filter((preRegistration) => !preRegistration.isRegistered));
+      setMemberPreRegistrations(
+        preRegistrations.filter(
+          (preRegistration) => !preRegistration.isRegistered,
+        ),
+      );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "직원 사전등록 목록을 불러오지 못했습니다.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "직원 사전등록 목록을 불러오지 못했습니다.",
+      );
     } finally {
       setIsPreRegistrationLoading(false);
     }
@@ -175,7 +197,9 @@ export function AdminDashboardPage({
   function handleRecentStatusToggle(status: TaskStatus) {
     setSelectedRecentStatuses((currentStatuses) => {
       if (currentStatuses.includes(status)) {
-        return currentStatuses.filter((currentStatus) => currentStatus !== status);
+        return currentStatuses.filter(
+          (currentStatus) => currentStatus !== status,
+        );
       }
 
       return [...currentStatuses, status];
@@ -197,7 +221,11 @@ export function AdminDashboardPage({
       setMessage("직원 사전등록이 완료되었습니다.");
       await refreshMemberPreRegistrations();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "직원 사전등록에 실패했습니다.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "직원 사전등록에 실패했습니다.",
+      );
     } finally {
       setIsPreRegisterSubmitting(false);
     }
@@ -226,7 +254,11 @@ export function AdminDashboardPage({
       setMessage("직원 사전등록 정보가 삭제되었습니다.");
       await refreshMemberPreRegistrations();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "직원 사전등록 정보를 삭제하지 못했습니다.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "직원 사전등록 정보를 삭제하지 못했습니다.",
+      );
     } finally {
       setIsPreRegistrationLoading(false);
     }
@@ -237,7 +269,7 @@ export function AdminDashboardPage({
       confirmLabel: "삭제",
       description: `${name} 님의 사전등록 정보를 삭제할까요?`,
       onConfirm: () => deletePreRegistrationAfterConfirm(id),
-      title: "사전등록 정보 삭제"
+      title: "사전등록 정보 삭제",
     });
   }
 
@@ -256,34 +288,56 @@ export function AdminDashboardPage({
       await markAllNotificationsAsRead(accessToken);
       setNotificationUnreadCount(0);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "알림을 읽음 처리하지 못했습니다.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "알림을 읽음 처리하지 못했습니다.",
+      );
     } finally {
       onNotificationOpen();
     }
   }
 
   return (
-    <main className="login-pdf-font min-h-dvh overflow-hidden bg-[#FFFEFC] px-3 py-4 text-[#222222]">
-      <ResponsiveContainer variant="dashboard">
-        <section className="rounded-[20px] border border-[#D8D1CE] bg-white px-3 py-3 shadow-[0_2px_10px_rgba(95,73,68,0.08)] sm:px-4 sm:py-4">
-          <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-2 sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:gap-3">
+    <main className="login-pdf-font relative isolate min-h-dvh overflow-hidden bg-[linear-gradient(180deg,#eaf4ff_0%,#f4f1ff_38%,#f7f8fa_72%)] px-4 py-6 text-[#191f28] sm:px-6 sm:py-8">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-28 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(49,130,246,0.28)_0%,rgba(49,130,246,0)_70%)] blur-md"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-28 top-32 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.22)_0%,rgba(124,92,255,0)_70%)] blur-lg"
+      />
+      <ResponsiveContainer
+        className="relative z-10 space-y-5"
+        variant="dashboard"
+      >
+        <section className="surface-card bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(238,246,255,0.96)_58%,rgba(245,241,255,0.96)_100%)] px-5 py-5 sm:px-7 sm:py-6">
+          <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-3">
             <button
               aria-label="설정"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm sm:h-10 sm:w-10"
+              className="icon-button"
               onClick={onSettingsOpen}
               type="button"
             >
               <Settings aria-hidden className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
             </button>
-            <div className="min-w-0 text-center">
-              <p className="truncate text-[17px] font-normal text-[#222222] sm:text-[19px] md:text-[20px]">
-                안녕하세요 {dashboard.currentMember.name} {getPositionName(dashboard.currentMember.positionName, dashboard.currentMember.roleType)}님
+            <div className="min-w-0 px-1 text-left">
+              <p className="truncate text-xl font-extrabold tracking-[-0.03em] text-[#191f28] sm:text-2xl">
+                안녕하세요 {dashboard.currentMember.name}{" "}
+                {getPositionName(
+                  dashboard.currentMember.positionName,
+                  dashboard.currentMember.roleType,
+                )}
+                님
               </p>
-              <p className="mt-1 text-[13px] font-normal text-[#7B716D] sm:text-[14px] md:text-[15px]">오늘도 즐거운 하루 되세요</p>
+              <p className="mt-1 text-sm font-medium text-[#8b95a1] sm:text-[15px]">
+                오늘 해야 할 업무를 확인해보세요
+              </p>
             </div>
             <button
               aria-label="로그아웃"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D8D1CE] bg-white text-[#4F4542] shadow-sm sm:h-10 sm:w-10"
+              className="icon-button"
               onClick={onLogout}
               type="button"
             >
@@ -336,10 +390,11 @@ export function AdminDashboardPage({
       </ResponsiveContainer>
       <button
         aria-label="새 업무 등록"
-        className="fixed bottom-6 z-30 flex h-14 w-14 items-center justify-center rounded-full border border-[#C7CDD4] bg-[#EAF3FF] text-[#2D70CB] shadow-[0_8px_18px_rgba(45,112,203,0.22)] sm:h-16 sm:w-16"
+        className="fixed bottom-6 z-30 flex h-14 w-14 items-center justify-center rounded-[18px] bg-[linear-gradient(135deg,#3182f6_0%,#6b5cff_100%)] text-white shadow-[0_10px_24px_rgba(49,130,246,0.36)] transition hover:brightness-95 active:scale-95 sm:h-16 sm:w-16"
         onClick={onTaskCreateOpen}
         style={{
-          right: "max(1.25rem, calc((100vw - min(calc(100vw - 1.5rem), 72rem)) / 2 + 1rem))"
+          right:
+            "max(1.25rem, calc((100vw - min(calc(100vw - 1.5rem), 72rem)) / 2 + 1rem))",
         }}
         type="button"
       >

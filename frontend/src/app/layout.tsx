@@ -11,23 +11,23 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "업무현황"
+    title: "업무현황",
   },
   icons: {
     icon: "/icons/icon-192.png",
-    apple: "/apple-touch-icon.png"
-  }
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#EF7890",
+  themeColor: "#F7F8FA",
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover"
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {

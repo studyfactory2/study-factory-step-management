@@ -14,16 +14,21 @@ export function PositionTreeSection({
   message,
   onSelectPosition,
   positions,
-  selectedPositionId
+  selectedPositionId,
 }: PositionTreeSectionProps) {
   return (
-    <section className="mb-3 rounded-[16px] border border-[#D9D2CF] bg-white px-1.5 py-2.5 shadow-[0_2px_10px_rgba(95,73,68,0.08)] sm:px-2.5 sm:py-3">
+    <section className="surface-card p-3">
+      <div className="mb-2">
+        <h2 className="text-base font-bold tracking-[-0.03em] text-[#191f28]">
+          함께 일하는 팀
+        </h2>
+      </div>
       {isLoading ? (
-        <div className="rounded-[12px] border border-dashed border-[#D9D2CF] bg-[#FFFAFA] px-3 py-5 text-center text-xs font-bold text-[#9C7D79]">
+        <div className="rounded-[16px] bg-[#f7f8fa] px-4 py-8 text-center text-sm font-medium text-[#8b95a1]">
           직위트리를 불러오는 중입니다.
         </div>
       ) : message ? (
-        <div className="rounded-[12px] border border-dashed border-[#D9D2CF] bg-[#FFFAFA] px-3 py-5 text-center text-xs font-bold text-[#9C7D79]">
+        <div className="rounded-[16px] bg-[#f7f8fa] px-4 py-8 text-center text-sm font-medium text-[#8b95a1]">
           {message}
         </div>
       ) : (
