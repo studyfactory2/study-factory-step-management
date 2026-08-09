@@ -11,6 +11,7 @@ import {
 
 export default function MemberManagementRoutePage() {
   const router = useRouter();
+  const [accessToken, setAccessToken] = useState("");
   const [currentMember, setCurrentMember] = useState<StoredMember | null>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -28,12 +29,19 @@ export default function MemberManagementRoutePage() {
     }
 
     setCurrentMember(auth.currentMember);
+    setAccessToken(auth.accessToken);
     setIsReady(true);
   }, [router]);
 
-  if (!isReady || !currentMember) {
+  if (!isReady || !accessToken || !currentMember) {
     return null;
   }
 
-  return <MemberManagementPage onBack={() => router.push("/admin-settings")} />;
+  return (
+    <MemberManagementPage
+      accessToken={accessToken}
+      currentMemberId={currentMember.id}
+      onBack={() => router.push("/admin-settings")}
+    />
+  );
 }

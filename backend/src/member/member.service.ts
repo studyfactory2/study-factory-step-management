@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { createHash } from "crypto";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";
@@ -196,6 +196,30 @@ export class MemberService {
     }
 
     await this.memberRepository.deletePreRegistration(preRegistration);
+  }
+
+  async deleteMember(id: number, currentMemberId: number): Promise<void> {
+    if (id === currentMemberId) {
+      throw new BadRequestException("현재 로그인한 계정은 삭제할 수 없습니다.");
+    }
+
+    const member = await this.memberRepository.findById(id);
+    if (!member || !member.isActive) {
+      throw new MemberNotFoundException(id);
+    }
+
+    member.isActive = false;
+    await this.memberRepository.save(member);
+  }
+
+  async restoreMember(id: number): Promise<Member> {
+    const member = await this.memberRepository.findById(id);
+    if (!member) {
+      throw new MemberNotFoundException(id);
+    }
+
+    member.isActive = true;
+    return this.memberRepository.save(member);
   }
 
   async register(request: MemberRegisterRequest, avatar?: UploadFile): Promise<Member> {

@@ -39,7 +39,7 @@ export class AuthService {
       passwordHash
     );
 
-    if (!member) {
+    if (!member || !member.isActive) {
       throw new InvalidCredentialsException();
     }
 

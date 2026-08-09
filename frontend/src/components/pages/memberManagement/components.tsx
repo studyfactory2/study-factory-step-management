@@ -1,4 +1,5 @@
 import type { Member } from "@/types/domain";
+import { Trash2 } from "lucide-react";
 import { type OrganizationGroup, type PositionGroup } from "./types";
 import {
   formatPhoneNumber,
@@ -12,7 +13,18 @@ import {
   groupMembersByPosition
 } from "./utils";
 
-export function EmployeeOrganizationSection({ group }: { group: OrganizationGroup }) {
+type MemberDeleteProps = {
+  currentMemberId: number;
+  deletingMemberId: number | null;
+  onDelete: (member: Member) => void;
+};
+
+export function EmployeeOrganizationSection({
+  currentMemberId,
+  deletingMemberId,
+  group,
+  onDelete
+}: { group: OrganizationGroup } & MemberDeleteProps) {
   const meta = getOrganizationMeta(group.organizationName);
   const OrganizationIcon = meta.icon;
   const positionGroups = groupMembersByPosition(group.members);
@@ -34,7 +46,10 @@ export function EmployeeOrganizationSection({ group }: { group: OrganizationGrou
         <div className="mt-2 max-h-[360px] space-y-3 overflow-y-auto pr-1">
           {positionGroups.map((positionGroup) => (
             <EmployeePositionTable
+              currentMemberId={currentMemberId}
+              deletingMemberId={deletingMemberId}
               key={positionGroup.positionName}
+              onDelete={onDelete}
               positionGroup={positionGroup}
             />
           ))}
@@ -44,7 +59,12 @@ export function EmployeeOrganizationSection({ group }: { group: OrganizationGrou
   );
 }
 
-export function EmployeePositionTable({ positionGroup }: { positionGroup: PositionGroup }) {
+export function EmployeePositionTable({
+  currentMemberId,
+  deletingMemberId,
+  onDelete,
+  positionGroup
+}: { positionGroup: PositionGroup } & MemberDeleteProps) {
   const positionMeta = getPositionMeta(positionGroup.positionName);
   const PositionIcon = positionMeta.icon;
 
@@ -60,22 +80,47 @@ export function EmployeePositionTable({ positionGroup }: { positionGroup: Positi
 
       <div className="space-y-1.5">
         {positionGroup.members.map((member) => (
-          <EmployeeRow key={member.id} member={member} />
+          <EmployeeRow
+            currentMemberId={currentMemberId}
+            deletingMemberId={deletingMemberId}
+            key={member.id}
+            member={member}
+            onDelete={onDelete}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-export function EmployeeRow({ member }: { member: Member }) {
+export function EmployeeRow({
+  currentMemberId,
+  deletingMemberId,
+  member,
+  onDelete
+}: { member: Member } & MemberDeleteProps) {
+  const isCurrentMember = member.id === currentMemberId;
+  const isDeleting = deletingMemberId === member.id;
+
   return (
     <article className="rounded-[10px] border border-[#E6DFDC] bg-[#FFFEFC] px-2 py-2 text-[13px] font-normal text-[#4F4542] md:px-3 md:py-3 md:text-[15px]">
-      <div className="grid grid-cols-[52px_minmax(0,1fr)_96px] items-center gap-1.5 md:grid-cols-[76px_minmax(0,1fr)_132px] md:gap-3">
+      <div className="grid grid-cols-[52px_minmax(0,1fr)_96px_auto] items-center gap-1.5 md:grid-cols-[76px_minmax(0,1fr)_132px_auto] md:gap-3">
         <span className="truncate text-[14px] text-[#2D70CB] md:text-[17px]">{getMemberDisplayName(member)}</span>
         <span className="truncate text-[#7B716D] md:text-[15px]">{getMemberDutyName(member)}</span>
         <span className="whitespace-nowrap text-right text-[12px] text-[#6F6662] md:text-[14px]">
-          {formatPhoneNumber(member.phoneNumber ?? null)}
+          {member.phoneNumber ? formatPhoneNumber(member.phoneNumber) : null}
         </span>
+        <button
+          aria-label={`${getMemberDisplayName(member)} 사원 삭제`}
+          className="inline-flex h-7 items-center justify-center gap-1 rounded-[8px] border border-[#FFD1D6] bg-[#FFF4F5] px-2 text-[11px] text-[#E5485D] transition-colors hover:bg-[#FFE8EB] disabled:cursor-not-allowed disabled:border-[#E6DFDC] disabled:bg-[#F7F5F4] disabled:text-[#B0A8A3] md:h-8 md:px-2.5 md:text-[13px]"
+          disabled={isCurrentMember || isDeleting}
+          onClick={() => onDelete(member)}
+          title={isCurrentMember ? "현재 로그인한 계정은 삭제할 수 없습니다." : undefined}
+          type="button"
+        >
+          <Trash2 aria-hidden className="h-3.5 w-3.5" />
+          <span>{isDeleting ? "삭제 중" : "삭제"}</span>
+        </button>
       </div>
       <div className="mt-1.5 grid grid-cols-3 gap-1 md:mt-2.5 md:gap-2">
         <EmployeeInfoPill label="나이" value={getMemberAgeLabel(member)} />

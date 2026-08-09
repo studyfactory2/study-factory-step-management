@@ -1,7 +1,9 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { AdminOrCeoGuard } from "../admin/guard/admin-or-ceo.guard";
+import { CurrentMember } from "../auth/decorator/current-member.decorator";
 import { JWTAuthGuard } from "../auth/guard/jwt-auth.guard";
+import { CurrentMember as CurrentMemberType } from "../auth/type/current-member.type";
 import { UploadFile } from "../upload/type/upload-file.type";
 import { MemberPreRegisterRequest } from "./dto/member-pre-register.request";
 import { MemberRegisterRequest } from "./dto/member-register.request";
@@ -58,6 +60,21 @@ export class MemberController {
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
   async deletePreRegistration(@Param("id", ParseIntPipe) id: number) {
     return this.memberService.deletePreRegistration(id);
+  }
+
+  @Delete(":id")
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
+  async deleteMember(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    await this.memberService.deleteMember(id, currentMember.memberId);
+  }
+
+  @Patch(":id/restore")
+  @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
+  async restoreMember(@Param("id", ParseIntPipe) id: number) {
+    return this.memberService.restoreMember(id);
   }
 
   @Get(":id")

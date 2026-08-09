@@ -85,6 +85,42 @@ export async function getMembers(): Promise<Member[]> {
   return response.json() as Promise<Member[]>;
 }
 
+export async function deleteMember(accessToken: string, id: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/members/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "사원을 삭제하지 못했습니다.");
+  }
+}
+
+export async function restoreMember(accessToken: string, id: number): Promise<Member> {
+  const response = await fetch(`${API_BASE_URL}/api/members/${id}/restore`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(error?.message) ? error.message[0] : error?.message;
+
+    throw new Error(message ?? "사원을 복구하지 못했습니다.");
+  }
+
+  return response.json() as Promise<Member>;
+}
+
 export async function getMemberBranches(): Promise<string[]> {
   const response = await fetch(`${API_BASE_URL}/api/members/branches`, {
     cache: "no-store"
