@@ -36,6 +36,7 @@ type FindRecentWorkStatusOptions = {
   category?: TaskCategory;
   limit?: number;
   memberId?: number;
+  prioritizeIncomplete?: boolean;
   sortOrder?: TaskSortOrder;
   statuses: TaskStatus[];
   viewerId?: number;
@@ -198,6 +199,60 @@ export class TaskRepository {
   }
 
   async findRecentWorkStatus(options: FindRecentWorkStatusOptions): Promise<Task[]> {
+    let limitedTaskIds: number[] | undefined;
+
+    if (options.limit) {
+      const idQueryBuilder = this.taskRepository
+        .createQueryBuilder("task")
+        .select("task.id", "taskId")
+        .where("task.status IN (:...statuses)", { statuses: options.statuses })
+        .andWhere("task.isDraft = false");
+
+      if (options.memberId) {
+        idQueryBuilder.andWhere("(task.assigneeId = :memberId OR task.createdBy = :memberId)", {
+          memberId: options.memberId
+        });
+      }
+
+      if (options.category) {
+        idQueryBuilder.andWhere("task.category = :category", { category: options.category });
+      }
+
+      if (options.prioritizeIncomplete) {
+        idQueryBuilder
+          .addSelect(
+            "CASE WHEN task.status = :completedStatus THEN 1 ELSE 0 END",
+            "status_priority"
+          )
+          .addSelect(
+            "CASE WHEN task.status <> :completedStatus THEN task.createdAt END",
+            "incomplete_created_at"
+          )
+          .addSelect(
+            "CASE WHEN task.status = :completedStatus THEN task.updatedAt END",
+            "completed_updated_at"
+          )
+          .setParameter("completedStatus", TaskStatus.COMPLETED)
+          .orderBy("status_priority", "ASC")
+          .addOrderBy("incomplete_created_at", "ASC", "NULLS LAST")
+          .addOrderBy("completed_updated_at", "DESC", "NULLS LAST")
+          .addOrderBy("task.id", "ASC");
+      } else if (options.sortOrder === TaskSortOrder.OLDEST) {
+        idQueryBuilder.orderBy("task.updatedAt", "ASC").addOrderBy("task.id", "ASC");
+      } else {
+        idQueryBuilder.orderBy("task.updatedAt", "DESC").addOrderBy("task.id", "DESC");
+      }
+
+      const idRows = await idQueryBuilder
+        .take(options.limit)
+        .getRawMany<{ taskId: number }>();
+      limitedTaskIds = idRows.map((row) => Number(row.taskId));
+
+      if (limitedTaskIds.length === 0) {
+        return [];
+      }
+    }
+
     const queryBuilder = this.taskRepository
       .createQueryBuilder("task")
       .leftJoinAndSelect("task.assignee", "assignee")
@@ -230,6 +285,10 @@ export class TaskRepository {
       queryBuilder.andWhere("task.category = :category", { category: options.category });
     }
 
+    if (limitedTaskIds) {
+      queryBuilder.andWhere("task.id IN (:...limitedTaskIds)", { limitedTaskIds });
+    }
+
     if (options.sortOrder === TaskSortOrder.LATEST) {
       queryBuilder.orderBy("task.updatedAt", "DESC");
     } else if (options.sortOrder === TaskSortOrder.OLDEST) {
@@ -238,13 +297,18 @@ export class TaskRepository {
       queryBuilder.orderBy("task.updatedAt", "DESC");
     }
 
-    queryBuilder.addOrderBy("comments.updatedAt", "DESC");
+    const tasks = await queryBuilder.getMany();
 
-    if (options.limit) {
-      queryBuilder.take(options.limit);
+    if (limitedTaskIds) {
+      const taskOrder = new Map(limitedTaskIds.map((taskId, index) => [taskId, index]));
+      tasks.sort(
+        (left, right) =>
+          (taskOrder.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
+          (taskOrder.get(right.id) ?? Number.MAX_SAFE_INTEGER)
+      );
     }
 
-    return queryBuilder.getMany();
+    return tasks;
   }
 
   async findDetailById(id: number): Promise<Task | null> {

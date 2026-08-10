@@ -39,6 +39,7 @@ const statusOptions: Array<{ label: string; value: TaskStatus }> = [
 
 export function RecentOutputsSection({
   currentMemberId,
+  onAllTasksOpen,
   onDetailOpen,
   onScopeChange,
   onStatusToggle,
@@ -76,14 +77,25 @@ export function RecentOutputsSection({
 
   return (
     <section className="rounded-[18px] border border-[#dce5f2] bg-[linear-gradient(145deg,#ffffff_0%,#f8fbff_62%,#faf8ff_100%)] p-3 shadow-[0_8px_24px_rgba(49,91,140,0.09)] sm:p-4">
-      <div className="mb-2.5 flex items-center gap-1.5">
-        <Clipboard
-          aria-hidden
-          className="h-4.5 w-4.5 text-[#7B716D] sm:h-5 sm:w-5"
-        />
-        <h2 className="text-[18px] font-normal text-[#222222] sm:text-[20px] md:text-[21px]">
-          최근 업무 현황
-        </h2>
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Clipboard
+            aria-hidden
+            className="h-4.5 w-4.5 shrink-0 text-[#7B716D] sm:h-5 sm:w-5"
+          />
+          <h2 className="truncate text-[18px] font-normal text-[#222222] sm:text-[20px] md:text-[21px]">
+            최근 업무 현황
+          </h2>
+        </div>
+        {onAllTasksOpen ? (
+          <button
+            className="h-7 shrink-0 rounded-[8px] border border-[#D6E4F8] bg-[#F2F7FF] px-2.5 text-[10px] font-semibold text-[#3182F6] transition hover:border-[#9CC5FF] hover:bg-[#EAF3FF] active:scale-95 sm:h-8 sm:px-3 sm:text-[12px]"
+            onClick={onAllTasksOpen}
+            type="button"
+          >
+            전체 보기
+          </button>
+        ) : null}
       </div>
 
       <div className="mb-2.5 flex items-center justify-between gap-1 sm:gap-2">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
 import {
   getTaskAllWorkStatus,
   type TaskRecentWorkStatus
@@ -84,18 +83,20 @@ export function AllTasksPage({
   }
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-background px-3 py-4 text-foreground">
-      <div className="pointer-events-none fixed left-10 top-20 text-[#F0C957]">
-        <Sparkles aria-hidden className="h-9 w-9 fill-current" />
-      </div>
-      <div className="pointer-events-none fixed right-12 top-28 text-[#F1A9C0]">
-        <Sparkles aria-hidden className="h-8 w-8 fill-current" />
-      </div>
+    <main className="login-pdf-font relative isolate min-h-dvh overflow-hidden bg-[linear-gradient(180deg,#eaf4ff_0%,#f4f1ff_38%,#f7f8fa_72%)] px-4 py-6 text-[#191f28] sm:px-6 sm:py-8">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-28 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(49,130,246,0.28)_0%,rgba(49,130,246,0)_70%)] blur-md"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-28 top-32 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.22)_0%,rgba(124,92,255,0)_70%)] blur-lg"
+      />
 
-      <ResponsiveContainer variant="detail">
+      <ResponsiveContainer className="relative z-10 space-y-4" variant="detail">
         <AllTasksHeader isAdmin={isAdmin} onBack={onBack} taskCount={tasks.length} />
 
-        <section className="rounded-[20px] border border-[#F2C9C2] bg-[#FFFEFC] px-3 py-3 shadow-[0_5px_0_#EFC6BE]">
+        <section className="rounded-[20px] border border-[#dce5f2] bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(248,251,255,0.98)_62%,rgba(250,248,255,0.98)_100%)] px-3 py-3 shadow-[0_10px_28px_rgba(49,91,140,0.10)] sm:p-4">
           <AllTasksFilterBar
             onSortToggle={() => setSortOrder((current) => (current === "LATEST" ? "OLDEST" : "LATEST"))}
             onStatusToggle={handleStatusToggle}
@@ -104,19 +105,19 @@ export function AllTasksPage({
           />
 
           {message && (
-            <div className="mt-3 rounded-[14px] border border-[#F2C9C2] bg-[#FFF8F9] px-3 py-2 text-[13px] font-black text-primary">
+            <div className="mt-3 rounded-[14px] border border-[#ffd4d8] bg-[#fff4f5] px-3 py-2 text-[13px] font-semibold text-[#e5484d]">
               {message}
             </div>
           )}
 
-          <div className="mt-3 rounded-[16px] border border-[#F2C9C2] bg-white p-2">
+          <div className="mt-3 rounded-[16px] border border-[#e5e8eb] bg-white/90 p-2">
             <div className="max-h-[calc(100dvh-220px)] min-h-[330px] space-y-2.5 overflow-y-auto pr-1.5">
               {isLoading ? (
-                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-[13px] font-semibold text-[#9B7A75]">
+                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#cbd8e8] bg-[#f8fafc] text-[13px] font-medium text-[#8b95a1]">
                   업무를 불러오는 중입니다.
                 </div>
               ) : tasks.length === 0 ? (
-                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#F2C9C2] bg-[#FFF8F6] text-[13px] font-semibold text-[#9B7A75]">
+                <div className="flex h-32 items-center justify-center rounded-[14px] border border-dashed border-[#cbd8e8] bg-[#f8fafc] text-[13px] font-medium text-[#8b95a1]">
                   표시할 업무가 없습니다.
                 </div>
               ) : (

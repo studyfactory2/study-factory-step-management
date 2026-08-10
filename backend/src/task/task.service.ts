@@ -232,6 +232,7 @@ export class TaskService {
     const tasks = await this.taskRepository.findRecentWorkStatus({
       limit: 10,
       memberId,
+      prioritizeIncomplete: true,
       sortOrder: query.sortOrder,
       statuses,
       category: query.category,

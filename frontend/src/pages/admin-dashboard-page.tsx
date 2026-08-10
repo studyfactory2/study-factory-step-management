@@ -46,6 +46,7 @@ import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 
 type AdminDashboardPageProps = {
   accessToken: string;
+  onAllTasksOpen: () => void;
   onBoardOpen: () => void;
   onSettingsOpen: () => void;
   onTaskCreateOpen: () => void;
@@ -89,6 +90,7 @@ type ConfirmDialogState = {
 
 export function AdminDashboardPage({
   accessToken,
+  onAllTasksOpen,
   onBoardOpen,
   onSettingsOpen,
   onTaskCreateOpen,
@@ -366,6 +368,7 @@ export function AdminDashboardPage({
         />
         <RecentOutputsSection
           currentMemberId={dashboard.currentMember.id}
+          onAllTasksOpen={onAllTasksOpen}
           onDetailOpen={onTaskDetailOpen}
           onScopeChange={setRecentOutputScope}
           onStatusToggle={handleRecentStatusToggle}
