@@ -33,6 +33,7 @@ export function MemberManagementPage({ accessToken, currentMemberId, onBack }: M
   const [isLoading, setIsLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
   const [deletingMemberId, setDeletingMemberId] = useState<number | null>(null);
+  const [deletedMemberName, setDeletedMemberName] = useState("");
   const [restoreTarget, setRestoreTarget] = useState<Member | null>(null);
   const [restoringMemberId, setRestoringMemberId] = useState<number | null>(null);
   const [isInactiveMembersOpen, setIsInactiveMembersOpen] = useState(false);
@@ -43,6 +44,7 @@ export function MemberManagementPage({ accessToken, currentMemberId, onBack }: M
     }
 
     const targetId = deleteTarget.id;
+    const targetName = getMemberDisplayName(deleteTarget);
     setDeletingMemberId(targetId);
     setErrorMessage("");
 
@@ -52,6 +54,7 @@ export function MemberManagementPage({ accessToken, currentMemberId, onBack }: M
         member.id === targetId ? { ...member, isActive: false } : member
       )));
       setDeleteTarget(null);
+      setDeletedMemberName(targetName);
     } catch (error: unknown) {
       setErrorMessage(error instanceof Error ? error.message : "사원을 삭제하지 못했습니다.");
       setDeleteTarget(null);
@@ -310,6 +313,17 @@ export function MemberManagementPage({ accessToken, currentMemberId, onBack }: M
           onCancel={() => setDeleteTarget(null)}
           onConfirm={() => void handleDeleteConfirm()}
           title="사원 삭제"
+        />
+      ) : null}
+
+      {deletedMemberName ? (
+        <ConfirmDialog
+          cancelLabel={null}
+          confirmLabel="확인"
+          description={`${deletedMemberName} 사원이 비활성 회원으로 이동되었습니다.`}
+          onCancel={() => setDeletedMemberName("")}
+          onConfirm={() => setDeletedMemberName("")}
+          title="삭제가 완료되었습니다"
         />
       ) : null}
 
