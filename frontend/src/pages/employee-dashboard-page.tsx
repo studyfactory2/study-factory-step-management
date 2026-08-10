@@ -15,6 +15,7 @@ import {
   getTaskRecentWorkStatus,
   readTaskRecentWorkStatusCache,
   readTaskCategorySummaryCache,
+  type TaskCategory,
   type TaskCategorySummaryItem,
 } from "@/api/task";
 import { MessageBanner } from "@/components/adminDashboard/message-banner";
@@ -63,6 +64,8 @@ export function EmployeeDashboardPage({
   ]);
   const [recentTaskSortOrder, setRecentTaskSortOrder] =
     useState<AdminDashboardSortOrder>("LATEST");
+  const [selectedTaskCategory, setSelectedTaskCategory] =
+    useState<TaskCategory | null>(null);
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -151,6 +154,12 @@ export function EmployeeDashboardPage({
     );
   }
 
+  function handleTaskCategoryToggle(category: TaskCategory) {
+    setSelectedTaskCategory((currentCategory) =>
+      currentCategory === category ? null : category,
+    );
+  }
+
   async function handleNotificationOpen() {
     if (!accessToken || !onNotificationOpen) {
       return;
@@ -229,7 +238,9 @@ export function EmployeeDashboardPage({
           categorySummary={categorySummary}
           notificationUnreadCount={notificationUnreadCount}
           onBoardOpen={onBoardOpen}
+          onCategoryToggle={handleTaskCategoryToggle}
           onNotificationOpen={() => void handleNotificationOpen()}
+          selectedCategory={selectedTaskCategory}
         />
         {isLoading && (
           <section className="surface-card p-6 text-center text-[15px] font-medium text-[#8b95a1] sm:text-[16px]">
@@ -243,6 +254,7 @@ export function EmployeeDashboardPage({
           onSortOrderToggle={handleRecentTaskSortToggle}
           onStatusToggle={handleRecentTaskStatusToggle}
           recentOutputs={recentOutputs}
+          selectedCategory={selectedTaskCategory}
           selectedScope="MINE"
           selectedSortOrder={recentTaskSortOrder}
           selectedStatuses={recentTaskStatuses}

@@ -17,6 +17,7 @@ import {
 import {
   getTaskCategorySummary,
   readTaskCategorySummaryCache,
+  type TaskCategory,
   type TaskCategorySummaryItem,
 } from "@/api/task";
 import {
@@ -110,6 +111,8 @@ export function AdminDashboardPage({
   const [selectedRecentStatuses, setSelectedRecentStatuses] = useState<
     TaskStatus[]
   >([]);
+  const [selectedTaskCategory, setSelectedTaskCategory] =
+    useState<TaskCategory | null>(null);
   const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
   const [memberManagementView, setMemberManagementView] =
     useState<MemberManagementView>("menu");
@@ -204,6 +207,12 @@ export function AdminDashboardPage({
 
       return [...currentStatuses, status];
     });
+  }
+
+  function handleTaskCategoryToggle(category: TaskCategory) {
+    setSelectedTaskCategory((currentCategory) =>
+      currentCategory === category ? null : category,
+    );
   }
 
   async function handlePreRegister(request: {
@@ -351,7 +360,9 @@ export function AdminDashboardPage({
           categorySummary={categorySummary}
           notificationUnreadCount={notificationUnreadCount}
           onBoardOpen={onBoardOpen}
+          onCategoryToggle={handleTaskCategoryToggle}
           onNotificationOpen={() => void handleNotificationOpen()}
+          selectedCategory={selectedTaskCategory}
         />
         <RecentOutputsSection
           currentMemberId={dashboard.currentMember.id}
@@ -359,6 +370,7 @@ export function AdminDashboardPage({
           onScopeChange={setRecentOutputScope}
           onStatusToggle={handleRecentStatusToggle}
           recentOutputs={dashboard.recentOutputs}
+          selectedCategory={selectedTaskCategory}
           selectedScope={recentOutputScope}
           selectedStatuses={selectedRecentStatuses}
         />

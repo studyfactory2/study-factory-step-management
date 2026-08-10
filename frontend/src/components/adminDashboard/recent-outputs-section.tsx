@@ -4,6 +4,7 @@ import type {
   AdminDashboardRecentOutput,
   AdminDashboardSortOrder,
 } from "@/api/admin";
+import type { TaskCategory } from "@/api/task";
 import type { TaskStatus } from "@/types/domain";
 
 export type RecentOutputScope = "ALL" | "MINE" | "STAFF";
@@ -16,6 +17,7 @@ type RecentOutputsSectionProps = {
   onScopeChange?: (value: RecentOutputScope) => void;
   onStatusToggle?: (value: TaskStatus) => void;
   recentOutputs: AdminDashboardRecentOutput[];
+  selectedCategory?: TaskCategory | null;
   selectedSortOrder?: AdminDashboardSortOrder;
   selectedScope?: RecentOutputScope;
   selectedStatuses?: TaskStatus[];
@@ -41,13 +43,17 @@ export function RecentOutputsSection({
   onScopeChange,
   onStatusToggle,
   recentOutputs,
+  selectedCategory = null,
   selectedScope = "ALL",
   selectedStatuses = [],
   showScopeSelector = true,
 }: RecentOutputsSectionProps) {
-  const filteredOutputs = filterOutputsByStatus(
-    filterOutputsByScope(recentOutputs, selectedScope, currentMemberId),
-    selectedStatuses,
+  const filteredOutputs = filterOutputsByCategory(
+    filterOutputsByStatus(
+      filterOutputsByScope(recentOutputs, selectedScope, currentMemberId),
+      selectedStatuses,
+    ),
+    selectedCategory,
   );
   const [isScopeOpen, setIsScopeOpen] = useState(false);
   const scopeDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -324,6 +330,19 @@ function filterOutputsByStatus(
 
   return outputs.filter((output) =>
     selectedStatuses.includes(output.taskStatus),
+  );
+}
+
+function filterOutputsByCategory(
+  outputs: AdminDashboardRecentOutput[],
+  selectedCategory: TaskCategory | null,
+) {
+  if (!selectedCategory) {
+    return outputs;
+  }
+
+  return outputs.filter(
+    (output) => output.taskCategory === selectedCategory,
   );
 }
 
