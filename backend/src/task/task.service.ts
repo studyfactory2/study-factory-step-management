@@ -349,6 +349,21 @@ export class TaskService {
     };
   }
 
+  async delete(id: number, currentMember: CurrentMember): Promise<void> {
+    const task = await this.taskRepository.findPublishedById(id);
+
+    if (!task) {
+      throw new TaskNotFoundException(id);
+    }
+
+    if (!this.isAdminRole(currentMember.role) && task.createdBy !== currentMember.memberId) {
+      throw new ForbiddenException("업무 삭제 권한이 없습니다.");
+    }
+
+    await this.taskRepository.deletePublishedById(id);
+    await this.clearDashboardCache();
+  }
+
   async updateDescription(
     id: number,
     request: TaskDescriptionUpdateRequest

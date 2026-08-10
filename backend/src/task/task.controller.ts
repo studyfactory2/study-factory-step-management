@@ -100,6 +100,15 @@ export class TaskController {
     return this.taskService.findDetail(id, currentMember);
   }
 
+  @UseGuards(JWTAuthGuard)
+  @Delete(":id")
+  async deleteTask(
+    @Param("id", ParseIntPipe) id: number,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    await this.taskService.delete(id, currentMember);
+  }
+
   @UseGuards(JWTAuthGuard, AdminOrCeoGuard)
   @Patch(":id/description")
   async updateDescription(

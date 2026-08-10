@@ -326,6 +326,13 @@ export class TaskRepository {
     });
   }
 
+  async deletePublishedById(id: number): Promise<void> {
+    await this.taskRepository.delete({
+      id,
+      isDraft: false
+    });
+  }
+
   async findDraftsByCreator(createdBy: number): Promise<Task[]> {
     return this.taskRepository.find({
       where: {

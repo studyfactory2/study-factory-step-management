@@ -322,6 +322,24 @@ export function saveTaskDetailCache(accessToken: string, task: TaskDetail) {
   );
 }
 
+function clearTaskCaches(accessToken: string, taskId: number) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(getTaskDetailCacheKey(accessToken, taskId));
+
+  for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+    const key = window.localStorage.key(index);
+    if (
+      key?.startsWith(TASK_RECENT_WORK_STATUS_CACHE_KEY_PREFIX) ||
+      key?.startsWith(TASK_CATEGORY_SUMMARY_CACHE_KEY_PREFIX)
+    ) {
+      window.localStorage.removeItem(key);
+    }
+  }
+}
+
 export function readTaskRecentWorkStatusCache(
   accessToken: string,
   filters: {
@@ -526,6 +544,32 @@ export async function getTaskDetail(
   saveTaskDetailCache(accessToken, taskDetail);
 
   return taskDetail;
+}
+
+export async function deleteTask(
+  accessToken: string,
+  taskId: number,
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    handleUnauthorizedResponse(response);
+    const error = (await response
+      .json()
+      .catch(() => null)) as ApiErrorResponse | null;
+    const message = Array.isArray(error?.message)
+      ? error.message[0]
+      : error?.message;
+
+    throw new Error(message ?? "업무를 삭제하지 못했습니다.");
+  }
+
+  clearTaskCaches(accessToken, taskId);
 }
 
 export async function updateTaskDescription(
