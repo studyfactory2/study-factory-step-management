@@ -197,7 +197,7 @@ export function EmployeeDashboardPage({
         variant="dashboard"
       >
         <section className="surface-card bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(238,246,255,0.96)_58%,rgba(245,241,255,0.96)_100%)] px-5 py-5 sm:px-7 sm:py-6">
-          <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-3">
+          <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2 min-[390px]:gap-3">
             <button
               aria-label="설정"
               className="icon-button"
@@ -206,11 +206,11 @@ export function EmployeeDashboardPage({
             >
               <Settings aria-hidden className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
             </button>
-            <div className="min-w-0 px-1 text-left">
-              <p className="truncate text-xl font-extrabold tracking-[-0.03em] text-[#191f28] sm:text-2xl">
+            <div className="min-w-0 text-center min-[390px]:px-1">
+              <p className="truncate text-[16px] font-extrabold tracking-[-0.03em] text-[#191f28] min-[390px]:text-xl sm:text-2xl">
                 안녕하세요 {currentMember.name}님
               </p>
-              <p className="mt-1 text-sm font-medium text-[#8b95a1] sm:text-[15px]">
+              <p className="mt-1 whitespace-nowrap text-[11px] font-medium text-[#8b95a1] min-[390px]:text-sm sm:text-[15px]">
                 오늘 해야 할 업무를 확인해보세요
               </p>
             </div>
