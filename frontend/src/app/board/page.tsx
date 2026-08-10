@@ -156,11 +156,6 @@ export default function BoardRoutePage() {
   }
 
   function handleBack() {
-    if (window.history.length > 1) {
-      router.back();
-      return;
-    }
-
     router.push(backPath);
   }
 
