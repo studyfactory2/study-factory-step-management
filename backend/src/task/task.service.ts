@@ -158,15 +158,22 @@ export class TaskService {
   }
 
   async getCategorySummary(
-    query: TaskRecentWorkStatusQueryRequest = {}
+    query: TaskRecentWorkStatusQueryRequest = {},
+    currentMember: CurrentMember
   ): Promise<TaskCategorySummaryItemResponse[]> {
-    const cacheKey = getTaskCategorySummaryCacheKey(query.status);
+    const assigneeId = this.isAdminRole(currentMember.role)
+      ? undefined
+      : currentMember.memberId;
+    const cacheKey = getTaskCategorySummaryCacheKey(query.status, assigneeId);
     const cachedSummary = await this.cacheService.getJson<TaskCategorySummaryItemResponse[]>(cacheKey);
     if (cachedSummary) {
       return cachedSummary;
     }
 
-    const rows = await this.taskRepository.findActiveCountRowsByCategory(query.status);
+    const rows = await this.taskRepository.findActiveCountRowsByCategory(
+      query.status,
+      assigneeId
+    );
 
     const summary = rows.map((row) => ({
       category: row.category,

@@ -41,15 +41,17 @@ const TASK_RECENT_WORK_STATUS_CACHE_KEY_PREFIX =
 
 function getTaskCategorySummaryCacheKey(
   filters: { statuses?: TaskStatus[] } = {},
+  accessToken = "",
 ) {
   const statusKey = filters.statuses?.length
     ? [...filters.statuses].sort().join(",")
     : "ALL";
 
-  return `${TASK_CATEGORY_SUMMARY_CACHE_KEY_PREFIX}:${statusKey}`;
+  return `${TASK_CATEGORY_SUMMARY_CACHE_KEY_PREFIX}:${getViewerCacheKey(accessToken)}:${statusKey}`;
 }
 
 export function readTaskCategorySummaryCache(
+  accessToken: string,
   filters: {
     statuses?: TaskStatus[];
   } = {},
@@ -60,7 +62,7 @@ export function readTaskCategorySummaryCache(
 
   try {
     const cachedValue = window.localStorage.getItem(
-      getTaskCategorySummaryCacheKey(filters),
+      getTaskCategorySummaryCacheKey(filters, accessToken),
     );
     if (!cachedValue) {
       return null;
@@ -71,18 +73,23 @@ export function readTaskCategorySummaryCache(
       !Array.isArray(cache.summary) ||
       Date.now() - cache.savedAt > TASK_CATEGORY_SUMMARY_CACHE_TTL_MS
     ) {
-      window.localStorage.removeItem(getTaskCategorySummaryCacheKey(filters));
+      window.localStorage.removeItem(
+        getTaskCategorySummaryCacheKey(filters, accessToken),
+      );
       return null;
     }
 
     return cache.summary;
   } catch {
-    window.localStorage.removeItem(getTaskCategorySummaryCacheKey(filters));
+    window.localStorage.removeItem(
+      getTaskCategorySummaryCacheKey(filters, accessToken),
+    );
     return null;
   }
 }
 
 function saveTaskCategorySummaryCache(
+  accessToken: string,
   filters: {
     statuses?: TaskStatus[];
   } = {},
@@ -93,7 +100,7 @@ function saveTaskCategorySummaryCache(
   }
 
   window.localStorage.setItem(
-    getTaskCategorySummaryCacheKey(filters),
+    getTaskCategorySummaryCacheKey(filters, accessToken),
     JSON.stringify({
       savedAt: Date.now(),
       summary,
@@ -429,6 +436,7 @@ export async function getTaskStatusSummaryByBranch(): Promise<
 }
 
 export async function getTaskCategorySummary(
+  accessToken: string,
   filters: {
     statuses?: TaskStatus[];
   } = {},
@@ -444,15 +452,19 @@ export async function getTaskCategorySummary(
     `${API_BASE_URL}/api/tasks/category-summary${queryString ? `?${queryString}` : ""}`,
     {
       cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     },
   );
 
   if (!response.ok) {
+    handleUnauthorizedResponse(response);
     throw new Error("업무 종류별 현황을 불러오지 못했습니다.");
   }
 
   const summary = (await response.json()) as TaskCategorySummaryItem[];
-  saveTaskCategorySummaryCache(filters, summary);
+  saveTaskCategorySummaryCache(accessToken, filters, summary);
 
   return summary;
 }

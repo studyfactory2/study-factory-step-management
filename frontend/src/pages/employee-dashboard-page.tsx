@@ -96,14 +96,17 @@ export function EmployeeDashboardPage({
           setIsLoading(false);
         }
 
-        const cachedCategorySummary = readTaskCategorySummaryCache({
-          statuses: activeTaskStatuses,
-        });
+        const cachedCategorySummary = readTaskCategorySummaryCache(
+          accessToken,
+          {
+            statuses: activeTaskStatuses,
+          },
+        );
         if (cachedCategorySummary) {
           setCategorySummary(cachedCategorySummary);
         }
 
-        void getTaskCategorySummary({
+        void getTaskCategorySummary(accessToken, {
           statuses: activeTaskStatuses,
         })
           .then(setCategorySummary)

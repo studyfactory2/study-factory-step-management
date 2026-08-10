@@ -25,9 +25,13 @@ export class TaskController {
     return this.taskService.getStatusSummaryByBranch();
   }
 
+  @UseGuards(JWTAuthGuard)
   @Get("category-summary")
-  async getCategorySummary(@Query() query: TaskRecentWorkStatusQueryRequest) {
-    return this.taskService.getCategorySummary(query);
+  async getCategorySummary(
+    @Query() query: TaskRecentWorkStatusQueryRequest,
+    @CurrentMember() currentMember: CurrentMemberType
+  ) {
+    return this.taskService.getCategorySummary(query, currentMember);
   }
 
   @UseGuards(JWTAuthGuard)

@@ -180,7 +180,10 @@ export class TaskRepository {
       .getRawMany<TaskCountRow>();
   }
 
-  async findActiveCountRowsByCategory(statuses?: TaskStatus[]): Promise<TaskCategoryCountRow[]> {
+  async findActiveCountRowsByCategory(
+    statuses?: TaskStatus[],
+    assigneeId?: number
+  ): Promise<TaskCategoryCountRow[]> {
     const queryBuilder = this.taskRepository
       .createQueryBuilder("task")
       .select("task.category", "category")
@@ -189,6 +192,10 @@ export class TaskRepository {
 
     if (statuses?.length) {
       queryBuilder.andWhere("task.status IN (:...statuses)", { statuses });
+    }
+
+    if (assigneeId) {
+      queryBuilder.andWhere("task.assigneeId = :assigneeId", { assigneeId });
     }
 
     return queryBuilder
