@@ -139,7 +139,6 @@ export class AdminService {
     const tasks = await this.taskRepository.findRecentWorkStatus({
       category: query.category,
       limit: 10,
-      prioritizeIncomplete: true,
       sortOrder: query.sortOrder,
       statuses,
       viewerId: currentMemberId

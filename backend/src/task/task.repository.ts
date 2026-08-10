@@ -36,7 +36,6 @@ type FindRecentWorkStatusOptions = {
   category?: TaskCategory;
   limit?: number;
   memberId?: number;
-  prioritizeIncomplete?: boolean;
   sortOrder?: TaskSortOrder;
   statuses: TaskStatus[];
   viewerId?: number;
@@ -218,26 +217,7 @@ export class TaskRepository {
         idQueryBuilder.andWhere("task.category = :category", { category: options.category });
       }
 
-      if (options.prioritizeIncomplete) {
-        idQueryBuilder
-          .addSelect(
-            "CASE WHEN task.status = :completedStatus THEN 1 ELSE 0 END",
-            "status_priority"
-          )
-          .addSelect(
-            "CASE WHEN task.status <> :completedStatus THEN task.createdAt END",
-            "incomplete_created_at"
-          )
-          .addSelect(
-            "CASE WHEN task.status = :completedStatus THEN task.updatedAt END",
-            "completed_updated_at"
-          )
-          .setParameter("completedStatus", TaskStatus.COMPLETED)
-          .orderBy("status_priority", "ASC")
-          .addOrderBy("incomplete_created_at", "ASC", "NULLS LAST")
-          .addOrderBy("completed_updated_at", "DESC", "NULLS LAST")
-          .addOrderBy("task.id", "ASC");
-      } else if (options.sortOrder === TaskSortOrder.OLDEST) {
+      if (options.sortOrder === TaskSortOrder.OLDEST) {
         idQueryBuilder.orderBy("task.updatedAt", "ASC").addOrderBy("task.id", "ASC");
       } else {
         idQueryBuilder.orderBy("task.updatedAt", "DESC").addOrderBy("task.id", "DESC");
