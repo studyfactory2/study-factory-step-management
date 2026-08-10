@@ -141,6 +141,18 @@ export class BoardRepository {
     return this.boardPostRepository.save(post);
   }
 
+  async deactivatePost(postId: number): Promise<void> {
+    await this.boardPostRepository.update(
+      {
+        id: postId,
+        isActive: true
+      },
+      {
+        isActive: false
+      }
+    );
+  }
+
   async savePostCategories(postCategories: BoardPostCategory[]): Promise<void> {
     if (postCategories.length === 0) {
       return;

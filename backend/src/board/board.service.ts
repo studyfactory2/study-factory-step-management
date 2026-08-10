@@ -206,8 +206,7 @@ export class BoardService {
     }
 
     this.validatePostDeletionPermission(post, currentMember);
-    post.isActive = false;
-    await this.boardRepository.savePost(post);
+    await this.boardRepository.deactivatePost(post.id);
   }
 
   async findPosts(viewerId: number, type?: BoardPostType): Promise<BoardPostListResponse[]> {
