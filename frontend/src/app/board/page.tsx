@@ -438,18 +438,16 @@ export default function BoardRoutePage() {
         ) : null}
       </ResponsiveContainer>
 
-      <button
-        aria-label="게시글 작성"
-        className="fixed bottom-6 z-30 flex h-14 w-14 items-center justify-center rounded-[18px] bg-[linear-gradient(135deg,#3182f6_0%,#6b5cff_100%)] text-white shadow-[0_10px_24px_rgba(49,130,246,0.32)] transition hover:brightness-95 active:scale-95"
-        onClick={() => router.push("/board/new")}
-        style={{
-          right:
-            "max(1.25rem, calc((100vw - min(calc(100vw - 2rem), 24rem)) / 2 + 0.75rem))",
-        }}
-        type="button"
-      >
-        <Plus aria-hidden className="h-8 w-8" />
-      </button>
+      <div className="pointer-events-none fixed inset-x-4 bottom-6 z-30 mx-auto flex max-w-[380px] justify-end sm:max-w-xl md:max-w-2xl lg:max-w-4xl">
+        <button
+          aria-label="게시글 작성"
+          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-[18px] bg-[linear-gradient(135deg,#3182f6_0%,#6b5cff_100%)] text-white shadow-[0_10px_24px_rgba(49,130,246,0.32)] transition hover:brightness-95 active:scale-95 sm:h-16 sm:w-16"
+          onClick={() => router.push("/board/new")}
+          type="button"
+        >
+          <Plus aria-hidden className="h-8 w-8 sm:h-9 sm:w-9" />
+        </button>
+      </div>
     </main>
   );
 }
