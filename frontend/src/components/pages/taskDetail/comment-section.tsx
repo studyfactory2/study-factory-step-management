@@ -205,7 +205,7 @@ export function CommentSection({
           onClick={handleCommentSubmit}
           type="button"
         >
-          {isSubmitting ? "등록 중" : "코멘트 등록"}
+          {isSubmitting ? "등록 중" : "등록"}
         </button>
       </div>
 

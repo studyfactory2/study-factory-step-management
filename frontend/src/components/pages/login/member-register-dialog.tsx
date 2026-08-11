@@ -189,12 +189,18 @@ export function MemberRegisterDialog({ onClose }: { onClose: () => void }) {
           <div className="relative">
             <CalendarDays aria-hidden className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7B8B91]" />
             <input
+              aria-label="입사일"
               className="h-10 w-full rounded-[10px] border border-[#D8D1CE] bg-white pl-9 pr-3 text-[13px] font-normal text-[#222222] outline-none focus:border-[#9DC7ED] focus:bg-[#F4FAFF] focus:shadow-[0_0_0_3px_rgba(157,199,237,0.22)] sm:h-11 sm:text-[14px]"
               onChange={(event) => setRegisterBirthDate(event.target.value)}
               required
               type="date"
               value={registerBirthDate}
             />
+            {!registerBirthDate ? (
+              <span className="pointer-events-none absolute bottom-px left-9 right-9 top-px flex items-center bg-white text-[13px] font-normal text-[#A69E9A] sm:text-[14px]">
+                입사일
+              </span>
+            ) : null}
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <CustomDropdown
